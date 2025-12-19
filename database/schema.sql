@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `restaurant_settings` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `restaurant_id` INT UNSIGNED NOT NULL,
   `phone` VARCHAR(20) DEFAULT NULL,
+  `extra_phones` JSON DEFAULT NULL,
   `whatsapp_number` VARCHAR(20) DEFAULT NULL,
   `whatsapp_token` TEXT DEFAULT NULL COMMENT 'WhatsApp Business API token',
   `whatsapp_phone_id` VARCHAR(50) DEFAULT NULL,

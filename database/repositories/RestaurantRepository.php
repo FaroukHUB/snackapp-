@@ -8,9 +8,6 @@ require_once __DIR__ . '/../Database.php';
 
 class RestaurantRepository {
 
-    /**
-     * Récupère un restaurant par son slug
-     */
     public static function getBySlug(string $slug): ?array {
         return Database::fetchOne(
             "SELECT * FROM restaurants WHERE slug = ? AND is_active = 1",
@@ -18,9 +15,6 @@ class RestaurantRepository {
         );
     }
 
-    /**
-     * Récupère un restaurant par son ID
-     */
     public static function getById(int $id): ?array {
         return Database::fetchOne(
             "SELECT * FROM restaurants WHERE id = ?",
@@ -28,9 +22,6 @@ class RestaurantRepository {
         );
     }
 
-    /**
-     * Récupère les paramètres d'un restaurant
-     */
     public static function getSettings(int $restaurantId): ?array {
         return Database::fetchOne(
             "SELECT * FROM restaurant_settings WHERE restaurant_id = ?",
@@ -38,9 +29,6 @@ class RestaurantRepository {
         );
     }
 
-    /**
-     * Met à jour les paramètres
-     */
     public static function updateSettings(int $restaurantId, array $data): bool {
         $existing = self::getSettings($restaurantId);
 
@@ -52,9 +40,6 @@ class RestaurantRepository {
         }
     }
 
-    /**
-     * Récupère les horaires d'ouverture
-     */
     public static function getOpeningHours(int $restaurantId): array {
         return Database::fetchAll(
             "SELECT * FROM opening_hours WHERE restaurant_id = ? ORDER BY day_of_week",
@@ -62,14 +47,9 @@ class RestaurantRepository {
         );
     }
 
-    /**
-     * Met à jour les horaires
-     */
     public static function updateOpeningHours(int $restaurantId, array $hours): bool {
-        // Supprimer les anciens
         Database::delete('opening_hours', ['restaurant_id' => $restaurantId]);
 
-        // Insérer les nouveaux
         foreach ($hours as $i => $hour) {
             Database::insert('opening_hours', [
                 'restaurant_id' => $restaurantId,
@@ -83,29 +63,22 @@ class RestaurantRepository {
         return true;
     }
 
-    /**
-     * Vérifie si le restaurant accepte les commandes
-     */
     public static function isAcceptingOrders(int $restaurantId): bool {
         $settings = self::getSettings($restaurantId);
         return (bool) ($settings['accepting_orders'] ?? true);
     }
 
-    /**
-     * Toggle le statut d'acceptation des commandes
-     */
-    public static function toggleAcceptingOrders(int $restaurantId): bool {
-        $current = self::isAcceptingOrders($restaurantId);
-        $newStatus = $current ? 0 : 1;
+    public static function toggleAcceptingOrders(int $restaurantId, ?bool $newStatus = null): bool {
+        if ($newStatus === null) {
+            $current = self::isAcceptingOrders($restaurantId);
+            $newStatus = !$current;
+        }
 
-        self::updateSettings($restaurantId, ['accepting_orders' => $newStatus]);
+        self::updateSettings($restaurantId, ['accepting_orders' => $newStatus ? 1 : 0]);
 
-        return !$current;
+        return $newStatus;
     }
 
-    /**
-     * Récupère la FAQ
-     */
     public static function getFaq(int $restaurantId): array {
         return Database::fetchAll(
             "SELECT * FROM faq WHERE restaurant_id = ? ORDER BY sort_order",
@@ -113,9 +86,6 @@ class RestaurantRepository {
         );
     }
 
-    /**
-     * Met à jour la FAQ
-     */
     public static function updateFaq(int $restaurantId, array $items): bool {
         Database::delete('faq', ['restaurant_id' => $restaurantId]);
 
@@ -133,10 +103,6 @@ class RestaurantRepository {
         return true;
     }
 
-    /**
-     * Récupère les données complètes pour le site public
-     * (équivalent de restaurant.json)
-     */
     public static function getPublicData(int $restaurantId): array {
         $restaurant = self::getById($restaurantId);
         $settings = self::getSettings($restaurantId);
@@ -153,11 +119,22 @@ class RestaurantRepository {
             ];
         }
 
+        $extraPhones = [];
+        if (!empty($settings['extra_phones'])) {
+            $extraPhones = json_decode($settings['extra_phones'], true) ?? [];
+        }
+
+        $extraSocials = [];
+        if (!empty($settings['extra_socials'])) {
+            $extraSocials = json_decode($settings['extra_socials'], true) ?? [];
+        }
+
         return [
             'name' => $restaurant['name'] ?? '',
             'contact' => [
                 'phone' => $settings['phone'] ?? '',
-                'whatsappOrdersNumber' => $settings['whatsapp_number'] ?? ''
+                'whatsappOrdersNumber' => $settings['whatsapp_number'] ?? '',
+                'extra_phones' => $extraPhones
             ],
             'location' => [
                 'address' => $settings['address'] ?? '',
@@ -167,23 +144,28 @@ class RestaurantRepository {
             'social' => [
                 'instagram' => $settings['instagram'] ?? '',
                 'facebook' => $settings['facebook'] ?? '',
-                'tiktok' => $settings['tiktok'] ?? ''
+                'tiktok' => $settings['tiktok'] ?? '',
+                'snapchat' => $settings['snapchat'] ?? '',
+                'extra' => $extraSocials
             ],
             'openingHours' => $openingHours,
             'faq' => [
-                'title' => 'Questions fréquentes',
+                'title' => 'Questions frequentes',
                 'items' => array_map(fn($f) => [
                     'question' => $f['question'],
                     'answer' => $f['answer']
                 ], $faq)
             ],
-            'accepting_orders' => (bool) ($settings['accepting_orders'] ?? true)
+            'accepting_orders' => (bool) ($settings['accepting_orders'] ?? true),
+            'whatsapp' => [
+                'token' => $settings['whatsapp_token'] ?? '',
+                'phoneNumberId' => $settings['whatsapp_phone_id'] ?? '',
+                'businessAccountId' => $settings['whatsapp_business_id'] ?? '',
+                'configured' => !empty($settings['whatsapp_token'])
+            ]
         ];
     }
 
-    /**
-     * Récupère la config WhatsApp
-     */
     public static function getWhatsAppConfig(int $restaurantId): array {
         $settings = self::getSettings($restaurantId);
 
@@ -195,9 +177,6 @@ class RestaurantRepository {
         ];
     }
 
-    /**
-     * Met à jour la config WhatsApp
-     */
     public static function updateWhatsAppConfig(int $restaurantId, array $config): bool {
         $data = [];
 
@@ -218,9 +197,6 @@ class RestaurantRepository {
         return false;
     }
 
-    /**
-     * Vérifie les credentials admin
-     */
     public static function verifyAdmin(int $restaurantId, string $username, string $password): ?array {
         $admin = Database::fetchOne(
             "SELECT * FROM admin_users WHERE restaurant_id = ? AND username = ?",
@@ -228,7 +204,6 @@ class RestaurantRepository {
         );
 
         if ($admin && password_verify($password, $admin['password_hash'])) {
-            // Mettre à jour last_login
             Database::update('admin_users', ['last_login' => date('Y-m-d H:i:s')], ['id' => $admin['id']]);
 
             unset($admin['password_hash']);

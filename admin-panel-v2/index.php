@@ -143,8 +143,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit;
     }
 
-    // Sauvegarder les réglages
+       // Sauvegarder les réglages
     if ($_POST['action'] === 'save_settings') {
+        // Parser les réseaux sociaux dynamiques
+        $socialTypes = $_POST['social_type'] ?? [];
+        $socialValues = $_POST['social_value'] ?? [];
+        $socials = ['instagram' => '', 'facebook' => '', 'tiktok' => '', 'snapchat' => '', 'extra' => []];
+
+        foreach ($socialTypes as $i => $type) {
+            $value = trim($socialValues[$i] ?? '');
+            if (empty($value)) continue;
+
+            if (in_array($type, ['instagram', 'facebook', 'tiktok', 'snapchat']) && empty($socials[$type])) {
+                $socials[$type] = $value;
+            } else {
+                $socials['extra'][] = ['type' => $type, 'value' => $value];
+            }
+        }
+
+        // Parser les téléphones supplémentaires
+        $extraPhones = array_filter(array_map('trim', $_POST['extra_phones'] ?? []));
+
         if ($useMySQL) {
             // Horaires
             if (isset($_POST['hours'])) {
@@ -162,8 +181,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $settingsData = [];
             if (isset($_POST['phone'])) $settingsData['phone'] = $_POST['phone'];
             if (isset($_POST['whatsapp'])) $settingsData['whatsapp_number'] = $_POST['whatsapp'];
-            if (isset($_POST['instagram'])) $settingsData['instagram'] = $_POST['instagram'];
-            if (isset($_POST['facebook'])) $settingsData['facebook'] = $_POST['facebook'];
+            $settingsData['instagram'] = $socials['instagram'];
+            $settingsData['facebook'] = $socials['facebook'];
+            $settingsData['tiktok'] = $socials['tiktok'];
+            $settingsData['snapchat'] = $socials['snapchat'];
+            $settingsData['extra_socials'] = json_encode($socials['extra']);
+            $settingsData['extra_phones'] = json_encode($extraPhones);
 
             if (!empty($settingsData)) {
                 RestaurantRepository::updateSettings(SNACK_RESTAURANT_ID, $settingsData);
@@ -183,8 +206,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
             if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
             if (isset($_POST['whatsapp'])) $restaurantSettings['contact']['whatsappOrdersNumber'] = $_POST['whatsapp'];
-            if (isset($_POST['instagram'])) $restaurantSettings['social']['instagram'] = $_POST['instagram'];
-            if (isset($_POST['facebook'])) $restaurantSettings['social']['facebook'] = $_POST['facebook'];
+            $restaurantSettings['contact']['extra_phones'] = $extraPhones;
+            $restaurantSettings['social']['instagram'] = $socials['instagram'];
+            $restaurantSettings['social']['facebook'] = $socials['facebook'];
+            $restaurantSettings['social']['tiktok'] = $socials['tiktok'];
+            $restaurantSettings['social']['snapchat'] = $socials['snapchat'];
+            $restaurantSettings['social']['extra'] = $socials['extra'];
 
             file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
@@ -733,71 +760,157 @@ if (isset($_GET['export'])) {
                 </form>
             </div>
 
-            <!-- Contact -->
+                        <!-- Contact -->
             <div class="card">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-phone"></i> Contact & Réseaux</h3>
-                <form method="POST">
+                <form method="POST" id="contact-form">
                     <input type="hidden" name="action" value="save_settings">
-                    <div class="form-group">
-                        <label>Téléphone</label>
-                        <input type="text" name="phone" value="<?php echo htmlspecialchars($restaurantSettings['contact']['phone'] ?? ''); ?>">
+
+                    <!-- Téléphones -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Téléphones</label>
+                        <div id="phones-container">
+                            <div class="form-group dynamic-row" style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" name="phone" value="<?php echo htmlspecialchars($restaurantSettings['contact']['phone'] ?? ''); ?>" placeholder="Téléphone principal" style="flex: 1;">
+                            </div>
+                            <?php
+                            $extraPhones = $restaurantSettings['contact']['extra_phones'] ?? [];
+                            foreach ($extraPhones as $i => $ep): ?>
+                            <div class="form-group dynamic-row" style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" name="extra_phones[]" value="<?php echo htmlspecialchars($ep); ?>" placeholder="Numéro supplémentaire" style="flex: 1;">
+                                <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 8px 12px;" onclick="this.parentNode.remove()"><i class="fas fa-times"></i></button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-gray" onclick="addPhone()" style="margin-top: 8px;"><i class="fas fa-plus"></i> Ajouter un numéro</button>
                     </div>
+
                     <div class="form-group">
                         <label>WhatsApp (numéro sans +)</label>
                         <input type="text" name="whatsapp" value="<?php echo htmlspecialchars($restaurantSettings['contact']['whatsappOrdersNumber'] ?? ''); ?>">
                     </div>
-                    <div class="form-group">
-                        <label>Instagram</label>
-                        <input type="text" name="instagram" value="<?php echo htmlspecialchars($restaurantSettings['social']['instagram'] ?? ''); ?>">
+
+                    <!-- Réseaux sociaux -->
+                    <div style="margin-bottom: 20px; margin-top: 20px; border-top: 1px solid #374151; padding-top: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Réseaux sociaux</label>
+                        <div id="socials-container">
+                            <div class="form-group dynamic-row" style="display: flex; gap: 8px; align-items: center;">
+                                <select name="social_type[]" style="width: 130px; padding: 10px; background: #1a1a2e; border: 1px solid #374151; border-radius: 8px; color: #fff;">
+                                    <option value="instagram" selected>Instagram</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="tiktok">TikTok</option>
+                                    <option value="snapchat">Snapchat</option>
+                                    <option value="twitter">Twitter/X</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                                <input type="text" name="social_value[]" value="<?php echo htmlspecialchars($restaurantSettings['social']['instagram'] ?? ''); ?>" placeholder="Lien ou @pseudo" style="flex: 1;">
+                            </div>
+                            <?php if (!empty($restaurantSettings['social']['facebook'])): ?>
+                            <div class="form-group dynamic-row" style="display: flex; gap: 8px; align-items: center;">
+                                <select name="social_type[]" style="width: 130px; padding: 10px; background: #1a1a2e; border: 1px solid #374151; border-radius: 8px; color: #fff;">
+                                    <option value="instagram">Instagram</option>
+                                    <option value="facebook" selected>Facebook</option>
+                                    <option value="tiktok">TikTok</option>
+                                    <option value="snapchat">Snapchat</option>
+                                    <option value="twitter">Twitter/X</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                                <input type="text" name="social_value[]" value="<?php echo htmlspecialchars($restaurantSettings['social']['facebook']); ?>" placeholder="Lien ou @pseudo" style="flex: 1;">
+                                <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 8px 12px;" onclick="this.parentNode.remove()"><i class="fas fa-times"></i></button>
+                            </div>
+                            <?php endif; ?>
+                            <?php if (!empty($restaurantSettings['social']['tiktok'])): ?>
+                            <div class="form-group dynamic-row" style="display: flex; gap: 8px; align-items: center;">
+                                <select name="social_type[]" style="width: 130px; padding: 10px; background: #1a1a2e; border: 1px solid #374151; border-radius: 8px; color: #fff;">
+                                    <option value="instagram">Instagram</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="tiktok" selected>TikTok</option>
+                                    <option value="snapchat">Snapchat</option>
+                                    <option value="twitter">Twitter/X</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                                <input type="text" name="social_value[]" value="<?php echo htmlspecialchars($restaurantSettings['social']['tiktok']); ?>" placeholder="Lien ou @pseudo" style="flex: 1;">
+                                <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 8px 12px;" onclick="this.parentNode.remove()"><i class="fas fa-times"></i></button>
+                            </div>
+                            <?php endif; ?>
+                            <?php if (!empty($restaurantSettings['social']['snapchat'])): ?>
+                            <div class="form-group dynamic-row" style="display: flex; gap: 8px; align-items: center;">
+                                <select name="social_type[]" style="width: 130px; padding: 10px; background: #1a1a2e; border: 1px solid #374151; border-radius: 8px; color: #fff;">
+                                    <option value="instagram">Instagram</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="tiktok">TikTok</option>
+                                    <option value="snapchat" selected>Snapchat</option>
+                                    <option value="twitter">Twitter/X</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                                <input type="text" name="social_value[]" value="<?php echo htmlspecialchars($restaurantSettings['social']['snapchat']); ?>" placeholder="Lien ou @pseudo" style="flex: 1;">
+                                <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 8px 12px;" onclick="this.parentNode.remove()"><i class="fas fa-times"></i></button>
+                            </div>
+                            <?php endif; ?>
+                            <?php
+                            $extraSocials = $restaurantSettings['social']['extra'] ?? [];
+                            foreach ($extraSocials as $es): ?>
+                            <div class="form-group dynamic-row" style="display: flex; gap: 8px; align-items: center;">
+                                <select name="social_type[]" style="width: 130px; padding: 10px; background: #1a1a2e; border: 1px solid #374151; border-radius: 8px; color: #fff;">
+                                    <option value="instagram" <?php echo ($es['type'] ?? '') === 'instagram' ? 'selected' : ''; ?>>Instagram</option>
+                                    <option value="facebook" <?php echo ($es['type'] ?? '') === 'facebook' ? 'selected' : ''; ?>>Facebook</option>
+                                    <option value="tiktok" <?php echo ($es['type'] ?? '') === 'tiktok' ? 'selected' : ''; ?>>TikTok</option>
+                                    <option value="snapchat" <?php echo ($es['type'] ?? '') === 'snapchat' ? 'selected' : ''; ?>>Snapchat</option>
+                                    <option value="twitter" <?php echo ($es['type'] ?? '') === 'twitter' ? 'selected' : ''; ?>>Twitter/X</option>
+                                    <option value="youtube" <?php echo ($es['type'] ?? '') === 'youtube' ? 'selected' : ''; ?>>YouTube</option>
+                                    <option value="other" <?php echo ($es['type'] ?? '') === 'other' ? 'selected' : ''; ?>>Autre</option>
+                                </select>
+                                <input type="text" name="social_value[]" value="<?php echo htmlspecialchars($es['value'] ?? ''); ?>" placeholder="Lien ou @pseudo" style="flex: 1;">
+                                <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 8px 12px;" onclick="this.parentNode.remove()"><i class="fas fa-times"></i></button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-gray" onclick="addSocial()" style="margin-top: 8px;"><i class="fas fa-plus"></i> Ajouter un réseau</button>
                     </div>
-                    <div class="form-group">
-                        <label>Facebook</label>
-                        <input type="text" name="facebook" value="<?php echo htmlspecialchars($restaurantSettings['social']['facebook'] ?? ''); ?>">
-                    </div>
+
                     <button type="submit" class="btn"><i class="fas fa-save"></i> Enregistrer</button>
                 </form>
             </div>
 
-            <!-- WhatsApp Business API -->
-            <div class="card">
-                <h3 style="margin-bottom: 15px;"><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp Business API</h3>
-                <p style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">
-                    Pour envoyer des messages automatiques via l'API WhatsApp Business, vous devez configurer votre token d'accès.
-                    <a href="https://developers.facebook.com/docs/whatsapp/business-management-api" target="_blank" style="color: #60a5fa;">En savoir plus →</a>
-                </p>
-                <form method="POST">
-                    <input type="hidden" name="action" value="save_whatsapp_config">
-                    <div class="form-group">
-                        <label>Token d'accès WhatsApp Business API</label>
-                        <input type="password" name="whatsapp_token" id="whatsapp_token"
-                               value="<?php echo htmlspecialchars($restaurantSettings['whatsapp']['token'] ?? ''); ?>"
-                               placeholder="Entrez votre token WhatsApp Business API"
-                               style="font-family: monospace;">
-                        <button type="button" onclick="toggleTokenVisibility()" class="btn btn-sm btn-ghost" style="margin-top: 8px;">
-                            <i class="fas fa-eye" id="toggle-eye"></i> Afficher/Masquer
-                        </button>
-                    </div>
-                    <div class="form-group">
-                        <label>ID du numéro de téléphone WhatsApp</label>
-                        <input type="text" name="whatsapp_phone_id"
-                               value="<?php echo htmlspecialchars($restaurantSettings['whatsapp']['phoneNumberId'] ?? ''); ?>"
-                               placeholder="Ex: 123456789012345">
-                    </div>
-                    <div class="form-group">
-                        <label>ID du Business Account</label>
-                        <input type="text" name="whatsapp_business_id"
-                               value="<?php echo htmlspecialchars($restaurantSettings['whatsapp']['businessAccountId'] ?? ''); ?>"
-                               placeholder="Ex: 123456789012345">
-                    </div>
-                    <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-                        <p style="color: #f59e0b; font-size: 12px; margin: 0;">
-                            <i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong> Le token doit être gardé secret.
-                            Ne le partagez jamais publiquement.
-                        </p>
-                    </div>
-                    <button type="submit" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> Enregistrer la configuration</button>
-                </form>
-            </div>
+            <script>
+            function addPhone() {
+                const container = document.getElementById('phones-container');
+                const div = document.createElement('div');
+                div.className = 'form-group dynamic-row';
+                div.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+                div.innerHTML = `
+                    <input type="text" name="extra_phones[]" placeholder="Numéro supplémentaire" style="flex: 1;">
+                    <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 8px 12px;" onclick="this.parentNode.remove()"><i class="fas fa-times"></i></button>
+                `;
+                container.appendChild(div);
+            }
+
+            function addSocial() {
+                const container = document.getElementById('socials-container');
+                const div = document.createElement('div');
+                div.className = 'form-group dynamic-row';
+                div.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+                div.innerHTML = `
+                    <select name="social_type[]" style="width: 130px; padding: 10px; background: #1a1a2e; border: 1px solid #374151; border-radius: 8px; color: #fff;">
+                        <option value="instagram">Instagram</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="snapchat">Snapchat</option>
+                        <option value="twitter">Twitter/X</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="other">Autre</option>
+                    </select>
+                    <input type="text" name="social_value[]" placeholder="Lien ou @pseudo" style="flex: 1;">
+                    <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 8px 12px;" onclick="this.parentNode.remove()"><i class="fas fa-times"></i></button>
+                `;
+                container.appendChild(div);
+            }
+            </script>
+
 
             <!-- FAQ -->
             <div class="card">

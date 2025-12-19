@@ -899,7 +899,12 @@ session_start();
         const tr = document.createElement("tr");
         tr.className = "row";
         tr.style.cursor = "pointer";
-        const img = it.image ? String(it.image) : "";
+        let img = it.image ? String(it.image) : "";
+// Préfixer avec .. si le chemin commence par / pour remonter à la racine
+if (img && img.startsWith('/')) {
+  img = '..' + img;
+}
+
         tr.innerHTML = `
           <td style="width:56px">
             ${img ? `<img class="thumb" src="${escapeHtml(img)}" alt="${escapeHtml(it.name)}">` : `<div class="thumb"></div>`}
