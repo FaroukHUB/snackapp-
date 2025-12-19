@@ -1,0 +1,389 @@
+{
+    "version": 1,
+    "featured": {
+        "enabled": true,
+        "title": "🔥 Les préférés de nos clients",
+        "subtitle": "Nos burgers gourmets les plus populaires",
+        "items": [
+            "le-fabrik",
+            "le-seguin",
+            "le-spicy",
+            "tiramisu"
+        ]
+    },
+    "menu": {
+        "categories": [
+            {
+                "id": "burgers",
+                "name": "Burgers",
+                "description": "Nos burgers gourmets avec pain artisanal et viandes de qualité",
+                "items": [
+                    {
+                        "id": "le-fabrik",
+                        "name": "Le Fabrik",
+                        "description": "Pain artisanal, steak 180g, sauce Fabrik, cheddar, oignons, tomates, salade.",
+                        "priceSolo": 11,
+                        "priceMenu": 14,
+                        "image": "\/images\/moyenfabrik_ivtf74 (1).webp",
+                        "baseIngredients": [
+                            "salade",
+                            "tomates",
+                            "oignons"
+                        ],
+                        "isSignature": true,
+                        "status": "available"
+                    },
+                    {
+                        "id": "le-seguin",
+                        "name": "Le Seguin",
+                        "description": "Burger au fromage de chèvre avec sauce miel, salade, tomates, oignons.",
+                        "priceSolo": 11,
+                        "priceMenu": 14,
+                        "image": "\/images.webp",
+                        "baseIngredients": [
+                            "salade",
+                            "tomates",
+                            "oignons"
+                        ],
+                        "status": "unavailable"
+                    },
+                    {
+                        "id": "le-spicy",
+                        "name": "Le Spicy",
+                        "description": "Poulet épicé, sauce relevée, salade, tomates, cheddar.",
+                        "priceSolo": 11,
+                        "priceMenu": 14,
+                        "image": "\/images\/moyenspicy_cktzjt.webp",
+                        "baseIngredients": [
+                            "salade",
+                            "tomates"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "le-classic",
+                        "name": "Le Classic",
+                        "description": "Steak, cheddar, salade, tomates, sauce burger.",
+                        "priceSolo": 10,
+                        "priceMenu": 13,
+                        "image": "\/images\/moyenclassic_psv9ne (2) (1).webp",
+                        "baseIngredients": [
+                            "salade",
+                            "tomates"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "le-supreme",
+                        "name": "Le Suprême",
+                        "description": "Burger généreux avec double viande et fromage.",
+                        "priceSolo": 12,
+                        "priceMenu": 15,
+                        "image": "\/images\/moyensupreme_jma1xu.webp",
+                        "baseIngredients": [],
+                        "status": "available"
+                    },
+                    {
+                        "id": "le-mexicain",
+                        "name": "Le Mexican",
+                        "description": "Steak, cheddar, sauce relevée, poivrons, oignons, salade.",
+                        "priceSolo": 11,
+                        "priceMenu": 14,
+                        "image": "\/images\/fabrik\/menu\/le-mexicain.jpg",
+                        "baseIngredients": [
+                            "salade",
+                            "poivrons",
+                            "oignons"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "l-indien",
+                        "name": "L'Indien",
+                        "description": "Poulet mariné, sauce curry, salade, tomates, oignons.",
+                        "priceSolo": 11,
+                        "priceMenu": 14,
+                        "image": "\/images\/fabrik\/menu\/l-indien.jpg",
+                        "baseIngredients": [
+                            "salade",
+                            "tomates",
+                            "oignons"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "le-vege",
+                        "name": "Le Végé",
+                        "description": "Galette végétarienne, légumes frais, sauce légère.",
+                        "priceSolo": 10,
+                        "priceMenu": 13,
+                        "image": "\/images\/moyenvege_wpvszf.webp",
+                        "baseIngredients": [
+                            "légumes frais"
+                        ],
+                        "isVeggie": true,
+                        "status": "available"
+                    },
+                    {
+                        "id": "le-chti",
+                        "name": "Le Ch'ti",
+                        "description": "Burger inspiration du Nord, fromage local, sauce maison.",
+                        "priceSolo": 11,
+                        "priceMenu": 14,
+                        "image": "\/images\/fabrik\/menu\/le-chti.jpg",
+                        "baseIngredients": [],
+                        "status": "available"
+                    },
+                    {
+                        "id": "le-cheese",
+                        "name": "Le Cheese",
+                        "description": "Steak, cheddar, salade, oignons, sauce burger.",
+                        "priceSolo": 9,
+                        "priceMenu": 12,
+                        "image": "\/images\/cheese.jpg",
+                        "baseIngredients": [
+                            "salade",
+                            "oignons"
+                        ],
+                        "status": "available"
+                    }
+                ]
+            },
+            {
+                "id": "menu-enfant",
+                "name": "Menu Enfant",
+                "items": [
+                    {
+                        "id": "menu-enfant",
+                        "name": "Menu Enfant",
+                        "description": "Petit burger ou tenders + frites + boisson.",
+                        "priceMenu": 9,
+                        "image": "\/images\/kid_s0wggz.webp",
+                        "isKids": true,
+                        "kidsOptions": [
+                            {
+                                "id": "mini-burger",
+                                "name": "Mini Burger"
+                            },
+                            {
+                                "id": "tenders-kid",
+                                "name": "3 Tenders"
+                            }
+                        ],
+                        "status": "available"
+                    }
+                ]
+            },
+            {
+                "id": "extras",
+                "name": "Extras",
+                "items": [
+                    {
+                        "id": "tenders",
+                        "name": "Tenders poulet",
+                        "price": 4.5,
+                        "image": "\/images\/fabrik\/menu\/tenders.jpg",
+                        "status": "available"
+                    },
+                    {
+                        "id": "nems-xxl",
+                        "name": "Nems poulet XXL",
+                        "price": 5,
+                        "image": "\/images\/fabrik\/menu\/nems-xxl.jpg",
+                        "status": "available"
+                    },
+                    {
+                        "id": "frites-fraiches",
+                        "name": "Frites fraîches",
+                        "price": 3,
+                        "image": "\/images\/fabrik\/menu\/frites-fraiches.jpg",
+                        "status": "available"
+                    },
+                    {
+                        "id": "frites-cheddar",
+                        "name": "Frites cheddar",
+                        "price": 4,
+                        "image": "\/images\/fabrik\/menu\/frites-cheddar.jpg",
+                        "status": "available"
+                    },
+                    {
+                        "id": "mozza-sticks",
+                        "name": "Mozza sticks",
+                        "price": 4.5,
+                        "image": "\/images\/fabrik\/menu\/mozza-sticks.jpg",
+                        "status": "available"
+                    }
+                ]
+            },
+            {
+                "id": "desserts",
+                "name": "Desserts",
+                "items": [
+                    {
+                        "id": "tiramisu",
+                        "name": "Tiramisu",
+                        "price": 3.5,
+                        "image": "\/images\/la-tarte-au-daim_jmkzbe.webp",
+                        "status": "available"
+                    },
+                    {
+                        "id": "tarte-daim",
+                        "name": "Tarte au Daim",
+                        "price": 3.5,
+                        "image": "\/images\/fabrik\/menu\/tarte-daim.jpg",
+                        "status": "available"
+                    }
+                ]
+            },
+            {
+                "id": "boissons",
+                "name": "Boissons",
+                "items": [
+                    {
+                        "id": "eau",
+                        "name": "Eau",
+                        "price": 1.5,
+                        "status": "available"
+                    },
+                    {
+                        "id": "san-pellegrino",
+                        "name": "San Pellegrino",
+                        "price": 1.5,
+                        "status": "available"
+                    },
+                    {
+                        "id": "ice-tea",
+                        "name": "Ice Tea",
+                        "price": 1.5,
+                        "status": "available"
+                    },
+                    {
+                        "id": "oasis",
+                        "name": "Oasis Tropical",
+                        "price": 1.5,
+                        "status": "available"
+                    },
+                    {
+                        "id": "schweppes-agrumes",
+                        "name": "Schweppes agrumes",
+                        "price": 1.5,
+                        "status": "available"
+                    },
+                    {
+                        "id": "schweppes-mojito",
+                        "name": "Schweppes mojito",
+                        "price": 1.5,
+                        "status": "unavailable"
+                    },
+                    {
+                        "id": "tropico",
+                        "name": "Tropico exotique",
+                        "price": 1.5,
+                        "status": "unavailable"
+                    },
+                    {
+                        "id": "fanta",
+                        "name": "Fanta",
+                        "price": 1.5,
+                        "status": "available"
+                    },
+                    {
+                        "id": "coca",
+                        "name": "Coca-Cola",
+                        "price": 1.5,
+                        "status": "available"
+                    },
+                    {
+                        "id": "coca-zero",
+                        "name": "Coca-Cola Zero",
+                        "price": 1.5,
+                        "status": "available"
+                    },
+                    {
+                        "id": "coca-cherry",
+                        "name": "Coca-Cola Cherry",
+                        "price": 1.5,
+                        "status": "available"
+                    }
+                ]
+            },
+            {
+                "id": "glaces",
+                "name": "Glaces",
+                "items": []
+            },
+            {
+                "id": "sandwich",
+                "name": "Sandwich",
+                "items": []
+            }
+        ]
+    },
+    "formula": {
+        "enabled": true,
+        "name": "La Formule",
+        "description": "Burger + Frites + Boisson au choix",
+        "includes": {
+            "burger": true,
+            "fries": true,
+            "drink": true
+        },
+        "drinkCategories": [
+            "boissons"
+        ],
+        "friesOptions": [
+            {
+                "id": "frites-fraiches",
+                "name": "Frites fraîches",
+                "extraCost": 0
+            },
+            {
+                "id": "frites-cheddar",
+                "name": "Frites cheddar",
+                "extraCost": 1
+            }
+        ],
+        "displayText": "🍔 + 🍟 + 🥤",
+        "displayTextLong": "Burger + Frites fraîches + Boisson au choix"
+    },
+    "supplements": {
+        "catalog": {
+            "sup-fromage": {
+                "id": "sup-fromage",
+                "name": "Fromage",
+                "price": 1,
+                "status": "available"
+            },
+            "sup-galette": {
+                "id": "sup-galette",
+                "name": "Galette de pomme de terre",
+                "price": 1,
+                "status": "available"
+            },
+            "sup-bacon": {
+                "id": "sup-bacon",
+                "name": "Bacon",
+                "price": 1,
+                "status": "available"
+            },
+            "sup-cheddar-frites": {
+                "id": "sup-cheddar-frites",
+                "name": "Cheddar sur les frites",
+                "price": 1,
+                "status": "available"
+            }
+        },
+        "defaultForCategories": {
+            "burgers": [
+                "sup-fromage",
+                "sup-galette",
+                "sup-bacon",
+                "sup-cheddar-frites"
+            ],
+            "menu-enfant": [],
+            "extras": [],
+            "desserts": [],
+            "boissons": []
+        }
+    }
+}

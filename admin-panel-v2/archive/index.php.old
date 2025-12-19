@@ -1,0 +1,345 @@
+<?php
+require_once 'config.php';
+requireLogin();
+
+$config = loadConfig();
+$primaryColor = $config['branding']['primaryColor'] ?? '#f97316';
+$restaurantName = $config['restaurant']['name'] ?? 'Restaurant';
+$whatsappNumber = $config['contact']['whatsappOrdersNumber'] ?? '';
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - <?php echo htmlspecialchars($restaurantName); ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: <?php echo $primaryColor; ?>;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .primary-gradient {
+            background: linear-gradient(135deg, var(--primary-color), color-mix(in srgb, var(--primary-color) 80%, black));
+        }
+
+        .tab-btn {
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .tab-btn.active {
+            color: white;
+            background: var(--primary-color);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .new-order-badge {
+            position: relative;
+        }
+
+        .new-order-badge::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        .order-card {
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-received {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .status-preparing {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .status-ready {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .btn {
+            transition: all 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: var(--primary-color);
+            opacity: 0.1;
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+    </style>
+</head>
+<body class="pb-20">
+    <!-- Header -->
+    <header class="glass-strong sticky top-0 z-40 px-4 py-3 mb-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl primary-gradient flex items-center justify-center">
+                    <i class="fas fa-utensils text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg"><?php echo htmlspecialchars($restaurantName); ?></h1>
+                    <p class="text-gray-400 text-xs">Administration</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="notif-toggle" class="w-10 h-10 rounded-xl glass flex items-center justify-center text-white hover:bg-white/10 transition-colors">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <a href="logout.php" class="w-10 h-10 rounded-xl glass flex items-center justify-center text-white hover:bg-white/10 transition-colors">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4">
+        <!-- Section: Commandes -->
+        <div id="section-orders" class="section active">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-white">Commandes en direct</h2>
+                <div class="flex items-center gap-2">
+                    <span id="sound-status" class="text-sm text-gray-400">
+                        <i class="fas fa-volume-up"></i> Activé
+                    </span>
+                    <button id="refresh-orders" class="px-4 py-2 rounded-xl glass text-white text-sm btn">
+                        <i class="fas fa-sync-alt"></i> Actualiser
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats rapides -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="glass-strong rounded-2xl p-4 stat-card">
+                    <div class="text-gray-400 text-sm mb-1">En attente</div>
+                    <div class="text-3xl font-bold text-white" id="stat-pending">0</div>
+                </div>
+                <div class="glass-strong rounded-2xl p-4 stat-card">
+                    <div class="text-gray-400 text-sm mb-1">En préparation</div>
+                    <div class="text-3xl font-bold text-yellow-400" id="stat-preparing">0</div>
+                </div>
+                <div class="glass-strong rounded-2xl p-4 stat-card">
+                    <div class="text-gray-400 text-sm mb-1">Prêtes</div>
+                    <div class="text-3xl font-bold text-green-400" id="stat-ready">0</div>
+                </div>
+                <div class="glass-strong rounded-2xl p-4 stat-card">
+                    <div class="text-gray-400 text-sm mb-1">Aujourd'hui</div>
+                    <div class="text-3xl font-bold" style="color: var(--primary-color);" id="stat-today">0</div>
+                </div>
+            </div>
+
+            <!-- Liste des commandes -->
+            <div id="orders-list" class="space-y-4">
+                <!-- Les commandes seront insérées ici par JavaScript -->
+            </div>
+
+            <!-- Message si aucune commande -->
+            <div id="no-orders" class="glass-strong rounded-2xl p-12 text-center">
+                <i class="fas fa-inbox text-6xl text-gray-600 mb-4"></i>
+                <p class="text-gray-400 text-lg">Aucune commande pour le moment</p>
+                <p class="text-gray-500 text-sm mt-2">Les nouvelles commandes apparaîtront ici automatiquement</p>
+            </div>
+        </div>
+
+        <!-- Section: Tableau de bord -->
+        <div id="section-dashboard" class="section">
+            <h2 class="text-2xl font-bold text-white mb-6">Tableau de bord</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Graphique ventes -->
+                <div class="glass-strong rounded-2xl p-6">
+                    <h3 class="text-white font-semibold mb-4">Ventes de la semaine</h3>
+                    <canvas id="salesChart"></canvas>
+                </div>
+
+                <!-- Top produits -->
+                <div class="glass-strong rounded-2xl p-6">
+                    <h3 class="text-white font-semibold mb-4">Top 5 produits</h3>
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Produits -->
+        <div id="section-products" class="section">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-white">Gestion des produits</h2>
+                <button id="add-product-btn" class="px-4 py-2 rounded-xl primary-gradient text-white font-semibold btn">
+                    <i class="fas fa-plus mr-2"></i>Ajouter un produit
+                </button>
+            </div>
+
+            <div id="products-list" class="space-y-4">
+                <!-- Les produits seront insérés ici -->
+            </div>
+        </div>
+
+        <!-- Section: Clients -->
+        <div id="section-customers" class="section">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-white">Base clients & Fidélité</h2>
+                <button id="send-promo-btn" class="px-4 py-2 rounded-xl primary-gradient text-white font-semibold btn">
+                    <i class="fab fa-whatsapp mr-2"></i>Envoyer promo
+                </button>
+            </div>
+
+            <div id="customers-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Les clients seront insérés ici -->
+            </div>
+        </div>
+
+        <!-- Section: Paramètres -->
+        <div id="section-settings" class="section">
+            <h2 class="text-2xl font-bold text-white mb-6">Paramètres</h2>
+
+            <div class="glass-strong rounded-2xl p-6">
+                <h3 class="text-white font-semibold mb-4">Informations du restaurant</h3>
+                <!-- Formulaire de paramètres -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Navigation Bottom (Mobile Style) -->
+    <nav class="glass-strong fixed bottom-0 left-0 right-0 px-4 py-3 z-50">
+        <div class="max-w-7xl mx-auto flex items-center justify-around">
+            <button class="tab-btn active flex flex-col items-center gap-1 px-4 py-2 rounded-xl" data-section="orders">
+                <i class="fas fa-receipt text-xl"></i>
+                <span class="text-xs">Commandes</span>
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-4 py-2 rounded-xl" data-section="dashboard">
+                <i class="fas fa-chart-line text-xl"></i>
+                <span class="text-xs">Stats</span>
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-4 py-2 rounded-xl" data-section="products">
+                <i class="fas fa-burger text-xl"></i>
+                <span class="text-xs">Produits</span>
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-4 py-2 rounded-xl" data-section="customers">
+                <i class="fas fa-users text-xl"></i>
+                <span class="text-xs">Clients</span>
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-4 py-2 rounded-xl" data-section="settings">
+                <i class="fas fa-cog text-xl"></i>
+                <span class="text-xs">Réglages</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Modal de détail commande -->
+    <div id="order-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-strong rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-white">Détail commande</h3>
+                <button id="close-modal" class="w-10 h-10 rounded-xl glass flex items-center justify-center text-white hover:bg-white/10">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modal-content">
+                <!-- Contenu inséré par JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration globale
+        window.APP_CONFIG = {
+            primaryColor: '<?php echo $primaryColor; ?>',
+            restaurantName: '<?php echo addslashes($restaurantName); ?>',
+            whatsappNumber: '<?php echo $whatsappNumber; ?>'
+        };
+    </script>
+
+    <!-- APP.JS INLINE -->
+    <script><?php echo file_get_contents(__DIR__ . '/assets/js/app.js'); ?></script>
+
+    <!-- CUSTOMERS.JS INLINE -->
+    <script><?php echo file_get_contents(__DIR__ . '/assets/js/customers.js'); ?></script>
+
+    <!-- PRODUCTS.JS INLINE -->
+    <script><?php echo file_get_contents(__DIR__ . '/assets/js/products.js'); ?></script>
+</body>
+</html>

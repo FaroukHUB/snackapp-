@@ -1,0 +1,83 @@
+{
+  "id": "fabrik-burger",
+  "name": "Fabrik Burger",
+  "legalName": "Fabrik Burger",
+  "slug": "fabrik-burger",
+  "brandTagline": "Burgers gourmets à Lille",
+  "priceRange": "€€",
+  "isHalal": true,
+
+  "contact": {
+    "phone": "+33374455427",
+    "phoneDisplay": "03 74 45 54 27",
+    "allowWhatsAppOrders": true,
+    "whatsappOrdersNumber": "33757831883"
+  },
+
+  "location": {
+    "addressLine1": "110 Rue des Postes",
+    "addressLine2": "",
+    "postalCode": "59000",
+    "city": "Lille",
+    "countryCode": "FR",
+    "latitude": 50.624939,
+    "longitude": 3.0551876
+  },
+
+  "openingHours": [
+    { "day": "lundi", "opens": "18:30", "closes": "23:30" },
+    { "day": "mardi", "opens": "18:30", "closes": "23:30" },
+    { "day": "mercredi", "opens": "18:30", "closes": "23:30" },
+    { "day": "jeudi", "opens": "18:30", "closes": "23:30" },
+    { "day": "vendredi", "opens": "18:30", "closes": "01:00" },
+    { "day": "samedi", "opens": "18:30", "closes": "01:00" },
+    { "day": "dimanche", "opens": "18:30", "closes": "00:00" }
+  ],
+
+  "social": {
+    "facebook": "https://www.facebook.com/Fabrik-Burger-Page",
+    "instagram": "https://www.instagram.com/fabrik.burger/?hl=fr",
+    "tiktok": "",
+    "snapchat": ""
+  },
+
+  "platforms": [
+    {
+      "id": "uber-eats",
+      "name": "Uber Eats",
+      "url": "https://www.ubereats.com/fr-en/store/fabrik-burger/dMUlWAS8TGiOKDMY5ZCinA"
+    },
+    {
+      "id": "deliveroo",
+      "name": "Deliveroo",
+      "url": "https://deliveroo.fr/fr/menu/lille/lille-wazemmes/fabrik-burger"
+    }
+  ],
+
+  "faq": {
+    "enabled": true,
+    "items": [
+      {
+        "question": "Vos burgers sont-ils halal ?",
+        "answer": "Oui, tous nos burgers sont 100% halal."
+      },
+      {
+        "question": "Proposez-vous la livraison ?",
+        "answer": "Oui, nous livrons via Uber Eats et Deliveroo."
+      },
+      {
+        "question": "Peut-on manger sur place ?",
+        "answer": "Oui, nous avons une salle spacieuse avec tables et banquettes."
+      },
+      {
+        "question": "Avez-vous des options végétariennes ?",
+        "answer": "Oui, nous proposons Le Végé avec galette végétarienne."
+      }
+    ]
+  },
+
+  "seo": {
+    "title": "Fabrik Burger · Burgers gourmets halal à Lille (Wazemmes)",
+    "description": "Fabrik Burger à Lille Wazemmes : burgers gourmets, frites maison et desserts, sur place, à emporter ou en livraison via Uber Eats et Deliveroo."
+  }
+}

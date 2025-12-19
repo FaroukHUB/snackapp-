@@ -1,0 +1,1161 @@
+/* Polices */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@400;500;700&display=swap");
+
+/* Thème SnackApp par défaut (sera surchargé par SNACK_CONFIG) */
+:root{
+  --brand:#c58a3a;        /* accent par défaut (bois doré neutre) */
+  --ink:#111111;          /* texte principal */
+  --paper:#f9f4ec;        /* fond clair type carte */
+  --muted:#475569;        /* texte secondaire */
+  --ring:rgba(197,138,58,.25);
+  --radius-xxl:1.5rem;
+  --shadow:0 6px 20px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.06);
+}
+
+/* Fond global (écrasé par runtime si une couleur de background est définie) */
+body{
+  background-color:var(--paper);
+}
+
+/* Bouton principal */
+.btn-brand {
+  background: linear-gradient(135deg, var(--brand), var(--brand));
+  color: #fff;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+  transition: transform .15s ease, filter .2s ease;
+}
+.btn-brand:hover {
+  filter: brightness(1.06);
+}
+.btn-brand:active {
+  transform: scale(.97);
+}
+
+/* Helpers Tailwind */
+.bg-brand{ background:var(--brand)!important; }
+.bg-brand-soft{
+  background: rgba(197, 138, 58, 0.12) !important; /* Fallback - Plus visible */
+  background: color-mix(in srgb, var(--brand) 12%, white) !important;
+}
+.border-brand\/10{
+  border-color: rgba(197, 138, 58, 0.1) !important;
+  border-color: color-mix(in srgb, var(--brand) 10%, transparent) !important;
+}
+.text-brand{ color:var(--brand)!important; }
+.ring-brand:focus{ outline: none; box-shadow:0 0 0 4px var(--ring); }
+
+/* Typo app */
+.section-title{
+  font-family:"Montserrat",system-ui,Arial,sans-serif;
+  font-weight:800;
+  color:var(--ink);
+}
+.section-kicker{
+  font-family:"Montserrat",system-ui,Arial,sans-serif;
+  font-weight:700;
+  color:var(--brand);
+  letter-spacing:.02em;
+}
+
+/* Prix & badge menu */
+.price-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:4px 10px;
+  border-radius:9999px;
+  background:var(--brand);
+  color:#ffffff;
+  font-weight:700;
+  font-size:.9rem;
+}
+
+/* "14 € en menu" */
+.badge-menu{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-left:0.4rem;
+  padding:3px 8px;
+  border-radius:9999px;
+  font-size:0.75rem;
+  font-weight:700;
+  background:#000000;
+  color:var(--brand);
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  white-space:nowrap;
+}
+
+/* Cartes / relief */
+.elev{ box-shadow:var(--shadow); }
+.card .card-title{
+  font-family:"Montserrat",system-ui,Arial,sans-serif;
+  font-weight:700;
+}
+.card .price{
+  font-weight:700;
+  color:var(--ink);
+}
+
+/* Bouton bois existant */
+.btn-wood{
+  background:linear-gradient(135deg,#6b4e2e,#9b6b3b);
+  color:#fff;
+  font-weight:700;
+}
+.btn-wood:hover{ filter:brightness(1.05); }
+
+/* 🎨 HAMBURGER EN BLANC */
+.hamburger-3d{
+  transition: transform .15s ease;
+  color: #ffffff !important;  /* Texte blanc */
+  background: var(--brand) !important;  /* Fond couleur du snack */
+  border-color: var(--brand) !important;
+}
+.hamburger-3d:hover {
+  background: var(--brand) !important;
+  filter: brightness(1.1);
+}
+.hamburger-3d:active{
+  transform: translateZ(0) scale(.96);
+}
+
+/* Tabs header */
+.category-tabs .tab-btn{
+  border:1px solid #e5e7eb;
+  color:#0f172a;
+  background:#fff;
+}
+.category-tabs .tab-btn[aria-selected="true"]{
+  border-color:var(--brand);
+  color:var(--ink);
+  background:rgba(197,138,58,.08);
+}
+
+/* Panneaux d'onglet */
+.tab-panel{ display:none; }
+.tab-panel[data-active="true"]{ display:block; }
+
+/* Slider générique (mais on force la grille plus bas) */
+.slider{ position:relative; }
+.slider .track{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns: minmax(220px, 1fr);
+  gap:14px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  padding-bottom:4px;
+}
+.slider .track > [data-item]{ scroll-snap-align:start; }
+.slider .arrow{
+  position:absolute; top:50%; translate:0 -50%;
+  width:36px; height:36px; border-radius:9999px;
+  border:1px solid #e5e7eb; background:#fff;
+  display:grid; place-items:center; cursor:pointer;
+  box-shadow:var(--shadow);
+}
+.slider .arrow.left{ left:-10px; }
+.slider .arrow.right{ right:-10px; }
+.slider .arrow:active{ transform:scale(.96); }
+
+/* Images produits */
+.food-img{
+  width:100%; height:320px; object-fit:cover; border-radius:18px;
+  background:#f8fafc;
+}
+
+/* Agrandissement des cartes sur mobile */
+@media (max-width: 768px) {
+  .card {
+    transform: scale(1.08);
+    margin: 0.6rem 0;
+  }
+  .card img {
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+  }
+}
+
+/* Scrollbar masquée */
+.no-scrollbar::-webkit-scrollbar{ display:none; }
+.no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
+
+/* Barre de recherche focus */
+#smart-search input, #q{
+  font-family:"Roboto",system-ui,Arial,sans-serif;
+}
+#q:focus{ box-shadow:0 0 0 4px var(--ring); }
+
+/* ====================
+   SLIDER D'AVIS - CSS DÉDIÉ
+   ==================== */
+
+/* Container du slider */
+#reviews-slider-container {
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 1rem;
+  border: 1px solid #f1f5f9;
+}
+
+/* Flèches de navigation */
+#r-prev,
+#r-next {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100 !important;
+  font-size: 28px;
+  line-height: 1;
+  color: #475569;
+  transition: all 0.2s ease;
+  user-select: none;
+  pointer-events: auto !important;
+}
+
+#r-prev:hover,
+#r-next:hover {
+  background: #f8fafc !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  transform: translateY(-50%) scale(1.05) !important;
+}
+
+#r-prev:active,
+#r-next:active {
+  transform: translateY(-50%) scale(0.95) !important;
+}
+
+#r-prev {
+  left: 12px !important;
+}
+
+#r-next {
+  right: 12px !important;
+}
+
+/* Track du slider */
+#reviews-track {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Cartes d'avis - CRITIQUE pour le bon fonctionnement */
+#reviews-track > figure {
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 1.5rem;
+  background: white;
+}
+
+#reviews-track figure blockquote {
+  line-height: 1.6;
+}
+
+/* Footer typo */
+footer p, footer li, nav, .text-slate-600{
+  font-family:"Roboto",system-ui,Arial,sans-serif;
+}
+
+/* Focus visible */
+:where(a,button)[tabindex]:focus-visible,
+:where(a,button):focus-visible{
+  outline:2px solid var(--brand);
+  outline-offset:2px;
+}
+
+/* Drawer caché quand fermé */
+#drawer:not(.open),
+.overlay:not(.open),
+.backdrop:not(.open),
+.nav-overlay:not(.open){
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Drawer */
+#drawer{
+  visibility:hidden;
+  pointer-events:none;
+  transition:transform .25s ease,visibility 0s .25s;
+}
+#drawer.open{
+  visibility:visible;
+  pointer-events:auto;
+  transition:transform .25s ease,visibility 0s;
+}
+body.navlock{overflow:hidden}
+#drawer{z-index:12000}
+.site-header,header,#header{position:relative;z-index:11000}
+
+/* Arrows hidden < 768px (SAUF pour le slider d'avis) */
+@media (max-width: 768px){
+  .slider .arrow:not(#r-prev):not(#r-next){ display:none !important; }
+}
+
+/* MODE GRILLE pour les cartes (plus de slider horizontal) */
+/* IMPORTANT : Exclure le slider d'avis (#reviews-track) */
+.slider:not(#avis .slider),
+.slider .track:not(#reviews-track),
+.slider [data-track]:not(#reviews-track){
+  overflow-x: visible !important;
+  scroll-snap-type: none !important;
+  -webkit-overflow-scrolling: auto !important;
+}
+.slider .track:not(#reviews-track),
+.slider [data-track]:not(#reviews-track){
+  display: grid !important;
+  grid-auto-flow: row !important;
+  width: 100% !important;
+  white-space: normal !important;
+  gap: 1.5rem !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+.slider .track > *:not(#reviews-track > *),
+.slider [data-track] > *:not(#reviews-track > *){
+  flex: none !important;
+  width: auto !important;
+}
+.slider .arrow:not(#r-prev):not(#r-next){
+  display: none !important;
+}
+@media (max-width: 1024px){
+  .slider .track:not(#reviews-track),
+  .slider [data-track]:not(#reviews-track){
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 768px){
+  .slider .track:not(#reviews-track),
+  .slider [data-track]:not(#reviews-track){
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .slider .track > .card:not(#reviews-track > *),
+  .slider [data-track] > .card:not(#reviews-track > *){
+    transform: scale(1.04);
+  }
+}
+
+/* Bouton retour aux onglets (si tu l'utilises pour la recherche) */
+@media (max-width: 768px){
+  .grid-return {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f6f6f6;
+    border: 1px dashed #d9d9d9;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .grid-return:active { transform: scale(.98); }
+}
+
+/* 🎨 MENU DRAWER AMÉLIORÉ */
+/* Liens du menu en fond clair → texte noir */
+#drawer .drawer-link {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+  transition: all 0.2s ease;
+}
+
+#drawer .drawer-link:hover {
+  background: var(--brand) !important;
+  color: #ffffff !important;
+  border-color: var(--brand) !important;
+  transform: translateX(4px);
+}
+
+/* Titre des sections du drawer avec couleur accent */
+#drawer .drawer-title {
+  color: var(--brand) !important;
+}
+
+/* Badges téléphone et coordonnées */
+#drawer a[href^="tel"],
+#drawer .inline-flex.items-center.gap-2 {
+  background: var(--brand) !important;
+  color: #ffffff !important;
+  border-color: var(--brand) !important;
+  transition: all 0.2s ease;
+}
+
+#drawer a[href^="tel"]:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+/* Agrandissement spécifique du logo pour Fabrik Burger */
+body[data-snack="fabrik-burger"] header a[href="#hero"] img {
+  height: 52px !important;
+  width: 52px !important;
+}
+/* Laisse un peu plus de hauteur au header pour le gros logo */
+body[data-snack="fabrik-burger"] header .max-w-6xl {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Plaque en bois + large derrière le logo (Fabrik Burger uniquement) */
+.footer-logo-wrapper img.footer-logo {
+  max-height: 60px;
+  width: auto;
+  display: block;
+}
+
+/* 🎨 PRIX EN BLANC (sur fond noir) */
+.price-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  min-width: 9rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* SOLO : texte BLANC sur fond noir */
+.price-chip--solo {
+  background: #111111 !important;
+  color: #ffffff !important;  /* 👈 BLANC au lieu de var(--brand) */
+}
+
+.price-chip--solo:hover {
+  background: #1f1f1f !important;
+  transform: scale(1.02);
+}
+
+/* MENU : texte blanc sur fond couleur du snack */
+.price-chip--menu {
+  background: var(--brand) !important;
+  color: #ffffff !important;  /* 👈 Texte blanc aussi */
+}
+
+.price-chip--menu:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+.price-chip__plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);  /* Plus léger pour voir le + */
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+/* ========== TICKET BUILDER ========== */
+
+/* Bouton flottant 🎟 */
+.ticket-floating-btn {
+  position: fixed;
+  bottom: 4.5rem;
+  left: 1rem;
+  z-index: 40;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 999px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  background: var(--brand, #c58a3a);
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+}
+
+/* Overlay fondu derrière le ticket */
+.ticket-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+  z-index: 49;
+}
+.ticket-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Panel ticket gauche */
+.ticket-panel {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  width: 380px;
+  max-width: 100%;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease-out;
+  z-index: 50;
+}
+.ticket-panel.is-open {
+  transform: translateX(0);
+}
+
+.ticket-panel-inner {
+  height: 100%;
+  background: var(--paper, #ffffff);
+  border-right: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header du ticket */
+.ticket-header {
+  padding: 1rem 1.25rem;
+  background: var(--brand, #c58a3a);
+  color: #fff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.ticket-kicker {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.9;
+}
+.ticket-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.ticket-variant {
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.ticket-close {
+  border: none;
+  background: rgba(15, 23, 42, 0.15);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+/* Corps du ticket */
+.ticket-body {
+  padding: 1rem 1.25rem 1.25rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 60px);
+}
+
+/* Suppléments */
+.ticket-supp-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.ticket-supp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+.ticket-supp-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.6rem;
+  background: rgba(148, 163, 184, 0.12);
+}
+.ticket-supp-item input {
+  margin-right: 0.25rem;
+}
+.ticket-supp-price {
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+/* Formulaire */
+.ticket-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.ticket-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+.ticket-field input,
+.ticket-field textarea {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.ticket-actions {
+  margin-top: 0.5rem;
+}
+
+/* Mobile : panel plein écran */
+@media (max-width: 768px) {
+  .ticket-panel {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   ANIMATIONS PERSONNALISÉES
+======================================== */
+
+/* Animation pulse pour le 💡 du bandeau */
+@keyframes pulse-light {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.15) rotate(-10deg);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2) rotate(10deg);
+  }
+  75% {
+    transform: scale(1.15) rotate(-5deg);
+  }
+}
+
+.animate-pulse-light {
+  animation: pulse-light 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  display: inline-block;
+  filter: drop-shadow(0 0 8px rgba(255, 200, 0, 0.3));
+}
+
+/* Animation slide-in pour les toasts */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+/* ========================================
+   TOASTS / NOTIFICATIONS
+======================================== */
+
+.toast {
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 280px;
+  border-left: 4px solid var(--brand);
+  animation: slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast.toast-exit {
+  animation: slide-out-right 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.toast-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-title {
+  font-weight: 700;
+  color: #111827;
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+.toast-message {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.toast-close:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* Types de toasts */
+.toast-success {
+  border-left-color: #10b981;
+}
+
+.toast-info {
+  border-left-color: #3b82f6;
+}
+
+.toast-warning {
+  border-left-color: #f59e0b;
+}
+
+.toast-error {
+  border-left-color: #ef4444;
+}
+
+/* ========================================
+   TUTORIAL ANIMATION MODAL
+   ======================================== */
+
+/* Pulse animation pour les steps */
+@keyframes tutorial-pulse-ring {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--brand);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(197, 138, 58, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(197, 138, 58, 0);
+  }
+}
+
+.tutorial-pulse {
+  animation: tutorial-pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glow effect for active step */
+.tutorial-step.active .tutorial-pulse {
+  box-shadow: 0 0 20px rgba(197, 138, 58, 0.6),
+              0 0 40px rgba(197, 138, 58, 0.4);
+  animation: tutorial-pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Product animation */
+#tutorial-product {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  z-index: 20;
+}
+
+#tutorial-product.traveling {
+  animation: tutorial-product-bounce 1s ease-in-out;
+}
+
+@keyframes tutorial-product-bounce {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.2) rotate(10deg);
+  }
+}
+
+/* Step fade-in */
+.tutorial-step {
+  opacity: 0.5;
+  transform: translateY(10px);
+  transition: all 0.4s ease-out;
+}
+
+.tutorial-step.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* FAB Help Button Animation */
+@keyframes fab-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(197, 138, 58, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(197, 138, 58, 0);
+  }
+}
+
+#tutorial-help-btn {
+  animation: fab-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+#tutorial-help-btn:hover {
+  animation: none;
+}
+
+/* Mobile responsive for tutorial */
+@media (max-width: 768px) {
+  #tutorial-product {
+    font-size: 3rem !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+
+  #tutorial-product.traveling {
+    animation: tutorial-product-bounce-mobile 1s ease-in-out !important;
+  }
+
+  @keyframes tutorial-product-bounce-mobile {
+    0%, 100% {
+      transform: translateX(-50%) scale(1);
+    }
+    50% {
+      transform: translateX(-50%) scale(1.2) rotate(10deg);
+    }
+  }
+}
+
+/* ==================== MODALE DE PERSONNALISATION ==================== */
+
+/* Overlay */
+#customize-overlay {
+  transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+#customize-overlay.hidden {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#customize-overlay:not(.hidden) {
+  display: flex !important;
+  opacity: 1;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Modal */
+#customize-modal {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+#customize-overlay:not(.hidden) #customize-modal {
+  transform: scale(1);
+  opacity: 1;
+  animation: modalSlideIn 0.3s ease;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Suppléments - Checkboxes personnalisées */
+#customize-supplements-list label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+#customize-supplements-list label:hover {
+  border-color: var(--brand);
+  background: rgba(197, 138, 58, 0.05);
+}
+
+#customize-supplements-list input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  accent-color: var(--brand);
+}
+
+#customize-supplements-list input[type="checkbox"]:checked + span {
+  font-weight: 600;
+  color: var(--brand);
+}
+
+/* Ingrédients - Boutons toggle */
+#customize-ingredients-list button {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 9999px;
+  background: white;
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#customize-ingredients-list button:hover {
+  border-color: var(--brand);
+  background: rgba(197, 138, 58, 0.05);
+}
+
+#customize-ingredients-list button.active {
+  border-color: #dc2626;
+  background: #dc2626;
+  color: white;
+}
+
+#customize-ingredients-list button.active:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+/* Scrollbar personnalisée pour la modale */
+#customize-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+#customize-modal::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+#customize-modal::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+#customize-modal::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  #customize-modal {
+    max-height: 95vh;
+    margin: 0.5rem;
+  }
+
+  #customize-variant-section .grid {
+    gap: 0.5rem;
+  }
+
+  #customize-variant-section label {
+    padding: 0.75rem;
+  }
+}
+.card.is-unavailable {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.product-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #b91c1c;
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+/* ===== MODALS ADMIN ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-box {
+  background: #1e293b;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 16px;
+  padding: 28px;
+  color: #f8fafc;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-box h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.modal-box label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #cbd5f5;
+}
+
+.modal-box input,
+.modal-box textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: #0f172a;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.modal-box textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-box h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.modern-modal {
+  max-width: 480px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.form-group input,
+.form-group textarea {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #22c55e;
+}

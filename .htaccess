@@ -1,0 +1,32 @@
+# ============================================================================
+# DÉSACTIVATION DU CACHE POUR LE DEBUG
+# À RETIRER une fois que le slider fonctionne !
+# ============================================================================
+
+# Désactive le cache pour les fichiers JS, CSS, et HTML
+<IfModule mod_headers.c>
+    <FilesMatch "\.(js|css|html)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+</IfModule>
+
+# Désactive la compression Brotli qui peut causer des problèmes de cache
+<IfModule mod_brotli.c>
+    SetEnvIfNoCase Request_URI "\.(js|css|html)$" no-brotli
+</IfModule>
+
+# Force le serveur à vérifier les modifications de fichiers
+<IfModule mod_expires.c>
+    ExpiresActive Off
+</IfModule>
+
+# Ajoute un header ETag basé sur la modification du fichier
+FileETag MTime Size
+
+# Empêche le cache du navigateur
+<IfModule mod_headers.c>
+    Header unset ETag
+    Header unset Last-Modified
+</IfModule>

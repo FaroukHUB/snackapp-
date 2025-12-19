@@ -1,0 +1,62 @@
+[
+    {
+        "id": "CUST202512152034483306",
+        "name": "farouk",
+        "phone": "+213540565001",
+        "email": "",
+        "registered_at": "2025-12-15 20:34:48",
+        "orders_count": 4,
+        "total_spent": 54,
+        "loyalty_points": 54,
+        "last_order": "2025-12-16 17:21:16",
+        "notes": ""
+    },
+    {
+        "id": "CUST202512152120112801",
+        "name": "farouk",
+        "phone": "05667676",
+        "email": "",
+        "registered_at": "2025-12-15 21:20:11",
+        "orders_count": 1,
+        "total_spent": 12,
+        "loyalty_points": 12,
+        "last_order": "2025-12-15 21:20:11",
+        "notes": ""
+    },
+    {
+        "id": "CUST202512152152051748",
+        "name": "Farouk",
+        "phone": "0540560808",
+        "email": "",
+        "registered_at": "2025-12-15 21:52:05",
+        "orders_count": 3,
+        "total_spent": 42,
+        "loyalty_points": 42,
+        "last_order": "2025-12-15 22:19:39",
+        "notes": ""
+    },
+    {
+        "id": "CUST202512152222146837",
+        "name": "Farouk",
+        "phone": "058080885",
+        "email": "",
+        "registered_at": "2025-12-15 22:22:14",
+        "orders_count": 2,
+        "total_spent": 28,
+        "loyalty_points": 28,
+        "last_order": "2025-12-15 22:22:51",
+        "notes": ""
+    },
+    {
+        "id": "CUST202512152238397828",
+        "name": "Farouk",
+        "phone": "050505050",
+        "email": "",
+        "registered_at": "2025-12-15 22:38:39",
+        "orders_count": 4,
+        "total_spent": 63,
+        "loyalty_points": 63,
+        "last_order": "2025-12-15 22:52:53",
+        "notes": ""
+    }
+]

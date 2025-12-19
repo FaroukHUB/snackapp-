@@ -1,0 +1,22 @@
+# ZIPs - ne pas commiter
+*.zip
+# Exception pour l'archive de déploiement
+!fabrik-burger.zip
+
+# Anciens dossiers - ne pas commiter
+admin-panel/
+strapi-admin/
+strapi-deploy/
+deploy-package/
+
+# Fichiers système
+.DS_Store
+node_modules/
+.env
+
+# Fichiers temporaires
+*.tmp
+*.log
+
+# Database config (contient les credentials)
+database/config.php
