@@ -407,11 +407,30 @@ $action = $_POST['action'];
             $restaurantSettings['openingHours'] = [];
             $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
             foreach ($days as $i => $day) {
-                $restaurantSettings['openingHours'][] = [
-                    'day' => $day,
-                    'opens' => $_POST['hours'][$i]['opens'] ?? '18:30',
-                    'closes' => $_POST['hours'][$i]['closes'] ?? '23:30'
-                ];
+                $dayData = ['day' => $day];
+                // Nouveau format avec slots multiples
+                if (isset($_POST['hours'][$i]['slots'])) {
+                    $slots = [];
+                    foreach ($_POST['hours'][$i]['slots'] as $slot) {
+                        if (!empty($slot['opens']) && !empty($slot['closes'])) {
+                            $slots[] = [
+                                'opens' => $slot['opens'],
+                                'closes' => $slot['closes']
+                            ];
+                        }
+                    }
+                    $dayData['slots'] = $slots;
+                    // Garder compatibilité avec ancien format (premier créneau)
+                    if (!empty($slots)) {
+                        $dayData['opens'] = $slots[0]['opens'];
+                        $dayData['closes'] = $slots[0]['closes'];
+                    }
+                } else {
+                    // Ancien format
+                    $dayData['opens'] = $_POST['hours'][$i]['opens'] ?? '18:30';
+                    $dayData['closes'] = $_POST['hours'][$i]['closes'] ?? '23:30';
+                }
+                $restaurantSettings['openingHours'][] = $dayData;
             }
         }
         if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
@@ -1277,18 +1296,38 @@ if (isset($_GET['export'])) {
             <!-- Horaires -->
             <div class="card" style="border-left: 4px solid #3b82f6;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-clock" style="color: #3b82f6;"></i> Horaires d'ouverture</h3>
-                <form method="POST">
+                <p style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">Ajoutez plusieurs créneaux par jour (midi + soir)</p>
+                <form method="POST" id="hours-form">
                     <input type="hidden" name="action" value="save_settings">
                     <?php
                     $days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
                     $hours = $restaurantSettings['openingHours'] ?? [];
                     foreach ($days as $i => $day):
-                        $h = $hours[$i] ?? ['opens' => '18:30', 'closes' => '23:30'];
+                        $dayHours = $hours[$i] ?? ['opens' => '18:30', 'closes' => '23:30'];
+                        // Support ancien format (single slot) et nouveau format (multiple slots)
+                        $slots = isset($dayHours['slots']) ? $dayHours['slots'] : [['opens' => $dayHours['opens'] ?? '18:30', 'closes' => $dayHours['closes'] ?? '23:30']];
                     ?>
-                    <div class="hours-grid">
-                        <span><?php echo $day; ?></span>
-                        <input type="time" name="hours[<?php echo $i; ?>][opens]" value="<?php echo $h['opens']; ?>">
-                        <input type="time" name="hours[<?php echo $i; ?>][closes]" value="<?php echo $h['closes']; ?>">
+                    <div class="hours-day" data-day="<?php echo $i; ?>" style="margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <strong style="font-size: 14px;"><?php echo $day; ?></strong>
+                            <button type="button" class="btn btn-sm btn-gray" onclick="addSlot(<?php echo $i; ?>)" style="padding: 4px 10px; font-size: 11px;">
+                                <i class="fas fa-plus"></i> Créneau
+                            </button>
+                        </div>
+                        <div class="slots-container" id="slots-<?php echo $i; ?>">
+                            <?php foreach ($slots as $s => $slot): ?>
+                            <div class="slot-row" style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                                <input type="time" name="hours[<?php echo $i; ?>][slots][<?php echo $s; ?>][opens]" value="<?php echo $slot['opens']; ?>" style="flex: 1;">
+                                <span style="color: #6b7280;">→</span>
+                                <input type="time" name="hours[<?php echo $i; ?>][slots][<?php echo $s; ?>][closes]" value="<?php echo $slot['closes']; ?>" style="flex: 1;">
+                                <?php if ($s > 0): ?>
+                                <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 4px 8px;" onclick="this.parentNode.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <?php endif; ?>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                     <?php endforeach; ?>
                     <button type="submit" class="btn" style="margin-top: 15px;"><i class="fas fa-save"></i> Enregistrer</button>
@@ -1420,6 +1459,23 @@ if (isset($_GET['export'])) {
                 div.innerHTML = `
                     <input type="text" name="extra_phones[]" placeholder="Numéro supplémentaire" style="flex: 1;">
                     <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 8px 12px;" onclick="this.parentNode.remove()"><i class="fas fa-times"></i></button>
+                `;
+                container.appendChild(div);
+            }
+
+            function addSlot(dayIndex) {
+                const container = document.getElementById('slots-' + dayIndex);
+                const slotCount = container.querySelectorAll('.slot-row').length;
+                const div = document.createElement('div');
+                div.className = 'slot-row';
+                div.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 6px;';
+                div.innerHTML = `
+                    <input type="time" name="hours[${dayIndex}][slots][${slotCount}][opens]" value="12:00" style="flex: 1;">
+                    <span style="color: #6b7280;">→</span>
+                    <input type="time" name="hours[${dayIndex}][slots][${slotCount}][closes]" value="14:00" style="flex: 1;">
+                    <button type="button" class="btn btn-sm" style="background: #dc2626; padding: 4px 8px;" onclick="this.parentNode.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
                 `;
                 container.appendChild(div);
             }
