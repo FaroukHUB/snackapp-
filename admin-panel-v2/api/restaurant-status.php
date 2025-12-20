@@ -3,6 +3,11 @@
  * API: Gestion du statut du restaurant (ouvert/fermé pour les commandes)
  */
 
+// Session doit être démarrée AVANT config.php pour éviter les conflits
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once '../config.php';
 
 header('Content-Type: application/json');
@@ -121,7 +126,6 @@ switch ($action) {
 
     case 'toggle_delivery':
         // Toggle livraison ON/OFF
-        session_start();
         if (!isset($_SESSION['admin_logged_in'])) {
             echo json_encode(['success' => false, 'error' => 'Non autorisé']);
             exit;
@@ -161,7 +165,6 @@ switch ($action) {
 
     case 'update_platform':
         // Activer/Désactiver une plateforme
-        session_start();
         if (!isset($_SESSION['admin_logged_in'])) {
             echo json_encode(['success' => false, 'error' => 'Non autorisé']);
             exit;
@@ -206,7 +209,6 @@ switch ($action) {
 
     case 'add_platform':
         // Ajouter une nouvelle plateforme
-        session_start();
         if (!isset($_SESSION['admin_logged_in'])) {
             echo json_encode(['success' => false, 'error' => 'Non autorisé']);
             exit;
@@ -258,7 +260,6 @@ switch ($action) {
 
     case 'delete_platform':
         // Supprimer une plateforme
-        session_start();
         if (!isset($_SESSION['admin_logged_in'])) {
             echo json_encode(['success' => false, 'error' => 'Non autorisé']);
             exit;
@@ -285,6 +286,44 @@ switch ($action) {
                 'success' => true,
                 'platforms' => $restaurant['platforms'],
                 'message' => 'Plateforme supprimée'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
+        }
+        break;
+
+    case 'save_theme':
+        // Sauvegarder les couleurs du thème
+        if (!isset($_SESSION['admin_logged_in'])) {
+            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+
+        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
+        $restaurant = json_decode(file_get_contents($restaurantFile), true);
+
+        if (!isset($restaurant['theme'])) {
+            $restaurant['theme'] = ['colors' => []];
+        }
+        if (!isset($restaurant['theme']['colors'])) {
+            $restaurant['theme']['colors'] = [];
+        }
+
+        // Mettre à jour les couleurs
+        $colorFields = ['primary', 'secondary', 'accent', 'background', 'cardBg', 'text', 'textMuted'];
+        foreach ($colorFields as $field) {
+            if (isset($input[$field])) {
+                $restaurant['theme']['colors'][$field] = $input[$field];
+            }
+        }
+
+        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+            echo json_encode([
+                'success' => true,
+                'theme' => $restaurant['theme'],
+                'message' => 'Couleurs sauvegardées'
             ]);
         } else {
             echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);

@@ -1386,6 +1386,69 @@ if (isset($_GET['export'])) {
                 </form>
             </div>
 
+            <!-- Couleurs du thème -->
+            <div class="card" style="border-left: 4px solid #8b5cf6;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-palette" style="color: #8b5cf6;"></i> Couleurs du thème</h3>
+                <p style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">Personnalisez les couleurs de votre site</p>
+
+                <?php
+                $themeColors = $restaurantSettings['theme']['colors'] ?? [];
+                $defaultColors = [
+                    'primary' => '#c58a3a',
+                    'secondary' => '#1a1a2e',
+                    'accent' => '#f59e0b',
+                    'background' => '#0f0f1a',
+                    'cardBg' => '#1a1a2e',
+                    'text' => '#ffffff',
+                    'textMuted' => '#9ca3af'
+                ];
+                ?>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="color-primary" value="<?php echo $themeColors['primary'] ?? $defaultColors['primary']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
+                            <span>Principale</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="color-secondary" value="<?php echo $themeColors['secondary'] ?? $defaultColors['secondary']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
+                            <span>Secondaire</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="color-accent" value="<?php echo $themeColors['accent'] ?? $defaultColors['accent']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
+                            <span>Accent</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="color-background" value="<?php echo $themeColors['background'] ?? $defaultColors['background']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
+                            <span>Fond</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="color-cardBg" value="<?php echo $themeColors['cardBg'] ?? $defaultColors['cardBg']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
+                            <span>Cartes</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="color-text" value="<?php echo $themeColors['text'] ?? $defaultColors['text']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
+                            <span>Texte</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" onclick="saveThemeColors()" class="btn"><i class="fas fa-save"></i> Enregistrer</button>
+                    <button type="button" onclick="resetThemeColors()" class="btn btn-gray"><i class="fas fa-undo"></i> Réinitialiser</button>
+                </div>
+            </div>
+
             <!-- Livraison & Plateformes -->
             <div class="card" style="border-left: 4px solid #f59e0b;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-truck" style="color: #f59e0b;"></i> Livraison & Plateformes</h3>
@@ -2657,6 +2720,53 @@ function deletePlatform(platformId) {
         }
     })
     .catch(() => showToast('Erreur réseau', 'error'));
+}
+
+// ===== Gestion Couleurs du Thème =====
+function saveThemeColors() {
+    const colors = {
+        primary: document.getElementById('color-primary').value,
+        secondary: document.getElementById('color-secondary').value,
+        accent: document.getElementById('color-accent').value,
+        background: document.getElementById('color-background').value,
+        cardBg: document.getElementById('color-cardBg').value,
+        text: document.getElementById('color-text').value
+    };
+
+    fetch('api/restaurant-status.php?action=save_theme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(colors)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Couleurs sauvegardées ! Rechargez le site pour voir les changements.');
+        } else {
+            showToast(data.error || 'Erreur', 'error');
+        }
+    })
+    .catch(() => showToast('Erreur réseau', 'error'));
+}
+
+function resetThemeColors() {
+    const defaults = {
+        primary: '#c58a3a',
+        secondary: '#1a1a2e',
+        accent: '#f59e0b',
+        background: '#0f0f1a',
+        cardBg: '#1a1a2e',
+        text: '#ffffff'
+    };
+
+    document.getElementById('color-primary').value = defaults.primary;
+    document.getElementById('color-secondary').value = defaults.secondary;
+    document.getElementById('color-accent').value = defaults.accent;
+    document.getElementById('color-background').value = defaults.background;
+    document.getElementById('color-cardBg').value = defaults.cardBg;
+    document.getElementById('color-text').value = defaults.text;
+
+    showToast('Couleurs réinitialisées. Cliquez sur Enregistrer pour appliquer.');
 }
 
 // ===== Export CSV par mois =====
