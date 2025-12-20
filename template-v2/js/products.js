@@ -397,7 +397,9 @@ const Products = {
      * Open product modal
      */
     openProductModal(productId) {
+        console.log('Opening modal for product:', productId);
         const product = Config.getProduct(productId);
+        console.log('Product found:', product);
         if (!product) return;
 
         // Reset state
@@ -483,7 +485,9 @@ const Products = {
         }
 
         this.updateModalUI();
+        console.log('Modal element:', modal);
         modal.classList.add('active');
+        console.log('Modal classes after active:', modal?.className);
         document.body.style.overflow = 'hidden';
     },
 
