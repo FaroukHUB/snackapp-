@@ -305,18 +305,20 @@ switch ($action) {
         $restaurant = json_decode(file_get_contents($restaurantFile), true);
 
         if (!isset($restaurant['theme'])) {
-            $restaurant['theme'] = ['colors' => []];
-        }
-        if (!isset($restaurant['theme']['colors'])) {
-            $restaurant['theme']['colors'] = [];
+            $restaurant['theme'] = [];
         }
 
-        // Mettre à jour les couleurs
-        $colorFields = ['primary', 'secondary', 'accent', 'background', 'cardBg', 'text', 'textMuted'];
+        // Mettre à jour les couleurs directement dans theme
+        $colorFields = ['primary', 'accent', 'background', 'cardBackground'];
         foreach ($colorFields as $field) {
             if (isset($input[$field])) {
-                $restaurant['theme']['colors'][$field] = $input[$field];
+                $restaurant['theme'][$field] = $input[$field];
             }
+        }
+
+        // Calculer automatiquement primaryDark
+        if (isset($input['primary'])) {
+            $restaurant['theme']['primaryDark'] = $input['primary']; // Le site calculera une version plus sombre
         }
 
         if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {

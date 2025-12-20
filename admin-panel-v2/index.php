@@ -1388,58 +1388,47 @@ if (isset($_GET['export'])) {
 
             <!-- Couleurs du thème -->
             <div class="card" style="border-left: 4px solid #8b5cf6;">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-palette" style="color: #8b5cf6;"></i> Couleurs du thème</h3>
-                <p style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">Personnalisez les couleurs de votre site</p>
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-palette" style="color: #8b5cf6;"></i> Couleurs du site</h3>
 
                 <?php
-                $themeColors = $restaurantSettings['theme']['colors'] ?? [];
-                $defaultColors = [
-                    'primary' => '#c58a3a',
-                    'secondary' => '#1a1a2e',
-                    'accent' => '#f59e0b',
-                    'background' => '#0f0f1a',
-                    'cardBg' => '#1a1a2e',
-                    'text' => '#ffffff',
-                    'textMuted' => '#9ca3af'
-                ];
+                $theme = $restaurantSettings['theme'] ?? [];
                 ?>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="color" id="color-primary" value="<?php echo $themeColors['primary'] ?? $defaultColors['primary']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
-                            <span>Principale</span>
-                        </label>
+                <div style="display: grid; gap: 20px;">
+                    <!-- Couleur principale -->
+                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <input type="color" id="color-primary" value="<?php echo $theme['primary'] ?? '#e67e22'; ?>" style="width: 50px; height: 40px; border: none; cursor: pointer; border-radius: 8px;">
+                        <div>
+                            <strong style="font-size: 14px;">Couleur principale</strong>
+                            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Boutons, liens, prix, badges, icônes actives</p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="color" id="color-secondary" value="<?php echo $themeColors['secondary'] ?? $defaultColors['secondary']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
-                            <span>Secondaire</span>
-                        </label>
+
+                    <!-- Couleur d'accent -->
+                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <input type="color" id="color-accent" value="<?php echo $theme['accent'] ?? '#f39c12'; ?>" style="width: 50px; height: 40px; border: none; cursor: pointer; border-radius: 8px;">
+                        <div>
+                            <strong style="font-size: 14px;">Couleur d'accent</strong>
+                            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Survol des boutons, éléments surlignés</p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="color" id="color-accent" value="<?php echo $themeColors['accent'] ?? $defaultColors['accent']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
-                            <span>Accent</span>
-                        </label>
+
+                    <!-- Fond de page -->
+                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <input type="color" id="color-background" value="<?php echo $theme['background'] ?? '#1a1a2e'; ?>" style="width: 50px; height: 40px; border: none; cursor: pointer; border-radius: 8px;">
+                        <div>
+                            <strong style="font-size: 14px;">Fond de page</strong>
+                            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Arrière-plan du site</p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="color" id="color-background" value="<?php echo $themeColors['background'] ?? $defaultColors['background']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
-                            <span>Fond</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="color" id="color-cardBg" value="<?php echo $themeColors['cardBg'] ?? $defaultColors['cardBg']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
-                            <span>Cartes</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="color" id="color-text" value="<?php echo $themeColors['text'] ?? $defaultColors['text']; ?>" style="width: 40px; height: 30px; border: none; cursor: pointer;">
-                            <span>Texte</span>
-                        </label>
+
+                    <!-- Cartes produits -->
+                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                        <input type="color" id="color-cardBg" value="<?php echo $theme['cardBackground'] ?? '#252540'; ?>" style="width: 50px; height: 40px; border: none; cursor: pointer; border-radius: 8px;">
+                        <div>
+                            <strong style="font-size: 14px;">Cartes produits</strong>
+                            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Fond des cartes produits, formules, panier</p>
+                        </div>
                     </div>
                 </div>
 
@@ -2726,11 +2715,9 @@ function deletePlatform(platformId) {
 function saveThemeColors() {
     const colors = {
         primary: document.getElementById('color-primary').value,
-        secondary: document.getElementById('color-secondary').value,
         accent: document.getElementById('color-accent').value,
         background: document.getElementById('color-background').value,
-        cardBg: document.getElementById('color-cardBg').value,
-        text: document.getElementById('color-text').value
+        cardBackground: document.getElementById('color-cardBg').value
     };
 
     fetch('api/restaurant-status.php?action=save_theme', {
@@ -2741,7 +2728,7 @@ function saveThemeColors() {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            showToast('Couleurs sauvegardées ! Rechargez le site pour voir les changements.');
+            showToast('Couleurs sauvegardées !');
         } else {
             showToast(data.error || 'Erreur', 'error');
         }
@@ -2751,20 +2738,16 @@ function saveThemeColors() {
 
 function resetThemeColors() {
     const defaults = {
-        primary: '#c58a3a',
-        secondary: '#1a1a2e',
-        accent: '#f59e0b',
-        background: '#0f0f1a',
-        cardBg: '#1a1a2e',
-        text: '#ffffff'
+        primary: '#e67e22',
+        accent: '#f39c12',
+        background: '#1a1a2e',
+        cardBackground: '#252540'
     };
 
     document.getElementById('color-primary').value = defaults.primary;
-    document.getElementById('color-secondary').value = defaults.secondary;
     document.getElementById('color-accent').value = defaults.accent;
     document.getElementById('color-background').value = defaults.background;
-    document.getElementById('color-cardBg').value = defaults.cardBg;
-    document.getElementById('color-text').value = defaults.text;
+    document.getElementById('color-cardBg').value = defaults.cardBackground;
 
     showToast('Couleurs réinitialisées. Cliquez sur Enregistrer pour appliquer.');
 }
