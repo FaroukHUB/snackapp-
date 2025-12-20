@@ -227,7 +227,30 @@ $action = $_POST['action'];
         if ($useMySQL) {
             $order = OrderRepository::getByNumber(SNACK_RESTAURANT_ID, $_POST['order_id']);
             if ($order) {
+                $oldStatus = $order['status'] ?? '';
                 OrderRepository::updateStatus($order['id'], $_POST['new_status']);
+
+                // === ATTRIBUTION AUTOMATIQUE DES POINTS FIDÉLITÉ ===
+                // Quand une commande passe à "completed" pour la première fois
+                if ($_POST['new_status'] === 'completed' && $oldStatus !== 'completed') {
+                    $loyaltyConfig = LoyaltyRepository::getConfig(SNACK_RESTAURANT_ID);
+
+                    if ($loyaltyConfig['enabled'] && !empty($order['customer_id'])) {
+                        $orderTotal = (float) ($order['total'] ?? 0);
+                        $pointsPerEuro = (int) ($loyaltyConfig['points_per_euro'] ?? 1);
+                        $pointsEarned = (int) floor($orderTotal * $pointsPerEuro);
+
+                        if ($pointsEarned > 0) {
+                            LoyaltyRepository::addPoints(
+                                $order['customer_id'],
+                                SNACK_RESTAURANT_ID,
+                                $pointsEarned,
+                                $order['id'],
+                                'Commande #' . ($order['order_number'] ?? $order['id']) . ' - ' . number_format($orderTotal, 2) . '€'
+                            );
+                        }
+                    }
+                }
             }
         } else {
             foreach ($orders as &$order) {
