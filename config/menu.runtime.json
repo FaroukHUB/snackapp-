@@ -1,8 +1,8 @@
 {
-  "products": {},
-  "categories": {},
-  "customCategories": {},
-  "customProducts": {},
-  "deletedProducts": [],
-  "deletedCategories": []
+    "products": [],
+    "categories": [],
+    "customCategories": [],
+    "customProducts": [],
+    "deletedProducts": [],
+    "deletedCategories": []
 }
