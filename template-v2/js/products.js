@@ -154,7 +154,7 @@ const Products = {
                                     <span class="current">${Config.formatPrice(formule.price)}</span>
                                     ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
                                 </div>
-                                <button class="formule-add-btn" onclick="event.stopPropagation(); Products.openFormuleModal('${formule.id}')"><i class="fas fa-plus"></i></button>
+                                <button type="button" class="formule-add-btn" data-formule-id="${formule.id}"><i class="fas fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
@@ -425,6 +425,19 @@ const Products = {
         // Close on Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') this.closeModal();
+        });
+
+        // Formule add button click (event delegation)
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.formule-add-btn');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const formuleId = btn.dataset.formuleId;
+                if (formuleId) {
+                    this.openFormuleModal(formuleId);
+                }
+            }
         });
     },
 
