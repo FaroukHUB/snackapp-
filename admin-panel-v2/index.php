@@ -408,6 +408,9 @@ $action = $_POST['action'];
 
         // Traitement des horaires (formulaire horaires)
         if ($isHoursForm) {
+            // DEBUG - à supprimer
+            file_put_contents(__DIR__ . '/debug_hours.txt', print_r($_POST['hours'], true));
+
             if ($useMySQL) {
                 $hours = [];
                 foreach ($_POST['hours'] as $i => $h) {
