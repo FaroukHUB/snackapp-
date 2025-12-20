@@ -154,7 +154,7 @@ const Products = {
                                     <span class="current">${Config.formatPrice(formule.price)}</span>
                                     ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
                                 </div>
-                                <button class="formule-add-btn"><i class="fas fa-plus"></i></button>
+                                <button class="formule-add-btn" onclick="event.stopPropagation(); Products.openFormuleModal('${formule.id}')"><i class="fas fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
