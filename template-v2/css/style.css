@@ -753,6 +753,33 @@ ul {
     border: none;
 }
 
+.directions-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 14px 28px;
+    background: var(--primary);
+    color: var(--white);
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    font-size: 15px;
+    transition: var(--transition);
+    text-decoration: none;
+    width: 100%;
+}
+
+.directions-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.directions-btn i {
+    font-size: 18px;
+}
+
 /* Delivery Platforms */
 .platforms-grid {
     display: grid;

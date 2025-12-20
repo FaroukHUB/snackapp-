@@ -305,7 +305,8 @@ const Products = {
         const platformsGrid = document.getElementById('platformsGrid');
         if (platformsGrid) {
             const platforms = Config.getPlatforms();
-            if (platforms && platforms.length > 0) {
+            // Check if platforms is an array with items
+            if (Array.isArray(platforms) && platforms.length > 0) {
                 const platformIcons = {
                     'uber-eats': { icon: 'fa-shopping-bag', class: 'uber-eats' },
                     'deliveroo': { icon: 'fa-bicycle', class: 'deliveroo' },
@@ -321,13 +322,18 @@ const Products = {
 
                 platformsGrid.innerHTML = html;
             } else {
+                // Hide the section and sidebar link
                 document.getElementById('commander')?.classList.add('hidden');
-                document.getElementById('commander').style.display = 'none';
+                const commanderSection = document.getElementById('commander');
+                if (commanderSection) commanderSection.style.display = 'none';
+                const sidebarLink = document.getElementById('sidebarPlatforms');
+                if (sidebarLink) sidebarLink.style.display = 'none';
             }
         }
 
         // Google Maps
         const mapContainer = document.getElementById('mapContainer');
+        const directionsBtn = document.getElementById('directionsBtn');
         if (mapContainer) {
             const fullAddress = Config.getFullAddress();
             if (fullAddress) {
@@ -340,6 +346,10 @@ const Products = {
                         referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
                 `;
+                // Set directions button link (opens in Google Maps / GPS)
+                if (directionsBtn) {
+                    directionsBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+                }
             } else {
                 document.getElementById('localisation')?.classList.add('hidden');
                 document.getElementById('localisation').style.display = 'none';

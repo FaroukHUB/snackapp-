@@ -303,7 +303,7 @@ const Config = {
      * Get delivery platforms (Uber Eats, Deliveroo, Just Eat)
      */
     getPlatforms() {
-        return this.restaurant?.platforms || {};
+        return this.restaurant?.platforms || [];
     }
 };
 
