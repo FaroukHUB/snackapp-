@@ -918,17 +918,31 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
 
+                // Save cart data BEFORE any operation (will be cleared later)
+                const savedItems = JSON.parse(JSON.stringify(Cart.items));
+                const savedSubtotal = Cart.getSubtotal();
+                const savedDiscount = this.discount;
+
+                console.log('Cart items:', savedItems);
+                console.log('Subtotal:', savedSubtotal);
+
                 // Format items for API
-                const formattedItems = Cart.items.map(item => ({
-                    product_id: item.id,
-                    name: item.name,
-                    price: item.basePrice,
-                    quantity: item.quantity,
-                    variant: item.options?.menuType || 'solo',
-                    supplements: item.supplements || [],
-                    removed_ingredients: item.options?.removedIngredients || [],
-                    selected_drink: item.options?.selectedDrink?.name || null
-                }));
+                const formattedItems = savedItems.map(item => {
+                    const itemPrice = item.basePrice || 0;
+                    const supplementsTotal = (item.supplements || []).reduce((sum, s) => sum + (s.price || 0), 0);
+                    return {
+                        product_id: item.id,
+                        name: item.name,
+                        price: itemPrice + supplementsTotal,
+                        quantity: item.quantity,
+                        variant: item.options?.menuType || 'solo',
+                        supplements: item.supplements || [],
+                        removed_ingredients: item.options?.removedIngredients || [],
+                        selected_drink: item.options?.selectedDrink?.name || null
+                    };
+                });
+
+                const totalAmount = savedSubtotal - savedDiscount;
 
                 // Prepare order data for admin API
                 const orderData = {
@@ -936,13 +950,15 @@
                     customer_name: name,
                     customer_phone: phone,
                     items: formattedItems,
-                    subtotal: Cart.getSubtotal(),
-                    total: Cart.getSubtotal() - this.discount,
+                    subtotal: savedSubtotal,
+                    total: totalAmount,
                     notes: [
                         this.mode === 'delivery' ? `Livraison: ${address}` : 'Retrait sur place',
                         note
                     ].filter(Boolean).join(' | ')
                 };
+
+                console.log('Order data being sent:', orderData);
 
                 // Send to admin API
                 try {
@@ -960,7 +976,7 @@
                     if (result.success || result.order_id) {
                         // Show confirmation with real order number from API
                         const orderNumber = result.order_id || result.order?.order_number || 'XXXX';
-                        this.showConfirmation(orderNumber, name, phone, address, note, Cart.items, Cart.getSubtotal(), this.discount);
+                        this.showConfirmation(orderNumber, name, phone, address, note, savedItems, savedSubtotal, savedDiscount);
                     } else {
                         throw new Error(result.error || 'Erreur lors de la commande');
                     }
