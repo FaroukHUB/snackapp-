@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Commande + Fidélité</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #f5f5f5; }
+        .card { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { color: #1e293b; margin-bottom: 8px; }
+        h2 { color: #475569; font-size: 18px; margin: 0 0 16px 0; }
+        label { display: block; margin-bottom: 4px; font-weight: 500; color: #334155; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px; font-size: 16px; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+        .btn-primary { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        #result { padding: 16px; border-radius: 8px; margin-top: 16px; display: none; }
+        #result.success { background: #d1fae5; color: #065f46; display: block; }
+        #result.error { background: #fee2e2; color: #991b1b; display: block; }
+        #loyalty-info { padding: 16px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; margin-bottom: 16px; display: none; }
+        #loyalty-info.show { display: block; }
+        .points { font-size: 24px; font-weight: bold; color: #d97706; }
+        .reward-option { padding: 12px; background: white; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
+        .reward-option:hover { border-color: #f59e0b; }
+        .reward-option.selected { border-color: #f59e0b; background: #fffbeb; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 Test Commande</h1>
+        <h2>Simuler une commande avec fidélité</h2>
+
+        <label>Nom du client</label>
+        <input type="text" id="name" value="Test Client" />
+
+        <label>Téléphone</label>
+        <input type="tel" id="phone" placeholder="Ex: 0612345678" />
+
+        <button class="btn-secondary" onclick="checkLoyalty()">🎁 Vérifier points fidélité</button>
+
+        <div id="loyalty-info">
+            <p>🏆 Vos points : <span class="points" id="points-display">0</span></p>
+            <div id="rewards-list"></div>
+        </div>
+
+        <label>Produits (simulation)</label>
+        <select id="product">
+            <option value="burger-classic">Burger Classic - 8.50€</option>
+            <option value="menu-burger">Menu Burger - 12.00€</option>
+            <option value="tacos-xl">Tacos XL - 10.50€</option>
+        </select>
+
+        <button class="btn-primary" onclick="sendOrder()">📱 Envoyer la commande</button>
+
+        <div id="result"></div>
+    </div>
+
+    <div class="card">
+        <h2>📋 Instructions de test</h2>
+        <ol>
+            <li>Ouvrez le <a href="admin-panel-v2/" target="_blank">Panel Admin</a> dans un autre onglet</li>
+            <li>Activez les notifications sonores quand demandé</li>
+            <li>Revenez ici et envoyez une commande</li>
+            <li>Le panel admin devrait afficher une notification avec son</li>
+        </ol>
+    </div>
+
+    <script>
+        let selectedReward = null;
+
+        async function checkLoyalty() {
+            const phone = document.getElementById('phone').value.trim();
+            if (!phone) {
+                alert('Entrez un numéro de téléphone');
+                return;
+            }
+
+            try {
+                const res = await fetch(`api/public.php?endpoint=loyalty&phone=${encodeURIComponent(phone)}`);
+                const data = await res.json();
+
+                if (!data.success) {
+                    alert(data.error || 'Erreur');
+                    return;
+                }
+
+                document.getElementById('loyalty-info').classList.add('show');
+                document.getElementById('points-display').textContent = data.points;
+
+                const rewardsList = document.getElementById('rewards-list');
+                rewardsList.innerHTML = '';
+
+                if (data.rewards && data.rewards.length > 0) {
+                    data.rewards.forEach(reward => {
+                        const div = document.createElement('div');
+                        div.className = 'reward-option';
+                        div.innerHTML = `<strong>${reward.name}</strong> (${reward.points_required} pts)`;
+                        div.onclick = () => {
+                            document.querySelectorAll('.reward-option').forEach(el => el.classList.remove('selected'));
+                            div.classList.add('selected');
+                            selectedReward = reward;
+                        };
+                        rewardsList.appendChild(div);
+                    });
+                } else {
+                    rewardsList.innerHTML = '<p style="color:#92400e;">Pas assez de points pour une récompense</p>';
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert('Erreur: ' + err.message);
+            }
+        }
+
+        async function sendOrder() {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const product = document.getElementById('product');
+            const productName = product.options[product.selectedIndex].text;
+            const price = parseFloat(productName.match(/(\d+\.\d+)/)[1]);
+
+            if (!name || !phone) {
+                alert('Remplissez tous les champs');
+                return;
+            }
+
+            // Calculer réduction fidélité
+            let discount = 0;
+            let finalTotal = price;
+
+            if (selectedReward) {
+                if (selectedReward.reward_type === 'discount_percent') {
+                    discount = price * (parseFloat(selectedReward.reward_value) / 100);
+                } else if (selectedReward.reward_type === 'discount_amount') {
+                    discount = parseFloat(selectedReward.reward_value);
+                }
+                finalTotal = Math.max(0, price - discount);
+            }
+
+            const orderData = {
+                customer_name: name,
+                customer_phone: phone,
+                items: [{
+                    name: productName.split(' - ')[0],
+                    quantity: 1,
+                    price: price
+                }],
+                subtotal: price,
+                total: finalTotal,
+                loyalty_reward_id: selectedReward?.id || null,
+                loyalty_discount: discount,
+                notes: 'Test depuis test-order-flow.html'
+            };
+
+            try {
+                const res = await fetch('admin-panel-v2/webhook.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                const data = await res.json();
+                const resultDiv = document.getElementById('result');
+
+                if (data.success) {
+                    resultDiv.className = 'success';
+                    let msg = `✅ Commande ${data.order_id} envoyée !<br>Total: ${finalTotal.toFixed(2)}€`;
+                    if (selectedReward) {
+                        msg += `<br>🎁 Réduction fidélité: -${discount.toFixed(2)}€`;
+                    }
+                    resultDiv.innerHTML = msg;
+
+                    // Reset
+                    selectedReward = null;
+                    document.querySelectorAll('.reward-option').forEach(el => el.classList.remove('selected'));
+                } else {
+                    resultDiv.className = 'error';
+                    resultDiv.innerHTML = '❌ Erreur: ' + (data.error || 'Inconnue');
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('result').className = 'error';
+                document.getElementById('result').innerHTML = '❌ Erreur réseau: ' + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
