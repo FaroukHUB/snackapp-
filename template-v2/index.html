@@ -130,11 +130,33 @@
                 <div class="modal-details">
                     <h2 id="modalTitle">Nom du produit</h2>
                     <p class="modal-description" id="modalDescription">Description</p>
-                    <div class="modal-price" id="modalPrice">0,00 €</div>
 
-                    <!-- Supplements -->
+                    <!-- Menu/Solo Toggle -->
+                    <div class="modal-menu-toggle" id="menuToggleSection">
+                        <div class="menu-toggle-options">
+                            <button type="button" class="menu-option active" data-type="solo" onclick="Products.setMenuType('solo')">
+                                <span class="option-label">Seul</span>
+                                <span class="option-price" id="priceSolo">0,00 €</span>
+                            </button>
+                            <button type="button" class="menu-option" data-type="menu" onclick="Products.setMenuType('menu')">
+                                <span class="option-label">Menu</span>
+                                <span class="option-desc">+ Frites + Boisson</span>
+                                <span class="option-price" id="priceMenu">0,00 €</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remove Ingredients -->
+                    <div class="modal-ingredients" id="modalIngredients">
+                        <h4><i class="fas fa-minus-circle"></i> Retirer des ingrédients</h4>
+                        <div class="ingredients-list" id="ingredientsList">
+                            <!-- Ingredients will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Add Supplements -->
                     <div class="modal-supplements" id="modalSupplements">
-                        <h4>Personnalisez votre commande</h4>
+                        <h4><i class="fas fa-plus-circle"></i> Ajouter des suppléments</h4>
                         <div class="supplements-list" id="supplementsList">
                             <!-- Supplements will be injected -->
                         </div>

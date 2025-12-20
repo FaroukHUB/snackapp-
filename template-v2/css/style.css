@@ -916,6 +916,148 @@ ul {
     color: var(--primary);
 }
 
+/* Menu/Solo Toggle */
+.modal-menu-toggle {
+    margin-bottom: 20px;
+}
+
+.menu-toggle-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.menu-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius-sm);
+    background: var(--white);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+.menu-option:hover {
+    border-color: var(--gray-300);
+    background: var(--gray-50);
+}
+
+.menu-option.active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.menu-option .option-label {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+}
+
+.menu-option .option-desc {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+}
+
+.menu-option .option-price {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+/* Ingredients to Remove */
+.modal-ingredients {
+    margin-bottom: 16px;
+}
+
+.modal-ingredients h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-ingredients h4 i {
+    color: var(--error);
+}
+
+.ingredients-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ingredient-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--gray-100);
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.ingredient-item:hover {
+    background: var(--gray-200);
+}
+
+.ingredient-item.removed {
+    background: var(--error);
+    color: var(--white);
+    text-decoration: line-through;
+}
+
+.ingredient-item i {
+    font-size: 10px;
+}
+
+/* Image Loading Fix */
+.product-image-wrapper,
+.modal-image {
+    background: var(--gray-100);
+    position: relative;
+}
+
+.product-image,
+.modal-image img {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.product-image.loading,
+.modal-image img.loading {
+    opacity: 0;
+}
+
+.product-image[src=""],
+.product-image:not([src]),
+.modal-image img[src=""],
+.modal-image img:not([src]) {
+    visibility: hidden;
+}
+
+/* Placeholder for missing images */
+.image-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-100);
+    color: var(--gray-400);
+    font-size: 32px;
+}
+
 .modal-actions {
     display: flex;
     gap: 16px;

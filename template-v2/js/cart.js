@@ -261,15 +261,27 @@ const Cart = {
             return;
         }
 
-        container.innerHTML = this.items.map(item => `
+        container.innerHTML = this.items.map(item => {
+            const menuType = item.options?.menuType;
+            const removedIngredients = item.options?.removedIngredients || [];
+
+            return `
             <div class="mini-cart-item" data-key="${item.key}">
                 <img src="../${item.image}" alt="${item.name}" class="mini-cart-item-image"
-                     onerror="this.src='../images/placeholder.jpg'">
+                     onerror="this.style.display='none'">
                 <div class="mini-cart-item-info">
-                    <div class="mini-cart-item-name">${item.name}</div>
+                    <div class="mini-cart-item-name">
+                        ${item.name}
+                        ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 9px; padding: 1px 4px; border-radius: 3px; margin-left: 4px;">MENU</span>' : ''}
+                    </div>
                     ${item.supplements.length > 0 ? `
-                        <div class="mini-cart-item-supplements" style="font-size: 11px; color: var(--gray-500);">
+                        <div class="mini-cart-item-supplements" style="font-size: 11px; color: var(--success);">
                             + ${item.supplements.map(s => s.name).join(', ')}
+                        </div>
+                    ` : ''}
+                    ${removedIngredients.length > 0 ? `
+                        <div class="mini-cart-item-removed" style="font-size: 11px; color: var(--error);">
+                            Sans: ${removedIngredients.join(', ')}
                         </div>
                     ` : ''}
                     <div class="mini-cart-item-price">${Config.formatPrice(this.getItemTotal(item))}</div>
@@ -280,7 +292,7 @@ const Cart = {
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-        `).join('');
+        `}).join('');
     },
 
     /**
@@ -349,11 +361,20 @@ const Cart = {
         message += `━━━━━━━━━━━━━━━━━━━━\n`;
 
         this.items.forEach(item => {
+            const menuType = item.options?.menuType;
+            const removedIngredients = item.options?.removedIngredients || [];
+
             message += `${item.quantity}x ${item.name}`;
-            if (item.supplements.length > 0) {
-                message += ` (+${item.supplements.map(s => s.name).join(', ')})`;
+            if (menuType === 'menu') {
+                message += ` (MENU)`;
             }
-            message += ` — ${Config.formatPrice(this.getItemTotal(item))}\n`;
+            if (item.supplements.length > 0) {
+                message += `\n   ✅ +${item.supplements.map(s => s.name).join(', ')}`;
+            }
+            if (removedIngredients.length > 0) {
+                message += `\n   ❌ Sans: ${removedIngredients.join(', ')}`;
+            }
+            message += `\n   💵 ${Config.formatPrice(this.getItemTotal(item))}\n`;
         });
 
         message += `━━━━━━━━━━━━━━━━━━━━\n`;

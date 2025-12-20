@@ -625,8 +625,9 @@
                             <input type="text" id="customerName" placeholder="Votre nom" required>
                         </div>
                         <div class="form-row">
-                            <label for="customerPhone">Téléphone *</label>
+                            <label for="customerPhone"><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp *</label>
                             <input type="tel" id="customerPhone" placeholder="06 12 34 56 78" required>
+                            <small style="color: var(--gray-500); font-size: 12px; margin-top: 4px; display: block;">Recevez votre confirmation sur WhatsApp</small>
                         </div>
                     </div>
 
@@ -751,15 +752,27 @@
                 const container = document.getElementById('cartItems');
                 if (!container) return;
 
-                container.innerHTML = Cart.items.map(item => `
+                container.innerHTML = Cart.items.map(item => {
+                    const menuType = item.options?.menuType;
+                    const removedIngredients = item.options?.removedIngredients || [];
+
+                    return `
                     <div class="cart-item" data-key="${item.key}">
                         <img src="../${item.image}" alt="${item.name}" class="cart-item-image"
-                             onerror="this.src='../images/placeholder.jpg'">
+                             onerror="this.style.display='none'">
                         <div class="cart-item-details">
-                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-name">
+                                ${item.name}
+                                ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">MENU</span>' : ''}
+                            </div>
                             ${item.supplements.length > 0 ? `
-                                <div class="cart-item-supplements">
-                                    + ${item.supplements.map(s => s.name).join(', ')}
+                                <div class="cart-item-supplements" style="color: var(--success);">
+                                    <i class="fas fa-plus-circle" style="font-size: 11px;"></i> ${item.supplements.map(s => s.name).join(', ')}
+                                </div>
+                            ` : ''}
+                            ${removedIngredients.length > 0 ? `
+                                <div class="cart-item-removed" style="color: var(--error); font-size: 13px;">
+                                    <i class="fas fa-minus-circle" style="font-size: 11px;"></i> Sans: ${removedIngredients.join(', ')}
                                 </div>
                             ` : ''}
                             <div class="cart-item-price">${Config.formatPrice(Cart.getItemTotal(item))}</div>
@@ -779,7 +792,7 @@
                             </div>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
             },
 
             renderUpsell() {

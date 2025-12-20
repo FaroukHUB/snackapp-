@@ -8,6 +8,8 @@ const Products = {
     currentProduct: null,
     currentQuantity: 1,
     selectedSupplements: [],
+    removedIngredients: [],
+    menuType: 'solo', // 'solo' or 'menu'
 
     /**
      * Initialize products display
@@ -19,6 +21,27 @@ const Products = {
         this.renderRestaurantInfo();
         this.setupModal();
         this.setupSearch();
+        this.setupImageErrorHandling();
+    },
+
+    /**
+     * Setup global image error handling
+     */
+    setupImageErrorHandling() {
+        document.addEventListener('error', (e) => {
+            if (e.target.tagName === 'IMG') {
+                e.target.style.display = 'none';
+                // Add placeholder icon
+                const wrapper = e.target.closest('.product-image-wrapper, .modal-image, .formule-image');
+                if (wrapper && !wrapper.querySelector('.image-placeholder')) {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'image-placeholder';
+                    placeholder.innerHTML = '<i class="fas fa-utensils"></i>';
+                    wrapper.style.position = 'relative';
+                    wrapper.appendChild(placeholder);
+                }
+            }
+        }, true);
     },
 
     /**
@@ -321,18 +344,63 @@ const Products = {
         const product = Config.getProduct(productId);
         if (!product) return;
 
+        // Reset state
         this.currentProduct = product;
         this.currentQuantity = 1;
         this.selectedSupplements = [];
+        this.removedIngredients = [];
+        this.menuType = 'solo';
 
         const modal = document.getElementById('productModal');
-        const price = product.price || product.priceSolo || 0;
 
         // Update modal content
-        document.getElementById('modalImage').src = '../' + product.image;
+        const imgEl = document.getElementById('modalImage');
+        if (product.image) {
+            imgEl.src = '../' + product.image;
+            imgEl.style.display = '';
+        } else {
+            imgEl.src = '';
+            imgEl.style.display = 'none';
+        }
         document.getElementById('modalTitle').textContent = product.name;
         document.getElementById('modalDescription').textContent = product.description || '';
-        document.getElementById('modalPrice').textContent = Config.formatPrice(price);
+
+        // Menu/Solo toggle
+        const menuToggleSection = document.getElementById('menuToggleSection');
+        const hasMenuOption = product.priceMenu && product.priceMenu > 0;
+
+        if (hasMenuOption) {
+            menuToggleSection.classList.remove('hidden');
+            menuToggleSection.style.display = '';
+            document.getElementById('priceSolo').textContent = Config.formatPrice(product.priceSolo || 0);
+            document.getElementById('priceMenu').textContent = Config.formatPrice(product.priceMenu || 0);
+            // Reset toggle to solo
+            document.querySelectorAll('.menu-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.type === 'solo');
+            });
+        } else {
+            menuToggleSection.classList.add('hidden');
+            menuToggleSection.style.display = 'none';
+        }
+
+        // Ingredients to remove
+        const ingredientsSection = document.getElementById('modalIngredients');
+        const ingredientsList = document.getElementById('ingredientsList');
+        const hasIngredients = product.baseIngredients && product.baseIngredients.length > 0;
+
+        if (hasIngredients) {
+            ingredientsSection.classList.remove('hidden');
+            ingredientsSection.style.display = '';
+            ingredientsList.innerHTML = product.baseIngredients.map(ing => `
+                <div class="ingredient-item" data-ingredient="${ing}" onclick="Products.toggleIngredient('${ing}')">
+                    <i class="fas fa-times"></i>
+                    <span>${this.capitalize(ing)}</span>
+                </div>
+            `).join('');
+        } else {
+            ingredientsSection.classList.add('hidden');
+            ingredientsSection.style.display = 'none';
+        }
 
         // Render supplements
         const supplements = Config.getSupplementsForCategory(product.categoryId);
@@ -341,6 +409,7 @@ const Products = {
 
         if (supplements.length > 0) {
             supplementsContainer.classList.remove('hidden');
+            supplementsContainer.style.display = '';
             supplementsList.innerHTML = supplements.map(sup => `
                 <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
                     <div class="supplement-info">
@@ -354,11 +423,41 @@ const Products = {
             `).join('');
         } else {
             supplementsContainer.classList.add('hidden');
+            supplementsContainer.style.display = 'none';
         }
 
         this.updateModalUI();
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+    },
+
+    /**
+     * Set menu type (solo or menu)
+     */
+    setMenuType(type) {
+        this.menuType = type;
+        document.querySelectorAll('.menu-option').forEach(opt => {
+            opt.classList.toggle('active', opt.dataset.type === type);
+        });
+        this.updateModalUI();
+    },
+
+    /**
+     * Toggle ingredient removal
+     */
+    toggleIngredient(ingredient) {
+        const index = this.removedIngredients.indexOf(ingredient);
+        if (index >= 0) {
+            this.removedIngredients.splice(index, 1);
+        } else {
+            this.removedIngredients.push(ingredient);
+        }
+
+        // Update UI
+        document.querySelectorAll('.ingredient-item').forEach(item => {
+            const ing = item.dataset.ingredient;
+            item.classList.toggle('removed', this.removedIngredients.includes(ing));
+        });
     },
 
     /**
@@ -425,11 +524,21 @@ const Products = {
     updateModalUI() {
         document.getElementById('qtyValue').textContent = this.currentQuantity;
 
-        // Calculate total
-        let total = this.currentProduct?.price || this.currentProduct?.priceSolo || 0;
+        // Calculate total based on menu type
+        let basePrice = 0;
+        if (this.menuType === 'menu' && this.currentProduct?.priceMenu) {
+            basePrice = this.currentProduct.priceMenu;
+        } else {
+            basePrice = this.currentProduct?.price || this.currentProduct?.priceSolo || 0;
+        }
+
+        let total = basePrice;
+
+        // Add supplements
         this.selectedSupplements.forEach(sup => {
             total += sup.price || 0;
         });
+
         total *= this.currentQuantity;
 
         document.getElementById('addToCartPrice').textContent = Config.formatPrice(total);
@@ -441,11 +550,24 @@ const Products = {
     addCurrentToCart() {
         if (!this.currentProduct) return;
 
+        // Create product with correct price based on menu type
+        const productToAdd = { ...this.currentProduct };
+
+        if (this.menuType === 'menu' && this.currentProduct.priceMenu) {
+            productToAdd.price = this.currentProduct.priceMenu;
+            productToAdd.name = this.currentProduct.name + ' (Menu)';
+        } else {
+            productToAdd.price = this.currentProduct.priceSolo || this.currentProduct.price;
+        }
+
         Cart.addItem(
-            this.currentProduct,
+            productToAdd,
             this.currentQuantity,
             [...this.selectedSupplements],
-            {}
+            {
+                menuType: this.menuType,
+                removedIngredients: [...this.removedIngredients]
+            }
         );
 
         this.closeModal();
