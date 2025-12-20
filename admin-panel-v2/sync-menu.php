@@ -53,6 +53,9 @@ function syncMenuStatuses() {
                         if (isset($productData['priceMenu'])) {
                             $item['priceMenu'] = $productData['priceMenu'];
                         }
+                        if (array_key_exists('badge', $productData)) {
+                            $item['badge'] = $productData['badge'];
+                        }
                     }
                 }
             }
