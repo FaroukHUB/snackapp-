@@ -149,9 +149,12 @@ const Products = {
                         <div class="formule-info">
                             <h3 class="formule-name">${formule.name}</h3>
                             <p class="formule-description">${formule.description}</p>
-                            <div class="formule-price">
-                                <span class="current">${Config.formatPrice(formule.price)}</span>
-                                ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
+                            <div class="formule-footer">
+                                <div class="formule-price">
+                                    <span class="current">${Config.formatPrice(formule.price)}</span>
+                                    ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
+                                </div>
+                                <button class="product-add-btn formule-add-btn">Ajouter</button>
                             </div>
                         </div>
                     </div>
