@@ -183,18 +183,18 @@ window.SNACK_CONFIG = {
 
   assets: {
     logo: {
-      light: "/images/fabriklogo.svg",
-      dark: "/images/fabriklogo.svg",
+      light: "images/fabriklogo.svg",
+      dark: "images/fabriklogo.svg",
       alt: "Logo Fabrik Burger"
     },
     hero: {
-      image: "/images/herofabrik.jpeg",
+      image: "images/herofabrik.jpeg",
       alt: "Comptoir et salle de Fabrik Burger à Lille"
     },
     gallery: [
-      "/images/fabrik/interior-1.jpg",
-      "/images/fabrik/counter-1.jpg",
-      "/images/fabrik/menu-board-1.jpg"
+      "images/fabrik/interior-1.jpg",
+      "images/fabrik/counter-1.jpg",
+      "images/fabrik/menu-board-1.jpg"
     ]
   },
 
@@ -226,7 +226,7 @@ window.SNACK_CONFIG = {
             description: "Pain artisanal, steak 180g, sauce Fabrik, cheddar, oignons, tomates, salade.",
             priceSolo: 11,
             priceMenu: 14,
-            image: "/images/moyenfabrik_ivtf74 (1).webp",
+            image: "images/moyenfabrik_ivtf74 (1).webp",
             baseIngredients: ["salade", "tomates", "oignons"],
             isSignature: true
           },
@@ -245,7 +245,7 @@ window.SNACK_CONFIG = {
             description: "Poulet épicé, sauce relevée, salade, tomates, cheddar.",
             priceSolo: 11,
             priceMenu: 14,
-            image: "/images/moyenspicy_cktzjt.webp",
+            image: "images/moyenspicy_cktzjt.webp",
             baseIngredients: ["salade", "tomates"]
           },
           {
@@ -254,7 +254,7 @@ window.SNACK_CONFIG = {
             description: "Steak, cheddar, salade, tomates, sauce burger.",
             priceSolo: 10,
             priceMenu: 13,
-            image: "/images/moyenclassic_psv9ne (2) (1).webp",
+            image: "images/moyenclassic_psv9ne (2) (1).webp",
             baseIngredients: ["salade", "tomates"]
           },
           {
@@ -263,7 +263,7 @@ window.SNACK_CONFIG = {
             description: "Burger généreux avec double viande et fromage.",
             priceSolo: 12,
             priceMenu: 15,
-            image: "/images/moyensupreme_jma1xu.webp",
+            image: "images/moyensupreme_jma1xu.webp",
             baseIngredients: []
           },
           {
@@ -272,7 +272,7 @@ window.SNACK_CONFIG = {
             description: "Steak, cheddar, sauce relevée, poivrons, oignons, salade.",
             priceSolo: 11,
             priceMenu: 14,
-            image: "/images/fabrik/menu/le-mexicain.jpg",
+            image: "images/fabrik/menu/le-mexicain.jpg",
             baseIngredients: ["salade", "poivrons", "oignons"]
           },
           {
@@ -281,7 +281,7 @@ window.SNACK_CONFIG = {
             description: "Poulet mariné, sauce curry, salade, tomates, oignons.",
             priceSolo: 11,
             priceMenu: 14,
-            image: "/images/fabrik/menu/l-indien.jpg",
+            image: "images/fabrik/menu/l-indien.jpg",
             baseIngredients: ["salade", "tomates", "oignons"]
           },
           {
@@ -290,7 +290,7 @@ window.SNACK_CONFIG = {
             description: "Galette végétarienne, légumes frais, sauce légère.",
             priceSolo: 10,
             priceMenu: 13,
-            image: "/images/moyenvege_wpvszf.webp",
+            image: "images/moyenvege_wpvszf.webp",
             baseIngredients: ["légumes frais"],
             isVeggie: true
           },
@@ -300,7 +300,7 @@ window.SNACK_CONFIG = {
             description: "Burger inspiration du Nord, fromage local, sauce maison.",
             priceSolo: 11,
             priceMenu: 14,
-            image: "/images/fabrik/menu/le-chti.jpg",
+            image: "images/fabrik/menu/le-chti.jpg",
             baseIngredients: []
           },
           {
@@ -309,7 +309,7 @@ window.SNACK_CONFIG = {
             description: "Steak, cheddar, salade, oignons, sauce burger.",
             priceSolo: 9,
             priceMenu: 12,
-            image: "/images/cheese.jpg",
+            image: "images/cheese.jpg",
             baseIngredients: ["salade", "oignons"]
           }
         ]
@@ -325,7 +325,7 @@ window.SNACK_CONFIG = {
             name: "Menu Enfant",
             description: "Petit burger ou tenders + frites + boisson.",
             priceMenu: 9,
-            image: "/images/kid_s0wggz.webp",
+            image: "images/kid_s0wggz.webp",
             isKids: true,
             kidsOptions: [
               { id: "mini-burger", name: "Mini Burger" },
@@ -340,11 +340,11 @@ window.SNACK_CONFIG = {
         id: "extras",
         name: "Extras",
         items: [
-          { id: "tenders", name: "Tenders poulet", price: 4.5, image: "/images/fabrik/menu/tenders.jpg" },
-          { id: "nems-xxl", name: "Nems poulet XXL", price: 5, image: "/images/fabrik/menu/nems-xxl.jpg" },
-          { id: "frites-fraiches", name: "Frites fraîches", price: 3, image: "/images/fabrik/menu/frites-fraiches.jpg" },
-          { id: "frites-cheddar", name: "Frites cheddar", price: 4, image: "/images/fabrik/menu/frites-cheddar.jpg" },
-          { id: "mozza-sticks", name: "Mozza sticks", price: 4.5, image: "/images/fabrik/menu/mozza-sticks.jpg" }
+          { id: "tenders", name: "Tenders poulet", price: 4.5, image: "images/fabrik/menu/tenders.jpg" },
+          { id: "nems-xxl", name: "Nems poulet XXL", price: 5, image: "images/fabrik/menu/nems-xxl.jpg" },
+          { id: "frites-fraiches", name: "Frites fraîches", price: 3, image: "images/fabrik/menu/frites-fraiches.jpg" },
+          { id: "frites-cheddar", name: "Frites cheddar", price: 4, image: "images/fabrik/menu/frites-cheddar.jpg" },
+          { id: "mozza-sticks", name: "Mozza sticks", price: 4.5, image: "images/fabrik/menu/mozza-sticks.jpg" }
         ]
       },
 
@@ -353,8 +353,8 @@ window.SNACK_CONFIG = {
         id: "desserts",
         name: "Desserts",
         items: [
-          { id: "tiramisu", name: "Tiramisu", price: 3.5, image: "/images/la-tarte-au-daim_jmkzbe.webp" },
-          { id: "tarte-daim", name: "Tarte au Daim", price: 3.5, image: "/images/fabrik/menu/tarte-daim.jpg" }
+          { id: "tiramisu", name: "Tiramisu", price: 3.5, image: "images/la-tarte-au-daim_jmkzbe.webp" },
+          { id: "tarte-daim", name: "Tarte au Daim", price: 3.5, image: "images/fabrik/menu/tarte-daim.jpg" }
         ]
       },
 
