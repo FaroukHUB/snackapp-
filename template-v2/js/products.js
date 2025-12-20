@@ -611,24 +611,48 @@ const Products = {
         const formule = Config.getFormule(formuleId);
         if (!formule) return;
 
-        // For now, treat formule like a product
+        // For now, treat formule like a product with fixed price
         this.currentProduct = {
             ...formule,
             price: formule.price,
-            categoryId: 'formules'
+            priceSolo: formule.price,
+            priceMenu: formule.price,
+            categoryId: 'formules',
+            isFormule: true
         };
         this.currentQuantity = 1;
         this.selectedSupplements = [];
+        this.removedIngredients = [];
+        this.menuType = 'solo';
 
         const modal = document.getElementById('productModal');
 
-        document.getElementById('modalImage').src = '../' + formule.image;
+        // Set image with fallback
+        const modalImage = document.getElementById('modalImage');
+        if (formule.image) {
+            modalImage.src = '../' + formule.image;
+            modalImage.onerror = () => { modalImage.style.display = 'none'; };
+        } else {
+            modalImage.style.display = 'none';
+        }
+
         document.getElementById('modalTitle').textContent = formule.name;
         document.getElementById('modalDescription').textContent = formule.description;
-        document.getElementById('modalPrice').textContent = Config.formatPrice(formule.price);
+
+        // Hide menu toggle for formules (fixed price)
+        document.getElementById('menuToggleSection').style.display = 'none';
+
+        // Hide ingredients section for formules
+        document.getElementById('modalIngredients').classList.add('hidden');
 
         // Hide supplements for formules
         document.getElementById('modalSupplements').classList.add('hidden');
+
+        // Hide drinks for formules
+        document.getElementById('modalDrinks').classList.add('hidden');
+
+        // Set price
+        document.getElementById('addToCartPrice').textContent = Config.formatPrice(formule.price);
 
         this.updateModalUI();
         modal.classList.add('active');
