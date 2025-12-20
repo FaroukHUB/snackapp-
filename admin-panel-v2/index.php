@@ -2163,11 +2163,11 @@ document.getElementById('addPointsModal')?.addEventListener('click', function(e)
 // === GESTION DIFFUSION ===
 function toggleBroadcastPanel() {
     const panel = document.getElementById('whatsapp-panel');
-    const checkboxes = document.querySelectorAll('.broadcast-checkbox');
+    const checkboxes = document.querySelectorAll('.broadcast-cb');
 
     if (panel.style.display === 'none') {
         panel.style.display = 'block';
-        checkboxes.forEach(cb => cb.style.display = 'block');
+        checkboxes.forEach(cb => cb.style.display = 'inline-block');
     } else {
         panel.style.display = 'none';
         checkboxes.forEach(cb => cb.style.display = 'none');
