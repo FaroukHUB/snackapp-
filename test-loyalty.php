@@ -7,20 +7,26 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Bootstrap
+// Bootstrap - utiliser le même que l'admin
 require_once __DIR__ . '/database/Database.php';
 require_once __DIR__ . '/database/repositories/CustomerRepository.php';
 require_once __DIR__ . '/database/repositories/LoyaltyRepository.php';
 require_once __DIR__ . '/database/repositories/RestaurantRepository.php';
 
-// Configuration base de données
-$dbConfig = [
-    'host' => getenv('DB_HOST') ?: 'localhost',
-    'dbname' => getenv('DB_NAME') ?: 'snackapp',
-    'username' => getenv('DB_USER') ?: 'root',
-    'password' => getenv('DB_PASS') ?: '',
-];
-Database::init($dbConfig);
+// Charger la config depuis le fichier
+$configFile = __DIR__ . '/database/config.php';
+if (file_exists($configFile)) {
+    $config = require $configFile;
+    Database::init($config['database']);
+} else {
+    // Fallback MAMP
+    Database::init([
+        'host' => 'localhost',
+        'dbname' => 'snackapp',
+        'username' => 'root',
+        'password' => 'root',
+    ]);
+}
 
 define('SNACK_RESTAURANT_ID', 1);
 
