@@ -955,11 +955,12 @@
                     });
 
                     const result = await response.json();
+                    console.log('API Response:', result);
 
-                    if (result.success) {
+                    if (result.success || result.order_id) {
                         // Show confirmation with real order number from API
                         const orderNumber = result.order_id || result.order?.order_number || 'XXXX';
-                        this.showConfirmation(orderNumber, name, phone);
+                        this.showConfirmation(orderNumber, name, phone, address, note, Cart.items, Cart.getSubtotal(), this.discount);
                     } else {
                         throw new Error(result.error || 'Erreur lors de la commande');
                     }
@@ -972,24 +973,114 @@
                 }
             },
 
-            showConfirmation(orderNumber, customerName, customerPhone) {
+            showConfirmation(orderNumber, customerName, customerPhone, customerAddress, note, items, subtotal, discount) {
                 // Update modal
                 document.getElementById('confirmationOrderNumber').textContent = `#${orderNumber}`;
 
-                // Generate WhatsApp self-send link
-                const whatsappLink = Cart.generateWhatsAppSelfLink(
-                    customerPhone,
-                    customerName,
+                // Generate receipt link
+                const receiptLink = this.generateReceiptLink(
                     orderNumber,
-                    this.mode
+                    customerName,
+                    customerPhone,
+                    customerAddress,
+                    items,
+                    subtotal,
+                    discount
                 );
-                document.getElementById('whatsappSelfLink').href = whatsappLink;
+                document.getElementById('whatsappSelfLink').href = receiptLink;
 
                 // Show modal
                 document.getElementById('confirmationModal').classList.add('active');
 
                 // Clear cart
                 Cart.clear();
+            },
+
+            generateReceiptLink(orderNumber, customerName, customerPhone, customerAddress, items, subtotal, discount) {
+                const restaurant = Config.restaurant || {};
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('fr-FR');
+                const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                const total = subtotal - discount;
+                const tvaRate = 0.10; // 10% TVA restauration
+                const totalHT = total / (1 + tvaRate);
+                const tvaAmount = total - totalHT;
+
+                let receipt = `🧾 *TICKET DE CAISSE*\n`;
+                receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+                // Restaurant header
+                receipt += `*${restaurant.name || 'Restaurant'}*\n`;
+                receipt += `${Config.getFullAddress()}\n`;
+                receipt += `Tél: ${restaurant.contact?.phoneDisplay || restaurant.contact?.phone || ''}\n\n`;
+
+                receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                receipt += `📅 ${dateStr} à ${timeStr}\n`;
+                receipt += `🎫 Commande N° *${orderNumber}*\n`;
+                receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+                // Customer info
+                receipt += `👤 *Client:* ${customerName}\n`;
+                receipt += `📱 ${customerPhone}\n`;
+                if (customerAddress) {
+                    receipt += `📍 ${customerAddress}\n`;
+                }
+                receipt += `\n━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                receipt += `📋 *DÉTAIL COMMANDE*\n`;
+                receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+                // Items
+                items.forEach(item => {
+                    const itemTotal = (item.basePrice + (item.supplements || []).reduce((sum, s) => sum + (s.price || 0), 0)) * item.quantity;
+                    receipt += `${item.quantity}x ${item.name}\n`;
+                    receipt += `   ${Config.formatPrice(itemTotal)}\n`;
+
+                    // Menu type
+                    if (item.options?.menuType === 'menu') {
+                        receipt += `   → Menu\n`;
+                    }
+
+                    // Drink
+                    if (item.options?.selectedDrink) {
+                        receipt += `   🥤 ${item.options.selectedDrink.name}\n`;
+                    }
+
+                    // Supplements
+                    if (item.supplements && item.supplements.length > 0) {
+                        item.supplements.forEach(sup => {
+                            receipt += `   + ${sup.name} (${Config.formatPrice(sup.price)})\n`;
+                        });
+                    }
+
+                    // Removed ingredients
+                    if (item.options?.removedIngredients && item.options.removedIngredients.length > 0) {
+                        receipt += `   ❌ Sans: ${item.options.removedIngredients.join(', ')}\n`;
+                    }
+                    receipt += `\n`;
+                });
+
+                receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                receipt += `Sous-total: ${Config.formatPrice(subtotal)}\n`;
+                if (discount > 0) {
+                    receipt += `Remise: -${Config.formatPrice(discount)}\n`;
+                }
+                receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                receipt += `Total HT: ${Config.formatPrice(totalHT)}\n`;
+                receipt += `TVA (10%): ${Config.formatPrice(tvaAmount)}\n`;
+                receipt += `*TOTAL TTC: ${Config.formatPrice(total)}*\n`;
+                receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+                receipt += `✅ *Commande confirmée*\n`;
+                receipt += `Merci de votre visite !\n\n`;
+                receipt += `_Ce ticket fait foi de justificatif._`;
+
+                // Send to customer's own WhatsApp
+                const cleanPhone = customerPhone.replace(/[^0-9]/g, '');
+                // Add French country code if not present
+                const fullPhone = cleanPhone.startsWith('33') ? cleanPhone : '33' + cleanPhone.replace(/^0/, '');
+
+                return `https://wa.me/${fullPhone}?text=${encodeURIComponent(receipt)}`;
             },
 
             showToast(message, type = 'success') {
