@@ -176,6 +176,71 @@ $action = $_POST['action'];
         exit;
     }
 
+    // Rechercher un client (AJAX)
+    if ($action === 'search_customer') {
+        header('Content-Type: application/json');
+        $query = trim($_POST['query'] ?? '');
+        if (strlen($query) >= 2) {
+            $results = CustomerRepository::search(SNACK_RESTAURANT_ID, $query);
+            echo json_encode(['success' => true, 'customers' => $results]);
+        } else {
+            echo json_encode(['success' => false, 'customers' => []]);
+        }
+        exit;
+    }
+
+    // Utiliser une récompense (échanger des points)
+    if ($action === 'redeem_reward') {
+        header('Content-Type: application/json');
+        try {
+            $customerId = (int) ($_POST['customer_id'] ?? 0);
+            $rewardId = (int) ($_POST['reward_id'] ?? 0);
+
+            if ($customerId <= 0 || $rewardId <= 0) {
+                throw new Exception('Données invalides');
+            }
+
+            // Récupérer le client et la récompense
+            $customer = CustomerRepository::getById($customerId);
+            $rewards = LoyaltyRepository::getAllRewards(SNACK_RESTAURANT_ID);
+            $reward = null;
+            foreach ($rewards as $r) {
+                if ($r['id'] == $rewardId) {
+                    $reward = $r;
+                    break;
+                }
+            }
+
+            if (!$customer || !$reward) {
+                throw new Exception('Client ou récompense non trouvé');
+            }
+
+            $customerPoints = (int) ($customer['loyalty_points'] ?? 0);
+            $pointsRequired = (int) $reward['points_required'];
+
+            if ($customerPoints < $pointsRequired) {
+                throw new Exception('Points insuffisants (' . $customerPoints . '/' . $pointsRequired . ')');
+            }
+
+            // Déduire les points
+            $success = LoyaltyRepository::redeemPoints($customerId, SNACK_RESTAURANT_ID, $pointsRequired, $reward['name']);
+
+            if ($success) {
+                $newPoints = $customerPoints - $pointsRequired;
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Récompense "' . $reward['name'] . '" appliquée !',
+                    'new_points' => $newPoints
+                ]);
+            } else {
+                throw new Exception('Erreur lors de l\'échange');
+            }
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
     // Ajouter un client manuellement
     if ($action === 'add_customer') {
         header('Content-Type: application/json');
@@ -865,6 +930,9 @@ if (isset($_GET['export'])) {
                             <div style="flex: 1;">
                                 <h4 style="margin: 0 0 4px 0; font-size: 15px;"><?= htmlspecialchars($customer['name'] ?? 'Client') ?></h4>
                                 <p style="margin: 0; color: #9ca3af; font-size: 12px;"><i class="fas fa-phone"></i> <?= htmlspecialchars($customer['phone'] ?? 'N/A') ?></p>
+                                <?php if (!empty($customer['loyalty_code'])): ?>
+                                <p style="margin: 2px 0 0 0; color: #f59e0b; font-size: 11px; font-weight: 600;"><i class="fas fa-id-card"></i> <?= htmlspecialchars($customer['loyalty_code']) ?></p>
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -1001,6 +1069,53 @@ if (isset($_GET['export'])) {
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Modal Utiliser Points (Redeem) -->
+<div id="redeemModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; overflow-y: auto; padding: 20px;">
+    <div style="background: #2a2a3e; border-radius: 20px; padding: 25px; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); margin: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: #10b981;"><i class="fas fa-exchange-alt"></i> Utiliser des points</h3>
+            <button onclick="closeRedeemModal()" style="background: none; border: none; color: #9ca3af; font-size: 20px; cursor: pointer;"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Recherche client -->
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #d1d5db;">Rechercher le client</label>
+            <input type="text" id="redeemSearchInput" placeholder="Nom, téléphone ou code fidélité..."
+                   oninput="searchCustomerForRedeem(this.value)"
+                   style="width: 100%; padding: 12px; border: 1px solid #374151; border-radius: 10px; background: #1e293b; color: white; font-size: 15px;">
+            <div id="redeemSearchResults" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+
+        <!-- Client sélectionné -->
+        <div id="redeemSelectedCustomer" style="display: none; background: #1e293b; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 2px solid #10b981;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                    <div style="font-weight: bold; font-size: 16px;" id="redeemCustomerName"></div>
+                    <div style="color: #9ca3af; font-size: 12px;" id="redeemCustomerPhone"></div>
+                    <div style="color: #f59e0b; font-size: 11px; margin-top: 2px;" id="redeemCustomerCode"></div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 28px; font-weight: bold; color: #f59e0b;" id="redeemCustomerPoints">0</div>
+                    <div style="color: #9ca3af; font-size: 11px;">points</div>
+                </div>
+            </div>
+            <input type="hidden" id="redeemCustomerId">
+        </div>
+
+        <!-- Récompenses disponibles -->
+        <div id="redeemRewardsSection" style="display: none;">
+            <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #d1d5db;">Choisir une récompense</label>
+            <div id="redeemRewardsList"></div>
+        </div>
+
+        <!-- Message si pas assez de points -->
+        <div id="redeemNoRewards" style="display: none; text-align: center; padding: 20px; color: #6b7280;">
+            <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+            <p>Pas assez de points pour les récompenses disponibles</p>
+        </div>
     </div>
 </div>
 
@@ -1503,7 +1618,10 @@ if (isset($_GET['export'])) {
         <div id="section-loyalty" class="section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <h2><i class="fas fa-gift" style="color: #f59e0b;"></i> Programme Fidélité</h2>
-                <button onclick="openAddRewardModal()" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"><i class="fas fa-plus"></i> Nouvelle récompense</button>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button onclick="openRedeemModal()" class="btn btn-sm" style="background: #10b981;"><i class="fas fa-exchange-alt"></i> Utiliser points</button>
+                    <button onclick="openAddRewardModal()" class="btn btn-sm" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"><i class="fas fa-plus"></i> Récompense</button>
+                </div>
             </div>
 
             <!-- Configuration -->
@@ -1531,9 +1649,8 @@ if (isset($_GET['export'])) {
                 <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Les clients peuvent scanner ce QR code pour accéder à leur carte de fidélité virtuelle et voir leurs points.</p>
                 <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
                     <div id="loyalty-qrcode" style="background: white; padding: 15px; border-radius: 12px; display: inline-block;">
-                        <div style="width: 150px; height: 150px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #6b7280;">
-                            <i class="fas fa-qrcode" style="font-size: 48px;"></i>
-                        </div>
+                        <?php $loyaltyUrl = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'votresite.com') . '/loyalty-card.php'; ?>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?= urlencode($loyaltyUrl) ?>" alt="QR Code Fidélité" width="150" height="150">
                     </div>
                     <div>
                         <p style="color: #d1d5db; font-size: 14px; margin-bottom: 10px;"><strong>Lien de la carte fidélité :</strong></p>
@@ -2011,6 +2128,156 @@ function submitAddPoints(event) {
         .catch(error => {
             alert('Erreur de connexion');
             console.error(error);
+        });
+}
+
+// === MODAL UTILISER POINTS (REDEEM) ===
+let selectedRedeemCustomer = null;
+const availableRewards = <?php echo json_encode($rewards ?? []); ?>;
+
+function openRedeemModal() {
+    document.getElementById('redeemModal').style.display = 'flex';
+    document.getElementById('redeemSearchInput').value = '';
+    document.getElementById('redeemSearchResults').innerHTML = '';
+    document.getElementById('redeemSelectedCustomer').style.display = 'none';
+    document.getElementById('redeemRewardsSection').style.display = 'none';
+    document.getElementById('redeemNoRewards').style.display = 'none';
+    selectedRedeemCustomer = null;
+    setTimeout(() => document.getElementById('redeemSearchInput').focus(), 100);
+}
+
+function closeRedeemModal() {
+    document.getElementById('redeemModal').style.display = 'none';
+}
+
+let searchTimeout = null;
+function searchCustomerForRedeem(query) {
+    clearTimeout(searchTimeout);
+    const resultsDiv = document.getElementById('redeemSearchResults');
+
+    if (query.length < 2) {
+        resultsDiv.innerHTML = '<p style="color: #6b7280; font-size: 13px; padding: 10px;">Tapez au moins 2 caractères...</p>';
+        return;
+    }
+
+    resultsDiv.innerHTML = '<p style="color: #9ca3af; font-size: 13px; padding: 10px;"><i class="fas fa-spinner fa-spin"></i> Recherche...</p>';
+
+    searchTimeout = setTimeout(() => {
+        const formData = new FormData();
+        formData.append('action', 'search_customer');
+        formData.append('query', query);
+
+        fetch('', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.customers.length > 0) {
+                    resultsDiv.innerHTML = data.customers.map(c => `
+                        <div onclick="selectCustomerForRedeem(${c.id}, '${c.name.replace(/'/g, "\\'")}', '${c.phone}', '${c.loyalty_code || ''}', ${c.loyalty_points || 0})"
+                             style="padding: 12px; background: #1e293b; border-radius: 8px; margin-bottom: 8px; cursor: pointer; border: 1px solid #374151; transition: all 0.2s;"
+                             onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='#374151'">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 600;">${c.name}</div>
+                                    <div style="color: #9ca3af; font-size: 12px;">${c.phone}</div>
+                                    <div style="color: #f59e0b; font-size: 11px;">${c.loyalty_code || 'N/A'}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 20px; font-weight: bold; color: #f59e0b;">${c.loyalty_points || 0}</div>
+                                    <div style="color: #6b7280; font-size: 10px;">points</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    resultsDiv.innerHTML = '<p style="color: #6b7280; font-size: 13px; padding: 10px;">Aucun client trouvé</p>';
+                }
+            })
+            .catch(err => {
+                resultsDiv.innerHTML = '<p style="color: #ef4444; font-size: 13px; padding: 10px;">Erreur de recherche</p>';
+                console.error(err);
+            });
+    }, 300);
+}
+
+function selectCustomerForRedeem(id, name, phone, code, points) {
+    selectedRedeemCustomer = { id, name, phone, code, points };
+
+    // Masquer recherche
+    document.getElementById('redeemSearchResults').innerHTML = '';
+    document.getElementById('redeemSearchInput').value = '';
+
+    // Afficher client sélectionné
+    document.getElementById('redeemSelectedCustomer').style.display = 'block';
+    document.getElementById('redeemCustomerName').textContent = name;
+    document.getElementById('redeemCustomerPhone').textContent = phone;
+    document.getElementById('redeemCustomerCode').textContent = code || 'N/A';
+    document.getElementById('redeemCustomerPoints').textContent = points;
+    document.getElementById('redeemCustomerId').value = id;
+
+    // Afficher récompenses disponibles
+    const rewardsList = document.getElementById('redeemRewardsList');
+    const rewardsSection = document.getElementById('redeemRewardsSection');
+    const noRewards = document.getElementById('redeemNoRewards');
+
+    const affordable = availableRewards.filter(r => points >= r.points_required);
+
+    if (affordable.length > 0) {
+        rewardsSection.style.display = 'block';
+        noRewards.style.display = 'none';
+
+        rewardsList.innerHTML = affordable.map(r => `
+            <div style="padding: 15px; background: #1e293b; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #10b981;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 2px;">${r.name}</div>
+                        <div style="color: #9ca3af; font-size: 12px;">${r.description || ''}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #f59e0b; font-weight: bold;">${r.points_required} pts</div>
+                        <button onclick="redeemReward(${r.id}, '${r.name.replace(/'/g, "\\'")}', ${r.points_required})"
+                                style="margin-top: 5px; padding: 6px 12px; background: #10b981; border: none; border-radius: 6px; color: white; font-size: 12px; cursor: pointer;">
+                            <i class="fas fa-gift"></i> Utiliser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        rewardsSection.style.display = 'none';
+        noRewards.style.display = 'block';
+    }
+}
+
+function redeemReward(rewardId, rewardName, pointsRequired) {
+    if (!selectedRedeemCustomer) {
+        alert('Aucun client sélectionné');
+        return;
+    }
+
+    if (!confirm(`Utiliser ${pointsRequired} points pour "${rewardName}" ?`)) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'redeem_reward');
+    formData.append('customer_id', selectedRedeemCustomer.id);
+    formData.append('reward_id', rewardId);
+
+    fetch('', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert(`✓ Récompense utilisée !\n${data.reward_name}\nPoints restants: ${data.new_points}`);
+                closeRedeemModal();
+                window.location.href = 'index.php#loyalty';
+                location.reload();
+            } else {
+                alert('Erreur: ' + (data.error || 'Impossible d\'utiliser la récompense'));
+            }
+        })
+        .catch(err => {
+            alert('Erreur de connexion');
+            console.error(err);
         });
 }
 

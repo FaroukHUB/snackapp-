@@ -135,15 +135,19 @@ CREATE TABLE IF NOT EXISTS `product_supplements` (
 CREATE TABLE IF NOT EXISTS `customers` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `restaurant_id` INT UNSIGNED NOT NULL,
+  `loyalty_code` VARCHAR(10) NOT NULL COMMENT 'Code unique ex: SNACK-A3X7',
   `name` VARCHAR(100) NOT NULL,
   `phone` VARCHAR(20) NOT NULL,
   `email` VARCHAR(150) DEFAULT NULL,
+  `loyalty_points` INT UNSIGNED DEFAULT 0,
   `orders_count` INT UNSIGNED DEFAULT 0,
   `total_spent` DECIMAL(10,2) DEFAULT 0.00,
   `last_order_at` TIMESTAMP NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY `uk_restaurant_phone` (`restaurant_id`, `phone`),
+  UNIQUE KEY `uk_loyalty_code` (`loyalty_code`),
   INDEX `idx_orders_count` (`restaurant_id`, `orders_count`),
+  INDEX `idx_loyalty_points` (`restaurant_id`, `loyalty_points`),
   FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

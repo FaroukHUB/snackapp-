@@ -9,10 +9,39 @@ require_once __DIR__ . '/../Database.php';
 class CustomerRepository {
 
     /**
+     * Génère un code fidélité unique (ex: SNACK-A3X7)
+     */
+    public static function generateLoyaltyCode(): string {
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sans I, O, 0, 1 pour éviter confusion
+        $maxAttempts = 10;
+
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            $code = '';
+            for ($i = 0; $i < 4; $i++) {
+                $code .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+            $loyaltyCode = 'SNACK-' . $code;
+
+            // Vérifier unicité
+            $existing = Database::fetchOne(
+                "SELECT id FROM customers WHERE loyalty_code = ?",
+                [$loyaltyCode]
+            );
+
+            if (!$existing) {
+                return $loyaltyCode;
+            }
+        }
+
+        // Fallback avec timestamp
+        return 'SNACK-' . strtoupper(substr(md5(uniqid()), 0, 4));
+    }
+
+    /**
      * Récupère tous les clients d'un restaurant
      */
     public static function getAll(int $restaurantId, string $orderBy = 'orders_count DESC'): array {
-        $validOrders = ['orders_count DESC', 'total_spent DESC', 'created_at DESC', 'name ASC'];
+        $validOrders = ['orders_count DESC', 'total_spent DESC', 'created_at DESC', 'name ASC', 'loyalty_points DESC'];
         if (!in_array($orderBy, $validOrders)) {
             $orderBy = 'orders_count DESC';
         }
@@ -90,9 +119,11 @@ class CustomerRepository {
 
         return Database::insert('customers', [
             'restaurant_id' => $restaurantId,
+            'loyalty_code' => self::generateLoyaltyCode(),
             'name' => $data['name'] ?? 'Client',
             'phone' => $phone,
             'email' => $data['email'] ?? null,
+            'loyalty_points' => 0,
             'orders_count' => 0,
             'total_spent' => 0
         ]);
@@ -168,25 +199,52 @@ class CustomerRepository {
      */
     public static function addCustomer(int $restaurantId, array $data): int {
         $phone = $data['phone'] ?? '';
-        
+
         if (empty($phone)) {
             throw new Exception("Numéro de téléphone requis");
         }
-        
+
         // Vérifier si le client existe déjà
         $existing = self::getByPhone($restaurantId, $phone);
         if ($existing) {
             throw new Exception("Un client avec ce numéro existe déjà");
         }
-        
+
         return Database::insert('customers', [
             'restaurant_id' => $restaurantId,
+            'loyalty_code' => self::generateLoyaltyCode(),
             'name' => $data['name'] ?? 'Client',
             'phone' => $phone,
             'email' => $data['email'] ?? null,
+            'loyalty_points' => 0,
             'orders_count' => 0,
             'total_spent' => 0
         ]);
+    }
+
+    /**
+     * Récupère un client par code fidélité
+     */
+    public static function getByLoyaltyCode(string $loyaltyCode): ?array {
+        return Database::fetchOne(
+            "SELECT * FROM customers WHERE loyalty_code = ?",
+            [$loyaltyCode]
+        );
+    }
+
+    /**
+     * Recherche de clients (par nom, téléphone ou code)
+     */
+    public static function search(int $restaurantId, string $query): array {
+        $query = '%' . trim($query) . '%';
+        return Database::fetchAll(
+            "SELECT * FROM customers
+             WHERE restaurant_id = ?
+             AND (name LIKE ? OR phone LIKE ? OR loyalty_code LIKE ?)
+             ORDER BY orders_count DESC
+             LIMIT 20",
+            [$restaurantId, $query, $query, $query]
+        );
     }
 
     /**
