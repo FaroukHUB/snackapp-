@@ -395,6 +395,11 @@ switch ($action) {
         }
 
         saveMenuRuntime($runtime);
+
+        // Sync vers menu.json pour le site public
+        require_once __DIR__ . '/../sync-menu.php';
+        syncMenuStatuses();
+
         jsonSuccess(['product' => $patch]);
         break;
 
