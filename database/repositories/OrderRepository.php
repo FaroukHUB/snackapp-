@@ -317,4 +317,133 @@ class OrderRepository {
 
         return $orders;
     }
+
+    /**
+     * Statistiques de la semaine
+     */
+    public static function getWeekStats(int $restaurantId): array {
+        $stats = Database::fetchOne(
+            "SELECT
+                COUNT(*) as orders_count,
+                COALESCE(SUM(total), 0) as revenue,
+                COALESCE(AVG(total), 0) as avg_order
+             FROM orders
+             WHERE restaurant_id = ?
+               AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)",
+            [$restaurantId]
+        );
+
+        return [
+            'orders' => (int) ($stats['orders_count'] ?? 0),
+            'revenue' => (float) ($stats['revenue'] ?? 0),
+            'avg_order' => (float) ($stats['avg_order'] ?? 0)
+        ];
+    }
+
+    /**
+     * Statistiques du mois
+     */
+    public static function getMonthStats(int $restaurantId): array {
+        $stats = Database::fetchOne(
+            "SELECT
+                COUNT(*) as orders_count,
+                COALESCE(SUM(total), 0) as revenue,
+                COALESCE(AVG(total), 0) as avg_order
+             FROM orders
+             WHERE restaurant_id = ?
+               AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)",
+            [$restaurantId]
+        );
+
+        return [
+            'orders' => (int) ($stats['orders_count'] ?? 0),
+            'revenue' => (float) ($stats['revenue'] ?? 0),
+            'avg_order' => (float) ($stats['avg_order'] ?? 0)
+        ];
+    }
+
+    /**
+     * Top 5 des produits les plus vendus
+     */
+    public static function getTopProducts(int $restaurantId, int $days = 30, int $limit = 5): array {
+        return Database::fetchAll(
+            "SELECT oi.product_name as name, SUM(oi.quantity) as qty, SUM(oi.total_price) as revenue
+             FROM order_items oi
+             JOIN orders o ON oi.order_id = o.id
+             WHERE o.restaurant_id = ? AND o.created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+             GROUP BY oi.product_name
+             ORDER BY qty DESC
+             LIMIT ?",
+            [$restaurantId, $days, $limit]
+        );
+    }
+
+    /**
+     * Heures de pic (distribution des commandes par heure)
+     */
+    public static function getPeakHours(int $restaurantId, int $days = 30): array {
+        return Database::fetchAll(
+            "SELECT HOUR(created_at) as hour, COUNT(*) as count
+             FROM orders
+             WHERE restaurant_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+             GROUP BY HOUR(created_at)
+             ORDER BY hour ASC",
+            [$restaurantId, $days]
+        );
+    }
+
+    /**
+     * Revenus par jour (7 derniers jours)
+     */
+    public static function getDailyRevenue(int $restaurantId, int $days = 7): array {
+        return Database::fetchAll(
+            "SELECT DATE(created_at) as date, COUNT(*) as orders, COALESCE(SUM(total), 0) as revenue
+             FROM orders
+             WHERE restaurant_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+             GROUP BY DATE(created_at)
+             ORDER BY date ASC",
+            [$restaurantId, $days]
+        );
+    }
+
+    /**
+     * Export des stats en CSV
+     */
+    public static function exportStatsCSV(int $restaurantId, string $period = 'month'): string {
+        $days = match($period) {
+            'week' => 7,
+            'month' => 30,
+            'year' => 365,
+            default => 30
+        };
+
+        $orders = Database::fetchAll(
+            "SELECT o.order_number, o.created_at, o.customer_name, o.customer_phone, o.total, o.status
+             FROM orders o
+             WHERE o.restaurant_id = ? AND o.created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+             ORDER BY o.created_at DESC",
+            [$restaurantId, $days]
+        );
+
+        $csv = "\xEF\xBB\xBF";
+        $csv .= "Numéro,Date,Client,Téléphone,Total,Statut\n";
+
+        foreach ($orders as $o) {
+            $csv .= sprintf(
+                '"%s","%s","%s","%s",%.2f,"%s"' . "\n",
+                $o['order_number'],
+                $o['created_at'],
+                $o['customer_name'],
+                $o['customer_phone'],
+                $o['total'],
+                $o['status']
+            );
+        }
+
+        return $csv;
+    }
+
+
+
+
 }

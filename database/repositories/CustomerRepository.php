@@ -162,4 +162,48 @@ class CustomerRepository {
 
         return $csv;
     }
+
+    /**
+     * Ajoute un nouveau client manuellement
+     */
+    public static function addCustomer(int $restaurantId, array $data): int {
+        $phone = $data['phone'] ?? '';
+        
+        if (empty($phone)) {
+            throw new Exception("Numéro de téléphone requis");
+        }
+        
+        // Vérifier si le client existe déjà
+        $existing = self::getByPhone($restaurantId, $phone);
+        if ($existing) {
+            throw new Exception("Un client avec ce numéro existe déjà");
+        }
+        
+        return Database::insert('customers', [
+            'restaurant_id' => $restaurantId,
+            'name' => $data['name'] ?? 'Client',
+            'phone' => $phone,
+            'email' => $data['email'] ?? null,
+            'orders_count' => 0,
+            'total_spent' => 0
+        ]);
+    }
+
+    /**
+     * Supprime un client
+     */
+    public static function deleteCustomer(int $customerId, int $restaurantId): bool {
+        // Vérifier que le client appartient bien au restaurant
+        $customer = self::getById($customerId);
+        if (!$customer || $customer['restaurant_id'] !== $restaurantId) {
+            return false;
+        }
+        
+        return Database::delete('customers', ['id' => $customerId]) > 0;
+    }
+
+
+
+
+
 }

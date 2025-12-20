@@ -4,6 +4,8 @@
  * Support MySQL avec fallback JSON
  */
 
+
+require_once __DIR__ . '/../database/repositories/LoyaltyRepository.php';
 require_once __DIR__ . '/bootstrap.php';
 requireAdmin();
 
@@ -45,6 +47,19 @@ if ($useMySQL) {
     $openingHours = RestaurantRepository::getOpeningHours(SNACK_RESTAURANT_ID);
     $faqItems = RestaurantRepository::getFaq(SNACK_RESTAURANT_ID);
     $whatsappConfig = RestaurantRepository::getWhatsAppConfig(SNACK_RESTAURANT_ID);
+
+    // Stats avancées
+    $weekStats = OrderRepository::getWeekStats(SNACK_RESTAURANT_ID);
+    $monthStats = OrderRepository::getMonthStats(SNACK_RESTAURANT_ID);
+    $topProducts = OrderRepository::getTopProducts(SNACK_RESTAURANT_ID, 30, 5);
+    $peakHours = OrderRepository::getPeakHours(SNACK_RESTAURANT_ID, 30);
+    $dailyRevenue = OrderRepository::getDailyRevenue(SNACK_RESTAURANT_ID, 7);
+    
+    // Données fidélité
+     $loyaltyConfig = LoyaltyRepository::getConfig(SNACK_RESTAURANT_ID);
+     $loyaltyRewards = LoyaltyRepository::getAllRewards(SNACK_RESTAURANT_ID);
+     $loyaltyLeaderboard = LoyaltyRepository::getLeaderboard(SNACK_RESTAURANT_ID, 10);
+
 
 } else {
     // Mode JSON (fallback)
@@ -101,11 +116,66 @@ if ($useMySQL) {
     $settings = $restaurantSettings;
 }
 
+
+
+// === GESTION FIDÉLITÉ ===
+
+// Ajouter une récompense
+if ($action === 'add_reward') {
+    header('Content-Type: application/json');
+    try {
+        $rewardId = LoyaltyRepository::addReward(SNACK_RESTAURANT_ID, [
+            'name' => $_POST['reward_name'] ?? '',
+            'description' => $_POST['reward_description'] ?? '',
+            'points_required' => (int) ($_POST['points_required'] ?? 100),
+            'reward_type' => $_POST['reward_type'] ?? 'discount_percent',
+            'reward_value' => (float) ($_POST['reward_value'] ?? 10)
+        ]);
+        echo json_encode(['success' => true, 'reward_id' => $rewardId]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// Supprimer une récompense
+if ($action === 'delete_reward') {
+    header('Content-Type: application/json');
+    $rewardId = (int) ($_POST['reward_id'] ?? 0);
+    $deleted = LoyaltyRepository::deleteReward($rewardId);
+    echo json_encode(['success' => $deleted]);
+    exit;
+}
+
+// Modifier config fidélité
+if ($action === 'update_loyalty_config') {
+    header('Content-Type: application/json');
+    $enabled = ($_POST['loyalty_enabled'] ?? '1') === '1';
+    $pointsPerEuro = (int) ($_POST['points_per_euro'] ?? 1);
+    $updated = LoyaltyRepository::updateConfig(SNACK_RESTAURANT_ID, $enabled, $pointsPerEuro);
+    echo json_encode(['success' => $updated]);
+    exit;
+}
+
+// Ajouter des points manuellement à un client
+if ($action === 'add_loyalty_points') {
+    header('Content-Type: application/json');
+    $customerId = (int) ($_POST['customer_id'] ?? 0);
+    $points = (int) ($_POST['points'] ?? 0);
+    if ($customerId > 0 && $points != 0) {
+        LoyaltyRepository::addPoints($customerId, SNACK_RESTAURANT_ID, $points, null, 'Ajout manuel admin');
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Données invalides']);
+    }
+    exit;
+}
 // ============================================
 // TRAITER LES ACTIONS POST
 // ============================================
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+$action = $_POST['action'];
 
     // Changement de statut commande
     if ($_POST['action'] === 'change_status' && isset($_POST['order_id'], $_POST['new_status'])) {
@@ -219,6 +289,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit;
     }
 
+// Ajouter un client manuellement
+if ($action === 'add_customer') {
+    header('Content-Type: application/json');
+    try {
+        $name = trim($_POST['customer_name'] ?? '');
+        $phone = trim($_POST['customer_phone'] ?? '');
+        
+        if (empty($phone)) {
+            throw new Exception("Le numéro de téléphone est requis");
+        }
+        
+        $customerId = CustomerRepository::addCustomer(SNACK_RESTAURANT_ID, [
+            'name' => $name ?: 'Client',
+            'phone' => $phone
+        ]);
+        
+        echo json_encode(['success' => true, 'customer_id' => $customerId]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// Supprimer un client
+if ($action === 'delete_customer') {
+    header('Content-Type: application/json');
+    try {
+        $customerId = (int) ($_POST['customer_id'] ?? 0);
+        
+        if ($customerId <= 0) {
+            throw new Exception("ID client invalide");
+        }
+        
+        $deleted = CustomerRepository::deleteCustomer($customerId, SNACK_RESTAURANT_ID);
+        
+        if ($deleted) {
+            echo json_encode(['success' => true]);
+        } else {
+            throw new Exception("Impossible de supprimer ce client");
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+
+
+
     // Sauvegarder FAQ
     if ($_POST['action'] === 'save_faq') {
         $faqItemsNew = [];
@@ -289,6 +408,17 @@ if (isset($_GET['export'])) {
         }
         exit;
     }
+
+    if ($_GET['export'] === 'stats') {
+        $period = $_GET['period'] ?? 'month';
+        header('Content-Disposition: attachment; filename=stats_' . $period . '_' . date('Y-m-d') . '.csv');
+        if ($useMySQL) {
+            echo OrderRepository::exportStatsCSV(SNACK_RESTAURANT_ID, $period);
+        }
+        exit;
+    }
+
+
 
     if ($_GET['export'] === 'archives') {
         header('Content-Disposition: attachment; filename=commandes_archivees_' . date('Y-m-d') . '.csv');
@@ -519,14 +649,140 @@ if (isset($_GET['export'])) {
         </div>
 
         <!-- CLIENTS -->
-        <div id="section-customers" class="section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2>Clients (<?php echo count($customers); ?>)</h2>
-                <div style="display: flex; gap: 8px;">
-                    <a href="?export=customers" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> CSV</a>
-                    <button onclick="sendGroupWhatsApp()" class="btn btn-sm btn-whatsapp"><i class="fab fa-whatsapp"></i> Diffusion</button>
-                </div>
+     <!-- CLIENTS -->
+<div id="section-customers" class="section" style="display: none;">
+
+    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>👥 Clients</h2>
+        <button onclick="openAddCustomerModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2em;">+</span> Ajouter un client
+        </button>
+    </div>
+
+    <!-- Filtres rapides -->
+    <div class="customer-filters-wrap" style="margin-bottom: 15px;">
+        <div style="display: flex; gap: 8px; flex-wrap: nowrap;">
+            <button onclick="filterCustomers('all')" class="btn btn-sm customer-filter active" data-filter="all" style="white-space: nowrap;"><i class="fas fa-users"></i> Tous</button>
+            <button onclick="filterCustomers('vip')" class="btn btn-sm customer-filter" data-filter="vip" style="background: rgba(245,158,11,.2); border-color: #f59e0b; white-space: nowrap;"><i class="fas fa-crown"></i> VIP</button>
+            <button onclick="filterCustomers('regular')" class="btn btn-sm customer-filter" data-filter="regular" style="background: rgba(16,185,129,.2); border-color: #10b981; white-space: nowrap;"><i class="fas fa-star"></i> Réguliers</button>
+            <button onclick="filterCustomers('new')" class="btn btn-sm customer-filter" data-filter="new" style="background: rgba(59,130,246,.2); border-color: #3b82f6; white-space: nowrap;"><i class="fas fa-seedling"></i> Nouveaux</button>
+        </div>
+    </div>
+
+    <!-- Panel WhatsApp groupé -->
+    <div class="card" id="whatsapp-panel" style="display: none; margin-bottom: 15px; border: 1px solid #25D366;">
+        <h4 style="color: #25D366; margin-bottom: 10px;"><i class="fab fa-whatsapp"></i> Envoi groupé WhatsApp</h4>
+        <div class="form-group">
+            <label>Message à envoyer</label>
+            <textarea id="wa-message" placeholder="Ex: Nouvelle promo ! -20% sur tous les burgers ce weekend..."></textarea>
+        </div>
+        <p style="color: #9ca3af; font-size: 12px; margin-bottom: 10px;">Sélectionnez les clients ci-dessous puis cliquez sur Envoyer</p>
+        <button onclick="openWhatsAppLinks()" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> Ouvrir WhatsApp pour chaque client</button>
+    </div>
+
+    <!-- Grille des clients -->
+    <div class="customers-grid">
+        <?php if (empty($customers)): ?>
+            <div style="text-align: center; padding: 60px; color: #666;">
+                <div style="font-size: 4em; margin-bottom: 20px;">👥</div>
+                <p style="font-size: 1.2em;">Aucun client enregistré</p>
+                <p style="color: #999;">Les clients apparaîtront ici après leur première commande</p>
             </div>
+        <?php else: ?>
+            <?php foreach ($customers as $customer): ?>
+                <div class="customer-card" id="customer-<?= $customer['id'] ?>" style="position: relative;">
+                    <button onclick="deleteCustomer(<?= $customer['id'] ?>, '<?= htmlspecialchars($customer['name'] ?? 'Client') ?>')" 
+                            style="position: absolute; top: 10px; right: 10px; background: #ff4757; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;"
+                            title="Supprimer ce client">
+                        ✕
+                    </button>
+                    <div class="customer-avatar">
+                        <?= strtoupper(substr($customer['name'] ?? 'C', 0, 1)) ?>
+                    </div>
+                    <div class="customer-info">
+                        <h4><?= htmlspecialchars($customer['name'] ?? 'Client') ?></h4>
+                        <p>📱 <?= htmlspecialchars($customer['phone'] ?? 'N/A') ?></p>
+                        <?php if (!empty($customer['email'])): ?>
+                            <p>📧 <?= htmlspecialchars($customer['email']) ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="customer-stats">
+                        <div class="stat">
+                            <span class="stat-value"><?= $customer['orders_count'] ?? 0 ?></span>
+                            <span class="stat-label">Commandes</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value"><?= number_format($customer['total_spent'] ?? 0, 2) ?>€</span>
+                            <span class="stat-label">Total dépensé</span>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+
+</div>
+<!-- FIN CLIENTS -->
+
+<!-- Modal Ajouter Client -->
+<div id="addCustomerModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 20px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <h3 style="margin: 0 0 20px 0; font-size: 1.5em;">➕ Nouveau Client</h3>
+        <form id="addCustomerForm" onsubmit="submitAddCustomer(event)">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Nom</label>
+                <input type="text" id="newCustomerName" placeholder="Nom du client" 
+                       style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Téléphone *</label>
+                <input type="tel" id="newCustomerPhone" placeholder="06 12 34 56 78" required
+                       style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; box-sizing: border-box;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="closeAddCustomerModal()" 
+                        style="flex: 1; padding: 12px; background: #e0e0e0; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                    Annuler
+                </button>
+                <button type="submit" 
+                        style="flex: 1; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                    Ajouter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Modal Ajouter Client -->
+<div id="addCustomerModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 20px; padding: 30px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <h3 style="margin: 0 0 20px 0; font-size: 1.5em;">➕ Nouveau Client</h3>
+        <form id="addCustomerForm" onsubmit="submitAddCustomer(event)">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Nom</label>
+                <input type="text" id="newCustomerName" placeholder="Nom du client" 
+                       style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Téléphone *</label>
+                <input type="tel" id="newCustomerPhone" placeholder="06 12 34 56 78" required
+                       style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; box-sizing: border-box;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="closeAddCustomerModal()" 
+                        style="flex: 1; padding: 12px; background: #e0e0e0; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                    Annuler
+                </button>
+                <button type="submit" 
+                        style="flex: 1; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                    Ajouter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
             <!-- Filtres rapides (scrollable sur mobile) -->
             <div class="customer-filters-wrap" style="margin-bottom: 15px;">
@@ -628,6 +884,91 @@ if (isset($_GET['export'])) {
                 </form>
             <?php endif; ?>
         </div>
+
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        
+        <!-- Récompenses -->
+        <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0;">🏆 Récompenses</h3>
+                <button onclick="openAddRewardModal()" style="background: #667eea; color: white; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: 600;">
+                    + Ajouter
+                </button>
+            </div>
+            
+            <?php if (empty($loyaltyRewards)): ?>
+                <p style="color: #999; text-align: center; padding: 20px;">Aucune récompense configurée</p>
+            <?php else: ?>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <?php foreach ($loyaltyRewards as $reward): ?>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #f8f9fa; border-radius: 12px; <?= !$reward['is_active'] ? 'opacity: 0.5;' : '' ?>">
+                            <div>
+                                <div style="font-weight: 600; color: #333;"><?= htmlspecialchars($reward['name']) ?></div>
+                                <div style="font-size: 0.85em; color: #666;"><?= htmlspecialchars($reward['description']) ?></div>
+                                <div style="font-size: 0.8em; color: #667eea; margin-top: 4px;">
+                                    <?php
+                                    if ($reward['reward_type'] === 'discount_percent') {
+                                        echo $reward['reward_value'] . '% de réduction';
+                                    } elseif ($reward['reward_type'] === 'discount_amount') {
+                                        echo $reward['reward_value'] . '€ de réduction';
+                                    } else {
+                                        echo 'Produit offert';
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="background: #667eea; color: white; padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 0.9em;">
+                                    <?= $reward['points_required'] ?> pts
+                                </span>
+                                <button onclick="deleteReward(<?= $reward['id'] ?>)" style="background: #ff4757; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">✕</button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        
+        <!-- Classement clients -->
+        <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+            <h3 style="margin: 0 0 20px 0;">👑 Top Clients Fidèles</h3>
+            
+            <?php if (empty($loyaltyLeaderboard)): ?>
+                <p style="color: #999; text-align: center; padding: 20px;">Aucun client avec des points</p>
+            <?php else: ?>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <?php foreach ($loyaltyLeaderboard as $index => $client): ?>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: <?= $index < 3 ? 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' : '#f8f9fa' ?>; border-radius: 10px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 1.3em;">
+                                    <?php
+                                    if ($index === 0) echo '🥇';
+                                    elseif ($index === 1) echo '🥈';
+                                    elseif ($index === 2) echo '🥉';
+                                    else echo '#' . ($index + 1);
+                                    ?>
+                                </span>
+                                <div>
+                                    <div style="font-weight: 600;"><?= htmlspecialchars($client['name'] ?? 'Client') ?></div>
+                                    <div style="font-size: 0.8em; color: #666;"><?= $client['orders_count'] ?> commandes</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 700; color: #667eea; font-size: 1.1em;"><?= $client['loyalty_points'] ?> pts</div>
+                                <div style="font-size: 0.8em; color: #666;"><?= number_format($client['total_spent'], 2) ?>€</div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+
+
+
 
         <!-- ARCHIVES -->
         <div id="section-archives" class="section">
@@ -910,6 +1251,45 @@ if (isset($_GET['export'])) {
                 container.appendChild(div);
             }
             </script>
+            <!-- WhatsApp Business API -->
+            <div class="card">
+                <h3 style="margin-bottom: 15px;"><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp Business API</h3>
+                <p style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">
+                    Pour envoyer des messages automatiques via l'API WhatsApp Business, vous devez configurer votre token d'accès.
+                    <a href="https://developers.facebook.com/docs/whatsapp/business-management-api" target="_blank" style="color: #60a5fa;">En savoir plus →</a>
+                </p>
+                <form method="POST">
+                    <input type="hidden" name="action" value="save_whatsapp_config">
+                    <div class="form-group">
+                        <label>Token d'accès WhatsApp Business API</label>
+                        <input type="password" name="whatsapp_token" id="whatsapp_token"
+                               value="<?php echo htmlspecialchars($restaurantSettings['whatsapp']['token'] ?? ''); ?>"
+                               placeholder="Entrez votre token WhatsApp Business API"
+                               style="font-family: monospace;">
+                        <button type="button" onclick="toggleTokenVisibility()" class="btn btn-sm btn-gray" style="margin-top: 8px;">
+                            <i class="fas fa-eye" id="toggle-eye"></i> Afficher/Masquer
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>ID du numéro de téléphone WhatsApp</label>
+                        <input type="text" name="whatsapp_phone_id"
+                               value="<?php echo htmlspecialchars($restaurantSettings['whatsapp']['phoneNumberId'] ?? ''); ?>"
+                               placeholder="Ex: 123456789012345">
+                    </div>
+                    <div class="form-group">
+                        <label>ID du Business Account</label>
+                        <input type="text" name="whatsapp_business_id"
+                               value="<?php echo htmlspecialchars($restaurantSettings['whatsapp']['businessAccountId'] ?? ''); ?>"
+                               placeholder="Ex: 123456789012345">
+                    </div>
+                    <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                        <p style="color: #f59e0b; font-size: 12px; margin: 0;">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong> Le token doit être gardé secret.
+                        </p>
+                    </div>
+                    <button type="submit" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> Enregistrer la configuration</button>
+                </form>
+            </div>
 
 
             <!-- FAQ -->
@@ -935,6 +1315,111 @@ if (isset($_GET['export'])) {
             <div class="card">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-utensils"></i> Gestion des produits</h3>
                 <a href="products-manager.php" class="btn btn-green"><i class="fas fa-cog"></i> Gérer le menu</a>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div id="section-stats" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h2><i class="fas fa-chart-line"></i> Statistiques</h2>
+                <div style="display: flex; gap: 8px;">
+                    <a href="?export=stats&period=week" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> CSV Semaine</a>
+                    <a href="?export=stats&period=month" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> CSV Mois</a>
+                </div>
+            </div>
+
+            <!-- CA Cards -->
+            <div class="stats" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-calendar-day"></i> Aujourd'hui</div>
+                    <div class="stat-number" style="color: #10b981; font-size: 24px;"><?php echo number_format($stats['revenue'] ?? 0, 0); ?>€</div>
+                    <div style="color: #6b7280; font-size: 11px;"><?php echo $stats['today'] ?? 0; ?> cmd</div>
+                </div>
+                <div class="stat-card">
+                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-calendar-week"></i> Semaine</div>
+                    <div class="stat-number" style="color: #3b82f6; font-size: 24px;"><?php echo number_format($weekStats['revenue'] ?? 0, 0); ?>€</div>
+                    <div style="color: #6b7280; font-size: 11px;"><?php echo $weekStats['orders'] ?? 0; ?> cmd</div>
+                </div>
+                <div class="stat-card">
+                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-calendar-alt"></i> Mois</div>
+                    <div class="stat-number" style="color: #8b5cf6; font-size: 24px;"><?php echo number_format($monthStats['revenue'] ?? 0, 0); ?>€</div>
+                    <div style="color: #6b7280; font-size: 11px;"><?php echo $monthStats['orders'] ?? 0; ?> cmd</div>
+                </div>
+            </div>
+
+            <!-- Panier moyen & Heure de pic -->
+            <div class="stats" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 20px;">
+                <div class="stat-card">
+                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-shopping-basket"></i> Panier moyen</div>
+                    <div class="stat-number" style="font-size: 22px;"><?php echo number_format($monthStats['avg_order'] ?? 0, 1); ?>€</div>
+                </div>
+                <div class="stat-card">
+                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-clock"></i> Heure de pic</div>
+                    <div class="stat-number" style="font-size: 22px;"><?php echo $stats['peak_hour'] ?? '--:--'; ?></div>
+                </div>
+            </div>
+
+            <!-- Top Produits -->
+            <div class="card">
+                <h3 style="margin-bottom: 15px; font-size: 14px;"><i class="fas fa-trophy" style="color: #f59e0b;"></i> Top 5 Produits (30j)</h3>
+                <?php if (empty($topProducts)): ?>
+                    <p style="color: #6b7280; font-size: 13px;">Aucune donnée</p>
+                <?php else: ?>
+                    <?php foreach ($topProducts as $i => $product): ?>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; <?php echo $i < count($topProducts) - 1 ? 'border-bottom: 1px solid #374151;' : ''; ?>">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="width: 24px; height: 24px; background: <?php echo $i === 0 ? '#f59e0b' : ($i === 1 ? '#9ca3af' : ($i === 2 ? '#cd7f32' : '#374151')); ?>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;"><?php echo $i + 1; ?></span>
+                            <span style="font-size: 13px;"><?php echo htmlspecialchars($product['name']); ?></span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="color: <?php echo $primaryColor; ?>; font-weight: bold;"><?php echo $product['qty']; ?> vendus</span>
+                            <div style="color: #6b7280; font-size: 11px;"><?php echo number_format($product['revenue'], 0); ?>€</div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
+            <!-- Heures de pic -->
+            <div class="card" style="margin-top: 15px;">
+                <h3 style="margin-bottom: 15px; font-size: 14px;"><i class="fas fa-chart-bar" style="color: #3b82f6;"></i> Répartition par heure (30j)</h3>
+                <?php
+                $maxCount = max(array_column($peakHours, 'count') ?: [1]);
+                ?>
+                <div style="display: flex; align-items: flex-end; gap: 4px; height: 100px;">
+                    <?php for ($h = 11; $h <= 23; $h++):
+                        $hourData = array_filter($peakHours, fn($p) => (int)$p['hour'] === $h);
+                        $count = !empty($hourData) ? array_values($hourData)[0]['count'] : 0;
+                        $height = $maxCount > 0 ? ($count / $maxCount) * 100 : 0;
+                    ?>
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                        <div style="width: 100%; background: <?php echo $count === $maxCount && $count > 0 ? '#f59e0b' : '#3b82f6'; ?>; height: <?php echo max($height, 2); ?>px; border-radius: 4px 4px 0 0; min-height: 2px;"></div>
+                        <span style="font-size: 9px; color: #6b7280; margin-top: 4px;"><?php echo $h; ?>h</span>
+                    </div>
+                    <?php endfor; ?>
+                </div>
+            </div>
+
+            <!-- CA 7 derniers jours -->
+            <div class="card" style="margin-top: 15px;">
+                <h3 style="margin-bottom: 15px; font-size: 14px;"><i class="fas fa-chart-area" style="color: #10b981;"></i> CA des 7 derniers jours</h3>
+                <?php
+                $maxRevenue = max(array_column($dailyRevenue, 'revenue') ?: [1]);
+                $days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+                ?>
+                <div style="display: flex; align-items: flex-end; gap: 8px; height: 120px;">
+                    <?php foreach ($dailyRevenue as $day):
+                        $height = $maxRevenue > 0 ? ($day['revenue'] / $maxRevenue) * 100 : 0;
+                        $dayName = $days[date('w', strtotime($day['date']))];
+                        $isToday = $day['date'] === date('Y-m-d');
+                    ?>
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                        <span style="font-size: 10px; color: #9ca3af; margin-bottom: 4px;"><?php echo number_format($day['revenue'], 0); ?>€</span>
+                        <div style="width: 100%; background: <?php echo $isToday ? '#10b981' : '#374151'; ?>; height: <?php echo max($height, 4); ?>px; border-radius: 4px 4px 0 0;"></div>
+                        <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#6b7280'; ?>; margin-top: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo $dayName; ?></span>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
 
@@ -964,6 +1449,9 @@ if (isset($_GET['export'])) {
         <button class="nav-btn" data-section="customers"><i class="fas fa-users"></i><div>Clients</div></button>
         <button class="nav-btn" data-section="archives"><i class="fas fa-archive"></i><div>Archives</div></button>
         <button class="nav-btn" onclick="window.location.href='products-manager.php'" data-section="products"><i class="fas fa-burger"></i><div>Menu</div></button>
+        <button class="nav-btn" data-section="stats"><i class="fas fa-chart-line"></i><div>Stats</div></button>
+        
+
         <button class="nav-btn" data-section="settings"><i class="fas fa-cog"></i><div>Réglages</div></button>
     </div>
 
@@ -1067,8 +1555,181 @@ if (isset($_GET['export'])) {
             container.appendChild(div);
         }
 
+
+
         // Notifications
         if (window.orderNotificationSystem) orderNotificationSystem.start(10);
+
+// === GESTION CLIENTS ===
+function openAddCustomerModal() {
+    document.getElementById('addCustomerModal').style.display = 'flex';
+    document.getElementById('newCustomerName').value = '';
+    document.getElementById('newCustomerPhone').value = '';
+}
+
+function closeAddCustomerModal() {
+    document.getElementById('addCustomerModal').style.display = 'none';
+}
+
+function submitAddCustomer(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('newCustomerName').value.trim();
+    const phone = document.getElementById('newCustomerPhone').value.trim();
+    
+    if (!phone) {
+        alert('Le numéro de téléphone est requis');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', 'add_customer');
+    formData.append('customer_name', name);
+    formData.append('customer_phone', phone);
+    
+    fetch('', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeAddCustomerModal();
+            location.reload();
+        } else {
+            alert('Erreur: ' + (data.error || 'Impossible d\'ajouter le client'));
+        }
+    })
+    .catch(error => {
+        alert('Erreur de connexion');
+        console.error(error);
+    });
+}
+
+function deleteCustomer(customerId, customerName) {
+    if (!confirm('Supprimer le client "' + customerName + '" ?\n\nCette action est irréversible.')) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', 'delete_customer');
+    formData.append('customer_id', customerId);
+    
+    fetch('', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const card = document.getElementById('customer-' + customerId);
+            if (card) {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.8)';
+                setTimeout(() => card.remove(), 300);
+            }
+        } else {
+            alert('Erreur: ' + (data.error || 'Impossible de supprimer le client'));
+        }
+    })
+    .catch(error => {
+        alert('Erreur de connexion');
+        console.error(error);
+    });
+}
+
+// Fermer modal en cliquant à l'extérieur
+document.getElementById('addCustomerModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAddCustomerModal();
+    }
+});
+
+// === GESTION FIDÉLITÉ ===
+function updateLoyaltyConfig() {
+    const enabled = document.getElementById('loyaltyEnabled').checked;
+    const pointsPerEuro = document.getElementById('pointsPerEuro').value;
+    
+    const formData = new FormData();
+    formData.append('action', 'update_loyalty_config');
+    formData.append('loyalty_enabled', enabled ? '1' : '0');
+    formData.append('points_per_euro', pointsPerEuro);
+    
+    fetch('', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) alert('Erreur lors de la sauvegarde');
+        });
+}
+
+function openAddRewardModal() {
+    document.getElementById('addRewardModal').style.display = 'flex';
+    document.getElementById('rewardName').value = '';
+    document.getElementById('rewardDescription').value = '';
+    document.getElementById('rewardPoints').value = '100';
+    document.getElementById('rewardType').value = 'discount_percent';
+    document.getElementById('rewardValue').value = '10';
+    toggleRewardValue();
+}
+
+function closeAddRewardModal() {
+    document.getElementById('addRewardModal').style.display = 'none';
+}
+
+function toggleRewardValue() {
+    const type = document.getElementById('rewardType').value;
+    const container = document.getElementById('rewardValueContainer');
+    container.style.display = type === 'free_product' ? 'none' : 'block';
+}
+
+function submitAddReward(event) {
+    event.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('action', 'add_reward');
+    formData.append('reward_name', document.getElementById('rewardName').value);
+    formData.append('reward_description', document.getElementById('rewardDescription').value);
+    formData.append('points_required', document.getElementById('rewardPoints').value);
+    formData.append('reward_type', document.getElementById('rewardType').value);
+    formData.append('reward_value', document.getElementById('rewardValue').value);
+    
+    fetch('', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                closeAddRewardModal();
+                location.reload();
+            } else {
+                alert('Erreur: ' + (data.error || 'Impossible de créer la récompense'));
+            }
+        });
+}
+
+function deleteReward(rewardId) {
+    if (!confirm('Supprimer cette récompense ?')) return;
+    
+    const formData = new FormData();
+    formData.append('action', 'delete_reward');
+    formData.append('reward_id', rewardId);
+    
+    fetch('', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur lors de la suppression');
+            }
+        });
+}
+
+// Fermer modal récompense en cliquant dehors
+document.getElementById('addRewardModal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeAddRewardModal();
+});
+
+
     </script>
 </body>
 </html>
