@@ -55,15 +55,20 @@ const Products = {
         const categories = Config.getCategories();
         const icons = Config.categoryIcons;
 
-        // Add Formules link first
-        let html = `
-            <li>
-                <a href="#formules" class="active">
-                    <i class="fas fa-fire"></i>
-                    Nos Formules
-                </a>
-            </li>
-        `;
+        // Add Formules link first (only if formules are available)
+        const formules = Config.getAvailableFormules();
+        let html = '';
+
+        if (formules.length > 0) {
+            html = `
+                <li>
+                    <a href="#formulesSection" class="active" onclick="document.getElementById('formulesSection').scrollIntoView({behavior: 'smooth'}); return false;">
+                        <i class="fas fa-fire"></i>
+                        Nos Formules
+                    </a>
+                </li>
+            `;
+        }
 
         // Add category links
         categories.forEach(cat => {

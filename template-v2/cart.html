@@ -782,6 +782,15 @@
                 // Load config
                 await Config.init();
 
+                // Check delivery setting and hide option if disabled
+                const deliveryEnabled = Config.restaurant?.delivery?.enabled ?? true;
+                const deliveryOption = document.querySelector('.mode-option[data-mode="delivery"]');
+                if (!deliveryEnabled && deliveryOption) {
+                    deliveryOption.style.display = 'none';
+                    // Make pickup take full width
+                    document.querySelector('.mode-selector').style.gridTemplateColumns = '1fr';
+                }
+
                 // Initialize cart
                 Cart.init();
                 Cart.onUpdate = () => this.render();

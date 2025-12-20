@@ -15,6 +15,9 @@ define('SNACK_DB_PATH', SNACK_ROOT . '/database');
 define('SNACK_CONFIG_PATH', SNACK_ROOT . '/config');
 define('SNACK_ADMIN_PATH', __DIR__);
 
+// Charger les fonctions de config (loadMenuRuntime, saveMenuRuntime, etc.)
+require_once __DIR__ . '/config.php';
+
 // Charger les classes database
 require_once SNACK_DB_PATH . '/Database.php';
 require_once SNACK_DB_PATH . '/repositories/RestaurantRepository.php';
