@@ -21,7 +21,8 @@ if ($useMySQL) {
     $restaurantName = $restaurant['name'] ?? 'Restaurant';
     $primaryColor = $restaurant['primary_color'] ?? '#c58a3a';
 
-    $restaurantSettings = RestaurantRepository::getPublicData(SNACK_RESTAURANT_ID);
+    // Toujours charger les settings depuis restaurant.json (source de vérité)
+    $restaurantSettings = json_decode(file_get_contents(__DIR__ . '/../config/restaurant.json'), true) ?? [];
     $orders = OrderRepository::getActiveOrders(SNACK_RESTAURANT_ID, 50);
     $archivedOrders = OrderRepository::getArchivedOrders(SNACK_RESTAURANT_ID, 500);
     $customers = CustomerRepository::getAll(SNACK_RESTAURANT_ID);
@@ -354,9 +355,6 @@ $action = $_POST['action'];
 
        // Sauvegarder les réglages
     if ($_POST['action'] === 'save_settings') {
-        // DEBUG - à supprimer
-        file_put_contents(__DIR__ . '/debug_post.txt', print_r($_POST, true));
-
         // Vérifier quel formulaire a été soumis
         $isContactForm = isset($_POST['social_type']);
         $isHoursForm = isset($_POST['hours']);
@@ -411,9 +409,6 @@ $action = $_POST['action'];
 
         // Traitement des horaires (formulaire horaires)
         if ($isHoursForm) {
-            // DEBUG - à supprimer
-            file_put_contents(__DIR__ . '/debug_hours.txt', print_r($_POST['hours'], true));
-
             if ($useMySQL) {
                 $hours = [];
                 foreach ($_POST['hours'] as $i => $h) {
