@@ -354,6 +354,9 @@ $action = $_POST['action'];
 
        // Sauvegarder les réglages
     if ($_POST['action'] === 'save_settings') {
+        // DEBUG - à supprimer
+        file_put_contents(__DIR__ . '/debug_post.txt', print_r($_POST, true));
+
         // Vérifier quel formulaire a été soumis
         $isContactForm = isset($_POST['social_type']);
         $isHoursForm = isset($_POST['hours']);
