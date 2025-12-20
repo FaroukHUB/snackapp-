@@ -406,6 +406,12 @@ session_start();
           </div>
 
           <div class="field">
+            <label for="prodBadge">Badge (optionnel)</label>
+            <input id="prodBadge" name="badge" class="input" type="text" placeholder="Ex: Nouveau, Best-seller, Épicé 🌶️" maxlength="30" />
+            <span class="muted">Apparaît sur la photo du produit (max 30 caractères)</span>
+          </div>
+
+          <div class="field">
             <label>Photo</label>
             <div class="upload">
               <img id="imgPreview" class="preview" alt="Aperçu" />
@@ -481,6 +487,11 @@ session_start();
               <label for="editPriceMenu">Prix (menu)</label>
               <input id="editPriceMenu" name="priceMenu" class="input" type="number" step="0.01" min="0" />
             </div>
+          </div>
+          <div class="field">
+            <label for="editProdBadge">Badge (optionnel)</label>
+            <input id="editProdBadge" name="badge" class="input" type="text" placeholder="Ex: Nouveau, Best-seller, Épicé 🌶️" maxlength="30" />
+            <span class="muted">Apparaît sur la photo du produit</span>
           </div>
           <div class="field">
             <label>Photo du produit</label>
@@ -831,6 +842,7 @@ session_start();
       $("#editProdDesc").value = product.description ?? "";
       $("#editPriceSolo").value = product.priceSolo ?? "";
       $("#editPriceMenu").value = product.priceMenu ?? "";
+      $("#editProdBadge").value = product.badge ?? "";
       $("#editStatus").value = product.status ?? "available";
 
       // Afficher l'image actuelle
@@ -857,6 +869,7 @@ session_start();
       const description = $("#editProdDesc").value;
       const priceSolo = parseFloat($("#editPriceSolo").value) || 0;
       const priceMenu = $("#editPriceMenu").value ? parseFloat($("#editPriceMenu").value) : null;
+      const badge = $("#editProdBadge").value.trim() || null;
       const status = $("#editStatus").value;
       const imageFile = $("#editProductImage").files[0];
 
@@ -876,6 +889,7 @@ session_start();
           formData.set("description", description);
           formData.set("priceSolo", priceSolo);
           if (priceMenu !== null) formData.set("priceMenu", priceMenu);
+          if (badge) formData.set("badge", badge);
           formData.set("status", status);
           formData.set("supplements", JSON.stringify(supplements));
           formData.set("image", imageFile);
@@ -891,6 +905,7 @@ session_start();
             description,
             priceSolo,
             priceMenu,
+            badge,
             status,
             supplements
           });

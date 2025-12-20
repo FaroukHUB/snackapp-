@@ -202,7 +202,7 @@ const Products = {
                     <div class="product-image-wrapper">
                         <img src="../${product.image}" alt="${product.name}" class="product-image"
                              onerror="this.style.display='none'">
-                        ${product.isSignature ? '<span class="product-badge">Signature</span>' : ''}
+                        ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
                     </div>
                     <div class="product-info">
                         <h3 class="product-name">${product.name}</h3>

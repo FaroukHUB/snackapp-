@@ -407,6 +407,7 @@ switch ($action) {
             'description' => $input['description'] ?? '',
             'priceSolo' => $priceSolo,
             'priceMenu' => isset($input['priceMenu']) && $input['priceMenu'] !== '' ? (float)$input['priceMenu'] : null,
+            'badge' => isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null,
             'image' => $imagePath,
             'status' => 'available',
             'supplements' => $supplements
@@ -428,6 +429,7 @@ switch ($action) {
         if (isset($input['description'])) $patch['description'] = $input['description'];
         if (isset($input['priceSolo'])) $patch['priceSolo'] = (float)$input['priceSolo'];
         if (isset($input['priceMenu'])) $patch['priceMenu'] = $input['priceMenu'] !== '' ? (float)$input['priceMenu'] : null;
+        if (isset($input['badge'])) $patch['badge'] = $input['badge'] !== '' ? trim($input['badge']) : null;
         if (isset($input['status'])) $patch['status'] = $input['status'];
 
         // Gérer les suppléments (peuvent être une chaîne JSON depuis FormData)
