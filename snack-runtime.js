@@ -110,7 +110,7 @@ console.log("🚀 [INIT] snack-runtime.js is loading...");
     if (!useAPI) {
       // Menu depuis menu.json
       try {
-        const res = await fetch("/config/menu.json", { cache: "no-store" });
+        const res = await fetch("config/menu.json", { cache: "no-store" });
         if (!res.ok) throw new Error("menu.json introuvable");
 
         const menuData = await res.json();
@@ -140,7 +140,7 @@ console.log("🚀 [INIT] snack-runtime.js is loading...");
 
       // Settings depuis restaurant.json
       try {
-        const restoRes = await fetch("/config/restaurant.json", { cache: "no-store" });
+        const restoRes = await fetch("config/restaurant.json", { cache: "no-store" });
         if (restoRes.ok) {
           const restoData = await restoRes.json();
 

@@ -3,7 +3,7 @@
 // Objectif: ne JAMAIS écrire dans fabrik-burger.config.js (source de vérité front, read-only)
 
 (function () {
-  const RUNTIME_URL = "/config/menu.runtime.json";
+  const RUNTIME_URL = "config/menu.runtime.json";
 
   // Permet au runtime principal (snack-runtime.js) d'attendre le merge
   let __resolveReady;

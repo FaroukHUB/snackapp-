@@ -67,13 +67,13 @@ function isLargeSize(category, sizeLabel="simple"){
 
 /* ===== Formulaire panier (actions.php) ===== */
 function normalizeActionUrl(action){
-  if (!action) return "/cart/actions.php";
+  if (!action) return "cart/actions.php";
   try {
     const u = new URL(action, location.href);
-    const path = u.pathname.includes("actions.php") ? u.pathname : "/cart/actions.php";
+    const path = u.pathname.includes("actions.php") ? u.pathname : "cart/actions.php";
     return path + (u.search || "");
   } catch (e) {
-    return "/cart/actions.php";
+    return "cart/actions.php";
   }
 }
 
@@ -82,11 +82,11 @@ function ensureCartForm(){
   if (!form){
     form = document.createElement("form");
     form.method = "post";
-    form.action = "/cart/actions.php";
+    form.action = "cart/actions.php";
     form.className = "hidden";
     document.body.appendChild(form);
   } else {
-    const original = form.getAttribute("action") || "/cart/actions.php";
+    const original = form.getAttribute("action") || "cart/actions.php";
     form.action = normalizeActionUrl(original);
   }
 

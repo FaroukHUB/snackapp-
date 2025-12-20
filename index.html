@@ -21,7 +21,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Feuille de styles locale -->
-  <link rel="stylesheet" href="/styles.css"/>
+  <link rel="stylesheet" href="styles.css"/>
 
   <!-- JSON-LD Restaurant neutre (le runtime en injectera un autre basé sur SNACK_CONFIG) -->
   <script type="application/ld+json">
@@ -63,7 +63,7 @@
     </button>
 
     <!-- Reset panier -->
-    <form method="post" action="/cart/actions.php" class="hidden" aria-hidden="true">
+    <form method="post" action="cart/actions.php" class="hidden" aria-hidden="true">
       <input type="hidden" name="action" value="reset">
       <button type="submit">Reset</button>
     </form>
@@ -78,7 +78,7 @@
 
     <!-- Logo + nom -->
     <a href="#hero" class="ml-auto flex items-center gap-2">
-      <img src="/images/logo-placeholder.jpg" alt="Logo du snack" class="h-8 w-8 rounded-full object-cover"/>
+      <img src="images/logo-placeholder.jpg" alt="Logo du snack" class="h-8 w-8 rounded-full object-cover"/>
       <span class="font-semibold text-sm tracking-tight"></span>
     </a>
   </div>
@@ -94,7 +94,7 @@
     <!-- Header -->
     <div class="p-4 flex items-center justify-between border-b border-slate-800">
       <div class="flex items-center gap-2">
-        <img src="/images/logo-placeholder.jpg" alt="Logo du snack" class="h-8 w-8 rounded-full object-cover"/>
+        <img src="images/logo-placeholder.jpg" alt="Logo du snack" class="h-8 w-8 rounded-full object-cover"/>
         <div>
           <p class="font-semibold text-sm">Nom du snack</p>
           <p class="text-xs text-slate-400 leading-tight">
@@ -250,7 +250,7 @@
 <!-- HERO -->
 <section id="hero" class="relative">
   <img
-    src="/images/hero-placeholder.jpg"
+    src="images/hero-placeholder.jpg"
     alt="Photo du snack"
     class="w-full h-[44svh] md:h-[58svh] object-cover"
     decoding="async"
@@ -469,7 +469,7 @@
   <div class="max-w-7xl mx-auto px-4 grid gap-10 md:grid-cols-4">
     <!-- IDENTITÉ -->
     <div class="text-center md:text-left">
-      <img src="/images/logo-placeholder.jpg" alt="Logo du snack" class="h-9 mx-auto md:mx-0 mb-3"/>
+      <img src="images/logo-placeholder.jpg" alt="Logo du snack" class="h-9 mx-auto md:mx-0 mb-3"/>
       <p class="text-slate-600">
         Texte de présentation du snack (rempli par la configuration ou manuellement).
       </p>
@@ -731,13 +731,13 @@
 </div>
 
 <!-- Config Snack (ici : Fabrik Burger) -->
-<script src="/config/fabrik-burger.config.js?v=1765459000"></script>
+<script src="config/fabrik-burger.config.js?v=1765459000"></script>
 
 <!-- Script projet historique (La Formule) -->
-<script defer src="/script.js?v=1765459000"></script>
+<script defer src="script.js?v=1765459000"></script>
 
 <!-- Runtime SnackApp (applique la config sur le HTML de base) -->
-<script defer src="/snack-runtime.js?v=1765459000"></script>
+<script defer src="snack-runtime.js?v=1765459000"></script>
 
 
 <div id="addProductModal" class="modal-overlay">
