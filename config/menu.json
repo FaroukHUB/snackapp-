@@ -45,7 +45,7 @@
                             "tomates",
                             "oignons"
                         ],
-                        "status": "unavailable"
+                        "status": "available"
                     },
                     {
                         "id": "le-spicy",
@@ -273,13 +273,13 @@
                         "id": "schweppes-mojito",
                         "name": "Schweppes mojito",
                         "price": 1.5,
-                        "status": "unavailable"
+                        "status": "available"
                     },
                     {
                         "id": "tropico",
                         "name": "Tropico exotique",
                         "price": 1.5,
-                        "status": "unavailable"
+                        "status": "available"
                     },
                     {
                         "id": "fanta",
