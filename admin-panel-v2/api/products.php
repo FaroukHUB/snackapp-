@@ -85,10 +85,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             require_once __DIR__ . '/../config.php';
             $runtime = loadMenuRuntime();
 
-            $supplements = $runtime['supplements'] ?? [
+            // Charger les suppléments depuis menu.json, pas le runtime
+            $supplements = $menuData['supplements'] ?? [
                 'catalog' => [],
                 'defaultForCategories' => []
             ];
+
+            // Merger avec les modifications du runtime
+            if (!empty($runtime['supplements']['catalog'])) {
+                foreach ($runtime['supplements']['catalog'] as $id => $data) {
+                    if (isset($supplements['catalog'][$id])) {
+                        $supplements['catalog'][$id] = array_merge($supplements['catalog'][$id], $data);
+                    } else {
+                        $supplements['catalog'][$id] = $data;
+                    }
+                }
+            }
 
             jsonSuccess([
                 'menu' => $menuData['menu'] ?? ['categories' => []],

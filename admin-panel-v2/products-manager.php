@@ -935,10 +935,10 @@ session_start();
         tr.className = "row";
         tr.style.cursor = "pointer";
         let img = it.image ? String(it.image) : "";
-// Préfixer avec .. si le chemin commence par / pour remonter à la racine
-if (img && img.startsWith('/')) {
-  img = '..' + img;
-}
+        // Préfixer avec ../ pour remonter à la racine du site
+        if (img && !img.startsWith('http') && !img.startsWith('../')) {
+          img = '../' + img;
+        }
 
         tr.innerHTML = `
           <td style="width:56px">
