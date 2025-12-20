@@ -236,7 +236,7 @@ window.SNACK_CONFIG = {
             description: "Burger au fromage de chèvre avec sauce miel, salade, tomates, oignons.",
             priceSolo: 11,
             priceMenu: 14,
-            image: "/images.webp",
+            image: "images/seguin_vvlwyb.webp",
             baseIngredients: ["salade", "tomates", "oignons"]
           },
           {
@@ -272,7 +272,7 @@ window.SNACK_CONFIG = {
             description: "Steak, cheddar, sauce relevée, poivrons, oignons, salade.",
             priceSolo: 11,
             priceMenu: 14,
-            image: "images/fabrik/menu/le-mexicain.jpg",
+            image: "images/moyenmexicainfrites_zz4odh.webp",
             baseIngredients: ["salade", "poivrons", "oignons"]
           },
           {
@@ -281,7 +281,7 @@ window.SNACK_CONFIG = {
             description: "Poulet mariné, sauce curry, salade, tomates, oignons.",
             priceSolo: 11,
             priceMenu: 14,
-            image: "images/fabrik/menu/l-indien.jpg",
+            image: "images/moyenindien_jm0xvn.webp",
             baseIngredients: ["salade", "tomates", "oignons"]
           },
           {
@@ -300,7 +300,7 @@ window.SNACK_CONFIG = {
             description: "Burger inspiration du Nord, fromage local, sauce maison.",
             priceSolo: 11,
             priceMenu: 14,
-            image: "images/fabrik/menu/le-chti.jpg",
+            image: "images/moyenchti_s4rgvc.webp",
             baseIngredients: []
           },
           {
@@ -340,11 +340,11 @@ window.SNACK_CONFIG = {
         id: "extras",
         name: "Extras",
         items: [
-          { id: "tenders", name: "Tenders poulet", price: 4.5, image: "images/fabrik/menu/tenders.jpg" },
-          { id: "nems-xxl", name: "Nems poulet XXL", price: 5, image: "images/fabrik/menu/nems-xxl.jpg" },
-          { id: "frites-fraiches", name: "Frites fraîches", price: 3, image: "images/fabrik/menu/frites-fraiches.jpg" },
-          { id: "frites-cheddar", name: "Frites cheddar", price: 4, image: "images/fabrik/menu/frites-cheddar.jpg" },
-          { id: "mozza-sticks", name: "Mozza sticks", price: 4.5, image: "images/fabrik/menu/mozza-sticks.jpg" }
+          { id: "tenders", name: "Tenders poulet", price: 4.5, image: "images/mozzatenders_qli7au (1).webp" },
+          { id: "nems-xxl", name: "Nems poulet XXL", price: 5 },
+          { id: "frites-fraiches", name: "Frites fraîches", price: 3 },
+          { id: "frites-cheddar", name: "Frites cheddar", price: 4, image: "images/cheddar_t36vwm.webp" },
+          { id: "mozza-sticks", name: "Mozza sticks", price: 4.5, image: "images/mozzatenders_qli7au (1).webp" }
         ]
       },
 
@@ -353,8 +353,8 @@ window.SNACK_CONFIG = {
         id: "desserts",
         name: "Desserts",
         items: [
-          { id: "tiramisu", name: "Tiramisu", price: 3.5, image: "images/la-tarte-au-daim_jmkzbe.webp" },
-          { id: "tarte-daim", name: "Tarte au Daim", price: 3.5, image: "images/fabrik/menu/tarte-daim.jpg" }
+          { id: "tiramisu", name: "Tiramisu", price: 3.5, image: "images/minitiramisu_roc8ov.webp" },
+          { id: "tarte-daim", name: "Tarte au Daim", price: 3.5, image: "images/la-tarte-au-daim_jmkzbe.webp" }
         ]
       },
 
