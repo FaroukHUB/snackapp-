@@ -10,6 +10,7 @@ const Products = {
     selectedSupplements: [],
     removedIngredients: [],
     menuType: 'solo', // 'solo' or 'menu'
+    selectedDrink: null, // For menu drink selection
 
     /**
      * Initialize products display
@@ -189,6 +190,7 @@ const Products = {
                         <p class="product-description">${product.description || ''}</p>
                         <div class="product-footer">
                             <span class="product-price">${Config.formatPrice(price)}</span>
+                            ${!isUnavailable ? `<button class="product-add-btn">Ajouter</button>` : ''}
                         </div>
                     </div>
                 </div>
@@ -405,6 +407,7 @@ const Products = {
         this.selectedSupplements = [];
         this.removedIngredients = [];
         this.menuType = 'solo';
+        this.selectedDrink = null;
 
         const modal = document.getElementById('productModal');
 
@@ -481,6 +484,26 @@ const Products = {
             supplementsContainer.style.display = 'none';
         }
 
+        // Render drinks selection (for menu option)
+        const drinksContainer = document.getElementById('modalDrinks');
+        const drinksList = document.getElementById('drinksList');
+        const drinks = Config.getDrinks();
+        const hasMenuOption = product.priceMenu && product.priceMenu > 0;
+
+        if (hasMenuOption && drinks.length > 0) {
+            drinksList.innerHTML = drinks.map(drink => `
+                <div class="drink-item" data-id="${drink.id}" onclick="Products.selectDrink('${drink.id}')">
+                    ${drink.name}
+                </div>
+            `).join('');
+            // Hide by default (shown when menu is selected)
+            drinksContainer.classList.add('hidden');
+            drinksContainer.style.display = 'none';
+        } else {
+            drinksContainer.classList.add('hidden');
+            drinksContainer.style.display = 'none';
+        }
+
         this.updateModalUI();
         console.log('Modal element:', modal);
         modal.classList.add('active');
@@ -489,10 +512,39 @@ const Products = {
     },
 
     /**
+     * Select a drink for menu
+     */
+    selectDrink(drinkId) {
+        const drinks = Config.getDrinks();
+        const drink = drinks.find(d => d.id === drinkId);
+        this.selectedDrink = drink || null;
+
+        // Update UI
+        document.querySelectorAll('.drink-item').forEach(item => {
+            item.classList.toggle('selected', item.dataset.id === drinkId);
+        });
+    },
+
+    /**
      * Set menu type (solo or menu)
      */
     setMenuType(type) {
         this.menuType = type;
+
+        // Show/hide drinks section
+        const drinksContainer = document.getElementById('modalDrinks');
+        if (type === 'menu') {
+            drinksContainer.classList.remove('hidden');
+            drinksContainer.style.display = '';
+        } else {
+            drinksContainer.classList.add('hidden');
+            drinksContainer.style.display = 'none';
+            this.selectedDrink = null;
+            document.querySelectorAll('.drink-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+        }
+
         document.querySelectorAll('.menu-option').forEach(opt => {
             opt.classList.toggle('active', opt.dataset.type === type);
         });
@@ -623,7 +675,8 @@ const Products = {
             [...this.selectedSupplements],
             {
                 menuType: this.menuType,
-                removedIngredients: [...this.removedIngredients]
+                removedIngredients: [...this.removedIngredients],
+                selectedDrink: this.selectedDrink ? { ...this.selectedDrink } : null
             }
         );
 

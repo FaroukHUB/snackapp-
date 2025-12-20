@@ -156,6 +156,14 @@ const Config = {
     },
 
     /**
+     * Get drinks for menu selection
+     */
+    getDrinks() {
+        const drinksCategory = this.menu?.categories?.find(c => c.id === 'boissons');
+        return (drinksCategory?.items || []).filter(d => d.status === 'available');
+    },
+
+    /**
      * Get upsell suggestions based on cart contents
      */
     getUpsellSuggestions(cartCategories) {

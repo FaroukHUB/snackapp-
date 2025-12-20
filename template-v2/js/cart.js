@@ -264,6 +264,7 @@ const Cart = {
         container.innerHTML = this.items.map(item => {
             const menuType = item.options?.menuType;
             const removedIngredients = item.options?.removedIngredients || [];
+            const selectedDrink = item.options?.selectedDrink;
 
             return `
             <div class="mini-cart-item" data-key="${item.key}">
@@ -274,6 +275,11 @@ const Cart = {
                         ${item.name}
                         ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 9px; padding: 1px 4px; border-radius: 3px; margin-left: 4px;">MENU</span>' : ''}
                     </div>
+                    ${selectedDrink ? `
+                        <div class="mini-cart-item-drink" style="font-size: 11px; color: var(--primary);">
+                            🥤 ${selectedDrink.name}
+                        </div>
+                    ` : ''}
                     ${item.supplements.length > 0 ? `
                         <div class="mini-cart-item-supplements" style="font-size: 11px; color: var(--success);">
                             + ${item.supplements.map(s => s.name).join(', ')}
@@ -363,10 +369,14 @@ const Cart = {
         this.items.forEach(item => {
             const menuType = item.options?.menuType;
             const removedIngredients = item.options?.removedIngredients || [];
+            const selectedDrink = item.options?.selectedDrink;
 
             message += `${item.quantity}x ${item.name}`;
             if (menuType === 'menu') {
                 message += ` (MENU)`;
+            }
+            if (selectedDrink) {
+                message += `\n   🥤 Boisson: ${selectedDrink.name}`;
             }
             if (item.supplements.length > 0) {
                 message += `\n   ✅ +${item.supplements.map(s => s.name).join(', ')}`;

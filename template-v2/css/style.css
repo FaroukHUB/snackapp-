@@ -619,21 +619,20 @@ ul {
 }
 
 .product-add-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    padding: 8px 16px;
+    border-radius: var(--border-radius-sm);
     background: var(--primary);
     color: var(--white);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 600;
     transition: var(--transition);
+    border: none;
+    cursor: pointer;
 }
 
 .product-add-btn:hover {
     background: var(--primary-dark);
-    transform: scale(1.1);
+    transform: scale(1.02);
 }
 
 /* ============================================
@@ -998,10 +997,19 @@ ul {
     transition: var(--transition);
 }
 
+.supplement-checkbox i {
+    opacity: 0;
+    color: var(--white);
+    font-size: 12px;
+}
+
 .supplement-item.selected .supplement-checkbox {
     background: var(--primary);
     border-color: var(--primary);
-    color: var(--white);
+}
+
+.supplement-item.selected .supplement-checkbox i {
+    opacity: 1;
 }
 
 .supplement-name {
@@ -1012,6 +1020,48 @@ ul {
 .supplement-price {
     font-weight: 600;
     color: var(--primary);
+}
+
+/* Drinks Selection (Menu) */
+.modal-drinks {
+    margin-bottom: 20px;
+}
+
+.modal-drinks h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--gray-700);
+}
+
+.drinks-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.drink-item {
+    padding: 10px 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius-sm);
+    background: var(--white);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.drink-item:hover {
+    border-color: var(--primary);
+}
+
+.drink-item.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
 }
 
 /* Menu/Solo Toggle */
