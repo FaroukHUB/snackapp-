@@ -913,48 +913,62 @@
                     return;
                 }
 
-                // Generate order number
-                const orderNumber = Math.floor(1000 + Math.random() * 9000);
+                // Disable button during submission
+                const submitBtn = document.getElementById('submitOrder');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
 
-                // Prepare order data
+                // Format items for API
+                const formattedItems = Cart.items.map(item => ({
+                    product_id: item.id,
+                    name: item.name,
+                    price: item.basePrice,
+                    quantity: item.quantity,
+                    variant: item.options?.menuType || 'solo',
+                    supplements: item.supplements || [],
+                    removed_ingredients: item.options?.removedIngredients || [],
+                    selected_drink: item.options?.selectedDrink?.name || null
+                }));
+
+                // Prepare order data for admin API
                 const orderData = {
-                    orderNumber: orderNumber,
-                    customerName: name,
-                    customerPhone: phone,
-                    customerAddress: address,
-                    note: note,
-                    mode: this.mode,
-                    items: Cart.items,
+                    action: 'add',
+                    customer_name: name,
+                    customer_phone: phone,
+                    items: formattedItems,
                     subtotal: Cart.getSubtotal(),
-                    discount: this.discount,
                     total: Cart.getSubtotal() - this.discount,
-                    createdAt: new Date().toISOString()
+                    notes: [
+                        this.mode === 'delivery' ? `Livraison: ${address}` : 'Retrait sur place',
+                        note
+                    ].filter(Boolean).join(' | ')
                 };
 
-                // Send to backend
+                // Send to admin API
                 try {
-                    const response = await fetch('../webhook.php', {
+                    const response = await fetch('../admin-panel-v2/api/orders.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            ...orderData,
-                            source: 'template-v2'
-                        })
+                        body: JSON.stringify(orderData)
                     });
 
-                    if (!response.ok) {
-                        throw new Error('Order submission failed');
-                    }
+                    const result = await response.json();
 
-                    // Show confirmation
-                    this.showConfirmation(orderNumber, name, phone);
+                    if (result.success) {
+                        // Show confirmation with real order number from API
+                        const orderNumber = result.order_id || result.order?.order_number || 'XXXX';
+                        this.showConfirmation(orderNumber, name, phone);
+                    } else {
+                        throw new Error(result.error || 'Erreur lors de la commande');
+                    }
 
                 } catch (error) {
                     console.error('Order error:', error);
-                    // Still show confirmation (order might have gone through)
-                    this.showConfirmation(orderNumber, name, phone);
+                    this.showToast('Erreur: ' + error.message, 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Confirmer la commande';
                 }
             },
 
