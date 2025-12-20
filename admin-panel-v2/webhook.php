@@ -2,13 +2,15 @@
 /**
  * Webhook pour recevoir les commandes depuis le site web
  * Ce fichier doit être appelé depuis script.js quand le client envoie une commande
+ *
+ * Utilise bootstrap.php pour la cohérence avec le reste de l'admin
  */
 
-require_once 'config.php';
+require_once __DIR__ . '/bootstrap.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
 // Gérer les requêtes OPTIONS (preflight CORS)
@@ -40,63 +42,94 @@ foreach ($required as $field) {
     }
 }
 
-// Charger les commandes existantes
-$orders = loadData('orders.json');
+// Déterminer si on utilise MySQL ou JSON
+$useMySQL = !SNACK_USE_JSON && !defined('SNACK_DB_ERROR');
 
-// Générer un ID unique pour la commande
-$today = date('Ymd');
-$orderCount = 0;
+if ($useMySQL) {
+    // === MODE MYSQL ===
+    try {
+        $orderId = OrderRepository::createOrder(SNACK_RESTAURANT_ID, [
+            'customer_name' => $data['customer_name'] ?? 'Client',
+            'customer_phone' => preg_replace('/[^0-9+]/', '', $data['customer_phone']),
+            'items' => $data['items'],
+            'subtotal' => floatval($data['subtotal'] ?? $data['total']),
+            'total' => floatval($data['total']),
+            'notes' => $data['notes'] ?? null,
+            'loyalty_reward_id' => $data['loyalty_reward_id'] ?? null
+        ]);
 
-// Compter les commandes du jour
-foreach ($orders as $order) {
-    if (strpos($order['id'], 'ORD' . $today) === 0) {
-        $orderCount++;
+        $order = OrderRepository::getById($orderId);
+
+        echo json_encode([
+            'success' => true,
+            'order_id' => $order['order_number'],
+            'message' => 'Commande reçue avec succès'
+        ]);
+    } catch (Exception $e) {
+        error_log("Webhook MySQL Error: " . $e->getMessage());
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+} else {
+    // === MODE JSON (fallback) ===
+    require_once __DIR__ . '/config.php';
+
+    $orders = loadData('orders.json');
+
+    // Générer un ID unique pour la commande
+    $today = date('Ymd');
+    $orderCount = 0;
+
+    // Compter les commandes du jour
+    foreach ($orders as $order) {
+        if (strpos($order['id'], 'ORD' . $today) === 0) {
+            $orderCount++;
+        }
+    }
+
+    $orderId = 'ORD' . $today . str_pad($orderCount + 1, 4, '0', STR_PAD_LEFT);
+
+    // Créer la nouvelle commande
+    $newOrder = [
+        'id' => $orderId,
+        'customer_name' => $data['customer_name'] ?? '',
+        'customer_phone' => preg_replace('/[^0-9+]/', '', $data['customer_phone']),
+        'items' => $data['items'],
+        'subtotal' => floatval($data['subtotal'] ?? $data['total']),
+        'total' => floatval($data['total']),
+        'loyalty_reward_id' => $data['loyalty_reward_id'] ?? null,
+        'loyalty_discount' => floatval($data['loyalty_discount'] ?? 0),
+        'status' => 'received',
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s'),
+        'notes' => $data['notes'] ?? '',
+        'estimated_time' => null,
+        'estimated_ready_at' => null,
+        'ready_at' => null
+    ];
+
+    // Ajouter la commande
+    $orders[] = $newOrder;
+
+    // Sauvegarder
+    if (saveData('orders.json', $orders)) {
+        // Enregistrer le client si nouveau
+        saveCustomerFromOrder($newOrder);
+
+        echo json_encode([
+            'success' => true,
+            'order_id' => $orderId,
+            'message' => 'Commande reçue avec succès'
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'error' => 'Erreur lors de l\'enregistrement'
+        ]);
     }
 }
 
-$orderId = 'ORD' . $today . str_pad($orderCount + 1, 4, '0', STR_PAD_LEFT);
-
-// Créer la nouvelle commande
-$newOrder = [
-    'id' => $orderId,
-    'customer_name' => $data['customer_name'] ?? '',
-    'customer_phone' => preg_replace('/[^0-9+]/', '', $data['customer_phone']),
-    'items' => $data['items'],
-    'subtotal' => floatval($data['subtotal'] ?? $data['total']),
-    'total' => floatval($data['total']),
-    'loyalty_reward_id' => $data['loyalty_reward_id'] ?? null,
-    'loyalty_discount' => floatval($data['loyalty_discount'] ?? 0),
-    'status' => 'received',
-    'created_at' => date('Y-m-d H:i:s'),
-    'updated_at' => date('Y-m-d H:i:s'),
-    'notes' => $data['notes'] ?? '',
-    'estimated_time' => null,
-    'estimated_ready_at' => null,
-    'ready_at' => null
-];
-
-// Ajouter la commande
-$orders[] = $newOrder;
-
-// Sauvegarder
-if (saveData('orders.json', $orders)) {
-    // Enregistrer le client si nouveau
-    saveCustomerFromOrder($newOrder);
-
-    echo json_encode([
-        'success' => true,
-        'order_id' => $orderId,
-        'message' => 'Commande reçue avec succès'
-    ]);
-} else {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Erreur lors de l\'enregistrement'
-    ]);
-}
-
 /**
- * Enregistrer le client dans la base CRM
+ * Enregistrer le client dans la base CRM (mode JSON uniquement)
  */
 function saveCustomerFromOrder($order) {
     $customers = loadData('customers.json');
@@ -136,4 +169,3 @@ function saveCustomerFromOrder($order) {
 
     saveData('customers.json', $customers);
 }
-?>

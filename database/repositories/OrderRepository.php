@@ -158,9 +158,23 @@ class OrderRepository {
             }
         }
 
-        // Mettre à jour les stats du client
+        // Mettre à jour les stats du client et ajouter des points fidélité
         if ($customerId) {
             CustomerRepository::incrementStats($customerId, $data['total'] ?? 0);
+
+            // Ajouter des points fidélité (1€ = 1 point par défaut)
+            $orderTotal = floatval($data['total'] ?? 0);
+            $pointsToAdd = floor($orderTotal); // 1 point par euro
+
+            if ($pointsToAdd > 0) {
+                LoyaltyRepository::addPoints(
+                    $customerId,
+                    $restaurantId,
+                    $pointsToAdd,
+                    $orderId,
+                    'Commande #' . $orderNumber
+                );
+            }
         }
 
         return $orderId;
