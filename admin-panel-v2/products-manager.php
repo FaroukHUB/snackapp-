@@ -304,6 +304,7 @@ session_start();
         <a class="btn btn-ghost" href="./index.php" style="margin-right:8px;">← Retour</a>
         <button class="btn btn-good" type="button" id="btnAddCategory">+ Catégorie</button>
         <button class="btn btn-primary" type="button" id="btnAddProduct">+ Produit</button>
+        <button class="btn" type="button" id="btnAddFormule" style="background:rgba(168,85,247,.14);border-color:rgba(168,85,247,.35);">📦 + Formule</button>
         <button class="btn" type="button" id="btnManageSupplements" style="background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.35);">🧀 Suppléments</button>
       </div>
     </div>
@@ -506,6 +507,95 @@ session_start();
         </div>
       </form>
     </div>
+  </div>
+
+  <!-- MODAL: Formule -->
+  <div id="modalFormule" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalFormuleTitle" style="max-width:580px;">
+      <div class="modal-h">
+        <h3 id="modalFormuleTitle">Ajouter une formule</h3>
+        <button class="btn btn-ghost" type="button" data-close aria-label="Fermer">✕</button>
+      </div>
+      <form id="formFormule" enctype="multipart/form-data">
+        <input type="hidden" id="formuleId" name="formule_id" />
+        <div class="modal-b" style="max-height:60vh;overflow-y:auto;">
+          <div class="field">
+            <label for="formuleName">Nom de la formule</label>
+            <input id="formuleName" name="name" class="input" type="text" placeholder="Ex : Formule Midi" required />
+          </div>
+
+          <div class="field">
+            <label for="formuleDesc">Description</label>
+            <textarea id="formuleDesc" name="description" class="textarea" placeholder="Ex : 1 Burger au choix + Frites + Boisson"></textarea>
+          </div>
+
+          <div class="two">
+            <div class="field">
+              <label for="formulePrice">Prix (€)</label>
+              <input id="formulePrice" name="price" class="input" type="number" step="0.01" min="0" placeholder="12.90" required />
+            </div>
+            <div class="field">
+              <label for="formuleOriginalPrice">Prix barré (optionnel)</label>
+              <input id="formuleOriginalPrice" name="originalPrice" class="input" type="number" step="0.01" min="0" placeholder="15.50" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="formuleBadge">Badge (optionnel)</label>
+            <input id="formuleBadge" name="badge" class="input" type="text" placeholder="Ex : Populaire, -20%, Best Value" />
+          </div>
+
+          <div class="field">
+            <label>Photo de la formule</label>
+            <div class="upload">
+              <img id="formuleImgPreview" class="preview" alt="Aperçu" style="display:none;" />
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <input id="formuleImage" name="image" type="file" accept="image/png,image/jpeg,image/webp" />
+                <span class="muted">Formats: jpg / png / webp • conseillé: 800×600</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Contenu de la formule</label>
+            <div id="formuleIncludes" style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+              <!-- Les includes seront ajoutés dynamiquement -->
+            </div>
+            <button type="button" class="btn btn-ghost" id="btnAddInclude" style="margin-top:8px;">+ Ajouter un élément</button>
+          </div>
+
+          <div class="field">
+            <label for="formuleStatus">Statut</label>
+            <select id="formuleStatus" name="status" class="select">
+              <option value="available">Disponible</option>
+              <option value="unavailable">Indisponible</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-f">
+          <button class="btn btn-danger" type="button" id="btnDeleteFormule" style="display:none;">Supprimer</button>
+          <button class="btn btn-ghost" type="button" data-close>Annuler</button>
+          <button class="btn btn-primary" type="submit">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Section Formules (affichée sous la grille) -->
+  <div class="wrap" style="padding-top:0;">
+    <section class="panel" id="formulesPanel" style="margin-top:20px;">
+      <div class="panel-h">
+        <div>
+          <h2>📦 Formules</h2>
+          <div class="meta" id="formulesMeta">Chargement…</div>
+        </div>
+        <button class="btn btn-primary" type="button" id="btnAddFormuleInline">+ Ajouter</button>
+      </div>
+      <div class="panel-b">
+        <div id="formulesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;"></div>
+        <div id="formulesEmpty" class="muted" style="display:none;padding:20px;text-align:center;">Aucune formule configurée.</div>
+      </div>
+    </section>
   </div>
 
   <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
@@ -1026,6 +1116,229 @@ session_start();
       }
     });
 
+    // ===== GESTION DES FORMULES =====
+    let currentEditFormule = null;
+    let formuleIncludesCount = 0;
+
+    function getFormules(){
+      return state.menu?.formules ?? [];
+    }
+
+    function openFormuleModal(formule = null){
+      currentEditFormule = formule;
+      const form = $("#formFormule");
+      form.reset();
+      formuleIncludesCount = 0;
+      $("#formuleIncludes").innerHTML = "";
+      $("#formuleImgPreview").style.display = "none";
+
+      if (formule) {
+        // Mode édition
+        $("#modalFormuleTitle").textContent = "Modifier la formule";
+        $("#formuleId").value = formule.id;
+        $("#formuleName").value = formule.name ?? "";
+        $("#formuleDesc").value = formule.description ?? "";
+        $("#formulePrice").value = formule.price ?? "";
+        $("#formuleOriginalPrice").value = formule.originalPrice ?? "";
+        $("#formuleBadge").value = formule.badge ?? "";
+        $("#formuleStatus").value = formule.status ?? "available";
+        $("#btnDeleteFormule").style.display = "block";
+
+        // Afficher l'image existante
+        if (formule.image) {
+          $("#formuleImgPreview").src = "../" + formule.image;
+          $("#formuleImgPreview").style.display = "block";
+        }
+
+        // Ajouter les includes existants
+        (formule.includes ?? []).forEach(inc => addFormuleInclude(inc));
+      } else {
+        // Mode ajout
+        $("#modalFormuleTitle").textContent = "Ajouter une formule";
+        $("#formuleId").value = "";
+        $("#btnDeleteFormule").style.display = "none";
+        // Ajouter un include vide par défaut
+        addFormuleInclude();
+      }
+
+      openModal("#modalFormule");
+    }
+
+    function addFormuleInclude(data = null){
+      const container = $("#formuleIncludes");
+      const cats = getCategories();
+      const idx = formuleIncludesCount++;
+
+      const div = document.createElement("div");
+      div.className = "formule-include-row";
+      div.style.cssText = "display:flex;gap:8px;align-items:center;padding:10px;border:1px solid var(--stroke);border-radius:10px;background:rgba(0,0,0,.18);";
+
+      const typeVal = data?.type ?? "category";
+      const labelVal = data?.label ?? "";
+      const qtyVal = data?.quantity ?? 1;
+      const catIdVal = data?.categoryId ?? "";
+      const prodIdVal = data?.productId ?? "";
+
+      div.innerHTML = `
+        <select name="include_type_${idx}" class="select" style="width:110px;" onchange="toggleIncludeType(this, ${idx})">
+          <option value="category" ${typeVal === 'category' ? 'selected' : ''}>Catégorie</option>
+          <option value="product" ${typeVal === 'product' ? 'selected' : ''}>Produit</option>
+        </select>
+        <select name="include_cat_${idx}" class="select include-cat" style="width:140px;${typeVal === 'product' ? 'display:none;' : ''}">
+          <option value="">-- Catégorie --</option>
+          ${cats.map(c => `<option value="${escapeHtml(c.id)}" ${c.id === catIdVal ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+        </select>
+        <input name="include_prod_${idx}" class="input include-prod" type="text" placeholder="ID produit" value="${escapeHtml(prodIdVal)}" style="width:140px;${typeVal === 'category' ? 'display:none;' : ''}" />
+        <input name="include_label_${idx}" class="input" type="text" placeholder="Label affiché" value="${escapeHtml(labelVal)}" style="flex:1;min-width:100px;" />
+        <input name="include_qty_${idx}" class="input" type="number" min="1" value="${qtyVal}" style="width:60px;" />
+        <button type="button" class="btn btn-danger" style="padding:6px 10px;" onclick="this.closest('.formule-include-row').remove()">✕</button>
+      `;
+
+      container.appendChild(div);
+    }
+
+    window.toggleIncludeType = function(select, idx) {
+      const row = select.closest('.formule-include-row');
+      const catSelect = row.querySelector('.include-cat');
+      const prodInput = row.querySelector('.include-prod');
+      if (select.value === 'category') {
+        catSelect.style.display = '';
+        prodInput.style.display = 'none';
+      } else {
+        catSelect.style.display = 'none';
+        prodInput.style.display = '';
+      }
+    };
+
+    $("#btnAddFormule").addEventListener("click", () => openFormuleModal());
+    $("#btnAddFormuleInline").addEventListener("click", () => openFormuleModal());
+    $("#btnAddInclude").addEventListener("click", () => addFormuleInclude());
+
+    $("#formuleImage").addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      $("#formuleImgPreview").src = url;
+      $("#formuleImgPreview").style.display = "block";
+    });
+
+    $("#formFormule").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formuleId = $("#formuleId").value || null;
+      const name = $("#formuleName").value.trim();
+      const description = $("#formuleDesc").value.trim();
+      const price = parseFloat($("#formulePrice").value) || 0;
+      const originalPrice = $("#formuleOriginalPrice").value ? parseFloat($("#formuleOriginalPrice").value) : null;
+      const badge = $("#formuleBadge").value.trim() || null;
+      const status = $("#formuleStatus").value;
+      const imageFile = $("#formuleImage").files[0];
+
+      // Collecter les includes
+      const includes = [];
+      $$(".formule-include-row").forEach((row, idx) => {
+        const type = row.querySelector(`[name^="include_type_"]`).value;
+        const label = row.querySelector(`[name^="include_label_"]`).value.trim();
+        const qty = parseInt(row.querySelector(`[name^="include_qty_"]`).value) || 1;
+
+        if (!label) return;
+
+        const inc = { type, label, quantity: qty };
+        if (type === 'category') {
+          inc.categoryId = row.querySelector('.include-cat').value;
+        } else {
+          inc.productId = row.querySelector('.include-prod').value.trim();
+        }
+        includes.push(inc);
+      });
+
+      try {
+        const formData = new FormData();
+        formData.set("action", formuleId ? "update_formule" : "add_formule");
+        if (formuleId) formData.set("formule_id", formuleId);
+        formData.set("name", name);
+        formData.set("description", description);
+        formData.set("price", price);
+        if (originalPrice !== null) formData.set("originalPrice", originalPrice);
+        if (badge) formData.set("badge", badge);
+        formData.set("status", status);
+        formData.set("includes", JSON.stringify(includes));
+        if (imageFile) formData.set("image", imageFile);
+
+        const res = await fetch(API, { method: "POST", body: formData });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || data.success !== true) throw new Error(data?.message ?? "Erreur API");
+
+        toast("success", formuleId ? "Formule modifiée" : "Formule ajoutée", `"${name}" a été enregistrée.`);
+        closeModal($("#modalFormule"));
+        await boot();
+      } catch(err) {
+        toast("error", "Erreur", err?.message ?? "Impossible d'enregistrer.");
+      }
+    });
+
+    $("#btnDeleteFormule").addEventListener("click", async () => {
+      if (!currentEditFormule) return;
+      if (!confirm(`Supprimer la formule "${currentEditFormule.name}" ?`)) return;
+
+      try {
+        await apiPostJson({ action: "delete_formule", formule_id: currentEditFormule.id });
+        toast("success", "Supprimée", `"${currentEditFormule.name}" a été supprimée.`);
+        closeModal($("#modalFormule"));
+        await boot();
+      } catch(err) {
+        toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
+      }
+    });
+
+    function renderFormules(){
+      const grid = $("#formulesGrid");
+      const empty = $("#formulesEmpty");
+      const formules = getFormules();
+
+      $("#formulesMeta").textContent = `${formules.length} formule(s)`;
+
+      grid.innerHTML = "";
+
+      if (formules.length === 0) {
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+
+      formules.forEach(f => {
+        const card = document.createElement("div");
+        card.style.cssText = "display:flex;gap:12px;padding:12px;border:1px solid var(--stroke);border-radius:14px;background:rgba(255,255,255,.04);cursor:pointer;transition:background .12s ease;";
+        card.onmouseenter = () => card.style.background = "rgba(255,255,255,.08)";
+        card.onmouseleave = () => card.style.background = "rgba(255,255,255,.04)";
+
+        let imgSrc = f.image ? "../" + f.image : "";
+
+        card.innerHTML = `
+          <div style="width:80px;height:80px;flex-shrink:0;border-radius:12px;overflow:hidden;border:1px solid var(--stroke);background:rgba(0,0,0,.18);">
+            ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" style="width:100%;height:100%;object-fit:cover;" alt="${escapeHtml(f.name)}">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);">📦</div>'}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <strong style="font-size:14px;">${escapeHtml(f.name)}</strong>
+              ${f.badge ? `<span style="font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(168,85,247,.2);color:#c084fc;">${escapeHtml(f.badge)}</span>` : ''}
+            </div>
+            <p style="margin:0 0 6px;color:var(--muted);font-size:12px;line-height:1.3;">${escapeHtml(f.description ?? '')}</p>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:15px;font-weight:600;">${f.price?.toFixed(2) ?? '—'}€</span>
+              ${f.originalPrice ? `<span style="color:var(--muted);text-decoration:line-through;font-size:12px;">${f.originalPrice.toFixed(2)}€</span>` : ''}
+              <span class="status" data-status="${f.status ?? 'available'}" style="margin-left:auto;padding:4px 8px;">
+                <span class="dot"></span>${(f.status ?? 'available') === 'available' ? 'Dispo' : 'Indispo'}
+              </span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => openFormuleModal(f));
+        grid.appendChild(card);
+      });
+    }
+
     async function boot(){
       const data = await apiGet();
       state.menu = data;
@@ -1034,6 +1347,7 @@ session_start();
         state.selectedCategoryId = cats[0]?.id ?? null;
       }
       render();
+      renderFormules();
     }
 
     boot().catch((err)=>{

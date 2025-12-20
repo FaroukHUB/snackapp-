@@ -7,6 +7,21 @@
   "priceRange": "€€",
   "isHalal": true,
 
+  "theme": {
+    "primary": "#e67e22",
+    "primaryDark": "#d35400",
+    "secondary": "#2c3e50",
+    "accent": "#f39c12",
+    "background": "#1a1a2e",
+    "cardBackground": "#252540",
+    "textPrimary": "#ffffff",
+    "textSecondary": "#b4b4b4",
+    "success": "#27ae60",
+    "error": "#e74c3c",
+    "buttonRadius": "12px",
+    "cardRadius": "16px"
+  },
+
   "contact": {
     "phone": "+33374455427",
     "phoneDisplay": "03 74 45 54 27",
@@ -41,16 +56,26 @@
     "snapchat": ""
   },
 
+  "delivery": {
+    "enabled": true,
+    "ownDelivery": false,
+    "deliveryFee": 2.50,
+    "freeDeliveryMinimum": 25,
+    "estimatedTime": "30-45 min"
+  },
+
   "platforms": [
     {
       "id": "uber-eats",
       "name": "Uber Eats",
-      "url": "https://www.ubereats.com/fr-en/store/fabrik-burger/dMUlWAS8TGiOKDMY5ZCinA"
+      "url": "https://www.ubereats.com/fr-en/store/fabrik-burger/dMUlWAS8TGiOKDMY5ZCinA",
+      "enabled": true
     },
     {
       "id": "deliveroo",
       "name": "Deliveroo",
-      "url": "https://deliveroo.fr/fr/menu/lille/lille-wazemmes/fabrik-burger"
+      "url": "https://deliveroo.fr/fr/menu/lille/lille-wazemmes/fabrik-burger",
+      "enabled": true
     }
   ],
 

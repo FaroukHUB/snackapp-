@@ -119,6 +119,178 @@ switch ($action) {
         }
         break;
 
+    case 'toggle_delivery':
+        // Toggle livraison ON/OFF
+        session_start();
+        if (!isset($_SESSION['admin_logged_in'])) {
+            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
+            exit;
+        }
+
+        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
+        $restaurant = json_decode(file_get_contents($restaurantFile), true);
+
+        if (!isset($restaurant['delivery'])) {
+            $restaurant['delivery'] = ['enabled' => true];
+        }
+
+        $restaurant['delivery']['enabled'] = !$restaurant['delivery']['enabled'];
+
+        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+            echo json_encode([
+                'success' => true,
+                'delivery_enabled' => $restaurant['delivery']['enabled'],
+                'message' => $restaurant['delivery']['enabled'] ? '🚚 Livraison activée' : '🏠 Livraison désactivée'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
+        }
+        break;
+
+    case 'get_settings':
+        // Récupérer tous les paramètres du restaurant
+        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
+        $restaurant = json_decode(file_get_contents($restaurantFile), true);
+
+        echo json_encode([
+            'success' => true,
+            'delivery' => $restaurant['delivery'] ?? ['enabled' => false],
+            'platforms' => $restaurant['platforms'] ?? []
+        ]);
+        break;
+
+    case 'update_platform':
+        // Activer/Désactiver une plateforme
+        session_start();
+        if (!isset($_SESSION['admin_logged_in'])) {
+            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $platformId = $input['platform_id'] ?? null;
+        $enabled = isset($input['enabled']) ? (bool)$input['enabled'] : null;
+
+        if (!$platformId) {
+            echo json_encode(['success' => false, 'error' => 'ID plateforme manquant']);
+            exit;
+        }
+
+        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
+        $restaurant = json_decode(file_get_contents($restaurantFile), true);
+
+        $found = false;
+        foreach ($restaurant['platforms'] as &$platform) {
+            if ($platform['id'] === $platformId) {
+                $platform['enabled'] = $enabled ?? !($platform['enabled'] ?? true);
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            echo json_encode(['success' => false, 'error' => 'Plateforme introuvable']);
+            exit;
+        }
+
+        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+            echo json_encode([
+                'success' => true,
+                'platforms' => $restaurant['platforms'],
+                'message' => 'Plateforme mise à jour'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
+        }
+        break;
+
+    case 'add_platform':
+        // Ajouter une nouvelle plateforme
+        session_start();
+        if (!isset($_SESSION['admin_logged_in'])) {
+            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $name = trim($input['name'] ?? '');
+        $url = trim($input['url'] ?? '');
+
+        if (!$name || !$url) {
+            echo json_encode(['success' => false, 'error' => 'Nom et URL requis']);
+            exit;
+        }
+
+        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
+        $restaurant = json_decode(file_get_contents($restaurantFile), true);
+
+        $id = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+        $id = trim($id, '-');
+
+        // Vérifier que l'ID n'existe pas déjà
+        foreach ($restaurant['platforms'] as $p) {
+            if ($p['id'] === $id) {
+                $id .= '-' . rand(100, 999);
+                break;
+            }
+        }
+
+        $newPlatform = [
+            'id' => $id,
+            'name' => $name,
+            'url' => $url,
+            'enabled' => true
+        ];
+
+        $restaurant['platforms'][] = $newPlatform;
+
+        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+            echo json_encode([
+                'success' => true,
+                'platform' => $newPlatform,
+                'platforms' => $restaurant['platforms'],
+                'message' => 'Plateforme ajoutée'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
+        }
+        break;
+
+    case 'delete_platform':
+        // Supprimer une plateforme
+        session_start();
+        if (!isset($_SESSION['admin_logged_in'])) {
+            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $platformId = $input['platform_id'] ?? null;
+
+        if (!$platformId) {
+            echo json_encode(['success' => false, 'error' => 'ID plateforme manquant']);
+            exit;
+        }
+
+        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
+        $restaurant = json_decode(file_get_contents($restaurantFile), true);
+
+        $restaurant['platforms'] = array_values(array_filter(
+            $restaurant['platforms'],
+            fn($p) => $p['id'] !== $platformId
+        ));
+
+        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
+            echo json_encode([
+                'success' => true,
+                'platforms' => $restaurant['platforms'],
+                'message' => 'Plateforme supprimée'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
+        }
+        break;
+
     default:
         echo json_encode(['success' => false, 'error' => 'Action invalide']);
 }

@@ -745,6 +745,13 @@
             <div class="order-number" id="confirmationOrderNumber">#0000</div>
             <p>Temps d'attente estimé : <strong>15-20 min</strong></p>
 
+            <!-- Loyalty Points Earned -->
+            <div class="loyalty-earned" id="loyaltyEarned" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 12px 20px; border-radius: 12px; margin: 15px 0; text-align: center;">
+                <i class="fas fa-star" style="margin-right: 6px;"></i>
+                <span id="loyaltyPointsText">+10 points fidélité</span>
+                <a href="../loyalty-card.php" style="display: block; margin-top: 6px; color: white; font-size: 12px; text-decoration: underline;">Voir ma carte fidélité</a>
+            </div>
+
             <div class="confirmation-actions">
                 <a href="#" class="btn-whatsapp" id="whatsappSelfLink" target="_blank">
                     <i class="fab fa-whatsapp"></i>
@@ -1032,9 +1039,25 @@
                 }
             },
 
-            showConfirmation(orderNumber, customerName, customerPhone, customerAddress, note, items, subtotal, discount) {
+            showConfirmation(orderNumber, customerName, customerPhone, customerAddress, note, items, subtotal, discount, loyaltyPoints = 0) {
                 // Update modal
                 document.getElementById('confirmationOrderNumber').textContent = `#${orderNumber}`;
+
+                // Show loyalty points if earned
+                const loyaltyDiv = document.getElementById('loyaltyEarned');
+                if (loyaltyPoints > 0) {
+                    document.getElementById('loyaltyPointsText').textContent = `+${loyaltyPoints} points fidélité gagnés !`;
+                    loyaltyDiv.style.display = 'block';
+                } else {
+                    // Calculate points based on total (1 point per euro)
+                    const estimatedPoints = Math.floor(subtotal - discount);
+                    if (estimatedPoints > 0) {
+                        document.getElementById('loyaltyPointsText').textContent = `+${estimatedPoints} points fidélité gagnés !`;
+                        loyaltyDiv.style.display = 'block';
+                    } else {
+                        loyaltyDiv.style.display = 'none';
+                    }
+                }
 
                 // Generate receipt link
                 const receiptLink = this.generateReceiptLink(

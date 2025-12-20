@@ -542,12 +542,31 @@ if (isset($_GET['export'])) {
 
 
     if ($_GET['export'] === 'archives') {
-        header('Content-Disposition: attachment; filename=commandes_archivees_' . date('Y-m-d') . '.csv');
+        $filterMonth = $_GET['month'] ?? '';
+        $filteredOrders = $archivedOrders;
+
+        // Filtrer par mois si spécifié
+        if ($filterMonth) {
+            $filteredOrders = array_filter($archivedOrders, function($o) use ($filterMonth) {
+                $orderMonth = date('Y-m', strtotime($o['created_at'] ?? 'now'));
+                return $orderMonth === $filterMonth;
+            });
+        }
+
+        $filename = $filterMonth
+            ? 'commandes_' . $filterMonth . '.csv'
+            : 'commandes_archivees_' . date('Y-m-d') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=' . $filename);
         echo "\xEF\xBB\xBF";
-        echo "ID,Date,Client,Téléphone,Total,Statut,Produits\n";
-        foreach ($archivedOrders as $o) {
+        echo "ID,Date,Heure,Client,Téléphone,Total,Statut,Produits\n";
+        foreach ($filteredOrders as $o) {
             $items = array_map(fn($i) => ($i['quantity'] ?? 1) . 'x ' . ($i['name'] ?? $i['product_name'] ?? ''), $o['items'] ?? []);
-            echo '"' . ($o['id'] ?? $o['order_number'] ?? '') . '","' . ($o['created_at'] ?? '') . '","' . ($o['customer_name'] ?? '') . '","' . ($o['customer_phone'] ?? '') . '",' . ($o['total'] ?? 0) . ',"' . ($o['status'] ?? '') . '","' . implode('; ', $items) . "\"\n";
+            $dateTime = $o['created_at'] ?? '';
+            $date = date('Y-m-d', strtotime($dateTime));
+            $time = date('H:i', strtotime($dateTime));
+            echo '"' . ($o['id'] ?? $o['order_number'] ?? '') . '","' . $date . '","' . $time . '","' . ($o['customer_name'] ?? '') . '","' . ($o['customer_phone'] ?? '') . '",' . ($o['total'] ?? 0) . ',"' . ($o['status'] ?? '') . '","' . implode('; ', $items) . "\"\n";
         }
         exit;
     }
@@ -1188,7 +1207,21 @@ if (isset($_GET['export'])) {
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <h2><i class="fas fa-archive" style="color: #8b5cf6;"></i> Archives</h2>
-                <a href="?export=archives" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> Export CSV</a>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <select id="exportMonth" class="select" style="width: auto; padding: 8px 12px; font-size: 13px;">
+                        <option value="">Tout l'historique</option>
+                        <?php
+                        // Générer les 12 derniers mois
+                        for ($i = 0; $i < 12; $i++) {
+                            $monthDate = strtotime("-$i months");
+                            $monthVal = date('Y-m', $monthDate);
+                            $monthLabel = ucfirst(strftime('%B %Y', $monthDate));
+                            echo "<option value=\"$monthVal\">$monthLabel</option>";
+                        }
+                        ?>
+                    </select>
+                    <button onclick="exportArchives()" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> Export CSV</button>
+                </div>
             </div>
 
             <?php if (empty($archivedOrders)): ?>
@@ -1351,6 +1384,67 @@ if (isset($_GET['export'])) {
                     <?php endforeach; ?>
                     <button type="submit" class="btn" style="margin-top: 15px;"><i class="fas fa-save"></i> Enregistrer</button>
                 </form>
+            </div>
+
+            <!-- Livraison & Plateformes -->
+            <div class="card" style="border-left: 4px solid #f59e0b;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-truck" style="color: #f59e0b;"></i> Livraison & Plateformes</h3>
+
+                <!-- Toggle Livraison -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 15px;">
+                    <div>
+                        <strong style="font-size: 14px;">Livraison activée</strong>
+                        <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Afficher les options de livraison sur le site</p>
+                    </div>
+                    <div id="delivery-toggle" onclick="toggleDelivery()" style="cursor: pointer;">
+                        <div id="delivery-toggle-bg" style="width: 50px; height: 26px; border-radius: 13px; background: <?php echo ($restaurantSettings['delivery']['enabled'] ?? false) ? '#10b981' : '#4b5563'; ?>; position: relative; transition: background 0.3s;">
+                            <div id="delivery-toggle-knob" style="width: 22px; height: 22px; border-radius: 50%; background: white; position: absolute; top: 2px; left: <?php echo ($restaurantSettings['delivery']['enabled'] ?? false) ? '26px' : '2px'; ?>; transition: left 0.3s;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plateformes de livraison -->
+                <div style="margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <strong style="font-size: 14px;">Plateformes de livraison</strong>
+                        <button type="button" class="btn btn-sm btn-gray" onclick="openAddPlatformModal()"><i class="fas fa-plus"></i> Ajouter</button>
+                    </div>
+                    <div id="platforms-list">
+                        <?php foreach (($restaurantSettings['platforms'] ?? []) as $platform): ?>
+                        <div class="platform-row" data-id="<?php echo htmlspecialchars($platform['id']); ?>" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <strong style="font-size: 13px;"><?php echo htmlspecialchars($platform['name']); ?></strong>
+                                <a href="<?php echo htmlspecialchars($platform['url']); ?>" target="_blank" style="display: block; color: #60a5fa; font-size: 11px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"><?php echo htmlspecialchars($platform['url']); ?></a>
+                            </div>
+                            <div onclick="togglePlatform('<?php echo htmlspecialchars($platform['id']); ?>')" style="cursor: pointer;">
+                                <div class="platform-toggle" style="width: 40px; height: 22px; border-radius: 11px; background: <?php echo ($platform['enabled'] ?? true) ? '#10b981' : '#4b5563'; ?>; position: relative; transition: background 0.3s;">
+                                    <div style="width: 18px; height: 18px; border-radius: 50%; background: white; position: absolute; top: 2px; left: <?php echo ($platform['enabled'] ?? true) ? '20px' : '2px'; ?>; transition: left 0.3s;"></div>
+                                </div>
+                            </div>
+                            <button onclick="deletePlatform('<?php echo htmlspecialchars($platform['id']); ?>')" class="btn btn-sm" style="background: #dc2626; padding: 6px 10px;"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Ajouter Plateforme -->
+            <div id="add-platform-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+                <div style="background: #1f2937; border-radius: 16px; padding: 24px; max-width: 400px; width: 90%;">
+                    <h3 style="margin: 0 0 20px;"><i class="fas fa-plus"></i> Ajouter une plateforme</h3>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>Nom de la plateforme</label>
+                        <input type="text" id="new-platform-name" placeholder="Ex: Just Eat" style="width: 100%;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label>URL de votre page</label>
+                        <input type="url" id="new-platform-url" placeholder="https://..." style="width: 100%;">
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button onclick="closeAddPlatformModal()" class="btn btn-gray">Annuler</button>
+                        <button onclick="addPlatform()" class="btn"><i class="fas fa-plus"></i> Ajouter</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Contact -->
@@ -2458,6 +2552,122 @@ document.querySelectorAll('.switch input[type="checkbox"]').forEach(input => {
         input.addEventListener('change', updateSlider);
     }
 });
+
+// ===== Gestion Livraison & Plateformes =====
+function toggleDelivery() {
+    fetch('api/restaurant-status.php?action=toggle_delivery', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const bg = document.getElementById('delivery-toggle-bg');
+                const knob = document.getElementById('delivery-toggle-knob');
+                if (data.delivery_enabled) {
+                    bg.style.background = '#10b981';
+                    knob.style.left = '26px';
+                } else {
+                    bg.style.background = '#4b5563';
+                    knob.style.left = '2px';
+                }
+                showToast(data.message || 'Livraison mise à jour');
+            } else {
+                showToast(data.error || 'Erreur', 'error');
+            }
+        })
+        .catch(() => showToast('Erreur réseau', 'error'));
+}
+
+function togglePlatform(platformId) {
+    fetch('api/restaurant-status.php?action=update_platform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform_id: platformId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const row = document.querySelector(`.platform-row[data-id="${platformId}"]`);
+            if (row) {
+                const toggle = row.querySelector('.platform-toggle');
+                const platform = data.platforms.find(p => p.id === platformId);
+                if (platform && toggle) {
+                    toggle.style.background = platform.enabled ? '#10b981' : '#4b5563';
+                    toggle.querySelector('div').style.left = platform.enabled ? '20px' : '2px';
+                }
+            }
+            showToast('Plateforme mise à jour');
+        } else {
+            showToast(data.error || 'Erreur', 'error');
+        }
+    })
+    .catch(() => showToast('Erreur réseau', 'error'));
+}
+
+function openAddPlatformModal() {
+    document.getElementById('add-platform-modal').style.display = 'flex';
+    document.getElementById('new-platform-name').value = '';
+    document.getElementById('new-platform-url').value = '';
+}
+
+function closeAddPlatformModal() {
+    document.getElementById('add-platform-modal').style.display = 'none';
+}
+
+function addPlatform() {
+    const name = document.getElementById('new-platform-name').value.trim();
+    const url = document.getElementById('new-platform-url').value.trim();
+
+    if (!name || !url) {
+        showToast('Remplissez tous les champs', 'error');
+        return;
+    }
+
+    fetch('api/restaurant-status.php?action=add_platform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, url })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            closeAddPlatformModal();
+            location.reload(); // Reload to show new platform
+        } else {
+            showToast(data.error || 'Erreur', 'error');
+        }
+    })
+    .catch(() => showToast('Erreur réseau', 'error'));
+}
+
+function deletePlatform(platformId) {
+    if (!confirm('Supprimer cette plateforme ?')) return;
+
+    fetch('api/restaurant-status.php?action=delete_platform', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform_id: platformId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const row = document.querySelector(`.platform-row[data-id="${platformId}"]`);
+            if (row) row.remove();
+            showToast('Plateforme supprimée');
+        } else {
+            showToast(data.error || 'Erreur', 'error');
+        }
+    })
+    .catch(() => showToast('Erreur réseau', 'error'));
+}
+
+// ===== Export CSV par mois =====
+function exportArchives() {
+    const month = document.getElementById('exportMonth').value;
+    let url = '?export=archives';
+    if (month) {
+        url += '&month=' + encodeURIComponent(month);
+    }
+    window.location.href = url;
+}
 
 
     </script>

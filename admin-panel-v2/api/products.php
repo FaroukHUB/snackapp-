@@ -102,9 +102,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 }
             }
 
+            // Charger les formules (depuis menu.json, avec modifications runtime)
+            $formules = $menuData['formules'] ?? [];
+
+            // Appliquer les modifications du runtime aux formules
+            if (!empty($runtime['formules'])) {
+                foreach ($runtime['formules'] as $id => $patch) {
+                    foreach ($formules as &$f) {
+                        if ($f['id'] === $id) {
+                            $f = array_merge($f, $patch);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Ajouter les formules custom
+            if (!empty($runtime['customFormules'])) {
+                foreach ($runtime['customFormules'] as $f) {
+                    $formules[] = $f;
+                }
+            }
+
+            // Filtrer les formules supprimées
+            if (!empty($runtime['deletedFormules'])) {
+                $formules = array_filter($formules, fn($f) => !in_array($f['id'], $runtime['deletedFormules'], true));
+                $formules = array_values($formules);
+            }
+
             jsonSuccess([
                 'menu' => $menuData['menu'] ?? ['categories' => []],
-                'supplements' => $supplements
+                'supplements' => $supplements,
+                'formules' => $formules
             ]);
         }
     }
@@ -545,6 +574,259 @@ switch ($action) {
         jsonSuccess();
         break;
 
+    // ===== FORMULES =====
+    case 'add_formule':
+        $name = trim((string)($input['name'] ?? ''));
+        $description = trim((string)($input['description'] ?? ''));
+        $price = (float)($input['price'] ?? 0);
+        $originalPrice = isset($input['originalPrice']) && $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
+        $badge = isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null;
+        $status = $input['status'] ?? 'available';
+
+        if ($name === '' || $price <= 0) {
+            jsonError('Nom et prix requis');
+        }
+
+        // Générer un ID unique
+        $baseId = 'formule-' . strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+        $baseId = trim($baseId, '-');
+
+        $existingIds = [];
+        if (!empty($runtime['customFormules'])) {
+            foreach ($runtime['customFormules'] as $f) {
+                $existingIds[] = $f['id'];
+            }
+        }
+        // Charger aussi les IDs existants du menu.json
+        $menuData = json_decode(file_get_contents(SNACK_ROOT . '/config/menu.json'), true);
+        foreach (($menuData['formules'] ?? []) as $f) {
+            $existingIds[] = $f['id'];
+        }
+
+        $id = $baseId;
+        $i = 2;
+        while (in_array($id, $existingIds, true)) {
+            $id = $baseId . '-' . $i;
+            $i++;
+        }
+
+        // Gérer l'upload d'image
+        $imagePath = handleFormuleImageUpload($id);
+
+        // Décoder les includes
+        $includes = [];
+        if (isset($input['includes'])) {
+            $incData = is_string($input['includes']) ? json_decode($input['includes'], true) : $input['includes'];
+            if (is_array($incData)) {
+                $includes = $incData;
+            }
+        }
+
+        // Calculer l'économie
+        $savings = $originalPrice !== null ? round($originalPrice - $price, 2) : null;
+
+        $formule = [
+            'id' => $id,
+            'name' => $name,
+            'description' => $description,
+            'price' => $price,
+            'originalPrice' => $originalPrice,
+            'savings' => $savings,
+            'badge' => $badge,
+            'image' => $imagePath,
+            'includes' => $includes,
+            'status' => $status
+        ];
+
+        if (!isset($runtime['customFormules'])) {
+            $runtime['customFormules'] = [];
+        }
+        $runtime['customFormules'][$id] = $formule;
+
+        saveMenuRuntime($runtime);
+
+        // Sync vers menu.json
+        syncFormulesToMenu($runtime);
+
+        jsonSuccess(['formule' => $formule]);
+        break;
+
+    case 'update_formule':
+        $formuleId = $input['formule_id'] ?? null;
+
+        if (!$formuleId) {
+            jsonError('ID formule manquant');
+        }
+
+        $patch = [];
+        if (isset($input['name'])) $patch['name'] = trim($input['name']);
+        if (isset($input['description'])) $patch['description'] = trim($input['description']);
+        if (isset($input['price'])) $patch['price'] = (float)$input['price'];
+        if (isset($input['originalPrice'])) {
+            $patch['originalPrice'] = $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
+        }
+        if (isset($input['badge'])) {
+            $patch['badge'] = $input['badge'] !== '' ? trim($input['badge']) : null;
+        }
+        if (isset($input['status'])) $patch['status'] = $input['status'];
+        if (isset($input['includes'])) {
+            $incData = is_string($input['includes']) ? json_decode($input['includes'], true) : $input['includes'];
+            if (is_array($incData)) {
+                $patch['includes'] = $incData;
+            }
+        }
+
+        // Calculer savings si on a price et originalPrice
+        if (isset($patch['price']) || isset($patch['originalPrice'])) {
+            $currentPrice = $patch['price'] ?? null;
+            $currentOriginal = $patch['originalPrice'] ?? null;
+
+            if ($currentPrice !== null && $currentOriginal !== null) {
+                $patch['savings'] = round($currentOriginal - $currentPrice, 2);
+            }
+        }
+
+        // Gérer l'upload d'image
+        $imagePath = handleFormuleImageUpload($formuleId);
+        if ($imagePath) {
+            $patch['image'] = $imagePath;
+        }
+
+        // Vérifier si c'est une formule custom ou du menu.json
+        if (isset($runtime['customFormules'][$formuleId])) {
+            $runtime['customFormules'][$formuleId] = array_merge($runtime['customFormules'][$formuleId], $patch);
+        } else {
+            // C'est une formule du menu.json, on stocke le patch
+            if (!isset($runtime['formules'])) $runtime['formules'] = [];
+            if (!isset($runtime['formules'][$formuleId])) $runtime['formules'][$formuleId] = [];
+            $runtime['formules'][$formuleId] = array_merge($runtime['formules'][$formuleId], $patch);
+        }
+
+        saveMenuRuntime($runtime);
+
+        // Sync vers menu.json
+        syncFormulesToMenu($runtime);
+
+        jsonSuccess(['formule' => $patch]);
+        break;
+
+    case 'delete_formule':
+        $formuleId = $input['formule_id'] ?? null;
+
+        if (!$formuleId) {
+            jsonError('ID formule manquant');
+        }
+
+        // Supprimer de customFormules si présent
+        if (isset($runtime['customFormules'][$formuleId])) {
+            unset($runtime['customFormules'][$formuleId]);
+        }
+
+        // Ajouter à la liste des supprimées
+        if (!isset($runtime['deletedFormules'])) {
+            $runtime['deletedFormules'] = [];
+        }
+        if (!in_array($formuleId, $runtime['deletedFormules'], true)) {
+            $runtime['deletedFormules'][] = $formuleId;
+        }
+
+        saveMenuRuntime($runtime);
+
+        // Sync vers menu.json
+        syncFormulesToMenu($runtime);
+
+        jsonSuccess();
+        break;
+
     default:
         jsonError('Action inconnue');
+}
+
+/* =========================
+   HELPER: Upload image formule
+   ========================= */
+function handleFormuleImageUpload(string $baseId): ?string {
+    $fileKey = null;
+    if (!empty($_FILES['image'])) $fileKey = 'image';
+    if (!empty($_FILES['imageFile'])) $fileKey = 'imageFile';
+
+    if (!$fileKey) return null;
+
+    $file = $_FILES[$fileKey];
+
+    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        return null;
+    }
+
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $mime = mime_content_type($file['tmp_name']) ?: '';
+    if (!isset($allowed[$mime])) {
+        jsonError('Format image non supporté (jpg/png/webp)');
+    }
+
+    $uploadsDir = SNACK_ROOT . '/images/formules';
+    if (!is_dir($uploadsDir)) {
+        mkdir($uploadsDir, 0775, true);
+    }
+
+    $filename = $baseId . '-' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
+    $dest = $uploadsDir . '/' . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $dest)) {
+        jsonError('Échec sauvegarde image formule');
+    }
+
+    return 'images/formules/' . $filename;
+}
+
+/* =========================
+   HELPER: Sync formules to menu.json
+   ========================= */
+function syncFormulesToMenu(array $runtime): void {
+    $menuPath = SNACK_ROOT . '/config/menu.json';
+    if (!file_exists($menuPath)) return;
+
+    $menuData = json_decode(file_get_contents($menuPath), true);
+    if (!$menuData) return;
+
+    $formules = $menuData['formules'] ?? [];
+
+    // Appliquer les patches
+    if (!empty($runtime['formules'])) {
+        foreach ($runtime['formules'] as $id => $patch) {
+            foreach ($formules as &$f) {
+                if ($f['id'] === $id) {
+                    $f = array_merge($f, $patch);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Ajouter les formules custom
+    if (!empty($runtime['customFormules'])) {
+        foreach ($runtime['customFormules'] as $f) {
+            // Vérifier si elle n'existe pas déjà
+            $exists = false;
+            foreach ($formules as $existing) {
+                if ($existing['id'] === $f['id']) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
+                $formules[] = $f;
+            }
+        }
+    }
+
+    // Supprimer les formules marquées comme supprimées
+    if (!empty($runtime['deletedFormules'])) {
+        $formules = array_filter($formules, fn($f) => !in_array($f['id'], $runtime['deletedFormules'], true));
+        $formules = array_values($formules);
+    }
+
+    $menuData['formules'] = $formules;
+
+    file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }

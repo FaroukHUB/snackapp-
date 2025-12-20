@@ -69,17 +69,39 @@ const Config = {
     applyTheme() {
         if (!this.restaurant) return;
 
-        // Get primary color from restaurant config or use default
-        const primaryColor = this.restaurant.branding?.primaryColor || '#e63946';
-
-        // Generate color variants
+        const theme = this.restaurant.theme || {};
         const root = document.documentElement;
+
+        // Primary colors
+        const primaryColor = theme.primary || this.restaurant.branding?.primaryColor || '#e63946';
         root.style.setProperty('--primary', primaryColor);
-        root.style.setProperty('--primary-dark', this.darkenColor(primaryColor, 15));
+        root.style.setProperty('--primary-dark', theme.primaryDark || this.darkenColor(primaryColor, 15));
         root.style.setProperty('--primary-light', this.lightenColor(primaryColor, 90));
+
+        // Secondary & accent
+        if (theme.secondary) root.style.setProperty('--secondary', theme.secondary);
+        if (theme.accent) root.style.setProperty('--accent', theme.accent);
+
+        // Background colors
+        if (theme.background) root.style.setProperty('--bg-dark', theme.background);
+        if (theme.cardBackground) root.style.setProperty('--card-bg', theme.cardBackground);
+
+        // Text colors
+        if (theme.textPrimary) root.style.setProperty('--text-primary', theme.textPrimary);
+        if (theme.textSecondary) root.style.setProperty('--text-secondary', theme.textSecondary);
+
+        // Feedback colors
+        if (theme.success) root.style.setProperty('--success', theme.success);
+        if (theme.error) root.style.setProperty('--error', theme.error);
+
+        // Border radius
+        if (theme.buttonRadius) root.style.setProperty('--border-radius', theme.buttonRadius);
+        if (theme.cardRadius) root.style.setProperty('--border-radius-lg', theme.cardRadius);
 
         // Update page title
         document.title = `Commander | ${this.restaurant.name}`;
+
+        console.log('Theme applied:', theme);
     },
 
     /**

@@ -125,23 +125,34 @@ const Products = {
             return;
         }
 
-        grid.innerHTML = formules.map(formule => `
-            <div class="formule-card" onclick="Products.openFormuleModal('${formule.id}')">
-                ${formule.badge ? `<span class="formule-savings">${formule.badge}</span>` : ''}
-                <div class="formule-card-content">
-                    <img src="../${formule.image}" alt="${formule.name}" class="formule-image"
-                         onerror="this.style.display='none'">
-                    <div class="formule-info">
-                        <h3 class="formule-name">${formule.name}</h3>
-                        <p class="formule-description">${formule.description}</p>
-                        <div class="formule-price">
-                            <span class="current">${Config.formatPrice(formule.price)}</span>
-                            ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
+        grid.innerHTML = formules.map(formule => {
+            const hasImage = formule.image && formule.image.trim() !== '';
+            const imageHtml = hasImage
+                ? `<div class="formule-image-wrapper">
+                       <img src="../${formule.image}" alt="${formule.name}" class="formule-image"
+                            onerror="this.parentElement.innerHTML='<div class=\\'formule-image-placeholder\\'><i class=\\'fas fa-box-open\\'></i></div>'">
+                   </div>`
+                : `<div class="formule-image-wrapper">
+                       <div class="formule-image-placeholder"><i class="fas fa-box-open"></i></div>
+                   </div>`;
+
+            return `
+                <div class="formule-card" onclick="Products.openFormuleModal('${formule.id}')">
+                    ${formule.badge ? `<span class="formule-savings">${formule.badge}</span>` : ''}
+                    <div class="formule-card-content">
+                        ${imageHtml}
+                        <div class="formule-info">
+                            <h3 class="formule-name">${formule.name}</h3>
+                            <p class="formule-description">${formule.description}</p>
+                            <div class="formule-price">
+                                <span class="current">${Config.formatPrice(formule.price)}</span>
+                                ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     },
 
     /**
