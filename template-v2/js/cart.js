@@ -293,8 +293,8 @@ const Cart = {
                     <div class="mini-cart-item-price">${Config.formatPrice(this.getItemTotal(item))}</div>
                     <div class="mini-cart-item-qty">Qté: ${item.quantity}</div>
                 </div>
-                <button class="mini-cart-item-remove" onclick="Cart.removeItem('${item.key}')"
-                        style="color: var(--gray-400); padding: 8px;">
+                <button class="mini-cart-item-remove" onclick="event.stopPropagation(); Cart.removeItem('${item.key}'); return false;"
+                        style="color: var(--gray-400); padding: 8px; background: none; border: none; cursor: pointer; font-size: 16px;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>

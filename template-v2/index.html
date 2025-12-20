@@ -213,7 +213,10 @@
     <div class="mini-cart" id="miniCart">
         <div class="mini-cart-header">
             <h3><i class="fas fa-shopping-bag"></i> Votre commande</h3>
-            <button class="mini-cart-close" id="miniCartClose"><i class="fas fa-times"></i></button>
+            <div class="mini-cart-header-actions">
+                <button class="mini-cart-clear-btn" onclick="Cart.clear(); Cart.updateUI();">Vider</button>
+                <button class="mini-cart-close" id="miniCartClose"><i class="fas fa-times"></i></button>
+            </div>
         </div>
         <div class="mini-cart-items" id="miniCartItems">
             <!-- Cart items preview -->

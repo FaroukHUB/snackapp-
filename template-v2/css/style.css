@@ -1491,6 +1491,45 @@ ul {
     font-size: 13px;
 }
 
+.mini-cart-item-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-400);
+    padding: 8px;
+    font-size: 16px;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.mini-cart-item-remove:hover {
+    color: var(--error);
+    transform: scale(1.2);
+}
+
+.mini-cart-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mini-cart-clear-btn {
+    background: none;
+    border: 1px solid var(--error);
+    color: var(--error);
+    padding: 4px 10px;
+    border-radius: var(--border-radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.mini-cart-clear-btn:hover {
+    background: var(--error);
+    color: white;
+}
+
 .mini-cart-footer {
     padding: 20px 24px;
     border-top: 1px solid var(--gray-200);
