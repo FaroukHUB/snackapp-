@@ -238,21 +238,33 @@ const Products = {
             const c = Config.getContact();
             const social = Config.getSocial();
 
-            let html = `
-                <p><strong>Téléphone :</strong> <a href="tel:${c.phone}">${c.phoneDisplay || c.phone}</a></p>
-                <p><strong>Adresse :</strong> ${Config.getFullAddress()}</p>
-            `;
+            let html = `<div class="contact-cards">
+                <div class="contact-card">
+                    <div class="contact-card-icon"><i class="fas fa-phone"></i></div>
+                    <div class="contact-card-info">
+                        <div class="contact-card-label">Téléphone</div>
+                        <div class="contact-card-value"><a href="tel:${c.phone}">${c.phoneDisplay || c.phone}</a></div>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-card-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="contact-card-info">
+                        <div class="contact-card-label">Adresse</div>
+                        <div class="contact-card-value">${Config.getFullAddress()}</div>
+                    </div>
+                </div>
+            </div>`;
 
-            if (social.instagram || social.facebook) {
-                html += '<div style="margin-top: 16px; display: flex; gap: 12px;">';
+            if (social.instagram || social.facebook || social.tiktok) {
+                html += '<div class="social-links">';
                 if (social.instagram) {
-                    html += `<a href="${social.instagram}" target="_blank" style="color: var(--primary);"><i class="fab fa-instagram fa-lg"></i></a>`;
+                    html += `<a href="${social.instagram}" target="_blank" class="social-link instagram"><i class="fab fa-instagram"></i></a>`;
                 }
                 if (social.facebook) {
-                    html += `<a href="${social.facebook}" target="_blank" style="color: var(--primary);"><i class="fab fa-facebook fa-lg"></i></a>`;
+                    html += `<a href="${social.facebook}" target="_blank" class="social-link facebook"><i class="fab fa-facebook-f"></i></a>`;
                 }
                 if (social.tiktok) {
-                    html += `<a href="${social.tiktok}" target="_blank" style="color: var(--primary);"><i class="fab fa-tiktok fa-lg"></i></a>`;
+                    html += `<a href="${social.tiktok}" target="_blank" class="social-link tiktok"><i class="fab fa-tiktok"></i></a>`;
                 }
                 html += '</div>';
             }
@@ -264,6 +276,10 @@ const Products = {
         const hours = document.getElementById('horairesContent');
         if (hours) {
             const openingHours = Config.getOpeningHours();
+            const days = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+            const todayIndex = new Date().getDay();
+            const todayName = days[todayIndex];
+
             hours.innerHTML = `
                 <div class="hours-grid">
                     ${openingHours.map(h => {
@@ -273,8 +289,9 @@ const Products = {
                         } else {
                             timeStr = `${h.opens} - ${h.closes}`;
                         }
+                        const isToday = h.day.toLowerCase() === todayName;
                         return `
-                            <div class="hours-row">
+                            <div class="hours-row ${isToday ? 'today' : ''}">
                                 <span class="hours-day">${this.capitalize(h.day)}</span>
                                 <span class="hours-time">${timeStr}</span>
                             </div>
