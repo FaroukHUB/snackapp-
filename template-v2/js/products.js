@@ -300,6 +300,51 @@ const Products = {
                 document.getElementById('faq')?.classList.add('hidden');
             }
         }
+
+        // Delivery Platforms
+        const platformsGrid = document.getElementById('platformsGrid');
+        if (platformsGrid) {
+            const platforms = Config.getPlatforms();
+            if (platforms && platforms.length > 0) {
+                const platformIcons = {
+                    'uber-eats': { icon: 'fa-shopping-bag', class: 'uber-eats' },
+                    'deliveroo': { icon: 'fa-bicycle', class: 'deliveroo' },
+                    'just-eat': { icon: 'fa-utensils', class: 'just-eat' }
+                };
+
+                let html = platforms.map(p => {
+                    const config = platformIcons[p.id] || { icon: 'fa-external-link-alt', class: '' };
+                    return `<a href="${p.url}" target="_blank" class="platform-btn ${config.class}">
+                        <i class="fas ${config.icon}"></i> ${p.name}
+                    </a>`;
+                }).join('');
+
+                platformsGrid.innerHTML = html;
+            } else {
+                document.getElementById('commander')?.classList.add('hidden');
+                document.getElementById('commander').style.display = 'none';
+            }
+        }
+
+        // Google Maps
+        const mapContainer = document.getElementById('mapContainer');
+        if (mapContainer) {
+            const fullAddress = Config.getFullAddress();
+            if (fullAddress) {
+                const encodedAddress = encodeURIComponent(fullAddress);
+                mapContainer.innerHTML = `
+                    <iframe
+                        src="https://www.google.com/maps?q=${encodedAddress}&output=embed"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                `;
+            } else {
+                document.getElementById('localisation')?.classList.add('hidden');
+                document.getElementById('localisation').style.display = 'none';
+            }
+        }
     },
 
     /**

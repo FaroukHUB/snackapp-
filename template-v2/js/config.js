@@ -297,6 +297,13 @@ const Config = {
         const loc = this.restaurant?.location;
         if (!loc) return '';
         return `${loc.addressLine1}, ${loc.postalCode} ${loc.city}`;
+    },
+
+    /**
+     * Get delivery platforms (Uber Eats, Deliveroo, Just Eat)
+     */
+    getPlatforms() {
+        return this.restaurant?.platforms || {};
     }
 };
 

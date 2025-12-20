@@ -739,6 +739,77 @@ ul {
     padding-left: 30px;
 }
 
+/* Map Container */
+.map-container {
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    height: 300px;
+    background: var(--gray-100);
+}
+
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Delivery Platforms */
+.platforms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.platform-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    font-size: 14px;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.platform-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.platform-btn img {
+    height: 24px;
+    width: auto;
+}
+
+.platform-btn.uber-eats {
+    background: #06C167;
+    color: white;
+}
+
+.platform-btn.uber-eats:hover {
+    background: #05a857;
+}
+
+.platform-btn.deliveroo {
+    background: #00CCBC;
+    color: white;
+}
+
+.platform-btn.deliveroo:hover {
+    background: #00b3a6;
+}
+
+.platform-btn.just-eat {
+    background: #FF8000;
+    color: white;
+}
+
+.platform-btn.just-eat:hover {
+    background: #e67300;
+}
+
 /* ============================================
    MODAL
    ============================================ */
