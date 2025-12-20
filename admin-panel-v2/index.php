@@ -354,28 +354,61 @@ $action = $_POST['action'];
 
        // Sauvegarder les réglages
     if ($_POST['action'] === 'save_settings') {
-        // Parser les réseaux sociaux dynamiques
-        $socialTypes = $_POST['social_type'] ?? [];
-        $socialValues = $_POST['social_value'] ?? [];
-        $socials = ['instagram' => '', 'facebook' => '', 'tiktok' => '', 'snapchat' => '', 'extra' => []];
+        // Vérifier quel formulaire a été soumis
+        $isContactForm = isset($_POST['social_type']);
+        $isHoursForm = isset($_POST['hours']);
 
-        foreach ($socialTypes as $i => $type) {
-            $value = trim($socialValues[$i] ?? '');
-            if (empty($value)) continue;
+        // Parser les réseaux sociaux dynamiques (seulement si formulaire contact soumis)
+        if ($isContactForm) {
+            $socialTypes = $_POST['social_type'] ?? [];
+            $socialValues = $_POST['social_value'] ?? [];
+            $socials = ['instagram' => '', 'facebook' => '', 'tiktok' => '', 'snapchat' => '', 'extra' => []];
 
-            if (in_array($type, ['instagram', 'facebook', 'tiktok', 'snapchat']) && empty($socials[$type])) {
-                $socials[$type] = $value;
-            } else {
-                $socials['extra'][] = ['type' => $type, 'value' => $value];
+            foreach ($socialTypes as $i => $type) {
+                $value = trim($socialValues[$i] ?? '');
+                if (empty($value)) continue;
+
+                if (in_array($type, ['instagram', 'facebook', 'tiktok', 'snapchat']) && empty($socials[$type])) {
+                    $socials[$type] = $value;
+                } else {
+                    $socials['extra'][] = ['type' => $type, 'value' => $value];
+                }
             }
+
+            // Parser les téléphones supplémentaires
+            $extraPhones = array_filter(array_map('trim', $_POST['extra_phones'] ?? []));
+
+            if ($useMySQL) {
+                // Contact et social
+                $settingsData = [];
+                if (isset($_POST['phone'])) $settingsData['phone'] = $_POST['phone'];
+                if (isset($_POST['whatsapp'])) $settingsData['whatsapp_number'] = $_POST['whatsapp'];
+                $settingsData['instagram'] = $socials['instagram'];
+                $settingsData['facebook'] = $socials['facebook'];
+                $settingsData['tiktok'] = $socials['tiktok'];
+                $settingsData['snapchat'] = $socials['snapchat'];
+                $settingsData['extra_socials'] = json_encode($socials['extra']);
+                $settingsData['extra_phones'] = json_encode($extraPhones);
+
+                if (!empty($settingsData)) {
+                    RestaurantRepository::updateSettings(SNACK_RESTAURANT_ID, $settingsData);
+                }
+            }
+
+            // Mettre à jour restaurant.json - contact et social
+            if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
+            if (isset($_POST['whatsapp'])) $restaurantSettings['contact']['whatsappOrdersNumber'] = $_POST['whatsapp'];
+            $restaurantSettings['contact']['extra_phones'] = $extraPhones;
+            $restaurantSettings['social']['instagram'] = $socials['instagram'];
+            $restaurantSettings['social']['facebook'] = $socials['facebook'];
+            $restaurantSettings['social']['tiktok'] = $socials['tiktok'];
+            $restaurantSettings['social']['snapchat'] = $socials['snapchat'];
+            $restaurantSettings['social']['extra'] = $socials['extra'];
         }
 
-        // Parser les téléphones supplémentaires
-        $extraPhones = array_filter(array_map('trim', $_POST['extra_phones'] ?? []));
-
-        if ($useMySQL) {
-            // Horaires
-            if (isset($_POST['hours'])) {
+        // Traitement des horaires (formulaire horaires)
+        if ($isHoursForm) {
+            if ($useMySQL) {
                 $hours = [];
                 foreach ($_POST['hours'] as $i => $h) {
                     $hours[] = [
@@ -386,24 +419,7 @@ $action = $_POST['action'];
                 RestaurantRepository::updateOpeningHours(SNACK_RESTAURANT_ID, $hours);
             }
 
-            // Contact et social
-            $settingsData = [];
-            if (isset($_POST['phone'])) $settingsData['phone'] = $_POST['phone'];
-            if (isset($_POST['whatsapp'])) $settingsData['whatsapp_number'] = $_POST['whatsapp'];
-            $settingsData['instagram'] = $socials['instagram'];
-            $settingsData['facebook'] = $socials['facebook'];
-            $settingsData['tiktok'] = $socials['tiktok'];
-            $settingsData['snapchat'] = $socials['snapchat'];
-            $settingsData['extra_socials'] = json_encode($socials['extra']);
-            $settingsData['extra_phones'] = json_encode($extraPhones);
-
-            if (!empty($settingsData)) {
-                RestaurantRepository::updateSettings(SNACK_RESTAURANT_ID, $settingsData);
-            }
-        }
-
-        // Toujours mettre à jour restaurant.json pour le site public
-        if (isset($_POST['hours'])) {
+            // Mettre à jour restaurant.json - horaires
             $restaurantSettings['openingHours'] = [];
             $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
             foreach ($days as $i => $day) {
@@ -433,15 +449,8 @@ $action = $_POST['action'];
                 $restaurantSettings['openingHours'][] = $dayData;
             }
         }
-        if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
-        if (isset($_POST['whatsapp'])) $restaurantSettings['contact']['whatsappOrdersNumber'] = $_POST['whatsapp'];
-        $restaurantSettings['contact']['extra_phones'] = $extraPhones;
-        $restaurantSettings['social']['instagram'] = $socials['instagram'];
-        $restaurantSettings['social']['facebook'] = $socials['facebook'];
-        $restaurantSettings['social']['tiktok'] = $socials['tiktok'];
-        $restaurantSettings['social']['snapchat'] = $socials['snapchat'];
-        $restaurantSettings['social']['extra'] = $socials['extra'];
 
+        // Sauvegarder restaurant.json
         file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
         header('Location: index.php#settings');
