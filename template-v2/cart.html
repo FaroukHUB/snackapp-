@@ -926,12 +926,11 @@
                 console.log('Cart items:', savedItems);
                 console.log('Subtotal:', savedSubtotal);
 
-                // Format items for API
+                // Format items for API (don't send product_id - it's a string, DB expects int)
                 const formattedItems = savedItems.map(item => {
                     const itemPrice = item.basePrice || 0;
                     const supplementsTotal = (item.supplements || []).reduce((sum, s) => sum + (s.price || 0), 0);
                     return {
-                        product_id: item.id,
                         name: item.name,
                         price: itemPrice + supplementsTotal,
                         quantity: item.quantity,
