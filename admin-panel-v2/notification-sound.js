@@ -139,7 +139,7 @@ class OrderNotificationSystem {
         const total = (typeof order.total === 'number') ? order.total.toFixed(2) : '0.00';
 
         modal.innerHTML = `
-            <div style="background:#2a2a3e;padding:40px;border-radius:20px;text-align:center;max-width:400px;">
+            <div style="background:#2a2a3e;padding:40px;border-radius:20px;text-align:center;max-width:400px;" onclick="event.stopPropagation()">
                 <div style="font-size:80px">🔔</div>
                 <h2 style="color:#fff;margin:15px 0;">NOUVELLE COMMANDE</h2>
                 <p style="font-size:24px;color:#fff;font-weight:bold;margin:10px 0;">${customerName}</p>
@@ -151,6 +151,9 @@ class OrderNotificationSystem {
                 </button>
             </div>
         `;
+
+        // Clic n'importe où sur le fond arrête le son
+        modal.addEventListener('click', () => this.acceptOrder());
 
         document.body.appendChild(modal);
     }
