@@ -388,7 +388,21 @@ switch ($action) {
         if (isset($input['priceSolo'])) $patch['priceSolo'] = (float)$input['priceSolo'];
         if (isset($input['priceMenu'])) $patch['priceMenu'] = $input['priceMenu'] !== '' ? (float)$input['priceMenu'] : null;
         if (isset($input['status'])) $patch['status'] = $input['status'];
-        if (isset($input['supplements'])) $patch['supplements'] = is_array($input['supplements']) ? $input['supplements'] : [];
+
+        // Gérer les suppléments (peuvent être une chaîne JSON depuis FormData)
+        if (isset($input['supplements'])) {
+            $sups = $input['supplements'];
+            if (is_string($sups)) {
+                $sups = json_decode($sups, true) ?? [];
+            }
+            $patch['supplements'] = is_array($sups) ? $sups : [];
+        }
+
+        // Gérer l'upload d'image
+        $imagePath = handleImageUpload($productId);
+        if ($imagePath) {
+            $patch['image'] = $imagePath;
+        }
 
         if (isset($runtime['customProducts'][$productId])) {
             $runtime['customProducts'][$productId] = array_merge($runtime['customProducts'][$productId], $patch);
@@ -492,6 +506,11 @@ switch ($action) {
         if (isset($input['status'])) $runtime['supplements']['catalog'][$id]['status'] = $input['status'];
 
         saveMenuRuntime($runtime);
+
+        // Sync vers menu.json pour le site public
+        require_once __DIR__ . '/../sync-menu.php';
+        syncMenuStatuses();
+
         jsonSuccess(['supplement' => $runtime['supplements']['catalog'][$id]]);
         break;
 

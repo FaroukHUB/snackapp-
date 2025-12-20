@@ -400,30 +400,31 @@ $action = $_POST['action'];
             if (!empty($settingsData)) {
                 RestaurantRepository::updateSettings(SNACK_RESTAURANT_ID, $settingsData);
             }
-        } else {
-            // JSON mode
-            if (isset($_POST['hours'])) {
-                $restaurantSettings['openingHours'] = [];
-                $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-                foreach ($days as $i => $day) {
-                    $restaurantSettings['openingHours'][] = [
-                        'day' => $day,
-                        'opens' => $_POST['hours'][$i]['opens'] ?? '18:30',
-                        'closes' => $_POST['hours'][$i]['closes'] ?? '23:30'
-                    ];
-                }
-            }
-            if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
-            if (isset($_POST['whatsapp'])) $restaurantSettings['contact']['whatsappOrdersNumber'] = $_POST['whatsapp'];
-            $restaurantSettings['contact']['extra_phones'] = $extraPhones;
-            $restaurantSettings['social']['instagram'] = $socials['instagram'];
-            $restaurantSettings['social']['facebook'] = $socials['facebook'];
-            $restaurantSettings['social']['tiktok'] = $socials['tiktok'];
-            $restaurantSettings['social']['snapchat'] = $socials['snapchat'];
-            $restaurantSettings['social']['extra'] = $socials['extra'];
-
-            file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
+
+        // Toujours mettre à jour restaurant.json pour le site public
+        if (isset($_POST['hours'])) {
+            $restaurantSettings['openingHours'] = [];
+            $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+            foreach ($days as $i => $day) {
+                $restaurantSettings['openingHours'][] = [
+                    'day' => $day,
+                    'opens' => $_POST['hours'][$i]['opens'] ?? '18:30',
+                    'closes' => $_POST['hours'][$i]['closes'] ?? '23:30'
+                ];
+            }
+        }
+        if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
+        if (isset($_POST['whatsapp'])) $restaurantSettings['contact']['whatsappOrdersNumber'] = $_POST['whatsapp'];
+        $restaurantSettings['contact']['extra_phones'] = $extraPhones;
+        $restaurantSettings['social']['instagram'] = $socials['instagram'];
+        $restaurantSettings['social']['facebook'] = $socials['facebook'];
+        $restaurantSettings['social']['tiktok'] = $socials['tiktok'];
+        $restaurantSettings['social']['snapchat'] = $socials['snapchat'];
+        $restaurantSettings['social']['extra'] = $socials['extra'];
+
+        file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
         header('Location: index.php#settings');
         exit;
     }
@@ -441,10 +442,11 @@ $action = $_POST['action'];
 
         if ($useMySQL) {
             RestaurantRepository::updateFaq(SNACK_RESTAURANT_ID, $faqItemsNew);
-        } else {
-            $restaurantSettings['faq']['items'] = $faqItemsNew;
-            file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
+        // Toujours mettre à jour restaurant.json pour le site public
+        $restaurantSettings['faq']['items'] = $faqItemsNew;
+        file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
         header('Location: index.php#settings');
         exit;
     }

@@ -482,6 +482,12 @@ session_start();
             </div>
           </div>
           <div class="field">
+            <label>Photo du produit</label>
+            <div id="editProductImagePreview" style="margin-bottom:10px;"></div>
+            <input type="file" id="editProductImage" name="image" accept="image/jpeg,image/png,image/webp" class="input" style="padding:8px;" />
+            <small style="color:#9ca3af;display:block;margin-top:4px;">Formats: JPG, PNG, WebP (max 2MB)</small>
+          </div>
+          <div class="field">
             <label for="editStatus">Statut</label>
             <select id="editStatus" name="status" class="select">
               <option value="available">Disponible</option>
@@ -737,6 +743,16 @@ session_start();
       $("#editPriceMenu").value = product.priceMenu ?? "";
       $("#editStatus").value = product.status ?? "available";
 
+      // Afficher l'image actuelle
+      const previewDiv = $("#editProductImagePreview");
+      if (product.image) {
+        previewDiv.innerHTML = `<img src="../${product.image}" style="max-width:150px;max-height:100px;border-radius:8px;object-fit:cover;">`;
+      } else {
+        previewDiv.innerHTML = `<span style="color:#6b7280;">Aucune image</span>`;
+      }
+      // Reset le champ fichier
+      $("#editProductImage").value = "";
+
       // Suppléments du produit (ou par défaut de la catégorie)
       const productSups = product.supplements ?? state.menu?.supplements?.defaultForCategories?.[categoryId] ?? [];
       renderSupplementsCheckboxes("#editProductSupplementsList", productSups);
@@ -752,6 +768,7 @@ session_start();
       const priceSolo = parseFloat($("#editPriceSolo").value) || 0;
       const priceMenu = $("#editPriceMenu").value ? parseFloat($("#editPriceMenu").value) : null;
       const status = $("#editStatus").value;
+      const imageFile = $("#editProductImage").files[0];
 
       // Récupérer les suppléments cochés
       const supplements = [];
@@ -760,16 +777,34 @@ session_start();
       });
 
       try {
-        await apiPostJson({
-          action: "update_product",
-          product_id: productId,
-          name,
-          description,
-          priceSolo,
-          priceMenu,
-          status,
-          supplements
-        });
+        // Si une image est sélectionnée, utiliser FormData
+        if (imageFile) {
+          const formData = new FormData();
+          formData.set("action", "update_product");
+          formData.set("product_id", productId);
+          formData.set("name", name);
+          formData.set("description", description);
+          formData.set("priceSolo", priceSolo);
+          if (priceMenu !== null) formData.set("priceMenu", priceMenu);
+          formData.set("status", status);
+          formData.set("supplements", JSON.stringify(supplements));
+          formData.set("image", imageFile);
+
+          const res = await fetch(API, { method: "POST", body: formData });
+          const data = await res.json().catch(() => null);
+          if (!res.ok || !data || data.success !== true) throw new Error(data?.message ?? "Erreur API");
+        } else {
+          await apiPostJson({
+            action: "update_product",
+            product_id: productId,
+            name,
+            description,
+            priceSolo,
+            priceMenu,
+            status,
+            supplements
+          });
+        }
         toast("success", "Produit modifié", `"${name}" a été mis à jour.`);
         closeModal($("#modalEditProduct"));
         await boot();
