@@ -926,87 +926,96 @@ if (isset($_GET['export'])) {
                 </div>
             </div>
 
-            <!-- Grille des clients -->
-            <div class="customers-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+            <!-- Barre de recherche -->
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="customerSearch" placeholder="🔍 Rechercher par nom, téléphone ou code fidélité..."
+                       onkeyup="searchCustomers()"
+                       style="width: 100%; padding: 12px 16px; background: #1e293b; border: 1px solid #374151; border-radius: 10px; color: white; font-size: 14px;">
+            </div>
+
+            <!-- Tableau des clients -->
+            <div class="card" style="padding: 0; overflow: hidden;">
                 <?php if (empty($customers)): ?>
-                    <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #666;">
+                    <div style="text-align: center; padding: 60px; color: #666;">
                         <div style="font-size: 4em; margin-bottom: 20px;"><i class="fas fa-users" style="color: #555;"></i></div>
                         <p style="font-size: 1.2em; color: #9ca3af;">Aucun client enregistré</p>
                         <p style="color: #6b7280;">Les clients apparaîtront ici après leur première commande</p>
                     </div>
                 <?php else: ?>
-                    <?php foreach ($customers as $customer):
-                        $ordersCount = $customer['orders_count'] ?? 0;
-                        $totalSpent = $customer['total_spent'] ?? 0;
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #1e293b; text-align: left;">
+                                <th style="padding: 12px 15px; font-weight: 600; color: #9ca3af; white-space: nowrap;">
+                                    <input type="checkbox" id="selectAllCheckbox" onchange="toggleAllCustomers(this)" style="width: 16px; height: 16px; display: none;" class="broadcast-cb">
+                                </th>
+                                <th style="padding: 12px 15px; font-weight: 600; color: #9ca3af;">Client</th>
+                                <th style="padding: 12px 15px; font-weight: 600; color: #9ca3af;">Téléphone</th>
+                                <th style="padding: 12px 15px; font-weight: 600; color: #9ca3af;">Code Fidélité</th>
+                                <th style="padding: 12px 15px; font-weight: 600; color: #9ca3af; text-align: center;">Cmd</th>
+                                <th style="padding: 12px 15px; font-weight: 600; color: #9ca3af; text-align: center;">Dépensé</th>
+                                <th style="padding: 12px 15px; font-weight: 600; color: #9ca3af; text-align: center;">Points</th>
+                                <th style="padding: 12px 15px; font-weight: 600; color: #9ca3af;">Statut</th>
+                                <th style="padding: 12px 15px; font-weight: 600; color: #9ca3af; text-align: center;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            <?php foreach ($customers as $customer):
+                                $ordersCount = $customer['orders_count'] ?? 0;
+                                $totalSpent = $customer['total_spent'] ?? 0;
+                                $loyaltyPoints = $customer['loyalty_points'] ?? 0;
 
-                        // Déterminer la catégorie
-                        if ($ordersCount <= 1) {
-                            $category = 'new';
-                            $badge = '<span style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px;"><i class="fas fa-seedling"></i> Nouveau</span>';
-                        } elseif ($totalSpent >= 200 || $ordersCount >= 10) {
-                            $category = 'vip';
-                            $badge = '<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px;"><i class="fas fa-crown"></i> VIP</span>';
-                        } else {
-                            $category = 'regular';
-                            $badge = '<span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px;"><i class="fas fa-star"></i> Régulier</span>';
-                        }
-
-                        // Points fidélité
-                        $loyaltyPoints = $customer['loyalty_points'] ?? 0;
-                    ?>
-                    <div class="card customer-item" id="customer-<?= $customer['id'] ?>" data-category="<?= $category ?>" style="position: relative; padding: 15px;">
-                        <!-- Checkbox pour diffusion -->
-                        <label class="broadcast-checkbox" style="position: absolute; top: 10px; left: 10px; cursor: pointer; display: none;">
-                            <input type="checkbox" class="customer-checkbox" value="<?= htmlspecialchars($customer['phone'] ?? '') ?>" data-customer-id="<?= $customer['id'] ?>" onchange="updateSelectedCount()" style="width: 18px; height: 18px;">
-                        </label>
-
-                        <!-- Bouton supprimer -->
-                        <button onclick="deleteCustomer(<?= $customer['id'] ?>, '<?= htmlspecialchars($customer['name'] ?? 'Client', ENT_QUOTES) ?>')"
-                                style="position: absolute; top: 10px; right: 10px; background: #ff4757; color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center;"
-                                title="Supprimer ce client">
-                            <i class="fas fa-times"></i>
-                        </button>
-
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; margin-top: 5px;">
-                            <!-- Avatar -->
-                            <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, <?= $category === 'vip' ? '#f59e0b, #d97706' : ($category === 'regular' ? '#10b981, #059669' : '#3b82f6, #2563eb') ?>); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: white;">
-                                <?= strtoupper(substr($customer['name'] ?? 'C', 0, 1)) ?>
-                            </div>
-                            <div style="flex: 1;">
-                                <h4 style="margin: 0 0 4px 0; font-size: 15px;"><?= htmlspecialchars($customer['name'] ?? 'Client') ?></h4>
-                                <p style="margin: 0; color: #9ca3af; font-size: 12px;"><i class="fas fa-phone"></i> <?= htmlspecialchars($customer['phone'] ?? 'N/A') ?></p>
-                                <?php if (!empty($customer['loyalty_code'])): ?>
-                                <p style="margin: 2px 0 0 0; color: #f59e0b; font-size: 11px; font-weight: 600;"><i class="fas fa-id-card"></i> <?= htmlspecialchars($customer['loyalty_code']) ?></p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <!-- Badge catégorie -->
-                        <div style="margin-bottom: 12px;"><?= $badge ?></div>
-
-                        <!-- Stats -->
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; background: #1e293b; padding: 10px; border-radius: 8px;">
-                            <div>
-                                <div style="font-size: 16px; font-weight: bold; color: <?= $primaryColor ?>;"><?= $ordersCount ?></div>
-                                <div style="font-size: 10px; color: #6b7280;">Commandes</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 16px; font-weight: bold; color: #10b981;"><?= number_format($totalSpent, 0) ?>€</div>
-                                <div style="font-size: 10px; color: #6b7280;">Dépensé</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 16px; font-weight: bold; color: #f59e0b;"><?= $loyaltyPoints ?></div>
-                                <div style="font-size: 10px; color: #6b7280;">Points</div>
-                            </div>
-                        </div>
-
-                        <!-- Actions -->
-                        <div style="display: flex; gap: 8px; margin-top: 12px;">
-                            <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $customer['phone'] ?? '') ?>" target="_blank" class="btn btn-sm btn-whatsapp" style="flex: 1; justify-content: center;"><i class="fab fa-whatsapp"></i></a>
-                            <button onclick="openAddPointsModal(<?= $customer['id'] ?>, '<?= htmlspecialchars($customer['name'] ?? 'Client', ENT_QUOTES) ?>')" class="btn btn-sm" style="flex: 1; background: #f59e0b;"><i class="fas fa-plus"></i> Points</button>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
+                                // Déterminer la catégorie
+                                if ($ordersCount <= 1) {
+                                    $category = 'new';
+                                    $badge = '<span style="background: #3b82f6; color: white; padding: 3px 8px; border-radius: 10px; font-size: 10px; white-space: nowrap;"><i class="fas fa-seedling"></i> Nouveau</span>';
+                                    $avatarBg = '#3b82f6';
+                                } elseif ($totalSpent >= 200 || $ordersCount >= 10) {
+                                    $category = 'vip';
+                                    $badge = '<span style="background: #f59e0b; color: white; padding: 3px 8px; border-radius: 10px; font-size: 10px; white-space: nowrap;"><i class="fas fa-crown"></i> VIP</span>';
+                                    $avatarBg = '#f59e0b';
+                                } else {
+                                    $category = 'regular';
+                                    $badge = '<span style="background: #10b981; color: white; padding: 3px 8px; border-radius: 10px; font-size: 10px; white-space: nowrap;"><i class="fas fa-star"></i> Régulier</span>';
+                                    $avatarBg = '#10b981';
+                                }
+                            ?>
+                            <tr class="customer-row" data-category="<?= $category ?>" data-search="<?= strtolower(($customer['name'] ?? '') . ' ' . ($customer['phone'] ?? '') . ' ' . ($customer['loyalty_code'] ?? '')) ?>" style="border-bottom: 1px solid #2d3748; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 10px 15px;">
+                                    <input type="checkbox" class="customer-checkbox broadcast-cb" value="<?= htmlspecialchars($customer['phone'] ?? '') ?>" data-customer-id="<?= $customer['id'] ?>" onchange="updateSelectedCount()" style="width: 16px; height: 16px; display: none;">
+                                </td>
+                                <td style="padding: 10px 15px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: <?= $avatarBg ?>; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; color: white; flex-shrink: 0;">
+                                            <?= strtoupper(substr($customer['name'] ?? 'C', 0, 1)) ?>
+                                        </div>
+                                        <span style="font-weight: 500;"><?= htmlspecialchars($customer['name'] ?? 'Client') ?></span>
+                                    </div>
+                                </td>
+                                <td style="padding: 10px 15px; color: #9ca3af;"><?= htmlspecialchars($customer['phone'] ?? 'N/A') ?></td>
+                                <td style="padding: 10px 15px;">
+                                    <?php if (!empty($customer['loyalty_code'])): ?>
+                                    <span style="color: #f59e0b; font-weight: 600; font-size: 11px;"><?= htmlspecialchars($customer['loyalty_code']) ?></span>
+                                    <?php else: ?>
+                                    <span style="color: #4b5563;">—</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: <?= $primaryColor ?>;"><?= $ordersCount ?></td>
+                                <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: #10b981;"><?= number_format($totalSpent, 0) ?>€</td>
+                                <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: #f59e0b;"><?= $loyaltyPoints ?></td>
+                                <td style="padding: 10px 15px;"><?= $badge ?></td>
+                                <td style="padding: 10px 15px;">
+                                    <div style="display: flex; gap: 6px; justify-content: center;">
+                                        <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $customer['phone'] ?? '') ?>" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 6px 10px;" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                                        <button onclick="openAddPointsModal(<?= $customer['id'] ?>, '<?= htmlspecialchars($customer['name'] ?? 'Client', ENT_QUOTES) ?>')" class="btn btn-sm" style="padding: 6px 10px; background: #f59e0b;" title="Ajouter points"><i class="fas fa-plus"></i></button>
+                                        <button onclick="deleteCustomer(<?= $customer['id'] ?>, '<?= htmlspecialchars($customer['name'] ?? 'Client', ENT_QUOTES) ?>')" class="btn btn-sm" style="padding: 6px 10px; background: #dc2626;" title="Supprimer"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -1926,8 +1935,9 @@ if (isset($_GET['export'])) {
 
         // Filtrage des clients
         function filterCustomers(category) {
-            const items = document.querySelectorAll('.customer-item');
+            const rows = document.querySelectorAll('.customer-row');
             const filters = document.querySelectorAll('.customer-filter');
+            const searchTerm = document.getElementById('customerSearch')?.value.toLowerCase() || '';
 
             // Mettre à jour les boutons de filtre
             filters.forEach(btn => {
@@ -1937,13 +1947,24 @@ if (isset($_GET['export'])) {
                 }
             });
 
-            // Filtrer les clients
-            items.forEach(item => {
-                if (category === 'all' || item.dataset.category === category) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
+            // Filtrer les clients (combiné avec recherche)
+            rows.forEach(row => {
+                const matchesCategory = category === 'all' || row.dataset.category === category;
+                const matchesSearch = !searchTerm || row.dataset.search.includes(searchTerm);
+                row.style.display = (matchesCategory && matchesSearch) ? '' : 'none';
+            });
+        }
+
+        // Recherche de clients
+        function searchCustomers() {
+            const searchTerm = document.getElementById('customerSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('.customer-row');
+            const activeFilter = document.querySelector('.customer-filter.active')?.dataset.filter || 'all';
+
+            rows.forEach(row => {
+                const matchesSearch = !searchTerm || row.dataset.search.includes(searchTerm);
+                const matchesCategory = activeFilter === 'all' || row.dataset.category === activeFilter;
+                row.style.display = (matchesSearch && matchesCategory) ? '' : 'none';
             });
         }
 
@@ -2156,7 +2177,8 @@ function toggleBroadcastPanel() {
 
 function selectAllCustomers() {
     document.querySelectorAll('.customer-checkbox').forEach(cb => {
-        if (cb.closest('.customer-item').style.display !== 'none') {
+        const row = cb.closest('.customer-row');
+        if (row && row.style.display !== 'none') {
             cb.checked = true;
         }
     });
@@ -2166,6 +2188,14 @@ function selectAllCustomers() {
 function deselectAllCustomers() {
     document.querySelectorAll('.customer-checkbox').forEach(cb => cb.checked = false);
     updateSelectedCount();
+}
+
+function toggleAllCustomers(masterCheckbox) {
+    if (masterCheckbox.checked) {
+        selectAllCustomers();
+    } else {
+        deselectAllCustomers();
+    }
 }
 
 function updateSelectedCount() {
