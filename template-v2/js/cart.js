@@ -261,13 +261,13 @@ const Cart = {
             return;
         }
 
-        container.innerHTML = this.items.map(item => {
+        container.innerHTML = this.items.map((item, index) => {
             const menuType = item.options?.menuType;
             const removedIngredients = item.options?.removedIngredients || [];
             const selectedDrink = item.options?.selectedDrink;
 
             return `
-            <div class="mini-cart-item" data-key="${item.key}">
+            <div class="mini-cart-item" data-index="${index}">
                 <img src="../${item.image}" alt="${item.name}" class="mini-cart-item-image"
                      onerror="this.style.display='none'">
                 <div class="mini-cart-item-info">
@@ -293,12 +293,25 @@ const Cart = {
                     <div class="mini-cart-item-price">${Config.formatPrice(this.getItemTotal(item))}</div>
                     <div class="mini-cart-item-qty">Qté: ${item.quantity}</div>
                 </div>
-                <button class="mini-cart-item-remove" onclick="event.stopPropagation(); Cart.removeItem('${item.key}'); return false;"
-                        style="color: var(--gray-400); padding: 8px; background: none; border: none; cursor: pointer; font-size: 16px;">
+                <button type="button" class="mini-cart-item-remove" data-remove-index="${index}">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
         `}).join('');
+
+        // Add click handlers for remove buttons
+        container.querySelectorAll('.mini-cart-item-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const index = parseInt(btn.dataset.removeIndex);
+                if (!isNaN(index) && this.items[index]) {
+                    this.items.splice(index, 1);
+                    this.save();
+                    this.updateUI();
+                }
+            });
+        });
     },
 
     /**
