@@ -304,7 +304,8 @@ const Config = {
     getFullAddress() {
         const loc = this.restaurant?.location;
         if (!loc) return '';
-        return `${loc.addressLine1}, ${loc.postalCode} ${loc.city}`;
+        const street = loc.addressLine1 || loc.address || '';
+        return `${street}, ${loc.postalCode || ''} ${loc.city || ''}`.trim();
     },
 
     /**
