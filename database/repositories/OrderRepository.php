@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../Database.php';
+require_once __DIR__ . '/LoyaltyRepository.php';
 
 class OrderRepository {
 
@@ -93,6 +94,26 @@ class OrderRepository {
             ]);
         }
 
+        // Vérifier si une récompense fidélité est demandée
+        $loyaltyRewardId = null;
+        $loyaltyPointsUsed = 0;
+
+        if (!empty($data['loyalty_reward_id']) && $customerId) {
+            $reward = Database::fetchOne(
+                "SELECT * FROM loyalty_rewards WHERE id = ? AND is_active = 1",
+                [$data['loyalty_reward_id']]
+            );
+
+            if ($reward) {
+                // Vérifier que le client a assez de points
+                $customerPoints = LoyaltyRepository::getCustomerPoints($customerId);
+                if ($customerPoints >= $reward['points_required']) {
+                    $loyaltyRewardId = $reward['id'];
+                    $loyaltyPointsUsed = $reward['points_required'];
+                }
+            }
+        }
+
         // Créer la commande
         $orderId = Database::insert('orders', [
             'restaurant_id' => $restaurantId,
@@ -104,7 +125,10 @@ class OrderRepository {
             'total' => $data['total'] ?? 0,
             'status' => 'pending',
             'notes' => $data['notes'] ?? null,
-            'pickup_time' => $data['pickup_time'] ?? null
+            'pickup_time' => $data['pickup_time'] ?? null,
+            'loyalty_reward_id' => $loyaltyRewardId,
+            'loyalty_points_used' => $loyaltyPointsUsed,
+            'loyalty_redeemed' => 0
         ]);
 
         // Ajouter les items
@@ -211,9 +235,56 @@ class OrderRepository {
 
         if ($order) {
             $order['items'] = self::getOrderItems($order['id']);
+
+            // Ajouter les infos de récompense fidélité si présente
+            if (!empty($order['loyalty_reward_id'])) {
+                $order['loyalty_reward'] = Database::fetchOne(
+                    "SELECT * FROM loyalty_rewards WHERE id = ?",
+                    [$order['loyalty_reward_id']]
+                );
+            }
         }
 
         return $order;
+    }
+
+    /**
+     * Déduit les points fidélité quand la commande est terminée
+     */
+    public static function redeemLoyaltyPoints(int $orderId, int $restaurantId): bool {
+        $order = Database::fetchOne(
+            "SELECT * FROM orders WHERE id = ? AND restaurant_id = ?",
+            [$orderId, $restaurantId]
+        );
+
+        if (!$order || !$order['customer_id'] || !$order['loyalty_reward_id'] || $order['loyalty_redeemed']) {
+            return false;
+        }
+
+        // Récupérer la récompense
+        $reward = Database::fetchOne(
+            "SELECT * FROM loyalty_rewards WHERE id = ?",
+            [$order['loyalty_reward_id']]
+        );
+
+        if (!$reward) {
+            return false;
+        }
+
+        // Déduire les points
+        $success = LoyaltyRepository::redeemPoints(
+            $order['customer_id'],
+            $restaurantId,
+            $reward['points_required'],
+            $reward['name'] . ' (Commande ' . $order['order_number'] . ')'
+        );
+
+        if ($success) {
+            // Marquer comme déduit
+            Database::update('orders', ['loyalty_redeemed' => 1], ['id' => $orderId]);
+        }
+
+        return $success;
     }
 
     /**

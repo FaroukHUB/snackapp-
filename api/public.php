@@ -50,8 +50,12 @@ switch ($endpoint) {
         checkOrder($useMySQL);
         break;
 
+    case 'loyalty':
+        getLoyaltyInfo($useMySQL);
+        break;
+
     default:
-        jsonError('Endpoint invalide. Disponibles: menu, restaurant, status, order', 400);
+        jsonError('Endpoint invalide. Disponibles: menu, restaurant, status, order, loyalty', 400);
 }
 
 /* =========================
@@ -171,7 +175,8 @@ function createOrder(bool $useMySQL) {
                 'items' => $input['items'],
                 'subtotal' => $input['subtotal'] ?? $input['total'],
                 'total' => (float)$input['total'],
-                'notes' => $input['notes'] ?? null
+                'notes' => $input['notes'] ?? null,
+                'loyalty_reward_id' => $input['loyalty_reward_id'] ?? null
             ]);
 
             $order = OrderRepository::getById($orderId);
@@ -290,4 +295,50 @@ function checkOrder(bool $useMySQL) {
             jsonError('Commande introuvable', 404);
         }
     }
+}
+
+/**
+ * GET /api/public.php?endpoint=loyalty&phone=XXXXX
+ * Récupère les infos fidélité d'un client (points et récompenses disponibles)
+ */
+function getLoyaltyInfo(bool $useMySQL) {
+    $phone = $_GET['phone'] ?? '';
+
+    if (empty($phone)) {
+        jsonError('Numéro de téléphone requis');
+    }
+
+    if (!$useMySQL) {
+        jsonError('Fidélité non disponible en mode JSON');
+    }
+
+    // Chercher le client
+    $customer = CustomerRepository::getByPhone(SNACK_RESTAURANT_ID, $phone);
+
+    if (!$customer) {
+        // Client pas encore enregistré - retourner 0 points
+        jsonSuccess([
+            'found' => false,
+            'points' => 0,
+            'rewards' => []
+        ]);
+    }
+
+    // Récupérer les récompenses disponibles
+    $allRewards = LoyaltyRepository::getRewards(SNACK_RESTAURANT_ID);
+    $customerPoints = (int) ($customer['loyalty_points'] ?? 0);
+
+    // Filtrer les récompenses accessibles
+    $availableRewards = array_filter($allRewards, function($r) use ($customerPoints) {
+        return $customerPoints >= $r['points_required'];
+    });
+
+    jsonSuccess([
+        'found' => true,
+        'customer_name' => $customer['name'],
+        'loyalty_code' => $customer['loyalty_code'] ?? null,
+        'points' => $customerPoints,
+        'rewards' => array_values($availableRewards),
+        'all_rewards' => $allRewards
+    ]);
 }

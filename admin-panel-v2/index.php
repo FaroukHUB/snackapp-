@@ -301,6 +301,12 @@ $action = $_POST['action'];
                     $loyaltyConfig = LoyaltyRepository::getConfig(SNACK_RESTAURANT_ID);
 
                     if ($loyaltyConfig['enabled'] && !empty($order['customer_id'])) {
+                        // 1. D'abord déduire les points si une récompense était utilisée
+                        if (!empty($order['loyalty_reward_id']) && empty($order['loyalty_redeemed'])) {
+                            OrderRepository::redeemLoyaltyPoints($order['id'], SNACK_RESTAURANT_ID);
+                        }
+
+                        // 2. Ensuite ajouter les points gagnés sur cette commande
                         $orderTotal = (float) ($order['total'] ?? 0);
                         $pointsPerEuro = (int) ($loyaltyConfig['points_per_euro'] ?? 1);
                         $pointsEarned = (int) floor($orderTotal * $pointsPerEuro);
@@ -773,6 +779,24 @@ if (isset($_GET['export'])) {
                     <?php if (!empty($order['notes'])): ?>
                     <div style="background: #fef3c7; color: #92400e; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 12px;">
                         <i class="fas fa-sticky-note"></i> <strong>Note:</strong> <?php echo htmlspecialchars($order['notes']); ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($order['loyalty_reward_id'])): ?>
+                    <?php
+                        $loyaltyReward = $order['loyalty_reward'] ?? Database::fetchOne("SELECT * FROM loyalty_rewards WHERE id = ?", [$order['loyalty_reward_id']]);
+                        $isRedeemed = !empty($order['loyalty_redeemed']);
+                    ?>
+                    <div style="background: <?= $isRedeemed ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)' ?>; border: 1px solid <?= $isRedeemed ? '#10b981' : '#f59e0b' ?>; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 12px;">
+                        <i class="fas fa-gift" style="color: <?= $isRedeemed ? '#10b981' : '#f59e0b' ?>;"></i>
+                        <strong style="color: <?= $isRedeemed ? '#10b981' : '#f59e0b' ?>;">FIDÉLITÉ:</strong>
+                        <?= htmlspecialchars($loyaltyReward['name'] ?? 'Récompense') ?>
+                        <span style="color: #6b7280;">(-<?= $order['loyalty_points_used'] ?? $loyaltyReward['points_required'] ?? 0 ?> pts)</span>
+                        <?php if ($isRedeemed): ?>
+                            <span style="color: #10b981; margin-left: 5px;"><i class="fas fa-check"></i> Déduit</span>
+                        <?php else: ?>
+                            <span style="color: #f59e0b; margin-left: 5px;"><i class="fas fa-clock"></i> À déduire</span>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
 
