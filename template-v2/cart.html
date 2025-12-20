@@ -978,7 +978,8 @@
                         const orderNumber = result.order_id || result.order?.order_number || 'XXXX';
                         this.showConfirmation(orderNumber, name, phone, address, note, savedItems, savedSubtotal, savedDiscount);
                     } else {
-                        throw new Error(result.error || 'Erreur lors de la commande');
+                        // API returns 'message' not 'error'
+                        throw new Error(result.message || result.error || 'Erreur lors de la commande');
                     }
 
                 } catch (error) {
