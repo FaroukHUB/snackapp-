@@ -124,6 +124,31 @@
             color: var(--primary);
         }
 
+        .clear-cart-btn {
+            background: var(--error);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--border-radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .clear-cart-btn:hover {
+            background: #c0392b;
+            transform: scale(1.02);
+        }
+
+        .clear-cart-btn i {
+            color: white;
+            font-size: 11px;
+        }
+
         /* Cart Items */
         .cart-item {
             display: flex;
@@ -183,10 +208,15 @@
             color: var(--gray-400);
             padding: 8px;
             transition: var(--transition);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
         }
 
         .cart-item-remove:hover {
             color: var(--error);
+            transform: scale(1.1);
         }
 
         .cart-item-qty {
@@ -591,9 +621,14 @@
         <div id="cartContent">
             <!-- Cart Items -->
             <section class="cart-section">
-                <div class="cart-section-header">
-                    <i class="fas fa-shopping-basket"></i>
-                    Vos articles
+                <div class="cart-section-header" style="justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-shopping-basket"></i>
+                        Vos articles
+                    </div>
+                    <button class="clear-cart-btn" onclick="CartPage.clearCart()">
+                        <i class="fas fa-trash-alt"></i> Vider
+                    </button>
                 </div>
                 <div id="cartItems">
                     <!-- Items will be rendered here -->
@@ -862,6 +897,14 @@
                     document.getElementById('summaryDiscount').textContent = `-${Config.formatPrice(this.discount)}`;
                 } else {
                     document.getElementById('discountRow').style.display = 'none';
+                }
+            },
+
+            clearCart() {
+                if (confirm('Voulez-vous vraiment vider le panier ?')) {
+                    Cart.clear();
+                    this.updateView();
+                    this.showToast('Panier vidé', 'success');
                 }
             },
 
