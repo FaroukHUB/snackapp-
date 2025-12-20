@@ -1291,9 +1291,14 @@ cfg.menu.categories.forEach((cat, i) => {
       box.innerHTML = "";
       cfg.openingHours.forEach((h) => {
         const p = document.createElement("p");
-        p.innerHTML = `<strong>${capitalize(
-          h.day
-        )} :</strong> ${h.opens}–${h.closes}`;
+        // Support nouveau format (slots) et ancien format (opens/closes)
+        let timeStr = '';
+        if (h.slots && Array.isArray(h.slots)) {
+          timeStr = h.slots.map(s => `${s.opens}–${s.closes}`).join(' / ');
+        } else {
+          timeStr = `${h.opens}–${h.closes}`;
+        }
+        p.innerHTML = `<strong>${capitalize(h.day)} :</strong> ${timeStr}`;
         box.appendChild(p);
       });
     }
@@ -1436,7 +1441,14 @@ cfg.menu.categories.forEach((cat, i) => {
       hoursSection.innerHTML = "";
       cfg.openingHours.forEach((h) => {
         const p = document.createElement("p");
-        p.textContent = `${capitalize(h.day)} : ${h.opens}–${h.closes}`;
+        // Support nouveau format (slots) et ancien format (opens/closes)
+        let timeStr = '';
+        if (h.slots && Array.isArray(h.slots)) {
+          timeStr = h.slots.map(s => `${s.opens}–${s.closes}`).join(' / ');
+        } else {
+          timeStr = `${h.opens}–${h.closes}`;
+        }
+        p.textContent = `${capitalize(h.day)} : ${timeStr}`;
         p.className = "text-sm";
         hoursSection.appendChild(p);
       });
