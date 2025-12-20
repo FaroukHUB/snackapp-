@@ -9,7 +9,22 @@ require_once __DIR__ . '/database/repositories/CustomerRepository.php';
 require_once __DIR__ . '/database/repositories/LoyaltyRepository.php';
 require_once __DIR__ . '/database/repositories/RestaurantRepository.php';
 
-// Configuration restaurant (à adapter selon votre setup)
+// Charger la config DB
+$configFile = __DIR__ . '/database/config.php';
+if (file_exists($configFile)) {
+    $config = require $configFile;
+    Database::init($config['database']);
+} else {
+    Database::init([
+        'host' => 'localhost',
+        'port' => 8889,
+        'dbname' => 'snackapp',
+        'username' => 'root',
+        'password' => 'root',
+    ]);
+}
+
+// Configuration restaurant
 define('SNACK_RESTAURANT_ID', 1);
 
 $restaurant = RestaurantRepository::getById(SNACK_RESTAURANT_ID);
