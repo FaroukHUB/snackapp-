@@ -66,7 +66,9 @@ function handleImageUpload(string $baseId): ?string {
    MODE MySQL ou JSON
    ========================= */
 
-$useMySQL = !SNACK_USE_JSON && !defined('SNACK_DB_ERROR');
+// Pour la gestion des produits, on utilise toujours le mode JSON
+// car le menu vient du fichier config, pas de la base de données
+$useMySQL = false;
 
 /* =========================
    GET: Retourner le menu complet
