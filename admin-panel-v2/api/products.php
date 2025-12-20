@@ -75,27 +75,29 @@ $useMySQL = false;
    ========================= */
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if ($useMySQL) {
-        // Mode MySQL
-        $menu = MenuRepository::getFullMenu(SNACK_RESTAURANT_ID, true);
-        jsonSuccess($menu);
-    } else {
-        // Fallback JSON
-        require_once __DIR__ . '/../config.php';
-        $config = loadConfig();
-        $runtime = loadMenuRuntime();
-        $merged = applyRuntimeToConfig($config, $runtime);
+    // Charger directement depuis menu.json (déjà formaté)
+    $menuJsonPath = SNACK_ROOT . '/config/menu.json';
 
-        $supplements = $runtime['supplements'] ?? [
-            'catalog' => [],
-            'defaultForCategories' => []
-        ];
+    if (file_exists($menuJsonPath)) {
+        $menuData = json_decode(file_get_contents($menuJsonPath), true);
 
-        jsonSuccess([
-            'menu' => $merged['menu'] ?? ['categories' => []],
-            'supplements' => $supplements
-        ]);
+        if ($menuData) {
+            require_once __DIR__ . '/../config.php';
+            $runtime = loadMenuRuntime();
+
+            $supplements = $runtime['supplements'] ?? [
+                'catalog' => [],
+                'defaultForCategories' => []
+            ];
+
+            jsonSuccess([
+                'menu' => $menuData['menu'] ?? ['categories' => []],
+                'supplements' => $supplements
+            ]);
+        }
     }
+
+    jsonError('Impossible de charger le menu');
 }
 
 /* =========================
