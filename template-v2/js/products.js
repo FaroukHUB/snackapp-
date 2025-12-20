@@ -488,7 +488,6 @@ const Products = {
         const drinksContainer = document.getElementById('modalDrinks');
         const drinksList = document.getElementById('drinksList');
         const drinks = Config.getDrinks();
-        const hasMenuOption = product.priceMenu && product.priceMenu > 0;
 
         if (hasMenuOption && drinks.length > 0) {
             drinksList.innerHTML = drinks.map(drink => `
