@@ -617,53 +617,118 @@ if (isset($_GET['export'])) {
 
         <!-- COMMANDES -->
         <div id="section-orders" class="section active">
-            <div class="stats">
-                <div class="stat-card"><div style="color: #9ca3af; font-size: 12px;">En attente</div><div class="stat-number" style="color: #fdba74;"><?php echo $stats['pending']; ?></div></div>
-                <div class="stat-card"><div style="color: #9ca3af; font-size: 12px;">Terminées</div><div class="stat-number" style="color: #86efac;"><?php echo $stats['completed']; ?></div></div>
-                <div class="stat-card"><div style="color: #9ca3af; font-size: 12px;">Aujourd'hui</div><div class="stat-number"><?php echo $stats['today']; ?></div></div>
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h2><i class="fas fa-receipt" style="color: <?php echo $primaryColor; ?>;"></i> Commandes (<?php echo count($orders); ?>)</h2>
+                <?php if (!empty($orders)): ?>
+                <form method="POST" style="margin: 0;">
+                    <input type="hidden" name="action" value="clear_orders">
+                    <button type="submit" onclick="return confirm('Archiver toutes les commandes terminées ?')" class="btn btn-sm btn-gray"><i class="fas fa-archive"></i> Archiver tout</button>
+                </form>
+                <?php endif; ?>
             </div>
 
-            <?php if (!empty($orders)): ?>
-            <form method="POST" style="margin-bottom: 15px;">
-                <input type="hidden" name="action" value="clear_orders">
-                <button type="submit" onclick="return confirm('Archiver toutes les commandes ?')" class="btn btn-gray" style="width: 100%;"><i class="fas fa-archive"></i> Archiver tout</button>
-            </form>
-            <?php endif; ?>
+            <!-- Stats -->
+            <div class="stats" style="margin-bottom: 20px;">
+                <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+                    <div style="color: #f59e0b;"><i class="fas fa-clock"></i></div>
+                    <div class="stat-number" style="color: #f59e0b;"><?php echo $stats['pending']; ?></div>
+                    <div style="color: #9ca3af; font-size: 11px;">En attente</div>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid #10b981;">
+                    <div style="color: #10b981;"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-number" style="color: #10b981;"><?php echo $stats['completed']; ?></div>
+                    <div style="color: #9ca3af; font-size: 11px;">Terminées</div>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid <?php echo $primaryColor; ?>;">
+                    <div style="color: <?php echo $primaryColor; ?>;"><i class="fas fa-calendar-day"></i></div>
+                    <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo $stats['today']; ?></div>
+                    <div style="color: #9ca3af; font-size: 11px;">Aujourd'hui</div>
+                </div>
+            </div>
 
+            <!-- Liste des commandes -->
             <?php if (empty($orders)): ?>
-                <div class="card" style="text-align: center; padding: 40px;"><i class="fas fa-inbox" style="font-size: 48px; color: #555;"></i><p style="color: #9ca3af; margin-top: 10px;">Aucune commande</p></div>
+                <div class="card" style="text-align: center; padding: 60px;">
+                    <i class="fas fa-inbox" style="font-size: 48px; color: #555; margin-bottom: 15px;"></i>
+                    <p style="color: #9ca3af; font-size: 16px;">Aucune commande en cours</p>
+                    <p style="color: #6b7280; font-size: 13px;">Les nouvelles commandes apparaîtront ici</p>
+                </div>
             <?php else: ?>
-                <?php foreach ($orders as $order): ?>
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                        <div>
-                            <strong style="font-size: 16px;"><?php echo htmlspecialchars($order['customer_name'] ?? 'Client'); ?></strong>
-                            <br><span style="color: #9ca3af; font-size: 12px;"><?php echo htmlspecialchars($order['customer_phone'] ?? ''); ?></span>
-                            <br><span style="color: #6b7280; font-size: 11px;">#<?php echo htmlspecialchars($order['id']); ?></span>
+                <div style="display: grid; gap: 15px;">
+                <?php foreach ($orders as $order):
+                    $isCompleted = ($order['status'] ?? '') === 'completed';
+                    $statusColor = $isCompleted ? '#10b981' : '#f59e0b';
+                    $statusIcon = $isCompleted ? 'check-circle' : 'clock';
+                    $statusText = $isCompleted ? 'Terminée' : 'En attente';
+                ?>
+                <div class="card" style="border-left: 4px solid <?php echo $statusColor; ?>; padding: 15px;">
+                    <!-- En-tête commande -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, <?php echo $primaryColor; ?>, #d97706); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: white;">
+                                <?php echo strtoupper(substr($order['customer_name'] ?? 'C', 0, 1)); ?>
+                            </div>
+                            <div>
+                                <strong style="font-size: 15px; display: block;"><?php echo htmlspecialchars($order['customer_name'] ?? 'Client'); ?></strong>
+                                <span style="color: #9ca3af; font-size: 12px;"><i class="fas fa-phone"></i> <?php echo htmlspecialchars($order['customer_phone'] ?? 'N/A'); ?></span>
+                            </div>
                         </div>
-                        <div style="text-align: right;"><strong style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($order['total'] ?? 0, 2); ?>€</strong><br><span style="color: #9ca3af; font-size: 12px;"><?php echo date('d/m H:i', strtotime($order['created_at'])); ?></span></div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 18px; font-weight: bold; color: <?php echo $primaryColor; ?>;"><?php echo number_format($order['total'] ?? 0, 2); ?>€</div>
+                            <span style="color: #6b7280; font-size: 11px;">#<?php echo htmlspecialchars($order['id']); ?></span>
+                        </div>
                     </div>
-                    <div style="margin-bottom: 12px; font-size: 13px; color: #d1d5db;">
-                        <?php foreach ($order['items'] ?? [] as $item): ?>
-                            <?php echo ($item['quantity'] ?? 1) . 'x ' . htmlspecialchars($item['name']); ?><?php if (!empty($item['supplements'])): ?> <span style="color:#9ca3af;">(+<?php echo implode(', ', array_column($item['supplements'], 'name')); ?>)</span><?php endif; ?><br>
+
+                    <!-- Statut et date -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                        <span style="background: <?php echo $statusColor; ?>22; color: <?php echo $statusColor; ?>; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">
+                            <i class="fas fa-<?php echo $statusIcon; ?>"></i> <?php echo $statusText; ?>
+                        </span>
+                        <span style="background: #374151; color: #9ca3af; padding: 4px 10px; border-radius: 20px; font-size: 11px;">
+                            <i class="fas fa-clock"></i> <?php echo date('d/m H:i', strtotime($order['created_at'])); ?>
+                        </span>
+                    </div>
+
+                    <!-- Articles -->
+                    <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                        <?php foreach ($order['items'] ?? [] as $i => $item): ?>
+                            <div style="display: flex; justify-content: space-between; padding: 4px 0; <?php echo $i > 0 ? 'border-top: 1px solid #374151; margin-top: 4px;' : ''; ?>">
+                                <span style="color: #d1d5db; font-size: 13px;">
+                                    <strong style="color: <?php echo $primaryColor; ?>;"><?php echo $item['quantity'] ?? 1; ?>x</strong>
+                                    <?php echo htmlspecialchars($item['name']); ?>
+                                    <?php if (!empty($item['supplements'])): ?>
+                                        <span style="color: #6b7280; font-size: 11px;">(+<?php echo implode(', ', array_column($item['supplements'], 'name')); ?>)</span>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
                         <?php endforeach; ?>
                     </div>
-                    <?php if (!empty($order['notes'])): ?><p style="color: #9ca3af; font-size: 12px; margin-bottom: 12px;"><i class="fas fa-comment"></i> <?php echo htmlspecialchars($order['notes']); ?></p><?php endif; ?>
 
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <?php if (($order['status'] ?? '') !== 'completed'): ?>
+                    <?php if (!empty($order['notes'])): ?>
+                    <div style="background: #fef3c7; color: #92400e; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 12px;">
+                        <i class="fas fa-sticky-note"></i> <strong>Note:</strong> <?php echo htmlspecialchars($order['notes']); ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Actions -->
+                    <div style="display: flex; gap: 10px;">
+                        <?php if (!$isCompleted): ?>
                         <form method="POST" style="flex: 1;">
                             <input type="hidden" name="action" value="change_status">
                             <input type="hidden" name="order_id" value="<?php echo htmlspecialchars($order['id']); ?>">
-                            <button type="submit" name="new_status" value="completed" class="btn btn-green" style="width: 100%;"><i class="fas fa-check"></i> Terminée</button>
+                            <button type="submit" name="new_status" value="completed" class="btn btn-green" style="width: 100%;"><i class="fas fa-check"></i> Marquer terminée</button>
                         </form>
                         <?php else: ?>
-                        <div style="flex: 1; text-align: center; padding: 10px; background: rgba(134,239,172,0.1); border-radius: 8px; color: #86efac;"><i class="fas fa-check-circle"></i> Terminée</div>
+                        <div style="flex: 1; text-align: center; padding: 10px; background: rgba(16,185,129,0.1); border-radius: 8px; color: #10b981; font-weight: 600;">
+                            <i class="fas fa-check-circle"></i> Commande terminée
+                        </div>
                         <?php endif; ?>
-                        <a href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', $order['customer_phone'] ?? ''); ?>?text=<?php echo urlencode('Bonjour ! Votre commande #' . $order['id'] . ' est prête !'); ?>" target="_blank" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', $order['customer_phone'] ?? ''); ?>?text=<?php echo urlencode('Bonjour ! Votre commande #' . $order['id'] . ' est prête !'); ?>" target="_blank" class="btn btn-whatsapp" style="padding: 10px 15px;"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
                 <?php endforeach; ?>
+                </div>
             <?php endif; ?>
         </div>
 
@@ -941,15 +1006,17 @@ if (isset($_GET['export'])) {
 
         <!-- ARCHIVES -->
         <div id="section-archives" class="section">
+            <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2>Archives (<?php echo count($archivedOrders); ?>)</h2>
+                <h2><i class="fas fa-archive" style="color: #8b5cf6;"></i> Archives</h2>
                 <a href="?export=archives" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> Export CSV</a>
             </div>
 
             <?php if (empty($archivedOrders)): ?>
-                <div class="card" style="text-align: center; padding: 40px;">
+                <div class="card" style="text-align: center; padding: 60px;">
                     <i class="fas fa-archive" style="font-size: 48px; color: #555; margin-bottom: 15px;"></i>
-                    <p style="color: #9ca3af;">Aucune commande archivée</p>
+                    <p style="color: #9ca3af; font-size: 16px;">Aucune commande archivée</p>
+                    <p style="color: #6b7280; font-size: 13px;">Les commandes terminées seront archivées ici</p>
                 </div>
             <?php else: ?>
                 <?php
@@ -972,28 +1039,28 @@ if (isset($_GET['export'])) {
 
                 <!-- Stats archives -->
                 <div class="stats" style="margin-bottom: 20px;">
-                    <div class="stat-card">
-                        <div style="color: #9ca3af;"><i class="fas fa-receipt"></i></div>
-                        <div class="stat-number" style="font-size: 22px;"><?php echo $archiveCount; ?></div>
+                    <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
+                        <div style="color: #8b5cf6;"><i class="fas fa-receipt"></i></div>
+                        <div class="stat-number" style="color: #8b5cf6;"><?php echo $archiveCount; ?></div>
                         <div style="color: #9ca3af; font-size: 11px;">Commandes</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" style="border-left: 4px solid <?php echo $primaryColor; ?>;">
                         <div style="color: <?php echo $primaryColor; ?>;"><i class="fas fa-euro-sign"></i></div>
-                        <div class="stat-number" style="font-size: 22px;"><?php echo number_format($archiveTotal, 0); ?>€</div>
+                        <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($archiveTotal, 0); ?>€</div>
                         <div style="color: #9ca3af; font-size: 11px;">CA Total</div>
                     </div>
-                    <div class="stat-card">
-                        <div style="color: #10b981;"><i class="fas fa-calculator"></i></div>
-                        <div class="stat-number" style="font-size: 22px;"><?php echo $archiveCount > 0 ? number_format($archiveTotal / $archiveCount, 1) : 0; ?>€</div>
+                    <div class="stat-card" style="border-left: 4px solid #10b981;">
+                        <div style="color: #10b981;"><i class="fas fa-shopping-basket"></i></div>
+                        <div class="stat-number" style="color: #10b981;"><?php echo $archiveCount > 0 ? number_format($archiveTotal / $archiveCount, 1) : 0; ?>€</div>
                         <div style="color: #9ca3af; font-size: 11px;">Panier moyen</div>
                     </div>
                 </div>
 
                 <!-- Liste groupée par date -->
-                <?php foreach ($groupedByDate as $date => $orders):
+                <?php foreach ($groupedByDate as $date => $dateOrders):
                     $dateLabel = date('d/m/Y', strtotime($date));
                     $dayName = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'][date('w', strtotime($date))];
-                    $dayTotal = array_sum(array_column($orders, 'total'));
+                    $dayTotal = array_sum(array_column($dateOrders, 'total'));
 
                     // Date relative
                     $daysAgo = floor((time() - strtotime($date)) / 86400);
@@ -1005,39 +1072,53 @@ if (isset($_GET['export'])) {
                         $dateLabel = $dayName . ' ' . date('d/m', strtotime($date));
                     }
                 ?>
-                <div class="card" style="margin-bottom: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #374151; margin-bottom: 10px;">
-                        <div>
-                            <strong style="font-size: 14px;"><?php echo $dateLabel; ?></strong>
-                            <span style="color: #9ca3af; font-size: 12px; margin-left: 8px;"><?php echo count($orders); ?> commande<?php echo count($orders) > 1 ? 's' : ''; ?></span>
-                        </div>
-                        <span style="color: <?php echo $primaryColor; ?>; font-weight: bold;"><?php echo number_format($dayTotal, 2); ?>€</span>
-                    </div>
-
-                    <?php foreach (array_slice($orders, 0, 10) as $idx => $order): ?>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; <?php echo $idx < count($orders) - 1 ? 'border-bottom: 1px solid #2a2a3e;' : ''; ?>">
-                        <div style="flex: 1; min-width: 0;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <strong style="font-size: 13px;"><?php echo htmlspecialchars($order['customer_name'] ?? 'Client'); ?></strong>
-                                <span style="color: #6b7280; font-size: 10px;">#<?php echo htmlspecialchars(substr($order['id'], -6)); ?></span>
+                <div class="card" style="margin-bottom: 15px; border-left: 4px solid #8b5cf6;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #374151; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; background: #8b5cf622; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-calendar-day" style="color: #8b5cf6;"></i>
                             </div>
-                            <div style="color: #9ca3af; font-size: 11px; margin-top: 2px;">
-                                <i class="fas fa-clock" style="font-size: 9px;"></i> <?php echo date('H:i', strtotime($order['created_at'])); ?>
-                                <?php if (!empty($order['items'])): ?>
-                                • <?php echo count($order['items']); ?> article<?php echo count($order['items']) > 1 ? 's' : ''; ?>
-                                <?php endif; ?>
+                            <div>
+                                <strong style="font-size: 14px;"><?php echo $dateLabel; ?></strong>
+                                <div style="color: #9ca3af; font-size: 11px;"><?php echo count($dateOrders); ?> commande<?php echo count($dateOrders) > 1 ? 's' : ''; ?></div>
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>;"><?php echo number_format($order['total'] ?? 0, 2); ?>€</div>
-                            <div style="font-size: 10px; color: #10b981;"><i class="fas fa-check"></i> Terminée</div>
+                            <div style="font-size: 18px; font-weight: bold; color: <?php echo $primaryColor; ?>;"><?php echo number_format($dayTotal, 2); ?>€</div>
+                        </div>
+                    </div>
+
+                    <div style="background: #1e293b; border-radius: 8px; overflow: hidden;">
+                    <?php foreach (array_slice($dateOrders, 0, 10) as $idx => $order): ?>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; <?php echo $idx > 0 ? 'border-top: 1px solid #374151;' : ''; ?>">
+                        <div style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, <?php echo $primaryColor; ?>, #d97706); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white;">
+                                <?php echo strtoupper(substr($order['customer_name'] ?? 'C', 0, 1)); ?>
+                            </div>
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <strong style="font-size: 13px;"><?php echo htmlspecialchars($order['customer_name'] ?? 'Client'); ?></strong>
+                                    <span style="color: #6b7280; font-size: 10px;">#<?php echo htmlspecialchars(substr($order['id'], -6)); ?></span>
+                                </div>
+                                <div style="color: #6b7280; font-size: 11px;">
+                                    <i class="fas fa-clock" style="font-size: 9px;"></i> <?php echo date('H:i', strtotime($order['created_at'])); ?>
+                                    <?php if (!empty($order['items'])): ?>
+                                    • <?php echo count($order['items']); ?> article<?php echo count($order['items']) > 1 ? 's' : ''; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>; font-size: 14px;"><?php echo number_format($order['total'] ?? 0, 2); ?>€</div>
+                            <span style="background: #10b98122; color: #10b981; padding: 2px 8px; border-radius: 10px; font-size: 9px;"><i class="fas fa-check"></i> Terminée</span>
                         </div>
                     </div>
                     <?php endforeach; ?>
+                    </div>
 
-                    <?php if (count($orders) > 10): ?>
-                    <div style="text-align: center; padding-top: 10px; color: #9ca3af; font-size: 12px;">
-                        ... et <?php echo count($orders) - 10; ?> autre<?php echo (count($orders) - 10) > 1 ? 's' : ''; ?>
+                    <?php if (count($dateOrders) > 10): ?>
+                    <div style="text-align: center; padding-top: 12px; color: #6b7280; font-size: 12px;">
+                        <i class="fas fa-ellipsis-h"></i> et <?php echo count($dateOrders) - 10; ?> autre<?php echo (count($dateOrders) - 10) > 1 ? 's' : ''; ?>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -1047,11 +1128,14 @@ if (isset($_GET['export'])) {
 
         <!-- RÉGLAGES -->
         <div id="section-settings" class="section">
-            <h2 style="margin-bottom: 20px;">Réglages</h2>
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2><i class="fas fa-cog" style="color: #6b7280;"></i> Réglages</h2>
+            </div>
 
             <!-- Horaires -->
-            <div class="card">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-clock"></i> Horaires d'ouverture</h3>
+            <div class="card" style="border-left: 4px solid #3b82f6;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-clock" style="color: #3b82f6;"></i> Horaires d'ouverture</h3>
                 <form method="POST">
                     <input type="hidden" name="action" value="save_settings">
                     <?php
@@ -1070,9 +1154,9 @@ if (isset($_GET['export'])) {
                 </form>
             </div>
 
-                        <!-- Contact -->
-            <div class="card">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-phone"></i> Contact & Réseaux</h3>
+            <!-- Contact -->
+            <div class="card" style="border-left: 4px solid #10b981;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-phone" style="color: #10b981;"></i> Contact & Réseaux</h3>
                 <form method="POST" id="contact-form">
                     <input type="hidden" name="action" value="save_settings">
 
@@ -1221,7 +1305,7 @@ if (isset($_GET['export'])) {
             }
             </script>
             <!-- WhatsApp Business API -->
-            <div class="card">
+            <div class="card" style="border-left: 4px solid #25D366;">
                 <h3 style="margin-bottom: 15px;"><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp Business API</h3>
                 <p style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">
                     Pour envoyer des messages automatiques via l'API WhatsApp Business, vous devez configurer votre token d'accès.
@@ -1262,8 +1346,8 @@ if (isset($_GET['export'])) {
 
 
             <!-- FAQ -->
-            <div class="card">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-question-circle"></i> FAQ</h3>
+            <div class="card" style="border-left: 4px solid #8b5cf6;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-question-circle" style="color: #8b5cf6;"></i> FAQ</h3>
                 <form method="POST" id="faq-form">
                     <input type="hidden" name="action" value="save_faq">
                     <div id="faq-items">
@@ -1281,113 +1365,136 @@ if (isset($_GET['export'])) {
             </div>
 
             <!-- Produits -->
-            <div class="card">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-utensils"></i> Gestion des produits</h3>
-                <a href="products-manager.php" class="btn btn-green"><i class="fas fa-cog"></i> Gérer le menu</a>
+            <div class="card" style="border-left: 4px solid #f59e0b;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-utensils" style="color: #f59e0b;"></i> Gestion des produits</h3>
+                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Gérez votre menu, ajoutez des produits, modifiez les prix et les catégories.</p>
+                <a href="products-manager.php" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"><i class="fas fa-burger"></i> Gérer le menu</a>
             </div>
         </div>
 
         <!-- STATS -->
         <div id="section-stats" class="section">
+            <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2><i class="fas fa-chart-line"></i> Statistiques</h2>
+                <h2><i class="fas fa-chart-line" style="color: #3b82f6;"></i> Statistiques</h2>
                 <div style="display: flex; gap: 8px;">
-                    <a href="?export=stats&period=week" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> CSV Semaine</a>
-                    <a href="?export=stats&period=month" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> CSV Mois</a>
+                    <a href="?export=stats&period=week" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> Semaine</a>
+                    <a href="?export=stats&period=month" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> Mois</a>
                 </div>
             </div>
 
             <!-- CA Cards -->
             <div class="stats" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
-                <div class="stat-card">
-                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-calendar-day"></i> Aujourd'hui</div>
-                    <div class="stat-number" style="color: #10b981; font-size: 24px;"><?php echo number_format($stats['revenue'] ?? 0, 0); ?>€</div>
-                    <div style="color: #6b7280; font-size: 11px;"><?php echo $stats['today'] ?? 0; ?> cmd</div>
+                <div class="stat-card" style="border-left: 4px solid #10b981;">
+                    <div style="color: #10b981;"><i class="fas fa-calendar-day"></i></div>
+                    <div class="stat-number" style="color: #10b981;"><?php echo number_format($stats['revenue'] ?? 0, 0); ?>€</div>
+                    <div style="color: #9ca3af; font-size: 11px;">Aujourd'hui</div>
+                    <div style="color: #6b7280; font-size: 10px; margin-top: 4px;"><?php echo $stats['today'] ?? 0; ?> commandes</div>
                 </div>
-                <div class="stat-card">
-                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-calendar-week"></i> Semaine</div>
-                    <div class="stat-number" style="color: #3b82f6; font-size: 24px;"><?php echo number_format($weekStats['revenue'] ?? 0, 0); ?>€</div>
-                    <div style="color: #6b7280; font-size: 11px;"><?php echo $weekStats['orders'] ?? 0; ?> cmd</div>
+                <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+                    <div style="color: #3b82f6;"><i class="fas fa-calendar-week"></i></div>
+                    <div class="stat-number" style="color: #3b82f6;"><?php echo number_format($weekStats['revenue'] ?? 0, 0); ?>€</div>
+                    <div style="color: #9ca3af; font-size: 11px;">Semaine</div>
+                    <div style="color: #6b7280; font-size: 10px; margin-top: 4px;"><?php echo $weekStats['orders'] ?? 0; ?> commandes</div>
                 </div>
-                <div class="stat-card">
-                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-calendar-alt"></i> Mois</div>
-                    <div class="stat-number" style="color: #8b5cf6; font-size: 24px;"><?php echo number_format($monthStats['revenue'] ?? 0, 0); ?>€</div>
-                    <div style="color: #6b7280; font-size: 11px;"><?php echo $monthStats['orders'] ?? 0; ?> cmd</div>
+                <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
+                    <div style="color: #8b5cf6;"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="stat-number" style="color: #8b5cf6;"><?php echo number_format($monthStats['revenue'] ?? 0, 0); ?>€</div>
+                    <div style="color: #9ca3af; font-size: 11px;">Mois</div>
+                    <div style="color: #6b7280; font-size: 10px; margin-top: 4px;"><?php echo $monthStats['orders'] ?? 0; ?> commandes</div>
                 </div>
             </div>
 
             <!-- Panier moyen & Heure de pic -->
             <div class="stats" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 20px;">
-                <div class="stat-card">
-                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-shopping-basket"></i> Panier moyen</div>
-                    <div class="stat-number" style="font-size: 22px;"><?php echo number_format($monthStats['avg_order'] ?? 0, 1); ?>€</div>
+                <div class="stat-card" style="border-left: 4px solid <?php echo $primaryColor; ?>;">
+                    <div style="color: <?php echo $primaryColor; ?>;"><i class="fas fa-shopping-basket"></i></div>
+                    <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($monthStats['avg_order'] ?? 0, 1); ?>€</div>
+                    <div style="color: #9ca3af; font-size: 11px;">Panier moyen</div>
                 </div>
-                <div class="stat-card">
-                    <div style="color: #9ca3af; font-size: 11px;"><i class="fas fa-clock"></i> Heure de pic</div>
-                    <div class="stat-number" style="font-size: 22px;"><?php echo $stats['peak_hour'] ?? '--:--'; ?></div>
+                <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+                    <div style="color: #f59e0b;"><i class="fas fa-fire"></i></div>
+                    <div class="stat-number" style="color: #f59e0b;"><?php echo $stats['peak_hour'] ?? '--:--'; ?></div>
+                    <div style="color: #9ca3af; font-size: 11px;">Heure de pic</div>
                 </div>
             </div>
 
             <!-- Top Produits -->
-            <div class="card">
-                <h3 style="margin-bottom: 15px; font-size: 14px;"><i class="fas fa-trophy" style="color: #f59e0b;"></i> Top 5 Produits (30j)</h3>
+            <div class="card" style="border-left: 4px solid #f59e0b;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-trophy" style="color: #f59e0b;"></i> Top 5 Produits (30j)</h3>
                 <?php if (empty($topProducts)): ?>
-                    <p style="color: #6b7280; font-size: 13px;">Aucune donnée</p>
+                    <div style="text-align: center; padding: 30px; color: #6b7280;">
+                        <i class="fas fa-chart-pie" style="font-size: 32px; margin-bottom: 10px; color: #444;"></i>
+                        <p>Aucune donnée disponible</p>
+                    </div>
                 <?php else: ?>
-                    <?php foreach ($topProducts as $i => $product): ?>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; <?php echo $i < count($topProducts) - 1 ? 'border-bottom: 1px solid #374151;' : ''; ?>">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="width: 24px; height: 24px; background: <?php echo $i === 0 ? '#f59e0b' : ($i === 1 ? '#9ca3af' : ($i === 2 ? '#cd7f32' : '#374151')); ?>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;"><?php echo $i + 1; ?></span>
-                            <span style="font-size: 13px;"><?php echo htmlspecialchars($product['name']); ?></span>
+                    <div style="background: #1e293b; border-radius: 8px; overflow: hidden;">
+                    <?php foreach ($topProducts as $i => $product):
+                        $medalColors = ['#f59e0b', '#9ca3af', '#cd7f32', '#374151', '#374151'];
+                        $medalColor = $medalColors[$i] ?? '#374151';
+                    ?>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; <?php echo $i > 0 ? 'border-top: 1px solid #374151;' : ''; ?>">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="width: 28px; height: 28px; background: <?php echo $medalColor; ?>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white;"><?php echo $i + 1; ?></span>
+                            <span style="font-size: 14px; font-weight: 500;"><?php echo htmlspecialchars($product['name']); ?></span>
                         </div>
                         <div style="text-align: right;">
-                            <span style="color: <?php echo $primaryColor; ?>; font-weight: bold;"><?php echo $product['qty']; ?> vendus</span>
-                            <div style="color: #6b7280; font-size: 11px;"><?php echo number_format($product['revenue'], 0); ?>€</div>
+                            <div style="color: <?php echo $primaryColor; ?>; font-weight: bold; font-size: 14px;"><?php echo $product['qty']; ?> vendus</div>
+                            <div style="color: #10b981; font-size: 12px;"><?php echo number_format($product['revenue'], 0); ?>€</div>
                         </div>
                     </div>
                     <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
             </div>
 
             <!-- Heures de pic -->
-            <div class="card" style="margin-top: 15px;">
-                <h3 style="margin-bottom: 15px; font-size: 14px;"><i class="fas fa-chart-bar" style="color: #3b82f6;"></i> Répartition par heure (30j)</h3>
+            <div class="card" style="margin-top: 15px; border-left: 4px solid #3b82f6;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-chart-bar" style="color: #3b82f6;"></i> Répartition par heure (30j)</h3>
                 <?php
                 $maxCount = max(array_column($peakHours, 'count') ?: [1]);
                 ?>
-                <div style="display: flex; align-items: flex-end; gap: 4px; height: 100px;">
-                    <?php for ($h = 11; $h <= 23; $h++):
-                        $hourData = array_filter($peakHours, fn($p) => (int)$p['hour'] === $h);
-                        $count = !empty($hourData) ? array_values($hourData)[0]['count'] : 0;
-                        $height = $maxCount > 0 ? ($count / $maxCount) * 100 : 0;
-                    ?>
-                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                        <div style="width: 100%; background: <?php echo $count === $maxCount && $count > 0 ? '#f59e0b' : '#3b82f6'; ?>; height: <?php echo max($height, 2); ?>px; border-radius: 4px 4px 0 0; min-height: 2px;"></div>
-                        <span style="font-size: 9px; color: #6b7280; margin-top: 4px;"><?php echo $h; ?>h</span>
+                <div style="background: #1e293b; padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; align-items: flex-end; gap: 4px; height: 100px;">
+                        <?php for ($h = 11; $h <= 23; $h++):
+                            $hourData = array_filter($peakHours, fn($p) => (int)$p['hour'] === $h);
+                            $count = !empty($hourData) ? array_values($hourData)[0]['count'] : 0;
+                            $height = $maxCount > 0 ? ($count / $maxCount) * 100 : 0;
+                            $isPeak = $count === $maxCount && $count > 0;
+                        ?>
+                        <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                            <?php if ($count > 0): ?>
+                            <span style="font-size: 8px; color: <?php echo $isPeak ? '#f59e0b' : '#6b7280'; ?>; margin-bottom: 2px;"><?php echo $count; ?></span>
+                            <?php endif; ?>
+                            <div style="width: 100%; background: <?php echo $isPeak ? '#f59e0b' : '#3b82f6'; ?>; height: <?php echo max($height, 2); ?>px; border-radius: 4px 4px 0 0; min-height: 2px;"></div>
+                            <span style="font-size: 9px; color: <?php echo $isPeak ? '#f59e0b' : '#6b7280'; ?>; margin-top: 4px; font-weight: <?php echo $isPeak ? 'bold' : 'normal'; ?>;"><?php echo $h; ?>h</span>
+                        </div>
+                        <?php endfor; ?>
                     </div>
-                    <?php endfor; ?>
                 </div>
             </div>
 
             <!-- CA 7 derniers jours -->
-            <div class="card" style="margin-top: 15px;">
-                <h3 style="margin-bottom: 15px; font-size: 14px;"><i class="fas fa-chart-area" style="color: #10b981;"></i> CA des 7 derniers jours</h3>
+            <div class="card" style="margin-top: 15px; border-left: 4px solid #10b981;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-chart-area" style="color: #10b981;"></i> CA des 7 derniers jours</h3>
                 <?php
                 $maxRevenue = max(array_column($dailyRevenue, 'revenue') ?: [1]);
                 $days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
                 ?>
-                <div style="display: flex; align-items: flex-end; gap: 8px; height: 120px;">
-                    <?php foreach ($dailyRevenue as $day):
-                        $height = $maxRevenue > 0 ? ($day['revenue'] / $maxRevenue) * 100 : 0;
-                        $dayName = $days[date('w', strtotime($day['date']))];
-                        $isToday = $day['date'] === date('Y-m-d');
-                    ?>
-                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                        <span style="font-size: 10px; color: #9ca3af; margin-bottom: 4px;"><?php echo number_format($day['revenue'], 0); ?>€</span>
-                        <div style="width: 100%; background: <?php echo $isToday ? '#10b981' : '#374151'; ?>; height: <?php echo max($height, 4); ?>px; border-radius: 4px 4px 0 0;"></div>
-                        <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#6b7280'; ?>; margin-top: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo $dayName; ?></span>
+                <div style="background: #1e293b; padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; align-items: flex-end; gap: 8px; height: 120px;">
+                        <?php foreach ($dailyRevenue as $day):
+                            $height = $maxRevenue > 0 ? ($day['revenue'] / $maxRevenue) * 100 : 0;
+                            $dayName = $days[date('w', strtotime($day['date']))];
+                            $isToday = $day['date'] === date('Y-m-d');
+                        ?>
+                        <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                            <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#9ca3af'; ?>; margin-bottom: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo number_format($day['revenue'], 0); ?>€</span>
+                            <div style="width: 100%; background: <?php echo $isToday ? 'linear-gradient(180deg, #10b981, #059669)' : '#374151'; ?>; height: <?php echo max($height, 4); ?>px; border-radius: 4px 4px 0 0;"></div>
+                            <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#6b7280'; ?>; margin-top: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo $dayName; ?></span>
+                        </div>
+                        <?php endforeach; ?>
                     </div>
-                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
@@ -1552,13 +1659,21 @@ if (isset($_GET['export'])) {
                 btn.classList.add('active');
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                 document.getElementById('section-' + btn.dataset.section).classList.add('active');
+                window.location.hash = btn.dataset.section;
                 window.scrollTo(0, 0);
             });
         });
 
-        // Hash navigation
-        if (window.location.hash === '#settings') {
-            document.querySelector('[data-section="settings"]').click();
+        // Hash navigation - supporte toutes les sections
+        function navigateToSection(section) {
+            const btn = document.querySelector('[data-section="' + section + '"]');
+            if (btn) btn.click();
+        }
+
+        // Charger la section depuis le hash au démarrage
+        const hash = window.location.hash.replace('#', '');
+        if (hash && document.querySelector('[data-section="' + hash + '"]')) {
+            navigateToSection(hash);
         }
 
         // Restaurant status
@@ -1683,6 +1798,7 @@ function submitAddCustomer(event) {
     .then(data => {
         if (data.success) {
             closeAddCustomerModal();
+            window.location.href = 'index.php#customers';
             location.reload();
         } else {
             alert('Erreur: ' + (data.error || 'Impossible d\'ajouter le client'));
@@ -1787,6 +1903,7 @@ function submitAddReward(event) {
         .then(data => {
             if (data.success) {
                 closeAddRewardModal();
+                window.location.href = 'index.php#loyalty';
                 location.reload();
             } else {
                 alert('Erreur: ' + (data.error || 'Impossible de créer la récompense'));
@@ -1796,15 +1913,16 @@ function submitAddReward(event) {
 
 function deleteReward(rewardId) {
     if (!confirm('Supprimer cette récompense ?')) return;
-    
+
     const formData = new FormData();
     formData.append('action', 'delete_reward');
     formData.append('reward_id', rewardId);
-    
+
     fetch('', { method: 'POST', body: formData })
         .then(r => r.json())
         .then(data => {
             if (data.success) {
+                window.location.href = 'index.php#loyalty';
                 location.reload();
             } else {
                 alert('Erreur lors de la suppression');
@@ -1884,6 +2002,7 @@ function submitAddPoints(event) {
         .then(data => {
             if (data.success) {
                 closeAddPointsModal();
+                window.location.href = 'index.php#customers';
                 location.reload();
             } else {
                 alert('Erreur: ' + (data.error || 'Impossible d\'ajouter les points'));
