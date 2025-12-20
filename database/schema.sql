@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS `restaurant_settings` (
   `facebook` VARCHAR(100) DEFAULT NULL,
   `tiktok` VARCHAR(100) DEFAULT NULL,
   `accepting_orders` TINYINT(1) DEFAULT 1,
+  `loyalty_enabled` TINYINT(1) DEFAULT 1,
+  `loyalty_points_per_euro` INT UNSIGNED DEFAULT 1,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `uk_restaurant` (`restaurant_id`),
   FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON DELETE CASCADE
@@ -265,5 +267,41 @@ JOIN orders o ON oi.order_id = o.id
 WHERE o.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
 GROUP BY oi.product_id, p.restaurant_id, p.name
 ORDER BY total_sold DESC;
+
+-- ---------------------------------------------
+-- Table: loyalty_rewards
+-- ---------------------------------------------
+CREATE TABLE IF NOT EXISTS `loyalty_rewards` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `restaurant_id` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `points_required` INT UNSIGNED NOT NULL,
+  `reward_type` ENUM('discount_percent', 'discount_amount', 'free_item') DEFAULT 'discount_percent',
+  `reward_value` DECIMAL(8,2) DEFAULT 0.00,
+  `is_active` TINYINT(1) DEFAULT 1,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_restaurant` (`restaurant_id`, `is_active`),
+  FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------
+-- Table: loyalty_transactions
+-- ---------------------------------------------
+CREATE TABLE IF NOT EXISTS `loyalty_transactions` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `customer_id` INT UNSIGNED NOT NULL,
+  `restaurant_id` INT UNSIGNED NOT NULL,
+  `order_id` INT UNSIGNED DEFAULT NULL,
+  `points` INT NOT NULL COMMENT 'Positif = gagné, Négatif = utilisé',
+  `type` ENUM('earn', 'redeem', 'bonus', 'adjustment') NOT NULL,
+  `description` VARCHAR(255) DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_customer` (`customer_id`),
+  INDEX `idx_restaurant` (`restaurant_id`),
+  FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
