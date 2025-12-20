@@ -305,6 +305,7 @@ const Products = {
         const platformsGrid = document.getElementById('platformsGrid');
         if (platformsGrid) {
             const platforms = Config.getPlatforms();
+            console.log('Platforms loaded:', platforms);
             // Check if platforms is an array with items
             if (Array.isArray(platforms) && platforms.length > 0) {
                 const platformIcons = {

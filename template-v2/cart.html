@@ -247,6 +247,19 @@
             margin: 0 auto 8px;
         }
 
+        .upsell-placeholder {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--border-radius-sm);
+            background: var(--gray-200);
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+            font-size: 24px;
+        }
+
         .upsell-card-name {
             font-size: 13px;
             font-weight: 600;
@@ -819,10 +832,10 @@
 
                 grid.innerHTML = suggestions.map(product => {
                     const price = product.price || product.priceSolo || 0;
+                    const hasImage = product.image && product.image.length > 0;
                     return `
                         <div class="upsell-card" onclick="CartPage.quickAddUpsell('${product.id}')">
-                            <img src="../${product.image}" alt="${product.name}"
-                                 onerror="this.src='../images/placeholder.jpg'">
+                            ${hasImage ? `<img src="../${product.image}" alt="${product.name}" onerror="this.style.display='none'">` : '<div class="upsell-placeholder"><i class="fas fa-utensils"></i></div>'}
                             <div class="upsell-card-name">${product.name}</div>
                             <div class="upsell-card-price">+${Config.formatPrice(price)}</div>
                         </div>
