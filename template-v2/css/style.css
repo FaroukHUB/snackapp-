@@ -416,8 +416,14 @@ ul {
 
 .formules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 20px;
+}
+
+@media (max-width: 400px) {
+    .formules-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .formule-card {
@@ -469,6 +475,8 @@ ul {
 
 .formule-info {
     flex: 1;
+    min-width: 0;
+    overflow: visible;
 }
 
 .formule-name {
@@ -503,28 +511,34 @@ ul {
 
 .formule-footer {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    margin-top: 8px;
+    gap: 10px;
+    margin-top: 12px;
 }
 
 .formule-add-btn {
-    background: var(--primary);
-    color: white;
+    background: rgba(255,255,255,0.95);
+    color: var(--primary);
     border: none;
-    padding: 10px 20px;
-    border-radius: var(--border-radius-sm);
-    font-weight: 600;
-    font-size: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 16px;
     cursor: pointer;
     transition: var(--transition);
-    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .formule-add-btn:hover {
-    background: var(--primary-dark);
-    transform: scale(1.05);
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .formule-savings {

@@ -154,7 +154,7 @@ const Products = {
                                     <span class="current">${Config.formatPrice(formule.price)}</span>
                                     ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
                                 </div>
-                                <button class="product-add-btn formule-add-btn">Ajouter</button>
+                                <button class="formule-add-btn"><i class="fas fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
