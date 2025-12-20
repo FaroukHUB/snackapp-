@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Configuration
 define('ADMIN_PASSWORD', 'fabrik2025');
