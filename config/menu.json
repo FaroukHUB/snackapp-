@@ -385,5 +385,83 @@
             "desserts": [],
             "boissons": []
         }
+    },
+    "formules": [
+        {
+            "id": "formule-midi",
+            "name": "Formule Midi",
+            "description": "1 Burger au choix + Frites + Boisson",
+            "image": "images/formules/formule-midi.jpg",
+            "price": 12.90,
+            "originalPrice": 15.50,
+            "savings": 2.60,
+            "includes": [
+                { "type": "category", "categoryId": "burgers", "label": "1 Burger au choix", "quantity": 1 },
+                { "type": "product", "productId": "frites-maison", "label": "Frites maison", "quantity": 1 },
+                { "type": "category", "categoryId": "boissons", "label": "1 Boisson au choix", "quantity": 1 }
+            ],
+            "status": "available",
+            "badge": "Populaire"
+        },
+        {
+            "id": "formule-duo",
+            "name": "Formule Duo",
+            "description": "2 Burgers + 2 Frites + 2 Boissons",
+            "image": "images/formules/formule-duo.jpg",
+            "price": 24.90,
+            "originalPrice": 31.00,
+            "savings": 6.10,
+            "includes": [
+                { "type": "category", "categoryId": "burgers", "label": "2 Burgers au choix", "quantity": 2 },
+                { "type": "product", "productId": "frites-maison", "label": "2 Frites maison", "quantity": 2 },
+                { "type": "category", "categoryId": "boissons", "label": "2 Boissons au choix", "quantity": 2 }
+            ],
+            "status": "available",
+            "badge": "-20%"
+        },
+        {
+            "id": "formule-family",
+            "name": "Formule Family",
+            "description": "4 Burgers + 4 Frites + 4 Boissons + 2 Desserts",
+            "image": "images/formules/formule-family.jpg",
+            "price": 54.90,
+            "originalPrice": 68.00,
+            "savings": 13.10,
+            "includes": [
+                { "type": "category", "categoryId": "burgers", "label": "4 Burgers au choix", "quantity": 4 },
+                { "type": "product", "productId": "frites-maison", "label": "4 Frites maison", "quantity": 4 },
+                { "type": "category", "categoryId": "boissons", "label": "4 Boissons au choix", "quantity": 4 },
+                { "type": "category", "categoryId": "desserts", "label": "2 Desserts au choix", "quantity": 2 }
+            ],
+            "status": "available",
+            "badge": "Best Value"
+        }
+    ],
+    "upsellRules": [
+        {
+            "when": ["burgers"],
+            "suggest": ["extras", "boissons"],
+            "message": "Complétez votre burger !",
+            "priority": 1
+        },
+        {
+            "when": ["extras"],
+            "suggest": ["boissons", "desserts"],
+            "message": "Une boisson ou un dessert ?",
+            "priority": 2
+        },
+        {
+            "when": ["boissons"],
+            "suggest": ["desserts"],
+            "message": "Un petit dessert ?",
+            "priority": 3
+        }
+    ],
+    "categoryIcons": {
+        "burgers": "fa-burger",
+        "extras": "fa-french-fries",
+        "desserts": "fa-ice-cream",
+        "boissons": "fa-cup-straw",
+        "menu-enfant": "fa-child"
     }
 }

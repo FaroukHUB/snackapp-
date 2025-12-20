@@ -1,0 +1,525 @@
+/* ============================================
+   PRODUCTS.JS - Products & Formules Display
+   Template V2 - SnackApp
+   ============================================ */
+
+const Products = {
+    // Current modal state
+    currentProduct: null,
+    currentQuantity: 1,
+    selectedSupplements: [],
+
+    /**
+     * Initialize products display
+     */
+    init() {
+        this.renderSidebar();
+        this.renderFormules();
+        this.renderAllCategories();
+        this.renderRestaurantInfo();
+        this.setupModal();
+        this.setupSearch();
+    },
+
+    /**
+     * Render sidebar navigation
+     */
+    renderSidebar() {
+        const nav = document.getElementById('categoryNav');
+        if (!nav) return;
+
+        const categories = Config.getCategories();
+        const icons = Config.categoryIcons;
+
+        // Add Formules link first
+        let html = `
+            <li>
+                <a href="#formules" class="active">
+                    <i class="fas fa-fire"></i>
+                    Nos Formules
+                </a>
+            </li>
+        `;
+
+        // Add category links
+        categories.forEach(cat => {
+            const icon = icons[cat.id] || 'fa-utensils';
+            html += `
+                <li>
+                    <a href="#${cat.id}">
+                        <i class="fas ${icon}"></i>
+                        ${cat.name}
+                    </a>
+                </li>
+            `;
+        });
+
+        nav.innerHTML = html;
+
+        // Setup scroll spy
+        this.setupScrollSpy();
+    },
+
+    /**
+     * Setup scroll spy for active nav highlighting
+     */
+    setupScrollSpy() {
+        const sections = document.querySelectorAll('.product-section, .formules-section');
+        const navLinks = document.querySelectorAll('#categoryNav a');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id || 'formules';
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, {
+            rootMargin: '-20% 0px -70% 0px'
+        });
+
+        sections.forEach(section => observer.observe(section));
+    },
+
+    /**
+     * Render formules section
+     */
+    renderFormules() {
+        const grid = document.getElementById('formulesGrid');
+        const section = document.getElementById('formulesSection');
+        if (!grid) return;
+
+        const formules = Config.getAvailableFormules();
+
+        if (formules.length === 0) {
+            section?.classList.add('hidden');
+            return;
+        }
+
+        grid.innerHTML = formules.map(formule => `
+            <div class="formule-card" onclick="Products.openFormuleModal('${formule.id}')">
+                ${formule.badge ? `<span class="formule-savings">${formule.badge}</span>` : ''}
+                <div class="formule-card-content">
+                    <img src="../${formule.image}" alt="${formule.name}" class="formule-image"
+                         onerror="this.src='../images/placeholder.jpg'">
+                    <div class="formule-info">
+                        <h3 class="formule-name">${formule.name}</h3>
+                        <p class="formule-description">${formule.description}</p>
+                        <div class="formule-price">
+                            <span class="current">${Config.formatPrice(formule.price)}</span>
+                            ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    /**
+     * Render all product categories
+     */
+    renderAllCategories() {
+        const container = document.getElementById('productsContainer');
+        if (!container) return;
+
+        const categories = Config.getCategories();
+        const icons = Config.categoryIcons;
+
+        container.innerHTML = categories.map(cat => `
+            <section class="product-section" id="${cat.id}">
+                <h2>
+                    <i class="fas ${icons[cat.id] || 'fa-utensils'}"></i>
+                    ${cat.name}
+                </h2>
+                <div class="products-grid">
+                    ${this.renderProducts(cat.items, cat.id)}
+                </div>
+            </section>
+        `).join('');
+    },
+
+    /**
+     * Render products for a category
+     */
+    renderProducts(products, categoryId) {
+        return products.map(product => {
+            const isUnavailable = product.status === 'unavailable';
+            const price = product.price || product.priceSolo || 0;
+
+            return `
+                <div class="product-card ${isUnavailable ? 'unavailable' : ''}"
+                     onclick="${!isUnavailable ? `Products.openProductModal('${product.id}')` : ''}">
+                    <div class="product-image-wrapper">
+                        <img src="../${product.image}" alt="${product.name}" class="product-image"
+                             onerror="this.src='../images/placeholder.jpg'">
+                        ${product.isSignature ? '<span class="product-badge">Signature</span>' : ''}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-description">${product.description || ''}</p>
+                        <div class="product-footer">
+                            <span class="product-price">${Config.formatPrice(price)}</span>
+                            ${!isUnavailable ? `
+                                <button class="product-add-btn" onclick="event.stopPropagation(); Products.quickAdd('${product.id}')">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    /**
+     * Render restaurant info sections
+     */
+    renderRestaurantInfo() {
+        // Logo and name
+        const logoImg = document.getElementById('logoImg');
+        const logoText = document.getElementById('logoText');
+        if (logoImg && Config.restaurant?.logo) {
+            logoImg.src = '../' + Config.restaurant.logo;
+            logoImg.alt = Config.restaurant.name;
+        }
+        if (logoText) {
+            logoText.textContent = Config.restaurant?.name || 'Restaurant';
+        }
+
+        // Status
+        const status = document.getElementById('restaurantStatus');
+        if (status) {
+            const isOpen = Config.isOpen();
+            status.innerHTML = `
+                <span class="status-dot ${isOpen ? 'open' : 'closed'}"></span>
+                <span>${isOpen ? 'Ouvert' : 'Fermé'}</span>
+            `;
+        }
+
+        // Address
+        const address = document.getElementById('restaurantAddress');
+        if (address) {
+            address.innerHTML = `
+                <i class="fas fa-map-marker-alt"></i>
+                <span>${Config.getFullAddress()}</span>
+            `;
+        }
+
+        // Contact
+        const contact = document.getElementById('contactContent');
+        if (contact) {
+            const c = Config.getContact();
+            const social = Config.getSocial();
+
+            let html = `
+                <p><strong>Téléphone :</strong> <a href="tel:${c.phone}">${c.phoneDisplay || c.phone}</a></p>
+                <p><strong>Adresse :</strong> ${Config.getFullAddress()}</p>
+            `;
+
+            if (social.instagram || social.facebook) {
+                html += '<div style="margin-top: 16px; display: flex; gap: 12px;">';
+                if (social.instagram) {
+                    html += `<a href="${social.instagram}" target="_blank" style="color: var(--primary);"><i class="fab fa-instagram fa-lg"></i></a>`;
+                }
+                if (social.facebook) {
+                    html += `<a href="${social.facebook}" target="_blank" style="color: var(--primary);"><i class="fab fa-facebook fa-lg"></i></a>`;
+                }
+                if (social.tiktok) {
+                    html += `<a href="${social.tiktok}" target="_blank" style="color: var(--primary);"><i class="fab fa-tiktok fa-lg"></i></a>`;
+                }
+                html += '</div>';
+            }
+
+            contact.innerHTML = html;
+        }
+
+        // Hours
+        const hours = document.getElementById('horairesContent');
+        if (hours) {
+            const openingHours = Config.getOpeningHours();
+            hours.innerHTML = `
+                <div class="hours-grid">
+                    ${openingHours.map(h => {
+                        let timeStr = '';
+                        if (h.slots && Array.isArray(h.slots)) {
+                            timeStr = h.slots.map(s => `${s.opens} - ${s.closes}`).join(' / ');
+                        } else {
+                            timeStr = `${h.opens} - ${h.closes}`;
+                        }
+                        return `
+                            <div class="hours-row">
+                                <span class="hours-day">${this.capitalize(h.day)}</span>
+                                <span class="hours-time">${timeStr}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // FAQ
+        const faq = document.getElementById('faqContent');
+        if (faq) {
+            const faqItems = Config.getFAQ();
+            if (faqItems.length > 0) {
+                faq.innerHTML = faqItems.map(item => `
+                    <div class="faq-item">
+                        <div class="faq-question">${item.question}</div>
+                        <div class="faq-answer">${item.answer}</div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('faq')?.classList.add('hidden');
+            }
+        }
+    },
+
+    /**
+     * Setup product modal
+     */
+    setupModal() {
+        const modal = document.getElementById('productModal');
+        const backdrop = modal?.querySelector('.modal-backdrop');
+        const closeBtn = document.getElementById('modalClose');
+
+        backdrop?.addEventListener('click', () => this.closeModal());
+        closeBtn?.addEventListener('click', () => this.closeModal());
+
+        // Quantity buttons
+        document.getElementById('qtyMinus')?.addEventListener('click', () => {
+            if (this.currentQuantity > 1) {
+                this.currentQuantity--;
+                this.updateModalUI();
+            }
+        });
+
+        document.getElementById('qtyPlus')?.addEventListener('click', () => {
+            this.currentQuantity++;
+            this.updateModalUI();
+        });
+
+        // Add to cart button
+        document.getElementById('addToCartBtn')?.addEventListener('click', () => {
+            this.addCurrentToCart();
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') this.closeModal();
+        });
+    },
+
+    /**
+     * Open product modal
+     */
+    openProductModal(productId) {
+        const product = Config.getProduct(productId);
+        if (!product) return;
+
+        this.currentProduct = product;
+        this.currentQuantity = 1;
+        this.selectedSupplements = [];
+
+        const modal = document.getElementById('productModal');
+        const price = product.price || product.priceSolo || 0;
+
+        // Update modal content
+        document.getElementById('modalImage').src = '../' + product.image;
+        document.getElementById('modalTitle').textContent = product.name;
+        document.getElementById('modalDescription').textContent = product.description || '';
+        document.getElementById('modalPrice').textContent = Config.formatPrice(price);
+
+        // Render supplements
+        const supplements = Config.getSupplementsForCategory(product.categoryId);
+        const supplementsContainer = document.getElementById('modalSupplements');
+        const supplementsList = document.getElementById('supplementsList');
+
+        if (supplements.length > 0) {
+            supplementsContainer.classList.remove('hidden');
+            supplementsList.innerHTML = supplements.map(sup => `
+                <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
+                    <div class="supplement-info">
+                        <div class="supplement-checkbox">
+                            <i class="fas fa-check" style="font-size: 12px;"></i>
+                        </div>
+                        <span class="supplement-name">${sup.name}</span>
+                    </div>
+                    <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
+                </div>
+            `).join('');
+        } else {
+            supplementsContainer.classList.add('hidden');
+        }
+
+        this.updateModalUI();
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    },
+
+    /**
+     * Open formule modal (simplified for now)
+     */
+    openFormuleModal(formuleId) {
+        const formule = Config.getFormule(formuleId);
+        if (!formule) return;
+
+        // For now, treat formule like a product
+        this.currentProduct = {
+            ...formule,
+            price: formule.price,
+            categoryId: 'formules'
+        };
+        this.currentQuantity = 1;
+        this.selectedSupplements = [];
+
+        const modal = document.getElementById('productModal');
+
+        document.getElementById('modalImage').src = '../' + formule.image;
+        document.getElementById('modalTitle').textContent = formule.name;
+        document.getElementById('modalDescription').textContent = formule.description;
+        document.getElementById('modalPrice').textContent = Config.formatPrice(formule.price);
+
+        // Hide supplements for formules
+        document.getElementById('modalSupplements').classList.add('hidden');
+
+        this.updateModalUI();
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    },
+
+    /**
+     * Toggle supplement selection
+     */
+    toggleSupplement(supId) {
+        const sup = Config.supplements.catalog?.[supId];
+        if (!sup) return;
+
+        const index = this.selectedSupplements.findIndex(s => s.id === supId);
+        if (index >= 0) {
+            this.selectedSupplements.splice(index, 1);
+        } else {
+            this.selectedSupplements.push(sup);
+        }
+
+        // Update UI
+        document.querySelectorAll('.supplement-item').forEach(item => {
+            const id = item.dataset.id;
+            if (this.selectedSupplements.find(s => s.id === id)) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+
+        this.updateModalUI();
+    },
+
+    /**
+     * Update modal UI (quantity, total price)
+     */
+    updateModalUI() {
+        document.getElementById('qtyValue').textContent = this.currentQuantity;
+
+        // Calculate total
+        let total = this.currentProduct?.price || this.currentProduct?.priceSolo || 0;
+        this.selectedSupplements.forEach(sup => {
+            total += sup.price || 0;
+        });
+        total *= this.currentQuantity;
+
+        document.getElementById('addToCartPrice').textContent = Config.formatPrice(total);
+    },
+
+    /**
+     * Add current modal product to cart
+     */
+    addCurrentToCart() {
+        if (!this.currentProduct) return;
+
+        Cart.addItem(
+            this.currentProduct,
+            this.currentQuantity,
+            [...this.selectedSupplements],
+            {}
+        );
+
+        this.closeModal();
+    },
+
+    /**
+     * Quick add product without modal (no supplements)
+     */
+    quickAdd(productId) {
+        const product = Config.getProduct(productId);
+        if (!product) return;
+
+        Cart.addItem(product, 1, [], {});
+    },
+
+    /**
+     * Close modal
+     */
+    closeModal() {
+        const modal = document.getElementById('productModal');
+        modal?.classList.remove('active');
+        document.body.style.overflow = '';
+        this.currentProduct = null;
+    },
+
+    /**
+     * Setup search functionality
+     */
+    setupSearch() {
+        const input = document.getElementById('searchInput');
+        if (!input) return;
+
+        let debounceTimer;
+        input.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                this.filterProducts(e.target.value);
+            }, 300);
+        });
+    },
+
+    /**
+     * Filter products by search term
+     */
+    filterProducts(searchTerm) {
+        const term = searchTerm.toLowerCase().trim();
+        const cards = document.querySelectorAll('.product-card');
+
+        cards.forEach(card => {
+            const name = card.querySelector('.product-name')?.textContent.toLowerCase() || '';
+            const desc = card.querySelector('.product-description')?.textContent.toLowerCase() || '';
+
+            if (!term || name.includes(term) || desc.includes(term)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Hide empty sections
+        document.querySelectorAll('.product-section').forEach(section => {
+            const visibleCards = section.querySelectorAll('.product-card:not([style*="display: none"])');
+            section.style.display = visibleCards.length > 0 ? '' : 'none';
+        });
+    },
+
+    /**
+     * Helper: Capitalize first letter
+     */
+    capitalize(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+};
+
+// Export for use in other modules
+window.Products = Products;
