@@ -129,7 +129,7 @@ const Products = {
                 ${formule.badge ? `<span class="formule-savings">${formule.badge}</span>` : ''}
                 <div class="formule-card-content">
                     <img src="../${formule.image}" alt="${formule.name}" class="formule-image"
-                         onerror="this.src='../images/placeholder.jpg'">
+                         onerror="this.style.display='none'">
                     <div class="formule-info">
                         <h3 class="formule-name">${formule.name}</h3>
                         <p class="formule-description">${formule.description}</p>
@@ -179,7 +179,7 @@ const Products = {
                      onclick="${!isUnavailable ? `Products.openProductModal('${product.id}')` : ''}">
                     <div class="product-image-wrapper">
                         <img src="../${product.image}" alt="${product.name}" class="product-image"
-                             onerror="this.src='../images/placeholder.jpg'">
+                             onerror="this.style.display='none'">
                         ${product.isSignature ? '<span class="product-badge">Signature</span>' : ''}
                     </div>
                     <div class="product-info">
