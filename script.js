@@ -423,6 +423,19 @@ function ensureTicketShell() {
         <input id="ticket-phone" type="tel"
                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
                placeholder="Votre numéro" />
+        <button type="button" id="ticket-check-loyalty"
+                class="mt-1 text-xs text-brand hover:underline text-left">
+          🎁 Vérifier mes points fidélité
+        </button>
+      </div>
+
+      <div id="ticket-loyalty-section" class="hidden flex-col gap-2 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200">
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-semibold text-amber-800">🏆 Vos points fidélité</span>
+          <span id="ticket-loyalty-points" class="text-lg font-bold text-brand">0 pts</span>
+        </div>
+        <div id="ticket-loyalty-rewards" class="space-y-2"></div>
+        <p id="ticket-loyalty-empty" class="text-xs text-amber-600 hidden">Pas assez de points pour une récompense</p>
       </div>
 
       <div class="flex flex-col gap-1">
@@ -498,6 +511,155 @@ function ensureTicketShell() {
   const shareBtn = ticketPanel.querySelector("#ticket-share");
   if (shareBtn) {
     shareBtn.addEventListener("click", shareTicket);
+  }
+
+  // Bouton vérifier fidélité
+  const checkLoyaltyBtn = ticketPanel.querySelector("#ticket-check-loyalty");
+  if (checkLoyaltyBtn) {
+    checkLoyaltyBtn.addEventListener("click", checkLoyaltyPoints);
+  }
+}
+
+// Variable globale pour stocker la récompense sélectionnée
+let selectedLoyaltyReward = null;
+
+// Vérifier les points fidélité du client
+async function checkLoyaltyPoints() {
+  const phoneInput = document.getElementById("ticket-phone");
+  const phone = (phoneInput?.value || "").trim();
+
+  if (!phone) {
+    phoneInput?.classList.add("ring-2", "ring-red-400");
+    alert("Entrez votre numéro de téléphone pour vérifier vos points.");
+    return;
+  }
+
+  phoneInput?.classList.remove("ring-2", "ring-red-400");
+
+  const loyaltySection = document.getElementById("ticket-loyalty-section");
+  const loyaltyPoints = document.getElementById("ticket-loyalty-points");
+  const loyaltyRewards = document.getElementById("ticket-loyalty-rewards");
+  const loyaltyEmpty = document.getElementById("ticket-loyalty-empty");
+
+  try {
+    const response = await fetch(`api/public.php?endpoint=loyalty&phone=${encodeURIComponent(phone)}`);
+    const data = await response.json();
+
+    if (!data.success) {
+      alert(data.error || "Erreur lors de la vérification");
+      return;
+    }
+
+    // Afficher la section fidélité
+    loyaltySection.classList.remove("hidden");
+    loyaltySection.classList.add("flex");
+
+    // Afficher les points
+    loyaltyPoints.textContent = `${data.points} pts`;
+
+    // Réinitialiser la sélection
+    selectedLoyaltyReward = null;
+    loyaltyRewards.innerHTML = "";
+
+    if (data.rewards && data.rewards.length > 0) {
+      loyaltyEmpty.classList.add("hidden");
+
+      data.rewards.forEach((reward) => {
+        const rewardEl = document.createElement("label");
+        rewardEl.className = "flex items-center gap-2 p-2 rounded-lg bg-white border border-amber-200 cursor-pointer hover:bg-amber-50 transition";
+        rewardEl.innerHTML = `
+          <input type="radio" name="loyalty-reward" value="${reward.id}" class="accent-brand">
+          <div class="flex-1">
+            <p class="text-sm font-medium text-slate-800">${reward.name}</p>
+            <p class="text-xs text-slate-500">${reward.points_required} pts</p>
+          </div>
+          <span class="text-xs font-semibold text-green-600">
+            ${formatRewardValue(reward)}
+          </span>
+        `;
+
+        const radio = rewardEl.querySelector("input");
+        radio.addEventListener("change", () => {
+          selectedLoyaltyReward = reward;
+          updateTicketTotalWithLoyalty();
+        });
+
+        loyaltyRewards.appendChild(rewardEl);
+      });
+
+      // Ajouter option "ne pas utiliser"
+      const noRewardEl = document.createElement("label");
+      noRewardEl.className = "flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 cursor-pointer hover:bg-slate-50 transition";
+      noRewardEl.innerHTML = `
+        <input type="radio" name="loyalty-reward" value="" class="accent-brand" checked>
+        <span class="text-sm text-slate-600">Ne pas utiliser de récompense</span>
+      `;
+      const noRadio = noRewardEl.querySelector("input");
+      noRadio.addEventListener("change", () => {
+        selectedLoyaltyReward = null;
+        updateTicketTotalWithLoyalty();
+      });
+      loyaltyRewards.appendChild(noRewardEl);
+
+    } else {
+      loyaltyEmpty.classList.remove("hidden");
+      if (data.all_rewards && data.all_rewards.length > 0) {
+        const nextReward = data.all_rewards[0];
+        const pointsNeeded = nextReward.points_required - data.points;
+        loyaltyEmpty.textContent = `Plus que ${pointsNeeded} pts pour "${nextReward.name}" !`;
+      } else {
+        loyaltyEmpty.textContent = "Continuez à commander pour accumuler des points !";
+      }
+    }
+
+  } catch (error) {
+    console.error("Erreur fidélité:", error);
+    alert("Impossible de vérifier vos points. Réessayez plus tard.");
+  }
+}
+
+// Formater la valeur de la récompense
+function formatRewardValue(reward) {
+  switch (reward.reward_type) {
+    case "discount_percent":
+      return `-${reward.reward_value}%`;
+    case "discount_amount":
+      return `-${parseFloat(reward.reward_value).toFixed(2)}€`;
+    case "free_item":
+      return "🎁 Offert";
+    default:
+      return "";
+  }
+}
+
+// Mettre à jour le total avec la récompense
+function updateTicketTotalWithLoyalty() {
+  const totalEl = document.getElementById("ticket-total");
+  if (!totalEl) return;
+
+  let total = ticketLines.reduce((sum, line) => sum + (line.lineTotal || 0), 0);
+
+  if (selectedLoyaltyReward) {
+    const discount = calculateDiscount(total, selectedLoyaltyReward);
+    total = Math.max(0, total - discount);
+  }
+
+  totalEl.textContent = total.toFixed(2) + " €";
+}
+
+// Calculer la réduction
+function calculateDiscount(total, reward) {
+  if (!reward) return 0;
+
+  switch (reward.reward_type) {
+    case "discount_percent":
+      return total * (parseFloat(reward.reward_value) / 100);
+    case "discount_amount":
+      return parseFloat(reward.reward_value);
+    case "free_item":
+      return 0; // Le free item est géré différemment
+    default:
+      return 0;
   }
 }
 
@@ -713,10 +875,19 @@ async function sendToRestaurant() {
     return;
   }
 
-  const total = ticketLines.reduce(
+  const subtotal = ticketLines.reduce(
     (sum, line) => sum + (line.lineTotal || 0),
     0
   );
+
+  // Calculer la réduction fidélité si applicable
+  let loyaltyDiscount = 0;
+  let finalTotal = subtotal;
+
+  if (selectedLoyaltyReward) {
+    loyaltyDiscount = calculateDiscount(subtotal, selectedLoyaltyReward);
+    finalTotal = Math.max(0, subtotal - loyaltyDiscount);
+  }
 
   const cfg = window.SNACK_CONFIG || {};
 
@@ -755,10 +926,17 @@ async function sendToRestaurant() {
 
   const extra = msgInput.value.trim();
   const snackName = cfg.name || cfg.legalName || "Snack";
+
+  // Construire le texte avec réduction fidélité si applicable
+  let totalText = `Total : ${finalTotal.toFixed(2)} €`;
+  if (selectedLoyaltyReward && loyaltyDiscount > 0) {
+    totalText = `Sous-total : ${subtotal.toFixed(2)} €\n🎁 Fidélité (${selectedLoyaltyReward.name}) : -${loyaltyDiscount.toFixed(2)} €\nTotal : ${finalTotal.toFixed(2)} €`;
+  }
+
   const txt =
     `Commande de ${name} (${phone}) – ${snackName}\n\n` +
     `${linesText}\n\n` +
-    `Total : ${total.toFixed(2)} €` +
+    totalText +
     (extra ? `\n\nMessage : ${extra}` : "");
 
   const encoded = encodeURIComponent(txt);
@@ -787,7 +965,10 @@ async function sendToRestaurant() {
       }).filter(Boolean),
       removed: line.removedIngredients
     })),
-    total: total,
+    subtotal: subtotal,
+    total: finalTotal,
+    loyalty_reward_id: selectedLoyaltyReward?.id || null,
+    loyalty_discount: loyaltyDiscount,
     notes: extra,
     whatsapp_message: txt
   };
@@ -808,16 +989,31 @@ async function sendToRestaurant() {
     if (data.success) {
       console.log('✅ Commande enregistrée dans l\'admin:', data);
 
-      // Afficher message de confirmation
-      alert('✅ Merci ' + name + ' !\n\n' +
+      // Afficher message de confirmation avec info fidélité
+      let confirmMsg = '✅ Merci ' + name + ' !\n\n' +
             'Votre commande a bien été envoyée au restaurant.\n' +
-            'Montant : ' + total.toFixed(2) + '€\n\n' +
-            'Nous préparons votre commande !');
+            'Montant : ' + finalTotal.toFixed(2) + '€';
+
+      if (selectedLoyaltyReward) {
+        confirmMsg += '\n🎁 Récompense utilisée : ' + selectedLoyaltyReward.name;
+      }
+
+      confirmMsg += '\n\nNous préparons votre commande !';
+      alert(confirmMsg);
 
       // Vider le panier et fermer le ticket (dans un try/catch pour éviter les erreurs non critiques)
       try {
         ticketLines = [];
-        updateTicketDisplay();
+        selectedLoyaltyReward = null;
+
+        // Réinitialiser l'affichage fidélité
+        const loyaltySection = document.getElementById("ticket-loyalty-section");
+        if (loyaltySection) {
+          loyaltySection.classList.add("hidden");
+          loyaltySection.classList.remove("flex");
+        }
+
+        renderTicketPanel();
         ticketPanel.classList.add("hidden");
       } catch (cleanupErr) {
         console.warn('⚠️ Erreur nettoyage (non critique):', cleanupErr);
