@@ -173,10 +173,12 @@ const Products = {
         return products.map(product => {
             const isUnavailable = product.status === 'unavailable';
             const price = product.price || product.priceSolo || 0;
+            const cardClick = isUnavailable ? '' : `Products.openProductModal('${product.id}')`;
 
             return `
                 <div class="product-card ${isUnavailable ? 'unavailable' : ''}"
-                     onclick="${!isUnavailable ? `Products.openProductModal('${product.id}')` : ''}">
+                     data-product-id="${product.id}"
+                     onclick="${cardClick}">
                     <div class="product-image-wrapper">
                         <img src="../${product.image}" alt="${product.name}" class="product-image"
                              onerror="this.style.display='none'">
@@ -187,11 +189,6 @@ const Products = {
                         <p class="product-description">${product.description || ''}</p>
                         <div class="product-footer">
                             <span class="product-price">${Config.formatPrice(price)}</span>
-                            ${!isUnavailable ? `
-                                <button class="product-add-btn" onclick="event.stopPropagation(); Products.quickAdd('${product.id}')">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            ` : ''}
                         </div>
                     </div>
                 </div>
