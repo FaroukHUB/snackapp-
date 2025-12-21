@@ -58,5 +58,29 @@
         "loyalty_points": 63,
         "last_order": "2025-12-15 22:52:53",
         "notes": ""
+    },
+    {
+        "id": "CUST202512201033085259",
+        "name": "Test Client",
+        "phone": "0757831883",
+        "email": "",
+        "registered_at": "2025-12-20 10:33:08",
+        "orders_count": 7,
+        "total_spent": 68.5,
+        "loyalty_points": 66,
+        "last_order": "2025-12-20 10:51:31",
+        "notes": ""
+    },
+    {
+        "id": "CUST202512201043565861",
+        "name": "Test Curl",
+        "phone": "0612345678",
+        "email": "",
+        "registered_at": "2025-12-20 10:43:56",
+        "orders_count": 2,
+        "total_spent": 21,
+        "loyalty_points": 20,
+        "last_order": "2025-12-20 10:51:06",
+        "notes": ""
     }
 ]

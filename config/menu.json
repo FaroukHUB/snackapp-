@@ -31,7 +31,8 @@
                             "oignons"
                         ],
                         "isSignature": true,
-                        "status": "available"
+                        "status": "available",
+                        "badge": "Nouveau 🔥"
                     },
                     {
                         "id": "le-seguin",
@@ -58,7 +59,8 @@
                             "salade",
                             "tomates"
                         ],
-                        "status": "available"
+                        "status": "available",
+                        "badge": "Épicé 🌶️"
                     },
                     {
                         "id": "le-classic",
@@ -391,14 +393,29 @@
             "id": "formule-midi",
             "name": "Formule Midi",
             "description": "1 Burger au choix + Frites + Boisson",
-            "image": "images/formules/formule-midi.jpg",
-            "price": 12.90,
-            "originalPrice": 15.50,
-            "savings": 2.60,
+            "image": "images/formules/formule-midi-012b1bf0.jpg",
+            "price": 12.9,
+            "originalPrice": 15.5,
+            "savings": 2.6,
             "includes": [
-                { "type": "category", "categoryId": "burgers", "label": "1 Burger au choix", "quantity": 1 },
-                { "type": "product", "productId": "frites-maison", "label": "Frites maison", "quantity": 1 },
-                { "type": "category", "categoryId": "boissons", "label": "1 Boisson au choix", "quantity": 1 }
+                {
+                    "type": "category",
+                    "label": "1 Burger au choix",
+                    "quantity": 1,
+                    "categoryId": "burgers"
+                },
+                {
+                    "type": "product",
+                    "label": "Frites maison",
+                    "quantity": 1,
+                    "productId": "frites-maison"
+                },
+                {
+                    "type": "category",
+                    "label": "1 Boisson au choix",
+                    "quantity": 1,
+                    "categoryId": "boissons"
+                }
             ],
             "status": "available",
             "badge": "Populaire"
@@ -408,13 +425,28 @@
             "name": "Formule Duo",
             "description": "2 Burgers + 2 Frites + 2 Boissons",
             "image": "images/formules/formule-duo.jpg",
-            "price": 24.90,
-            "originalPrice": 31.00,
-            "savings": 6.10,
+            "price": 24.9,
+            "originalPrice": 31,
+            "savings": 6.1,
             "includes": [
-                { "type": "category", "categoryId": "burgers", "label": "2 Burgers au choix", "quantity": 2 },
-                { "type": "product", "productId": "frites-maison", "label": "2 Frites maison", "quantity": 2 },
-                { "type": "category", "categoryId": "boissons", "label": "2 Boissons au choix", "quantity": 2 }
+                {
+                    "type": "category",
+                    "categoryId": "burgers",
+                    "label": "2 Burgers au choix",
+                    "quantity": 2
+                },
+                {
+                    "type": "product",
+                    "productId": "frites-maison",
+                    "label": "2 Frites maison",
+                    "quantity": 2
+                },
+                {
+                    "type": "category",
+                    "categoryId": "boissons",
+                    "label": "2 Boissons au choix",
+                    "quantity": 2
+                }
             ],
             "status": "available",
             "badge": "-20%"
@@ -424,14 +456,34 @@
             "name": "Formule Family",
             "description": "4 Burgers + 4 Frites + 4 Boissons + 2 Desserts",
             "image": "images/formules/formule-family.jpg",
-            "price": 54.90,
-            "originalPrice": 68.00,
-            "savings": 13.10,
+            "price": 54.9,
+            "originalPrice": 68,
+            "savings": 13.1,
             "includes": [
-                { "type": "category", "categoryId": "burgers", "label": "4 Burgers au choix", "quantity": 4 },
-                { "type": "product", "productId": "frites-maison", "label": "4 Frites maison", "quantity": 4 },
-                { "type": "category", "categoryId": "boissons", "label": "4 Boissons au choix", "quantity": 4 },
-                { "type": "category", "categoryId": "desserts", "label": "2 Desserts au choix", "quantity": 2 }
+                {
+                    "type": "category",
+                    "label": "4 Burgers au choix",
+                    "quantity": 4,
+                    "categoryId": "burgers"
+                },
+                {
+                    "type": "product",
+                    "label": "4 Frites maison",
+                    "quantity": 4,
+                    "productId": "frites-maison"
+                },
+                {
+                    "type": "category",
+                    "label": "4 Boissons au choix",
+                    "quantity": 4,
+                    "categoryId": "boissons"
+                },
+                {
+                    "type": "category",
+                    "label": "2 Desserts au choix",
+                    "quantity": 2,
+                    "categoryId": "desserts"
+                }
             ],
             "status": "available",
             "badge": "Best Value"
@@ -439,20 +491,34 @@
     ],
     "upsellRules": [
         {
-            "when": ["burgers"],
-            "suggest": ["extras", "boissons"],
+            "when": [
+                "burgers"
+            ],
+            "suggest": [
+                "extras",
+                "boissons"
+            ],
             "message": "Complétez votre burger !",
             "priority": 1
         },
         {
-            "when": ["extras"],
-            "suggest": ["boissons", "desserts"],
+            "when": [
+                "extras"
+            ],
+            "suggest": [
+                "boissons",
+                "desserts"
+            ],
             "message": "Une boisson ou un dessert ?",
             "priority": 2
         },
         {
-            "when": ["boissons"],
-            "suggest": ["desserts"],
+            "when": [
+                "boissons"
+            ],
+            "suggest": [
+                "desserts"
+            ],
             "message": "Un petit dessert ?",
             "priority": 3
         }

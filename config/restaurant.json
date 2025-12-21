@@ -1,108 +1,207 @@
 {
-  "id": "fabrik-burger",
-  "name": "Fabrik Burger",
-  "legalName": "Fabrik Burger",
-  "slug": "fabrik-burger",
-  "brandTagline": "Burgers gourmets à Lille",
-  "priceRange": "€€",
-  "isHalal": true,
-
-  "theme": {
-    "primary": "#e67e22",
-    "primaryDark": "#d35400",
-    "secondary": "#2c3e50",
-    "accent": "#f39c12",
-    "background": "#1a1a2e",
-    "cardBackground": "#252540",
-    "textPrimary": "#ffffff",
-    "textSecondary": "#b4b4b4",
-    "success": "#27ae60",
-    "error": "#e74c3c",
-    "buttonRadius": "12px",
-    "cardRadius": "16px"
-  },
-
-  "contact": {
-    "phone": "+33374455427",
-    "phoneDisplay": "03 74 45 54 27",
-    "allowWhatsAppOrders": true,
-    "whatsappOrdersNumber": "33757831883"
-  },
-
-  "location": {
-    "addressLine1": "110 Rue des Postes",
-    "addressLine2": "",
-    "postalCode": "59000",
-    "city": "Lille",
-    "countryCode": "FR",
-    "latitude": 50.624939,
-    "longitude": 3.0551876
-  },
-
-  "openingHours": [
-    { "day": "lundi", "opens": "18:30", "closes": "23:30" },
-    { "day": "mardi", "opens": "18:30", "closes": "23:30" },
-    { "day": "mercredi", "opens": "18:30", "closes": "23:30" },
-    { "day": "jeudi", "opens": "18:30", "closes": "23:30" },
-    { "day": "vendredi", "opens": "18:30", "closes": "01:00" },
-    { "day": "samedi", "opens": "18:30", "closes": "01:00" },
-    { "day": "dimanche", "opens": "18:30", "closes": "00:00" }
-  ],
-
-  "social": {
-    "facebook": "https://www.facebook.com/Fabrik-Burger-Page",
-    "instagram": "https://www.instagram.com/fabrik.burger/?hl=fr",
-    "tiktok": "",
-    "snapchat": ""
-  },
-
-  "delivery": {
-    "enabled": true,
-    "ownDelivery": false,
-    "deliveryFee": 2.50,
-    "freeDeliveryMinimum": 25,
-    "estimatedTime": "30-45 min"
-  },
-
-  "platforms": [
-    {
-      "id": "uber-eats",
-      "name": "Uber Eats",
-      "url": "https://www.ubereats.com/fr-en/store/fabrik-burger/dMUlWAS8TGiOKDMY5ZCinA",
-      "enabled": true
+    "id": "fabrik-burger",
+    "name": "Fabrik Burger",
+    "legalName": "Fabrik Burger",
+    "slug": "fabrik-burger",
+    "brandTagline": "Burgers gourmets à Lille",
+    "priceRange": "€€",
+    "isHalal": true,
+    "theme": {
+        "primary": "#e67e22",
+        "primaryDark": "#e67e22",
+        "secondary": "#2c3e50",
+        "accent": "#f39c12",
+        "background": "#0f0f0f",
+        "cardBackground": "#252540",
+        "textPrimary": "#ffffff",
+        "textSecondary": "#b4b4b4",
+        "success": "#27ae60",
+        "error": "#e74c3c",
+        "buttonRadius": "12px",
+        "cardRadius": "16px",
+        "colors": {
+            "primary": "#c58a3a",
+            "secondary": "#1a1a2e",
+            "accent": "#f59e0b",
+            "background": "#0f0f1a",
+            "cardBg": "#1a1a2e",
+            "text": "#b31e1e"
+        }
     },
-    {
-      "id": "deliveroo",
-      "name": "Deliveroo",
-      "url": "https://deliveroo.fr/fr/menu/lille/lille-wazemmes/fabrik-burger",
-      "enabled": true
+    "contact": {
+        "phone": "+33374455427",
+        "phoneDisplay": "03 74 45 54 27",
+        "allowWhatsAppOrders": true,
+        "whatsappOrdersNumber": "33757831883",
+        "extra_phones": []
+    },
+    "location": {
+        "addressLine1": "110 Rue des Postes",
+        "addressLine2": "",
+        "postalCode": "59000",
+        "city": "Lille",
+        "countryCode": "FR",
+        "latitude": 50.624939,
+        "longitude": 3.0551876
+    },
+    "openingHours": [
+        {
+            "day": "lundi",
+            "slots": [
+                {
+                    "opens": "18:30",
+                    "closes": "23:30"
+                },
+                {
+                    "opens": "12:00",
+                    "closes": "14:00"
+                }
+            ],
+            "opens": "18:30",
+            "closes": "23:30"
+        },
+        {
+            "day": "mardi",
+            "slots": [
+                {
+                    "opens": "18:30",
+                    "closes": "23:30"
+                },
+                {
+                    "opens": "12:00",
+                    "closes": "14:00"
+                }
+            ],
+            "opens": "18:30",
+            "closes": "23:30"
+        },
+        {
+            "day": "mercredi",
+            "slots": [
+                {
+                    "opens": "18:30",
+                    "closes": "23:30"
+                },
+                {
+                    "opens": "12:00",
+                    "closes": "14:00"
+                }
+            ],
+            "opens": "18:30",
+            "closes": "23:30"
+        },
+        {
+            "day": "jeudi",
+            "slots": [
+                {
+                    "opens": "18:30",
+                    "closes": "23:30"
+                },
+                {
+                    "opens": "12:00",
+                    "closes": "14:00"
+                }
+            ],
+            "opens": "18:30",
+            "closes": "23:30"
+        },
+        {
+            "day": "vendredi",
+            "slots": [
+                {
+                    "opens": "18:30",
+                    "closes": "01:00"
+                },
+                {
+                    "opens": "12:00",
+                    "closes": "14:00"
+                }
+            ],
+            "opens": "18:30",
+            "closes": "01:00"
+        },
+        {
+            "day": "samedi",
+            "slots": [
+                {
+                    "opens": "18:30",
+                    "closes": "01:00"
+                },
+                {
+                    "opens": "12:00",
+                    "closes": "14:00"
+                }
+            ],
+            "opens": "18:30",
+            "closes": "01:00"
+        },
+        {
+            "day": "dimanche",
+            "slots": [
+                {
+                    "opens": "18:30",
+                    "closes": "00:00"
+                },
+                {
+                    "opens": "12:00",
+                    "closes": "14:00"
+                }
+            ],
+            "opens": "18:30",
+            "closes": "00:00"
+        }
+    ],
+    "social": {
+        "facebook": "https:\/\/www.facebook.com\/Fabrik-Burger-Page",
+        "instagram": "https:\/\/www.instagram.com\/fabrik.burger\/?hl=fr",
+        "tiktok": "",
+        "snapchat": "",
+        "extra": []
+    },
+    "delivery": {
+        "enabled": true,
+        "ownDelivery": false,
+        "deliveryFee": 2.5,
+        "freeDeliveryMinimum": 25,
+        "estimatedTime": "30-45 min"
+    },
+    "platforms": [
+        {
+            "id": "uber-eats",
+            "name": "Uber Eats",
+            "url": "https:\/\/www.ubereats.com\/fr-en\/store\/fabrik-burger\/dMUlWAS8TGiOKDMY5ZCinA",
+            "enabled": true
+        },
+        {
+            "id": "deliveroo",
+            "name": "Deliveroo",
+            "url": "https:\/\/deliveroo.fr\/fr\/menu\/lille\/lille-wazemmes\/fabrik-burger",
+            "enabled": true
+        }
+    ],
+    "faq": {
+        "enabled": true,
+        "items": [
+            {
+                "question": "Vos burgers sont-ils halal ?",
+                "answer": "Oui, tous nos burgers sont 100% halal."
+            },
+            {
+                "question": "Proposez-vous la livraison ?",
+                "answer": "Oui, nous livrons via Uber Eats et Deliveroo."
+            },
+            {
+                "question": "Peut-on manger sur place ?",
+                "answer": "Oui, nous avons une salle spacieuse avec tables et banquettes."
+            },
+            {
+                "question": "Avez-vous des options végétariennes ?",
+                "answer": "Oui, nous proposons Le Végé avec galette végétarienne."
+            }
+        ]
+    },
+    "seo": {
+        "title": "Fabrik Burger · Burgers gourmets halal à Lille (Wazemmes)",
+        "description": "Fabrik Burger à Lille Wazemmes : burgers gourmets, frites maison et desserts, sur place, à emporter ou en livraison via Uber Eats et Deliveroo."
     }
-  ],
-
-  "faq": {
-    "enabled": true,
-    "items": [
-      {
-        "question": "Vos burgers sont-ils halal ?",
-        "answer": "Oui, tous nos burgers sont 100% halal."
-      },
-      {
-        "question": "Proposez-vous la livraison ?",
-        "answer": "Oui, nous livrons via Uber Eats et Deliveroo."
-      },
-      {
-        "question": "Peut-on manger sur place ?",
-        "answer": "Oui, nous avons une salle spacieuse avec tables et banquettes."
-      },
-      {
-        "question": "Avez-vous des options végétariennes ?",
-        "answer": "Oui, nous proposons Le Végé avec galette végétarienne."
-      }
-    ]
-  },
-
-  "seo": {
-    "title": "Fabrik Burger · Burgers gourmets halal à Lille (Wazemmes)",
-    "description": "Fabrik Burger à Lille Wazemmes : burgers gourmets, frites maison et desserts, sur place, à emporter ou en livraison via Uber Eats et Deliveroo."
-  }
 }

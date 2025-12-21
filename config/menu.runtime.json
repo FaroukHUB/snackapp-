@@ -1,8 +1,120 @@
 {
-    "products": [],
+    "products": {
+        "le-fabrik": {
+            "status": "available",
+            "name": "Le Fabrik",
+            "description": "Pain artisanal, steak 180g, sauce Fabrik, cheddar, oignons, tomates, salade.",
+            "priceSolo": 11,
+            "priceMenu": 14,
+            "supplements": [
+                "sup-fromage",
+                "sup-galette",
+                "sup-bacon",
+                "sup-cheddar-frites"
+            ],
+            "badge": "Nouveau 🔥"
+        },
+        "le-classic": {
+            "name": "Le Classic",
+            "description": "Steak, cheddar, salade, tomates, sauce burger.",
+            "priceSolo": 10,
+            "priceMenu": 13,
+            "status": "available",
+            "supplements": []
+        },
+        "le-spicy": {
+            "name": "Le Spicy",
+            "description": "Poulet épicé, sauce relevée, salade, tomates, cheddar.",
+            "priceSolo": 11,
+            "priceMenu": 14,
+            "badge": "Épicé 🌶️",
+            "status": "available",
+            "supplements": [
+                "sup-fromage",
+                "sup-galette",
+                "sup-bacon",
+                "sup-cheddar-frites"
+            ]
+        }
+    },
     "categories": [],
     "customCategories": [],
     "customProducts": [],
     "deletedProducts": [],
-    "deletedCategories": []
+    "deletedCategories": [],
+    "supplements": {
+        "catalog": [],
+        "defaultForCategories": []
+    },
+    "customFormules": [],
+    "deletedFormules": [
+        "formule-ptit-dej"
+    ],
+    "formules": {
+        "formule-family": {
+            "name": "Formule Family",
+            "description": "4 Burgers + 4 Frites + 4 Boissons + 2 Desserts",
+            "price": 54.9,
+            "originalPrice": 68,
+            "badge": "Best Value",
+            "status": "available",
+            "includes": [
+                {
+                    "type": "category",
+                    "label": "4 Burgers au choix",
+                    "quantity": 4,
+                    "categoryId": "burgers"
+                },
+                {
+                    "type": "product",
+                    "label": "4 Frites maison",
+                    "quantity": 4,
+                    "productId": "frites-maison"
+                },
+                {
+                    "type": "category",
+                    "label": "4 Boissons au choix",
+                    "quantity": 4,
+                    "categoryId": "boissons"
+                },
+                {
+                    "type": "category",
+                    "label": "2 Desserts au choix",
+                    "quantity": 2,
+                    "categoryId": "desserts"
+                }
+            ],
+            "savings": 13.1
+        },
+        "formule-midi": {
+            "name": "Formule Midi",
+            "description": "1 Burger au choix + Frites + Boisson",
+            "price": 12.9,
+            "originalPrice": 15.5,
+            "badge": "Populaire",
+            "status": "available",
+            "includes": [
+                {
+                    "type": "category",
+                    "label": "1 Burger au choix",
+                    "quantity": 1,
+                    "categoryId": "burgers"
+                },
+                {
+                    "type": "product",
+                    "label": "Frites maison",
+                    "quantity": 1,
+                    "productId": "frites-maison"
+                },
+                {
+                    "type": "category",
+                    "label": "1 Boisson au choix",
+                    "quantity": 1,
+                    "categoryId": "boissons"
+                }
+            ],
+            "savings": 2.6,
+            "image": "images/formules/formule-midi-012b1bf0.jpg"
+        }
+    }
 }
