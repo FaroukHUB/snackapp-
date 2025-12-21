@@ -1,0 +1,90 @@
+{
+    "id": "le-marvelous",
+    "name": "Le Marvelous",
+    "legalName": "Le Marvelous",
+    "slug": "le-marvelous",
+    "brandTagline": "Diner 50's · Crêpes, Gaufres & Coffee",
+    "priceRange": "DA",
+    "isHalal": true,
+    "theme": {
+        "primary": "#2ec4b6",
+        "primaryDark": "#25a89c",
+        "secondary": "#1a1a2e",
+        "accent": "#ff6fae",
+        "background": "#f5f5f5",
+        "cardBackground": "#ffffff",
+        "textPrimary": "#111111",
+        "textSecondary": "#666666",
+        "success": "#27ae60",
+        "error": "#e74c3c",
+        "buttonRadius": "12px",
+        "cardRadius": "16px"
+    },
+    "contact": {
+        "phone": "+213556782194",
+        "phoneDisplay": "0556 78 21 94",
+        "allowWhatsAppOrders": true,
+        "whatsappOrdersNumber": "213556782194"
+    },
+    "location": {
+        "addressLine1": "Riad City, Cité OMS 562 logements",
+        "addressLine2": "",
+        "postalCode": "35520",
+        "city": "Ouled Moussa",
+        "countryCode": "DZ",
+        "latitude": 36.7053937,
+        "longitude": 3.3693709
+    },
+    "openingHours": [
+        { "day": "lundi", "opens": "07:00", "closes": "21:30" },
+        { "day": "mardi", "opens": "07:00", "closes": "21:30" },
+        { "day": "mercredi", "opens": "07:00", "closes": "21:30" },
+        { "day": "jeudi", "opens": "07:00", "closes": "21:30" },
+        { "day": "vendredi", "opens": "07:00", "closes": "11:30" },
+        { "day": "samedi", "opens": "07:00", "closes": "21:30" },
+        { "day": "dimanche", "opens": "07:00", "closes": "21:30" }
+    ],
+    "social": {
+        "facebook": "",
+        "instagram": "https://www.instagram.com/lemarvelous.50/",
+        "tiktok": "",
+        "snapchat": ""
+    },
+    "delivery": {
+        "enabled": true,
+        "ownDelivery": true,
+        "deliveryFee": 0,
+        "freeDeliveryMinimum": 0,
+        "estimatedTime": "30-45 min"
+    },
+    "platforms": [],
+    "faq": {
+        "enabled": true,
+        "items": [
+            {
+                "question": "Quels moyens de paiement acceptez-vous ?",
+                "answer": "Argent liquide uniquement."
+            },
+            {
+                "question": "Livrez-vous ?",
+                "answer": "Oui, livraison en commande directe via WhatsApp ou téléphone."
+            },
+            {
+                "question": "Y a-t-il un espace pour les femmes ?",
+                "answer": "Oui, nous disposons d'une salle réservée aux femmes."
+            },
+            {
+                "question": "Convient-il pour les familles ?",
+                "answer": "Oui, nous avons une salle dédiée aux familles et un menu enfant."
+            },
+            {
+                "question": "Peut-on regarder du sport sur place ?",
+                "answer": "Oui, écrans disponibles pour regarder du sport."
+            }
+        ]
+    },
+    "seo": {
+        "title": "Le Marvelous · Diner 50's à Ouled Moussa · Crêpes, Gaufres & Coffee",
+        "description": "Le Marvelous à Ouled Moussa : crêpes salées signature, crêpes sucrées, gaufres, boissons et menu enfant. Salle familles et salle femmes disponibles."
+    }
+}
