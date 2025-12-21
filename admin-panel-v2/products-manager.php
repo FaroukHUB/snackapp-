@@ -194,7 +194,8 @@ session_start();
     .modal{
       width:100%;
       max-width: 480px;
-      max-height: calc(100vh - 24px);
+      max-height: calc(100vh - 40px);
+      max-height: calc(100dvh - 40px);
       display:flex;
       flex-direction:column;
       border-radius: 16px;
@@ -212,8 +213,9 @@ session_start();
     }
     .modal-h{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
     .modal-h h3{margin:0;font-size:14px;font-weight:600}
-    .modal-b{padding:12px 14px;overflow-y:auto;flex:1}
-    .modal-f{padding:12px 14px;border-top:1px solid rgba(255,255,255,.12);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;flex-shrink:0;background:rgba(0,0,0,.2)}
+    .modal form{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+    .modal-b{padding:12px 14px;overflow-y:auto;flex:1 1 auto;min-height:0}
+    .modal-f{padding:14px;border-top:1px solid rgba(255,255,255,.12);display:flex;gap:10px;justify-content:flex-end;flex-wrap:nowrap;flex-shrink:0;background:rgba(0,0,0,.3)}
     .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
     .field label{font-size:11px;color:var(--muted);font-weight:500}
     .input, .textarea, .select{
