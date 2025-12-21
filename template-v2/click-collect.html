@@ -159,10 +159,20 @@
         </footer>
     </main>
 
+    <script src="js/config.js"></script>
     <script src="js/cart.js"></script>
     <script>
-        // Update cart badge
-        document.addEventListener('DOMContentLoaded', () => {
+        // Apply theme and update cart badge
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load config and apply theme
+            await Config.init();
+
+            // Update page title
+            if (Config.restaurant?.name) {
+                document.title = `Click & Collect | ${Config.restaurant.name}`;
+            }
+
+            // Update cart badge
             const badge = document.getElementById('cartBadge');
             if (badge) {
                 const cart = JSON.parse(localStorage.getItem('snackapp_cart') || '[]');

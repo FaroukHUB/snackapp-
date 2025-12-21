@@ -51,10 +51,11 @@
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">Infos</h3>
                     <ul class="nav-list nav-list-secondary">
-                        <li><a href="../loyalty-card.php" class="loyalty-link"><i class="fas fa-star"></i> Ma Fidélité</a></li>
-                        <li><a href="#contact"><i class="fas fa-phone"></i> Contact</a></li>
+                        <li><a href="fidelite.html"><i class="fas fa-star"></i> Fidélité</a></li>
+                        <li><a href="click-collect.html"><i class="fas fa-shopping-bag"></i> Click & Collect</a></li>
                         <li><a href="#horaires"><i class="fas fa-clock"></i> Horaires</a></li>
-                        <li id="sidebarPlatforms"><a href="#commander"><i class="fas fa-motorcycle"></i> Commander</a></li>
+                        <li><a href="#contact"><i class="fas fa-phone"></i> Contact</a></li>
+                        <li id="sidebarPlatforms"><a href="#commander"><i class="fas fa-motorcycle"></i> Livraison</a></li>
                         <li><a href="#localisation"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
                         <li><a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a></li>
                     </ul>
@@ -79,8 +80,62 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Hero Section with Formules -->
-            <section class="formules-section" id="formulesSection">
+            <!-- Hero Section -->
+            <section class="hero-section" id="heroSection">
+                <div class="hero-image-wrapper">
+                    <img src="../images/IMG_0391_dcr8f2.jpg" alt="Hero" class="hero-image" id="heroImage">
+                    <div class="hero-overlay"></div>
+                </div>
+                <div class="hero-content">
+                    <h1 id="heroTitle">Bienvenue</h1>
+                    <p id="heroSubtitle">Découvrez nos burgers gourmets</p>
+                </div>
+            </section>
+
+            <!-- Sélection pour vous (Featured) -->
+            <section class="featured-section" id="featuredSection">
+                <div class="section-header">
+                    <h2><i class="fas fa-star"></i> <span id="featuredTitle">Sélection pour vous</span></h2>
+                    <p class="section-subtitle" id="featuredSubtitle">Nos produits les plus appréciés</p>
+                </div>
+                <div class="featured-grid" id="featuredGrid">
+                    <!-- Featured products will be injected here -->
+                </div>
+            </section>
+
+            <!-- Click & Collect / Fidélité Cards -->
+            <section class="services-section" id="servicesSection">
+                <div class="services-grid">
+                    <a href="click-collect.html" class="service-card service-card--collect">
+                        <div class="service-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Click & Collect</h3>
+                            <p>Commandez en ligne, récupérez sur place</p>
+                        </div>
+                        <i class="fas fa-chevron-right service-arrow"></i>
+                    </a>
+                    <a href="fidelite.html" class="service-card service-card--fidelite">
+                        <div class="service-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Programme Fidélité</h3>
+                            <p>Cumulez des points, gagnez des récompenses</p>
+                        </div>
+                        <i class="fas fa-chevron-right service-arrow"></i>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Products Sections (Menu) -->
+            <div id="productsContainer">
+                <!-- Product sections will be injected here with separations -->
+            </div>
+
+            <!-- Nos Formules -->
+            <section class="formules-section section-alt-bg" id="formulesSection">
                 <div class="section-header">
                     <h2><i class="fas fa-fire"></i> Nos Formules</h2>
                     <p class="section-subtitle">Économisez avec nos menus combinés</p>
@@ -90,37 +145,17 @@
                 </div>
             </section>
 
-            <!-- Products Sections -->
-            <div id="productsContainer">
-                <!-- Product sections will be injected here -->
-            </div>
-
-            <!-- Contact Section -->
-            <section class="info-section" id="contact">
-                <h2><i class="fas fa-phone"></i> Contact</h2>
-                <div class="info-content" id="contactContent">
-                    <!-- Contact info will be injected -->
-                </div>
-            </section>
-
-            <!-- Hours Section -->
-            <section class="info-section" id="horaires">
-                <h2><i class="fas fa-clock"></i> Horaires</h2>
-                <div class="info-content" id="horairesContent">
-                    <!-- Hours will be injected -->
-                </div>
-            </section>
-
             <!-- Delivery Platforms Section -->
             <section class="info-section" id="commander">
                 <h2><i class="fas fa-motorcycle"></i> Commander en ligne</h2>
+                <p class="section-desc">Faites-vous livrer via nos partenaires</p>
                 <div class="platforms-grid" id="platformsGrid">
                     <!-- Platforms will be injected -->
                 </div>
             </section>
 
             <!-- Map Section -->
-            <section class="info-section" id="localisation">
+            <section class="info-section section-alt-bg" id="localisation">
                 <h2><i class="fas fa-map-marker-alt"></i> Nous trouver</h2>
                 <div class="map-container" id="mapContainer">
                     <!-- Map will be injected -->
@@ -132,9 +167,25 @@
 
             <!-- FAQ Section -->
             <section class="info-section" id="faq">
-                <h2><i class="fas fa-question-circle"></i> FAQ</h2>
+                <h2><i class="fas fa-question-circle"></i> Questions fréquentes</h2>
                 <div class="faq-list" id="faqContent">
                     <!-- FAQ will be injected -->
+                </div>
+            </section>
+
+            <!-- Hours Section -->
+            <section class="info-section section-alt-bg" id="horaires">
+                <h2><i class="fas fa-clock"></i> Horaires</h2>
+                <div class="info-content" id="horairesContent">
+                    <!-- Hours will be injected -->
+                </div>
+            </section>
+
+            <!-- Contact Section -->
+            <section class="info-section" id="contact">
+                <h2><i class="fas fa-phone"></i> Contact</h2>
+                <div class="info-content" id="contactContent">
+                    <!-- Contact info will be injected -->
                 </div>
             </section>
         </main>

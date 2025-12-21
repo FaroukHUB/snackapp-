@@ -24,6 +24,8 @@ const Products = {
      * Initialize products display
      */
     init() {
+        this.renderHero();
+        this.renderFeatured();
         this.renderSidebar();
         this.renderFormules();
         this.renderAllCategories();
@@ -31,6 +33,99 @@ const Products = {
         this.setupModal();
         this.setupSearch();
         this.setupImageErrorHandling();
+        this.applySectionBackgrounds();
+    },
+
+    /**
+     * Render hero section
+     */
+    renderHero() {
+        const heroTitle = document.getElementById('heroTitle');
+        const heroSubtitle = document.getElementById('heroSubtitle');
+
+        if (heroTitle && Config.restaurant?.name) {
+            heroTitle.textContent = `Bienvenue chez ${Config.restaurant.name}`;
+        }
+        if (heroSubtitle && Config.restaurant?.brandTagline) {
+            heroSubtitle.textContent = Config.restaurant.brandTagline;
+        }
+    },
+
+    /**
+     * Render featured products section
+     */
+    renderFeatured() {
+        const grid = document.getElementById('featuredGrid');
+        const section = document.getElementById('featuredSection');
+        const titleEl = document.getElementById('featuredTitle');
+        const subtitleEl = document.getElementById('featuredSubtitle');
+
+        if (!grid) return;
+
+        const featured = Config.featured;
+        if (!featured?.enabled || !featured?.items?.length) {
+            section?.classList.add('hidden');
+            return;
+        }
+
+        // Update title and subtitle if provided
+        if (titleEl && featured.title) {
+            titleEl.textContent = featured.title;
+        }
+        if (subtitleEl && featured.subtitle) {
+            subtitleEl.textContent = featured.subtitle;
+        }
+
+        // Get featured products
+        const featuredProducts = featured.items
+            .map(id => Config.getProduct(id))
+            .filter(p => p && p.status !== 'unavailable');
+
+        if (featuredProducts.length === 0) {
+            section?.classList.add('hidden');
+            return;
+        }
+
+        grid.innerHTML = featuredProducts.map(product => {
+            const price = product.priceSolo || product.price || 0;
+            return `
+                <div class="featured-card" onclick="Products.openProductModal('${product.id}')">
+                    <div class="product-image-wrapper">
+                        <img src="../${product.image}" alt="${product.name}" class="product-image"
+                             onerror="this.style.display='none'">
+                        ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <span class="product-price">${Config.formatPrice(price)}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    /**
+     * Apply section alternate backgrounds using theme color
+     */
+    applySectionBackgrounds() {
+        const primaryColor = Config.restaurant?.theme?.primary || '#e63946';
+        // Create a very light tint of the primary color (5% opacity)
+        const lightTint = this.hexToRgba(primaryColor, 0.03);
+        document.documentElement.style.setProperty('--section-alt-bg', lightTint);
+    },
+
+    /**
+     * Convert hex color to rgba
+     */
+    hexToRgba(hex, alpha) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        if (result) {
+            const r = parseInt(result[1], 16);
+            const g = parseInt(result[2], 16);
+            const b = parseInt(result[3], 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+        return `rgba(230, 57, 70, ${alpha})`; // fallback
     },
 
     /**
@@ -63,16 +158,16 @@ const Products = {
         const categories = Config.getCategories();
         const icons = Config.categoryIcons;
 
-        // Add Formules link first (only if formules are available)
-        const formules = Config.getAvailableFormules();
         let html = '';
 
-        if (formules.length > 0) {
-            html = `
+        // Add Featured link first (if enabled)
+        const featured = Config.featured;
+        if (featured?.enabled && featured?.items?.length > 0) {
+            html += `
                 <li>
-                    <a href="#formulesSection" class="active" onclick="document.getElementById('formulesSection').scrollIntoView({behavior: 'smooth'}); return false;">
-                        <i class="fas fa-fire"></i>
-                        Nos Formules
+                    <a href="#featuredSection" class="active">
+                        <i class="fas fa-star"></i>
+                        ${featured.title || 'Sélection pour vous'}
                     </a>
                 </li>
             `;
@@ -81,15 +176,31 @@ const Products = {
         // Add category links
         categories.forEach(cat => {
             const icon = icons[cat.id] || 'fa-utensils';
+            // Only add if category has items
+            if (cat.items && cat.items.length > 0) {
+                html += `
+                    <li>
+                        <a href="#${cat.id}">
+                            <i class="fas ${icon}"></i>
+                            ${cat.name}
+                        </a>
+                    </li>
+                `;
+            }
+        });
+
+        // Add Formules link (only if formules are available)
+        const formules = Config.getAvailableFormules();
+        if (formules.length > 0) {
             html += `
                 <li>
-                    <a href="#${cat.id}">
-                        <i class="fas ${icon}"></i>
-                        ${cat.name}
+                    <a href="#formulesSection">
+                        <i class="fas fa-fire"></i>
+                        Nos Formules
                     </a>
                 </li>
             `;
-        });
+        }
 
         nav.innerHTML = html;
 
@@ -101,13 +212,13 @@ const Products = {
      * Setup scroll spy for active nav highlighting
      */
     setupScrollSpy() {
-        const sections = document.querySelectorAll('.product-section, .formules-section');
+        const sections = document.querySelectorAll('.product-section, .formules-section, .featured-section');
         const navLinks = document.querySelectorAll('#categoryNav a');
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const id = entry.target.id || 'formules';
+                    const id = entry.target.id;
                     navLinks.forEach(link => {
                         link.classList.remove('active');
                         if (link.getAttribute('href') === `#${id}`) {
@@ -181,7 +292,10 @@ const Products = {
         const categories = Config.getCategories();
         const icons = Config.categoryIcons;
 
-        container.innerHTML = categories.map(cat => `
+        // Filter out empty categories
+        const nonEmptyCategories = categories.filter(cat => cat.items && cat.items.length > 0);
+
+        container.innerHTML = nonEmptyCategories.map(cat => `
             <section class="product-section" id="${cat.id}">
                 <h2>
                     <i class="fas ${icons[cat.id] || 'fa-utensils'}"></i>
