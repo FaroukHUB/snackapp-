@@ -44,8 +44,8 @@ const Config = {
      * Load restaurant data
      */
     async loadRestaurant() {
-        const response = await fetch(this.basePath + 'restaurant.json');
-        if (!response.ok) throw new Error('Failed to load restaurant.json');
+        const response = await fetch(this.basePath + 'restaurant.php');
+        if (!response.ok) throw new Error('Failed to load restaurant.php');
         this.restaurant = await response.json();
     },
 
@@ -53,8 +53,8 @@ const Config = {
      * Load menu data
      */
     async loadMenu() {
-        const response = await fetch(this.basePath + 'menu.json');
-        if (!response.ok) throw new Error('Failed to load menu.json');
+        const response = await fetch(this.basePath + 'menu.php');
+        if (!response.ok) throw new Error('Failed to load menu.php');
         const data = await response.json();
 
         this.menu = data.menu;
