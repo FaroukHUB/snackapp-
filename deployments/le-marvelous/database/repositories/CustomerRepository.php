@@ -1,0 +1,267 @@
+<?php
+/**
+ * SnackApp v1 - Customer Repository
+ * Gestion des clients
+ */
+
+require_once __DIR__ . '/../Database.php';
+
+class CustomerRepository {
+
+    /**
+     * Génère un code fidélité unique (ex: SNACK-A3X7)
+     */
+    public static function generateLoyaltyCode(): string {
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Sans I, O, 0, 1 pour éviter confusion
+        $maxAttempts = 10;
+
+        for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
+            $code = '';
+            for ($i = 0; $i < 4; $i++) {
+                $code .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+            $loyaltyCode = 'SNACK-' . $code;
+
+            // Vérifier unicité
+            $existing = Database::fetchOne(
+                "SELECT id FROM customers WHERE loyalty_code = ?",
+                [$loyaltyCode]
+            );
+
+            if (!$existing) {
+                return $loyaltyCode;
+            }
+        }
+
+        // Fallback avec timestamp
+        return 'SNACK-' . strtoupper(substr(md5(uniqid()), 0, 4));
+    }
+
+    /**
+     * Récupère tous les clients d'un restaurant
+     */
+    public static function getAll(int $restaurantId, string $orderBy = 'orders_count DESC'): array {
+        $validOrders = ['orders_count DESC', 'total_spent DESC', 'created_at DESC', 'name ASC', 'loyalty_points DESC'];
+        if (!in_array($orderBy, $validOrders)) {
+            $orderBy = 'orders_count DESC';
+        }
+
+        return Database::fetchAll(
+            "SELECT * FROM customers WHERE restaurant_id = ? ORDER BY {$orderBy}",
+            [$restaurantId]
+        );
+    }
+
+    /**
+     * Récupère les clients par catégorie (VIP, Regular, New)
+     */
+    public static function getByCategory(int $restaurantId, string $category): array {
+        $where = match($category) {
+            'vip' => 'orders_count >= 10',
+            'regular' => 'orders_count >= 3 AND orders_count < 10',
+            'new' => 'orders_count < 3',
+            default => '1=1'
+        };
+
+        return Database::fetchAll(
+            "SELECT * FROM customers WHERE restaurant_id = ? AND {$where} ORDER BY orders_count DESC",
+            [$restaurantId]
+        );
+    }
+
+    /**
+     * Statistiques des clients
+     */
+    public static function getStats(int $restaurantId): array {
+        $stats = Database::fetchOne(
+            "SELECT
+                COUNT(*) as total,
+                SUM(CASE WHEN orders_count >= 10 THEN 1 ELSE 0 END) as vip,
+                SUM(CASE WHEN orders_count >= 3 AND orders_count < 10 THEN 1 ELSE 0 END) as regular,
+                SUM(CASE WHEN orders_count < 3 THEN 1 ELSE 0 END) as new,
+                COALESCE(SUM(total_spent), 0) as total_revenue
+             FROM customers
+             WHERE restaurant_id = ?",
+            [$restaurantId]
+        );
+
+        return [
+            'total' => (int) ($stats['total'] ?? 0),
+            'vip' => (int) ($stats['vip'] ?? 0),
+            'regular' => (int) ($stats['regular'] ?? 0),
+            'new' => (int) ($stats['new'] ?? 0),
+            'total_revenue' => (float) ($stats['total_revenue'] ?? 0)
+        ];
+    }
+
+    /**
+     * Trouve ou crée un client
+     */
+    public static function findOrCreate(int $restaurantId, array $data): int {
+        $phone = $data['phone'] ?? '';
+
+        if (empty($phone)) {
+            throw new Exception("Numéro de téléphone requis");
+        }
+
+        $existing = Database::fetchOne(
+            "SELECT id FROM customers WHERE restaurant_id = ? AND phone = ?",
+            [$restaurantId, $phone]
+        );
+
+        if ($existing) {
+            // Mettre à jour le nom si fourni
+            if (!empty($data['name'])) {
+                Database::update('customers', ['name' => $data['name']], ['id' => $existing['id']]);
+            }
+            return $existing['id'];
+        }
+
+        return Database::insert('customers', [
+            'restaurant_id' => $restaurantId,
+            'loyalty_code' => self::generateLoyaltyCode(),
+            'name' => $data['name'] ?? 'Client',
+            'phone' => $phone,
+            'email' => $data['email'] ?? null,
+            'loyalty_points' => 0,
+            'orders_count' => 0,
+            'total_spent' => 0
+        ]);
+    }
+
+    /**
+     * Incrémente les stats après une commande
+     */
+    public static function incrementStats(int $customerId, float $orderTotal): bool {
+        return Database::query(
+            "UPDATE customers SET
+                orders_count = orders_count + 1,
+                total_spent = total_spent + ?,
+                last_order_at = NOW()
+             WHERE id = ?",
+            [$orderTotal, $customerId]
+        )->rowCount() > 0;
+    }
+
+    /**
+     * Récupère un client par ID
+     */
+    public static function getById(int $customerId): ?array {
+        return Database::fetchOne("SELECT * FROM customers WHERE id = ?", [$customerId]);
+    }
+
+    /**
+     * Récupère un client par téléphone
+     */
+    public static function getByPhone(int $restaurantId, string $phone): ?array {
+        return Database::fetchOne(
+            "SELECT * FROM customers WHERE restaurant_id = ? AND phone = ?",
+            [$restaurantId, $phone]
+        );
+    }
+
+    /**
+     * Historique des commandes d'un client
+     */
+    public static function getOrderHistory(int $customerId, int $limit = 20): array {
+        return Database::fetchAll(
+            "SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC LIMIT ?",
+            [$customerId, $limit]
+        );
+    }
+
+    /**
+     * Export CSV
+     */
+    public static function exportCSV(int $restaurantId): string {
+        $customers = self::getAll($restaurantId);
+
+        $csv = "\xEF\xBB\xBF"; // BOM UTF-8
+        $csv .= "Nom,Téléphone,Email,Commandes,Total dépensé,Dernière commande\n";
+
+        foreach ($customers as $c) {
+            $csv .= sprintf(
+                '"%s","%s","%s",%d,%.2f,"%s"' . "\n",
+                $c['name'],
+                $c['phone'],
+                $c['email'] ?? '',
+                $c['orders_count'],
+                $c['total_spent'],
+                $c['last_order_at'] ?? ''
+            );
+        }
+
+        return $csv;
+    }
+
+    /**
+     * Ajoute un nouveau client manuellement
+     */
+    public static function addCustomer(int $restaurantId, array $data): int {
+        $phone = $data['phone'] ?? '';
+
+        if (empty($phone)) {
+            throw new Exception("Numéro de téléphone requis");
+        }
+
+        // Vérifier si le client existe déjà
+        $existing = self::getByPhone($restaurantId, $phone);
+        if ($existing) {
+            throw new Exception("Un client avec ce numéro existe déjà");
+        }
+
+        return Database::insert('customers', [
+            'restaurant_id' => $restaurantId,
+            'loyalty_code' => self::generateLoyaltyCode(),
+            'name' => $data['name'] ?? 'Client',
+            'phone' => $phone,
+            'email' => $data['email'] ?? null,
+            'loyalty_points' => 0,
+            'orders_count' => 0,
+            'total_spent' => 0
+        ]);
+    }
+
+    /**
+     * Récupère un client par code fidélité
+     */
+    public static function getByLoyaltyCode(string $loyaltyCode): ?array {
+        return Database::fetchOne(
+            "SELECT * FROM customers WHERE loyalty_code = ?",
+            [$loyaltyCode]
+        );
+    }
+
+    /**
+     * Recherche de clients (par nom, téléphone ou code)
+     */
+    public static function search(int $restaurantId, string $query): array {
+        $query = '%' . trim($query) . '%';
+        return Database::fetchAll(
+            "SELECT * FROM customers
+             WHERE restaurant_id = ?
+             AND (name LIKE ? OR phone LIKE ? OR loyalty_code LIKE ?)
+             ORDER BY orders_count DESC
+             LIMIT 20",
+            [$restaurantId, $query, $query, $query]
+        );
+    }
+
+    /**
+     * Supprime un client
+     */
+    public static function deleteCustomer(int $customerId, int $restaurantId): bool {
+        // Vérifier que le client appartient bien au restaurant
+        $customer = self::getById($customerId);
+        if (!$customer || $customer['restaurant_id'] !== $restaurantId) {
+            return false;
+        }
+        
+        return Database::delete('customers', ['id' => $customerId]) > 0;
+    }
+
+
+
+
+
+}

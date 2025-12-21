@@ -1,0 +1,11 @@
+{
+    "loyalty": {
+        "enabled": true,
+        "pointsPerEuro": 1,
+        "rewardThreshold": 100
+    },
+    "notifications": {
+        "soundEnabled": true,
+        "soundVolume": 0.8
+    }
+}
