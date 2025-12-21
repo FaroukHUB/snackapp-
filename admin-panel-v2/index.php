@@ -2144,15 +2144,9 @@ if (isset($_GET['export'])) {
 
     <script src="notification-sound.js"></script>
     <script>
-        // PIN Protection
+        // PIN Protection - demande le PIN à chaque accès
         const PROTECTED_SECTIONS = ['stats', 'archives'];
-        let pinUnlocked = false;
         let pendingSection = null;
-
-        // Vérifier le statut PIN au chargement
-        fetch('api/admin-pin.php?action=check').then(r => r.json()).then(data => {
-            pinUnlocked = data.unlocked || false;
-        }).catch(() => {});
 
         function showPinModal(section) {
             pendingSection = section;
@@ -2190,7 +2184,6 @@ if (isset($_GET['export'])) {
                 body: JSON.stringify({ action: 'verify', pin })
             }).then(r => r.json()).then(data => {
                 if (data.success) {
-                    pinUnlocked = true;
                     closePinModal();
                     if (pendingSection) {
                         actuallyNavigate(pendingSection);
@@ -2221,11 +2214,11 @@ if (isset($_GET['export'])) {
             window.scrollTo(0, 0);
         }
 
-        // Navigation avec protection PIN
+        // Navigation avec protection PIN - toujours demander
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const section = btn.dataset.section;
-                if (PROTECTED_SECTIONS.includes(section) && !pinUnlocked) {
+                if (PROTECTED_SECTIONS.includes(section)) {
                     showPinModal(section);
                     return;
                 }
@@ -2235,7 +2228,7 @@ if (isset($_GET['export'])) {
 
         // Hash navigation - supporte toutes les sections
         function navigateToSection(section) {
-            if (PROTECTED_SECTIONS.includes(section) && !pinUnlocked) {
+            if (PROTECTED_SECTIONS.includes(section)) {
                 showPinModal(section);
                 return;
             }
@@ -2278,7 +2271,6 @@ if (isset($_GET['export'])) {
                     result.style.color = '#10b981';
                     document.getElementById('oldPinInput').value = '';
                     document.getElementById('newPinInput').value = '';
-                    pinUnlocked = false; // Force re-auth avec nouveau PIN
                 } else {
                     result.textContent = '❌ ' + (data.message || 'Erreur');
                     result.style.color = '#ef4444';
