@@ -140,7 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     'title' => 'Sélection pour vous',
                     'subtitle' => 'Nos produits les plus appréciés',
                     'items' => []
-                ]
+                ],
+                'categoryIcons' => $menuData['categoryIcons'] ?? []
             ]);
         }
     }
@@ -358,6 +359,7 @@ switch ($action) {
     case 'add_category':
         $name = trim((string)($input['name'] ?? ''));
         $description = trim((string)($input['description'] ?? ''));
+        $icon = trim((string)($input['icon'] ?? 'fa-utensils'));
 
         if ($name === '') {
             jsonError('Nom manquant');
@@ -388,7 +390,21 @@ switch ($action) {
         ];
 
         saveMenuRuntime($runtime);
-        jsonSuccess(['category' => ['id' => $id, 'name' => $name]]);
+
+        // Sauvegarder l'icône dans menu.json
+        $menuPath = SNACK_ROOT . '/config/menu.json';
+        if (file_exists($menuPath)) {
+            $menuData = json_decode(file_get_contents($menuPath), true);
+            if ($menuData) {
+                if (!isset($menuData['categoryIcons'])) {
+                    $menuData['categoryIcons'] = [];
+                }
+                $menuData['categoryIcons'][$id] = $icon;
+                file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            }
+        }
+
+        jsonSuccess(['category' => ['id' => $id, 'name' => $name, 'icon' => $icon]]);
         break;
 
     case 'add_product':

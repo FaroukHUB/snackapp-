@@ -525,9 +525,11 @@
     ],
     "categoryIcons": {
         "burgers": "fa-burger",
-        "extras": "fa-french-fries",
-        "desserts": "fa-ice-cream",
-        "boissons": "fa-cup-straw",
-        "menu-enfant": "fa-child"
+        "extras": "fa-drumstick-bite",
+        "desserts": "fa-cookie-bite",
+        "boissons": "fa-glass-water",
+        "menu-enfant": "fa-child",
+        "glaces": "fa-ice-cream",
+        "sandwich": "fa-bread-slice"
     }
 }

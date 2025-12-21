@@ -10,6 +10,7 @@ $csrfToken = getCsrfToken();
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="csrf-token" content="<?= e($csrfToken) ?>">
   <title>Admin • Produits</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     :root{
@@ -264,6 +265,40 @@ $csrfToken = getCsrfToken();
     .toast-item[data-type="success"]{border-color: rgba(22,163,74,.35)}
     .toast-item[data-type="error"]{border-color: rgba(239,68,68,.35)}
 
+    /* ===== ICON SELECTOR ===== */
+    .icon-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      aspect-ratio: 1;
+      border: 1px solid var(--stroke);
+      border-radius: 10px;
+      background: rgba(0,0,0,.18);
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .icon-option:hover {
+      border-color: var(--brand);
+      background: rgba(96,165,250,.1);
+    }
+    .icon-option input {
+      display: none;
+    }
+    .icon-option span {
+      font-size: 20px;
+      color: var(--muted);
+      transition: color .15s ease;
+    }
+    .icon-option:has(input:checked) {
+      border-color: var(--brand);
+      background: rgba(96,165,250,.2);
+      box-shadow: 0 0 12px rgba(96,165,250,.3);
+    }
+    .icon-option:has(input:checked) span {
+      color: var(--brand);
+    }
+
     /* ===== RESPONSIVE MOBILE ===== */
     @media (max-width: 768px) {
       .wrap { padding: 16px 12px 80px; }
@@ -401,7 +436,84 @@ $csrfToken = getCsrfToken();
             <label for="catDesc">Description (optionnel)</label>
             <textarea id="catDesc" name="description" class="textarea" placeholder="Texte affiché sous la catégorie…"></textarea>
           </div>
-          <p class="muted" style="margin:0">L’identifiant technique est généré automatiquement.</p>
+          <div class="field">
+            <label for="catIcon">Icône</label>
+            <div id="iconSelector" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:6px;">
+              <label class="icon-option" data-icon="fa-burger" title="Burger">
+                <input type="radio" name="icon" value="fa-burger" checked>
+                <span><i class="fas fa-burger"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-pizza-slice" title="Pizza">
+                <input type="radio" name="icon" value="fa-pizza-slice">
+                <span><i class="fas fa-pizza-slice"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-drumstick-bite" title="Poulet">
+                <input type="radio" name="icon" value="fa-drumstick-bite">
+                <span><i class="fas fa-drumstick-bite"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-hotdog" title="Hot-dog">
+                <input type="radio" name="icon" value="fa-hotdog">
+                <span><i class="fas fa-hotdog"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-bowl-food" title="Bowl">
+                <input type="radio" name="icon" value="fa-bowl-food">
+                <span><i class="fas fa-bowl-food"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-bread-slice" title="Sandwich">
+                <input type="radio" name="icon" value="fa-bread-slice">
+                <span><i class="fas fa-bread-slice"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-glass-water" title="Boisson">
+                <input type="radio" name="icon" value="fa-glass-water">
+                <span><i class="fas fa-glass-water"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-mug-hot" title="Café">
+                <input type="radio" name="icon" value="fa-mug-hot">
+                <span><i class="fas fa-mug-hot"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-wine-glass" title="Vin">
+                <input type="radio" name="icon" value="fa-wine-glass">
+                <span><i class="fas fa-wine-glass"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-ice-cream" title="Glace">
+                <input type="radio" name="icon" value="fa-ice-cream">
+                <span><i class="fas fa-ice-cream"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-cookie-bite" title="Dessert">
+                <input type="radio" name="icon" value="fa-cookie-bite">
+                <span><i class="fas fa-cookie-bite"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-cake-candles" title="Gâteau">
+                <input type="radio" name="icon" value="fa-cake-candles">
+                <span><i class="fas fa-cake-candles"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-cheese" title="Fromage">
+                <input type="radio" name="icon" value="fa-cheese">
+                <span><i class="fas fa-cheese"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-leaf" title="Végétarien">
+                <input type="radio" name="icon" value="fa-leaf">
+                <span><i class="fas fa-leaf"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-child" title="Enfant">
+                <input type="radio" name="icon" value="fa-child">
+                <span><i class="fas fa-child"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-star" title="Spécial">
+                <input type="radio" name="icon" value="fa-star">
+                <span><i class="fas fa-star"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-fire" title="Épicé">
+                <input type="radio" name="icon" value="fa-fire">
+                <span><i class="fas fa-fire"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-utensils" title="Général">
+                <input type="radio" name="icon" value="fa-utensils">
+                <span><i class="fas fa-utensils"></i></span>
+              </label>
+            </div>
+          </div>
+          <p class="muted" style="margin:0">L'identifiant technique est généré automatiquement.</p>
         </div>
         <div class="modal-f">
           <button class="btn btn-ghost" type="button" data-close>Annuler</button>
@@ -1203,9 +1315,10 @@ $csrfToken = getCsrfToken();
       const fd = new FormData(e.target);
       const name = String(fd.get("name") ?? "").trim();
       const description = String(fd.get("description") ?? "").trim();
+      const icon = String(fd.get("icon") ?? "fa-utensils").trim();
 
       try{
-        await apiPostJson({ action:"add_category", name, description });
+        await apiPostJson({ action:"add_category", name, description, icon });
         toast("success","Catégorie ajoutée", `"${name}" a été enregistrée.`);
         closeModal($("#modalCategory"));
         await boot();
