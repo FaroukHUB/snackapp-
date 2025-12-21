@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programme Fidélité | Vos points, vos récompenses</title>
+    <title>Programme Fidélité | Restaurant</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/pages.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,13 +13,13 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header" style="background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(10px);">
+    <header class="header">
         <div class="header-left">
             <a href="index.html" class="back-link">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div class="logo">
-                <span class="logo-text" style="color: white;">Programme Fidélité</span>
+                <span class="logo-text">Programme Fidélité</span>
             </div>
         </div>
         <div class="header-right">
@@ -33,163 +33,121 @@
     <!-- Main Content -->
     <main class="page-content">
         <!-- Hero Section -->
-        <section class="page-hero page-hero--primary">
-            <div class="page-hero-overlay"></div>
-            <div class="page-hero-content">
-                <div class="hero-icon hero-icon--light">
-                    <i class="fas fa-star"></i>
-                </div>
-                <h1>Votre fidélité récompensée</h1>
-                <p>Cumulez des points à chaque commande et débloquez des récompenses exclusives. Simple, gratuit et sans inscription !</p>
+        <section class="page-hero">
+            <div class="hero-icon">
+                <i class="fas fa-star"></i>
             </div>
+            <h1>Programme Fidélité</h1>
+            <p>Cumulez des points à chaque commande et débloquez des récompenses exclusives</p>
         </section>
 
         <!-- Comment ça marche -->
-        <section class="page-section">
-            <h2 class="section-title"><i class="fas fa-magic"></i> Comment ça marche ?</h2>
-            <div class="steps-timeline">
-                <div class="timeline-step fade-in">
-                    <div class="timeline-number">1</div>
-                    <div class="timeline-content">
-                        <h3>Passez votre commande</h3>
-                        <p>Commandez en Click & Collect ou sur place. Chaque euro dépensé vous rapporte des points !</p>
-                    </div>
+        <section class="info-section">
+            <h2><i class="fas fa-question-circle"></i> Comment ça marche ?</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon"><i class="fas fa-shopping-bag"></i></div>
+                    <h3>Commandez</h3>
+                    <p>Passez votre commande en Click & Collect ou sur place</p>
                 </div>
-                <div class="timeline-step fade-in">
-                    <div class="timeline-number">2</div>
-                    <div class="timeline-content">
-                        <h3>Cumulez vos points</h3>
-                        <p>Vos points s'accumulent automatiquement. Pas besoin de carte physique, tout est lié à votre numéro de téléphone.</p>
-                    </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon"><i class="fas fa-coins"></i></div>
+                    <h3>Cumulez</h3>
+                    <p>Gagnez <strong>10 points</strong> par euro dépensé</p>
                 </div>
-                <div class="timeline-step fade-in">
-                    <div class="timeline-number">3</div>
-                    <div class="timeline-content">
-                        <h3>Échangez contre des récompenses</h3>
-                        <p>Une fois le seuil atteint, choisissez votre récompense et profitez-en lors de votre prochaine visite !</p>
-                    </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon"><i class="fas fa-gift"></i></div>
+                    <h3>Profitez</h3>
+                    <p>Échangez vos points contre des récompenses</p>
                 </div>
             </div>
         </section>
 
         <!-- Points Visual -->
-        <section class="page-section">
-            <div class="points-section">
-                <div class="points-visual">
-                    <div class="points-item">
-                        <span class="points-value">1€</span>
-                        <span class="points-label">dépensé</span>
-                    </div>
-                    <div class="points-equals">=</div>
-                    <div class="points-item">
-                        <span class="points-value">10</span>
-                        <span class="points-label">points</span>
-                    </div>
+        <section class="info-section highlight-section">
+            <div class="points-visual">
+                <div class="points-item">
+                    <span class="points-value">1€</span>
+                    <span class="points-label">dépensé</span>
                 </div>
-                <p class="points-example">
-                    <i class="fas fa-lightbulb"></i>
-                    Exemple : Une commande de <strong>15€</strong> = <strong>150 points</strong> cumulés !
-                </p>
+                <div class="points-equals">=</div>
+                <div class="points-item accent">
+                    <span class="points-value">10</span>
+                    <span class="points-label">POINTS</span>
+                </div>
             </div>
+            <p class="points-example">
+                <i class="fas fa-lightbulb"></i>
+                Exemple : Une commande de <strong>15€</strong> = <strong>150 points</strong> cumulés !
+            </p>
         </section>
 
-        <!-- Rewards -->
-        <section class="page-section alt-bg">
-            <div class="section-inner">
-                <h2 class="section-title"><i class="fas fa-gift"></i> Les récompenses</h2>
-                <div class="rewards-grid">
-                    <div class="reward-card fade-in">
-                        <span class="reward-badge">500 pts</span>
-                        <div class="reward-icon"><i class="fas fa-cookie"></i></div>
-                        <h3>Cookie offert</h3>
-                        <p>Un délicieux cookie maison</p>
-                    </div>
-                    <div class="reward-card fade-in">
-                        <span class="reward-badge">800 pts</span>
-                        <div class="reward-icon"><i class="fas fa-glass-water"></i></div>
-                        <h3>Boisson offerte</h3>
-                        <p>Boisson au choix</p>
-                    </div>
-                    <div class="reward-card featured fade-in">
-                        <span class="reward-badge">1500 pts</span>
-                        <div class="reward-icon"><i class="fas fa-burger"></i></div>
-                        <h3>Burger offert</h3>
-                        <p>Le Fabrik ou Le Classic</p>
-                    </div>
-                    <div class="reward-card fade-in">
-                        <span class="reward-badge">2500 pts</span>
-                        <div class="reward-icon"><i class="fas fa-box"></i></div>
-                        <h3>Menu complet</h3>
-                        <p>Burger + Frites + Boisson</p>
-                    </div>
+        <!-- Récompenses -->
+        <section class="info-section">
+            <h2><i class="fas fa-gift"></i> Les Récompenses</h2>
+            <p class="section-desc">Échangez vos points contre ces récompenses exclusives</p>
+            <div class="rewards-grid">
+                <div class="reward-card">
+                    <div class="reward-badge">500 pts</div>
+                    <div class="reward-icon"><i class="fas fa-cookie"></i></div>
+                    <h3>Cookie offert</h3>
+                    <p>Un délicieux cookie maison</p>
+                </div>
+                <div class="reward-card">
+                    <div class="reward-badge">800 pts</div>
+                    <div class="reward-icon"><i class="fas fa-glass-water"></i></div>
+                    <h3>Boisson offerte</h3>
+                    <p>Boisson au choix</p>
+                </div>
+                <div class="reward-card featured">
+                    <div class="reward-badge">1500 pts</div>
+                    <div class="reward-icon"><i class="fas fa-burger"></i></div>
+                    <h3>Burger offert</h3>
+                    <p>Le Fabrik ou Le Classic</p>
+                </div>
+                <div class="reward-card">
+                    <div class="reward-badge">2500 pts</div>
+                    <div class="reward-icon"><i class="fas fa-box"></i></div>
+                    <h3>Menu complet</h3>
+                    <p>Burger + Frites + Boisson</p>
                 </div>
             </div>
         </section>
 
-        <!-- En ce moment (Offers) -->
-        <section class="page-section">
-            <div class="offers-section" id="offersSection">
-                <h2 class="section-title"><i class="fas fa-fire"></i> En ce moment</h2>
-                <div class="offers-grid" id="offersGrid">
-                    <!-- Offers will be loaded from admin settings -->
-                    <div class="offer-card">
-                        <span class="offer-badge">Nouveau</span>
-                        <h3>Points x2 le week-end</h3>
-                        <p>Doublez vos points sur toutes vos commandes du vendredi au dimanche !</p>
-                    </div>
-                    <div class="offer-card">
-                        <span class="offer-badge">Limité</span>
-                        <h3>Menu découverte</h3>
-                        <p>100 points bonus pour toute commande d'un nouveau burger</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CTA Voir mes points -->
-        <section class="page-section">
-            <div class="cta-section">
+        <!-- CTA -->
+        <section class="info-section cta-section">
+            <div class="cta-card">
                 <h2>Consultez vos points</h2>
-                <p>Accédez à votre espace fidélité pour voir votre solde et les récompenses disponibles</p>
+                <p>Accédez à votre carte de fidélité pour voir vos points et récompenses disponibles</p>
                 <a href="../loyalty-card.php" class="btn-primary">
                     <i class="fas fa-id-card"></i> Ma carte fidélité
-                </a>
-                <a href="index.html#menuSection" class="btn-secondary">
-                    <i class="fas fa-utensils"></i> Commander maintenant
                 </a>
             </div>
         </section>
 
         <!-- FAQ -->
-        <section class="page-section alt-bg">
-            <div class="section-inner">
-                <h2 class="section-title"><i class="fas fa-question-circle"></i> Questions fréquentes</h2>
-                <div class="faq-list">
-                    <details class="faq-item">
-                        <summary>Comment créer mon compte fidélité ?</summary>
-                        <p>Votre compte est créé automatiquement avec votre numéro de téléphone lors de votre première commande. Pas besoin d'inscription ou de télécharger une application !</p>
-                    </details>
-                    <details class="faq-item">
-                        <summary>Mes points expirent-ils ?</summary>
-                        <p>Vos points sont valables 12 mois à partir de votre dernière commande. Commandez régulièrement pour les conserver et en gagner de nouveaux !</p>
-                    </details>
-                    <details class="faq-item">
-                        <summary>Comment utiliser mes récompenses ?</summary>
-                        <p>Lors de votre prochaine commande, indiquez au comptoir que vous souhaitez utiliser vos points. Nous déduirons automatiquement la récompense de votre total.</p>
-                    </details>
-                    <details class="faq-item">
-                        <summary>Puis-je cumuler plusieurs récompenses ?</summary>
-                        <p>Oui ! Vous pouvez utiliser plusieurs récompenses sur une même commande, tant que vous avez suffisamment de points.</p>
-                    </details>
-                    <details class="faq-item">
-                        <summary>Les points sont-ils valables sur les plateformes de livraison ?</summary>
-                        <p>Non, les points fidélité ne sont valables que pour les commandes passées directement chez nous (Click & Collect ou sur place). C'est l'un des avantages de commander directement !</p>
-                    </details>
-                    <details class="faq-item">
-                        <summary>J'ai oublié mon téléphone, puis-je récupérer mes points ?</summary>
-                        <p>Oui, il suffit de nous donner votre numéro de téléphone habituel lors du paiement et nous retrouverons votre compte.</p>
-                    </details>
-                </div>
+        <section class="info-section">
+            <h2><i class="fas fa-question"></i> Questions fréquentes</h2>
+            <div class="faq-list">
+                <details class="faq-item">
+                    <summary>Comment créer mon compte fidélité ?</summary>
+                    <p>Votre compte est créé automatiquement avec votre numéro de téléphone lors de votre première commande. Pas besoin d'inscription !</p>
+                </details>
+                <details class="faq-item">
+                    <summary>Mes points expirent-ils ?</summary>
+                    <p>Vos points sont valables 12 mois à partir de votre dernière commande. Commandez régulièrement pour les conserver !</p>
+                </details>
+                <details class="faq-item">
+                    <summary>Comment utiliser mes récompenses ?</summary>
+                    <p>Lors de votre prochaine commande, indiquez que vous souhaitez utiliser vos points. Nous déduirons automatiquement la récompense.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>Les points sont-ils valables sur les plateformes de livraison ?</summary>
+                    <p>Non, les points fidélité ne sont valables que pour les commandes Click & Collect et sur place.</p>
+                </details>
             </div>
         </section>
 
@@ -201,13 +159,10 @@
         </footer>
     </main>
 
-    <script src="js/config.js"></script>
     <script src="js/cart.js"></script>
     <script>
-        // Apply theme and update cart badge
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Load config and apply theme
-            await Config.init();
+        // Update cart badge
+        document.addEventListener('DOMContentLoaded', () => {
             const badge = document.getElementById('cartBadge');
             if (badge) {
                 const cart = JSON.parse(localStorage.getItem('snackapp_cart') || '[]');
@@ -215,34 +170,7 @@
                 badge.textContent = count;
                 badge.style.display = count > 0 ? 'flex' : 'none';
             }
-
-            // Load offers from settings (placeholder - can be enhanced)
-            loadOffers();
         });
-
-        async function loadOffers() {
-            try {
-                const response = await fetch('../admin-panel-v2/data/settings.json');
-                if (response.ok) {
-                    const settings = await response.json();
-                    const offers = settings.loyalty?.offers || [];
-                    const offersGrid = document.getElementById('offersGrid');
-
-                    if (offers.length > 0 && offersGrid) {
-                        offersGrid.innerHTML = offers.map(offer => `
-                            <div class="offer-card">
-                                ${offer.badge ? `<span class="offer-badge">${offer.badge}</span>` : ''}
-                                <h3>${offer.title}</h3>
-                                <p>${offer.description}</p>
-                            </div>
-                        `).join('');
-                    }
-                }
-            } catch (e) {
-                // Keep default offers if loading fails
-                console.log('Using default offers');
-            }
-        }
     </script>
 </body>
 </html>

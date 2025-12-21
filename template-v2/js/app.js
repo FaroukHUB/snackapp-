@@ -1,6 +1,6 @@
 /* ============================================
    APP.JS - Application Initialization
-   Template V2 - SnackApp (BK Style)
+   Template V2 - SnackApp
    ============================================ */
 
 const App = {
@@ -8,7 +8,7 @@ const App = {
      * Initialize the application
      */
     async init() {
-        console.log('Initializing SnackApp Template V2 (BK Style)...');
+        console.log('Initializing SnackApp Template V2...');
 
         // Show loading state
         this.showLoading(true);
@@ -27,7 +27,7 @@ const App = {
             Products.init();
 
             // Setup UI interactions
-            this.setupMobileMenu();
+            this.setupSidebar();
             this.setupMiniCart();
             this.setupSmoothScroll();
 
@@ -45,6 +45,7 @@ const App = {
      * Show/hide loading state
      */
     showLoading(show) {
+        // Could add a loading overlay here
         document.body.classList.toggle('loading', show);
     },
 
@@ -67,33 +68,34 @@ const App = {
     },
 
     /**
-     * Setup mobile menu toggle
+     * Setup sidebar toggle (mobile)
      */
-    setupMobileMenu() {
-        const menuBtn = document.getElementById('mobileMenuBtn');
-        const menu = document.getElementById('mobileMenu');
-        const overlay = document.getElementById('mobileMenuOverlay');
-        const closeBtn = document.getElementById('mobileMenuClose');
+    setupSidebar() {
+        const toggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
 
-        const openMenu = () => {
-            menu?.classList.add('active');
-            overlay?.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        };
-
-        const closeMenu = () => {
-            menu?.classList.remove('active');
+        const closeSidebar = () => {
+            sidebar?.classList.remove('active');
             overlay?.classList.remove('active');
             document.body.style.overflow = '';
         };
 
-        menuBtn?.addEventListener('click', openMenu);
-        closeBtn?.addEventListener('click', closeMenu);
-        overlay?.addEventListener('click', closeMenu);
+        toggle?.addEventListener('click', () => {
+            const isActive = sidebar?.classList.toggle('active');
+            overlay?.classList.toggle('active', isActive);
+            document.body.style.overflow = isActive ? 'hidden' : '';
+        });
 
-        // Close on Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeMenu();
+        overlay?.addEventListener('click', closeSidebar);
+
+        // Close sidebar when clicking a nav link (mobile)
+        document.querySelectorAll('#categoryNav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    closeSidebar();
+                }
+            });
         });
     },
 
@@ -151,7 +153,7 @@ const App = {
                 const target = document.getElementById(targetId);
 
                 if (target) {
-                    const headerHeight = document.querySelector('.header-main')?.offsetHeight || 70;
+                    const headerHeight = document.querySelector('.header')?.offsetHeight || 70;
                     const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
 
                     window.scrollTo({
