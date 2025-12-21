@@ -1072,7 +1072,8 @@ ul {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 24px;
-    max-width: 700px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .platform-card {
@@ -1081,48 +1082,49 @@ ul {
     align-items: center;
     justify-content: center;
     gap: 16px;
-    padding: 40px 32px;
+    padding: 32px 24px;
     border-radius: var(--border-radius-lg);
     text-decoration: none;
     transition: all 0.3s ease;
-    min-height: 200px;
-    border: 2px solid transparent;
+    min-height: 180px;
+    border: 2px solid var(--gray-200);
+    background: var(--white);
 }
 
 /* Large platform cards */
 .platform-card.platform-card--large {
-    min-height: 220px;
-    padding: 48px 36px;
+    min-height: 200px;
+    padding: 36px 28px;
 }
 
 .platform-logo-wrapper {
-    height: 80px;
+    height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
 }
 
-/* Image-based logos */
+/* Image-based logos - keep original colors */
 .platform-logo-img {
-    max-height: 70px;
-    max-width: 180px;
+    max-height: 60px;
+    max-width: 160px;
     width: auto;
     height: auto;
     object-fit: contain;
-    filter: brightness(0) invert(1);
     transition: transform 0.3s ease;
 }
 
 .platform-card:hover .platform-logo-img {
-    transform: scale(1.05);
+    transform: scale(1.08);
 }
 
 /* Text fallback logo */
 .platform-text-logo {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     letter-spacing: -0.5px;
+    color: var(--gray-800);
 }
 
 /* SVG logos (legacy fallback) */
@@ -1139,24 +1141,18 @@ ul {
 }
 
 .platform-cta {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    opacity: 0.95;
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.15);
+    padding: 10px 18px;
     border-radius: 25px;
     transition: all 0.3s ease;
 }
 
-.platform-card:hover .platform-cta {
-    background: rgba(255, 255, 255, 0.25);
-}
-
 .platform-cta i {
-    font-size: 12px;
+    font-size: 11px;
     transition: transform 0.2s ease;
 }
 
@@ -1164,55 +1160,66 @@ ul {
     transform: translateX(4px);
 }
 
-/* Uber Eats - Dark theme */
+/* Uber Eats - Clean card with brand colors */
 .platform-card.uber-eats {
-    background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
-    color: white;
-    border-color: rgba(6, 193, 103, 0.3);
+    background: var(--white);
+    border-color: #142328;
 }
 
 .platform-card.uber-eats:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 40px rgba(6, 193, 103, 0.35);
-    border-color: rgba(6, 193, 103, 0.6);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(20, 35, 40, 0.15);
+    border-color: #06C167;
 }
 
-.platform-card.uber-eats .platform-logo-img {
-    filter: none; /* Keep original colors for Uber Eats logo */
-}
-
-.platform-card.uber-eats .platform-logo {
-    fill: #06C167;
-}
-
-/* Deliveroo - Teal theme */
-.platform-card.deliveroo {
-    background: linear-gradient(145deg, #00CCBC, #00a89d);
+.platform-card.uber-eats .platform-cta {
+    background: #142328;
     color: white;
+}
+
+.platform-card.uber-eats:hover .platform-cta {
+    background: #06C167;
+}
+
+/* Deliveroo - Clean card with teal accent */
+.platform-card.deliveroo {
+    background: var(--white);
+    border-color: #00CCBC;
 }
 
 .platform-card.deliveroo:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 40px rgba(0, 204, 188, 0.45);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 204, 188, 0.2);
+    border-color: #00CCBC;
 }
 
-.platform-card.deliveroo .platform-logo-img {
-    filter: brightness(0) invert(1); /* White logo on teal background */
-}
-
-/* Just Eat - Orange theme */
-.platform-card.just-eat {
-    background: linear-gradient(145deg, #FF8000, #e67300);
+.platform-card.deliveroo .platform-cta {
+    background: #00CCBC;
     color: white;
 }
 
-.platform-card.just-eat:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 40px rgba(255, 128, 0, 0.45);
+.platform-card.deliveroo:hover .platform-cta {
+    background: #00a89d;
 }
 
-.platform-card.just-eat .platform-logo-img {
-    filter: brightness(0) invert(1);
+/* Just Eat - Clean card with orange accent */
+.platform-card.just-eat {
+    background: var(--white);
+    border-color: #FF8000;
+}
+
+.platform-card.just-eat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(255, 128, 0, 0.2);
+}
+
+.platform-card.just-eat .platform-cta {
+    background: #FF8000;
+    color: white;
+}
+
+.platform-card.just-eat:hover .platform-cta {
+    background: #e67300;
 }
 
 @media (max-width: 600px) {
