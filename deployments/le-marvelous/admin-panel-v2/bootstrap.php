@@ -46,14 +46,14 @@ if (!file_exists($dbConfigFile)) {
 }
 
 // Restaurant actuel (pour multi-tenant)
-// Par défaut: Fabrik Burger (ID 1)
+// Le Marvelous (ID 2)
 if (!defined('SNACK_RESTAURANT_ID')) {
     // Essayer de récupérer depuis la session ou le domaine
     if (isset($_SESSION['restaurant_id'])) {
         define('SNACK_RESTAURANT_ID', $_SESSION['restaurant_id']);
     } else {
-        // TODO: Détecter depuis le domaine pour multi-tenant
-        define('SNACK_RESTAURANT_ID', 1);
+        // Le Marvelous = restaurant ID 2
+        define('SNACK_RESTAURANT_ID', 2);
     }
 }
 

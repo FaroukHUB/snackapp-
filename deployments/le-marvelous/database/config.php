@@ -12,7 +12,7 @@ return [
         'port' => 3306,
         'dbname' => 'zajr1824_marvelous',
         'username' => 'zajr1824_marvelous',
-        'password' => 'VOTRE_MOT_DE_PASSE',
+        'password' => 'Mariagor6!',
         'charset' => 'utf8mb4'
     ]
 ];
