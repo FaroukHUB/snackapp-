@@ -290,12 +290,12 @@ $csrfToken = getCsrfToken();
       color: var(--muted);
       transition: color .15s ease;
     }
-    .icon-option:has(input:checked) {
+    .icon-option.selected {
       border-color: var(--brand);
       background: rgba(96,165,250,.2);
       box-shadow: 0 0 12px rgba(96,165,250,.3);
     }
-    .icon-option:has(input:checked) span {
+    .icon-option.selected span {
       color: var(--brand);
     }
 
@@ -886,8 +886,41 @@ $csrfToken = getCsrfToken();
       if (open.length) closeModal(open[open.length-1]);
     });
 
+    // ===== ICON SELECTOR LOGIC =====
+    function initIconSelector() {
+      const container = $("#iconSelector");
+      if (!container) return;
+
+      const options = $$(".icon-option", container);
+
+      // Set initial selected state
+      options.forEach(opt => {
+        const input = opt.querySelector("input");
+        if (input && input.checked) {
+          opt.classList.add("selected");
+        }
+
+        // Handle click/change
+        opt.addEventListener("click", () => {
+          options.forEach(o => o.classList.remove("selected"));
+          opt.classList.add("selected");
+          if (input) input.checked = true;
+        });
+      });
+    }
+
+    // Initialize on page load
+    initIconSelector();
+
     $("#btnAddCategory").addEventListener("click", () => {
       $("#formCategory").reset();
+      // Reset icon selector to first option
+      const options = $$("#iconSelector .icon-option");
+      options.forEach((o, i) => {
+        o.classList.toggle("selected", i === 0);
+        const input = o.querySelector("input");
+        if (input) input.checked = (i === 0);
+      });
       openModal("#modalCategory");
     });
 
