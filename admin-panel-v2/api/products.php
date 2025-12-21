@@ -134,7 +134,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             jsonSuccess([
                 'menu' => $menuData['menu'] ?? ['categories' => []],
                 'supplements' => $supplements,
-                'formules' => $formules
+                'formules' => $formules,
+                'featured' => $menuData['featured'] ?? [
+                    'enabled' => true,
+                    'title' => 'Sélection pour vous',
+                    'subtitle' => 'Nos produits les plus appréciés',
+                    'items' => []
+                ]
             ]);
         }
     }

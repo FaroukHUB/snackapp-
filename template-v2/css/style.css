@@ -647,8 +647,15 @@ ul {
    PRODUCT SECTION
    ============================================ */
 .product-section {
-    margin-bottom: 48px;
+    margin-bottom: 64px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--gray-200);
     scroll-margin-top: calc(var(--header-height) + 24px);
+}
+
+.product-section:last-child {
+    border-bottom: none;
+    margin-bottom: 32px;
 }
 
 .product-section h2 {
@@ -2144,7 +2151,9 @@ ul {
    FEATURED SECTION (Sélection pour vous)
    ============================================ */
 .featured-section {
-    margin-bottom: 32px;
+    margin-bottom: 60px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--gray-200);
 }
 
 .featured-grid {
@@ -2227,7 +2236,9 @@ ul {
    SERVICES SECTION (Click & Collect / Fidélité)
    ============================================ */
 .services-section {
-    margin-bottom: 40px;
+    margin-bottom: 60px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--gray-200);
 }
 
 .services-grid {
@@ -2393,8 +2404,8 @@ ul {
    PRODUCT SECTION WITH SEPARATION
    ============================================ */
 .product-section {
-    margin-bottom: 48px;
-    padding-bottom: 32px;
+    margin-bottom: 64px;
+    padding-bottom: 48px;
     border-bottom: 1px solid var(--gray-200);
     scroll-margin-top: calc(var(--header-height) + 24px);
 }
@@ -2538,12 +2549,18 @@ ul {
     }
 
     .product-section {
-        margin-bottom: 32px;
-        padding-bottom: 24px;
+        margin-bottom: 48px;
+        padding-bottom: 32px;
     }
 
     .product-section h2 {
         font-size: 18px;
+    }
+
+    .featured-section,
+    .services-section {
+        margin-bottom: 48px;
+        padding-bottom: 32px;
     }
 }
 
