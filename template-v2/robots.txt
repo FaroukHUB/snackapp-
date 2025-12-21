@@ -1,0 +1,24 @@
+# Robots.txt for Fabrik Burger
+# https://fabrikburger.fr
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://fabrikburger.fr/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin-panel-v2/
+Disallow: /api/
+Disallow: /config/
+
+# Allow crawling of important pages
+Allow: /index.html
+Allow: /click-collect.html
+Allow: /fidelite.html
+Allow: /css/
+Allow: /js/
+Allow: /images/
+
+# Crawl-delay for politeness
+Crawl-delay: 1

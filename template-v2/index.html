@@ -3,12 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commander | Restaurant</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Fabrik Burger Lille - Burgers Gourmets Artisanaux | Click & Collect</title>
+    <meta name="description" content="Fabrik Burger Lille : Découvrez nos burgers gourmets artisanaux, viandes de qualité et pains frais. Commandez en Click & Collect ou faites-vous livrer. 110 Rue des Postes, Lille.">
+    <meta name="keywords" content="burger lille, restaurant lille, click collect lille, burger gourmet, fabrik burger, livraison burger lille, fast food lille">
+    <meta name="author" content="Fabrik Burger">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://fabrikburger.fr/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="restaurant">
+    <meta property="og:url" content="https://fabrikburger.fr/">
+    <meta property="og:title" content="Fabrik Burger Lille - Burgers Gourmets Artisanaux">
+    <meta property="og:description" content="Découvrez nos burgers gourmets artisanaux avec viandes de qualité et pains frais. Commandez en Click & Collect ou livraison à Lille.">
+    <meta property="og:image" content="https://fabrikburger.fr/images/og-image.jpg">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="Fabrik Burger">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://fabrikburger.fr/">
+    <meta name="twitter:title" content="Fabrik Burger Lille - Burgers Gourmets Artisanaux">
+    <meta name="twitter:description" content="Découvrez nos burgers gourmets artisanaux avec viandes de qualité et pains frais. Commandez en Click & Collect ou livraison à Lille.">
+    <meta name="twitter:image" content="https://fabrikburger.fr/images/og-image.jpg">
+
+    <!-- Favicon & Theme -->
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <meta name="theme-color" content="#e63946">
+    <meta name="msapplication-TileColor" content="#e63946">
+
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "name": "Fabrik Burger",
+        "image": "https://fabrikburger.fr/images/og-image.jpg",
+        "url": "https://fabrikburger.fr",
+        "telephone": "+33374455427",
+        "priceRange": "€€",
+        "servesCuisine": ["Burger", "Fast Food", "American"],
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "110 Rue des Postes",
+            "addressLocality": "Lille",
+            "postalCode": "59000",
+            "addressCountry": "FR"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 50.6292,
+            "longitude": 3.0573
+        },
+        "openingHoursSpecification": [
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday"],
+                "opens": "18:30",
+                "closes": "23:30"
+            },
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Friday", "Saturday"],
+                "opens": "18:30",
+                "closes": "01:00"
+            },
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": "Sunday",
+                "opens": "18:30",
+                "closes": "00:00"
+            }
+        ],
+        "menu": "https://fabrikburger.fr/",
+        "acceptsReservations": "False",
+        "hasMenu": {
+            "@type": "Menu",
+            "hasMenuSection": [
+                {
+                    "@type": "MenuSection",
+                    "name": "Burgers",
+                    "description": "Nos burgers gourmets avec pain artisanal"
+                },
+                {
+                    "@type": "MenuSection",
+                    "name": "Extras",
+                    "description": "Accompagnements et snacks"
+                },
+                {
+                    "@type": "MenuSection",
+                    "name": "Desserts",
+                    "description": "Nos desserts maison"
+                },
+                {
+                    "@type": "MenuSection",
+                    "name": "Boissons",
+                    "description": "Boissons fraîches"
+                }
+            ]
+        }
+    }
+    </script>
 </head>
 <body>
     <!-- Header -->
@@ -18,7 +123,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="logo">
-                <img src="" alt="" id="logoImg" class="logo-img">
+                <img src="" alt="Logo Fabrik Burger" id="logoImg" class="logo-img">
                 <span class="logo-text" id="logoText">Restaurant</span>
             </div>
         </div>
@@ -83,7 +188,7 @@
             <!-- Hero Section -->
             <section class="hero-section" id="heroSection">
                 <div class="hero-image-wrapper">
-                    <img src="../images/IMG_0391_dcr8f2.jpg" alt="Hero" class="hero-image" id="heroImage">
+                    <img src="../images/IMG_0391_dcr8f2.jpg" alt="Burgers gourmets Fabrik Burger Lille" class="hero-image" id="heroImage">
                     <div class="hero-overlay"></div>
                 </div>
                 <div class="hero-content">
@@ -198,7 +303,7 @@
             <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
             <div class="modal-body">
                 <div class="modal-image">
-                    <img src="" alt="" id="modalImage">
+                    <img src="" alt="Image du produit" id="modalImage">
                 </div>
                 <div class="modal-details">
                     <h2 id="modalTitle">Nom du produit</h2>
