@@ -471,11 +471,11 @@ const Products = {
             console.log('Platforms loaded:', platforms);
             // Check if platforms is an array with items
             if (Array.isArray(platforms) && platforms.length > 0) {
-                // Platform logos using image files
+                // Platform logos - try image first, fallback to text
                 const platformLogos = {
-                    'uber-eats': `<img src="../images/logouber.webp" alt="Uber Eats" class="platform-logo-img">`,
-                    'deliveroo': `<img src="../images/logodeliveroo.webp" alt="Deliveroo" class="platform-logo-img">`,
-                    'just-eat': `<img src="../images/logojusteat.webp" alt="Just Eat" class="platform-logo-img" onerror="this.parentElement.innerHTML='<span class=\\'platform-text-logo\\'>Just Eat</span>'">`
+                    'uber-eats': `<img src="../images/logouber.webp" alt="Uber Eats" class="platform-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span class="platform-text-logo" style="display:none">Uber Eats</span>`,
+                    'deliveroo': `<img src="../images/logodeliveroo.webp" alt="Deliveroo" class="platform-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span class="platform-text-logo" style="display:none">Deliveroo</span>`,
+                    'just-eat': `<img src="../images/logojusteat.webp" alt="Just Eat" class="platform-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span class="platform-text-logo" style="display:none">Just Eat</span>`
                 };
 
                 let html = platforms.map(p => {
