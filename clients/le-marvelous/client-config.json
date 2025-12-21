@@ -1,0 +1,121 @@
+{
+  "_comment": "Configuration Le Marvelous - À COMPLÉTER",
+  "_version": "1.0",
+
+  "client": {
+    "id": "le-marvelous",
+    "name": "Le Marvelous",
+    "domain": "lemarvelous.fr",
+    "created_at": "2024-12-21",
+    "status": "pending"
+  },
+
+  "branding": {
+    "colors": {
+      "primary": "#TODO",
+      "primary_dark": "#TODO",
+      "secondary": "#TODO",
+      "accent": "#TODO"
+    },
+    "fonts": {
+      "heading": "Inter",
+      "body": "Inter"
+    },
+    "logo": {
+      "file": "logo.svg",
+      "favicon": "favicon.png",
+      "og_image": "hero.jpg"
+    }
+  },
+
+  "restaurant": {
+    "name": "Le Marvelous",
+    "tagline": "TODO - Slogan",
+    "description": "TODO - Description SEO",
+    "cuisine_type": ["TODO"],
+    "price_range": "€€",
+
+    "address": {
+      "street": "TODO",
+      "city": "TODO",
+      "postal_code": "TODO",
+      "country": "FR"
+    },
+
+    "contact": {
+      "phone": "TODO",
+      "phone_display": "TODO",
+      "email": "TODO",
+      "whatsapp": "TODO"
+    },
+
+    "social": {
+      "instagram": "TODO",
+      "facebook": "TODO",
+      "tiktok": ""
+    },
+
+    "opening_hours": [
+      { "day": "lundi", "opens": "TODO", "closes": "TODO" },
+      { "day": "mardi", "opens": "TODO", "closes": "TODO" },
+      { "day": "mercredi", "opens": "TODO", "closes": "TODO" },
+      { "day": "jeudi", "opens": "TODO", "closes": "TODO" },
+      { "day": "vendredi", "opens": "TODO", "closes": "TODO" },
+      { "day": "samedi", "opens": "TODO", "closes": "TODO" },
+      { "day": "dimanche", "opens": "TODO", "closes": "TODO" }
+    ],
+
+    "delivery": {
+      "enabled": true,
+      "platforms": []
+    },
+
+    "features": {
+      "click_collect": true,
+      "loyalty_program": true,
+      "online_payment": false,
+      "table_ordering": false
+    }
+  },
+
+  "menu": {
+    "categories": [],
+    "supplements": {
+      "enabled": true,
+      "items": []
+    },
+    "formules": {
+      "enabled": false,
+      "menu_supplement": 0,
+      "includes": []
+    }
+  },
+
+  "loyalty": {
+    "enabled": true,
+    "points_per_euro": 10,
+    "rewards": []
+  },
+
+  "seo": {
+    "title": "Le Marvelous - TODO Ville | Commandez en ligne",
+    "meta_description": "TODO",
+    "keywords": [],
+    "google_analytics": "",
+    "google_maps_embed": ""
+  },
+
+  "admin": {
+    "default_password": "CHANGER_MOI",
+    "notification_email": "",
+    "notification_whatsapp": ""
+  },
+
+  "images_needed": [
+    "[ ] logo.svg - Logo vectoriel",
+    "[ ] logo.png - Logo PNG (512x512)",
+    "[ ] favicon.png - Favicon (32x32)",
+    "[ ] hero.jpg - Image hero (1200x630)",
+    "[ ] Photos produits"
+  ]
+}
