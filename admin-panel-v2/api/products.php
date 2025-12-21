@@ -772,6 +772,34 @@ switch ($action) {
         jsonSuccess();
         break;
 
+    // ===== FEATURED PRODUCTS =====
+    case 'update_featured':
+        $featuredData = $input['featured'] ?? null;
+
+        if (!$featuredData || !is_array($featuredData)) {
+            jsonError('Données featured invalides');
+        }
+
+        $featured = [
+            'enabled' => $featuredData['enabled'] ?? true,
+            'title' => trim($featuredData['title'] ?? 'Sélection pour vous'),
+            'subtitle' => trim($featuredData['subtitle'] ?? 'Nos produits les plus appréciés'),
+            'items' => $featuredData['items'] ?? []
+        ];
+
+        // Sauvegarder dans menu.json
+        $menuPath = SNACK_ROOT . '/config/menu.json';
+        if (file_exists($menuPath)) {
+            $menuData = json_decode(file_get_contents($menuPath), true);
+            if ($menuData) {
+                $menuData['featured'] = $featured;
+                file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            }
+        }
+
+        jsonSuccess(['featured' => $featured]);
+        break;
+
     default:
         jsonError('Action inconnue');
 }

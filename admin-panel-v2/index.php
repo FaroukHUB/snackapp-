@@ -2071,18 +2071,22 @@ if (isset($_GET['export'])) {
                         <?php foreach ($loyaltyLeaderboard as $i => $member):
                             $medalColors = ['#f59e0b', '#9ca3af', '#cd7f32'];
                             $medalColor = $medalColors[$i] ?? '#374151';
+                            $memberName = $member['name'] ?? $member['customer_name'] ?? 'Client';
+                            $memberPhone = $member['phone'] ?? $member['customer_phone'] ?? '';
+                            $memberPoints = $member['loyalty_points'] ?? $member['total_points'] ?? 0;
+                            $memberOrders = $member['orders_count'] ?? $member['rewards_redeemed'] ?? 0;
                         ?>
                         <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e293b; border-radius: 8px;">
                             <div style="width: 32px; height: 32px; background: <?= $medalColor ?>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">
                                 <?= $i + 1 ?>
                             </div>
                             <div style="flex: 1;">
-                                <div style="font-weight: 600; font-size: 14px;"><?= htmlspecialchars($member['customer_name'] ?? 'Client') ?></div>
-                                <div style="color: #6b7280; font-size: 11px;"><?= htmlspecialchars($member['customer_phone'] ?? '') ?></div>
+                                <div style="font-weight: 600; font-size: 14px;"><?= htmlspecialchars($memberName) ?></div>
+                                <div style="color: #6b7280; font-size: 11px;"><?= htmlspecialchars($memberPhone) ?></div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-weight: bold; color: #f59e0b;"><?= number_format($member['total_points'] ?? 0) ?> pts</div>
-                                <div style="font-size: 11px; color: #6b7280;"><?= $member['rewards_redeemed'] ?? 0 ?> récompenses</div>
+                                <div style="font-weight: bold; color: #f59e0b;"><?= number_format($memberPoints) ?> pts</div>
+                                <div style="font-size: 11px; color: #6b7280;"><?= $memberOrders ?> commandes</div>
                             </div>
                         </div>
                         <?php endforeach; ?>

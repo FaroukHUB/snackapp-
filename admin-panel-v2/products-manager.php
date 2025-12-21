@@ -648,6 +648,50 @@ $csrfToken = getCsrfToken();
         <div id="formulesEmpty" class="muted" style="display:none;padding:20px;text-align:center;">Aucune formule configurée.</div>
       </div>
     </section>
+
+    <!-- Section Sélection pour vous -->
+    <section class="panel" id="featuredPanel" style="margin-top:20px;">
+      <div class="panel-h">
+        <div>
+          <h2>⭐ Sélection pour vous</h2>
+          <div class="meta" id="featuredMeta">Produits mis en avant sur la page d'accueil</div>
+        </div>
+        <button class="btn btn-primary" type="button" id="btnAddFeatured">+ Ajouter</button>
+      </div>
+      <div class="panel-b">
+        <div class="field" style="margin-bottom:12px;">
+          <label for="featuredTitle">Titre de la section</label>
+          <input id="featuredTitle" class="input" type="text" placeholder="Sélection pour vous" />
+        </div>
+        <div class="field" style="margin-bottom:12px;">
+          <label for="featuredSubtitle">Sous-titre</label>
+          <input id="featuredSubtitle" class="input" type="text" placeholder="Nos produits les plus appréciés" />
+        </div>
+        <div class="field">
+          <label>Produits sélectionnés (glisser pour réordonner)</label>
+          <div id="featuredGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:8px;"></div>
+          <div id="featuredEmpty" class="muted" style="display:none;padding:20px;text-align:center;">Aucun produit sélectionné. Cliquez sur "+ Ajouter" pour en ajouter.</div>
+        </div>
+        <button class="btn btn-good" type="button" id="btnSaveFeatured" style="margin-top:16px;">Enregistrer la sélection</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- MODAL: Ajouter produit Featured -->
+  <div id="modalFeatured" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalFeaturedTitle" style="max-width:600px;">
+      <div class="modal-h">
+        <h3 id="modalFeaturedTitle">Ajouter à la sélection</h3>
+        <button class="btn btn-ghost" type="button" data-close aria-label="Fermer">✕</button>
+      </div>
+      <div class="modal-b" style="max-height:60vh;overflow-y:auto;">
+        <input id="featuredSearch" class="search" type="search" placeholder="Rechercher un produit..." style="margin-bottom:12px;" />
+        <div id="featuredProductsList" style="display:grid;gap:8px;"></div>
+      </div>
+      <div class="modal-f">
+        <button class="btn btn-ghost" type="button" data-close>Fermer</button>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
@@ -1411,6 +1455,157 @@ $csrfToken = getCsrfToken();
       });
     }
 
+    // ============================================
+    // FEATURED PRODUCTS MANAGEMENT
+    // ============================================
+
+    let featuredItems = [];
+
+    function getAllProducts() {
+      const categories = getCategories();
+      const products = [];
+      categories.forEach(cat => {
+        (cat.items || []).forEach(item => {
+          products.push({ ...item, categoryId: cat.id, categoryName: cat.name });
+        });
+      });
+      return products;
+    }
+
+    function getFeaturedConfig() {
+      return state.menu?.featured || { enabled: true, title: 'Sélection pour vous', subtitle: 'Nos produits les plus appréciés', items: [] };
+    }
+
+    function renderFeatured() {
+      const grid = $("#featuredGrid");
+      const empty = $("#featuredEmpty");
+      const featured = getFeaturedConfig();
+
+      // Set inputs
+      $("#featuredTitle").value = featured.title || 'Sélection pour vous';
+      $("#featuredSubtitle").value = featured.subtitle || 'Nos produits les plus appréciés';
+
+      featuredItems = featured.items || [];
+
+      grid.innerHTML = "";
+
+      if (featuredItems.length === 0) {
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+
+      const allProducts = getAllProducts();
+
+      featuredItems.forEach((productId, index) => {
+        const product = allProducts.find(p => p.id === productId);
+        if (!product) return;
+
+        const card = document.createElement("div");
+        card.style.cssText = "display:flex;gap:10px;padding:10px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);position:relative;";
+
+        let imgSrc = product.image ? "../" + product.image : "";
+
+        card.innerHTML = `
+          <div style="width:50px;height:50px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.18);">
+            ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);">🍔</div>'}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
+            <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${(product.priceSolo || product.price || 0).toFixed(2)}€</div>
+          </div>
+          <button type="button" class="btn btn-danger" style="padding:6px 10px;font-size:11px;position:absolute;top:6px;right:6px;" data-remove="${index}">✕</button>
+        `;
+
+        card.querySelector('[data-remove]').addEventListener('click', () => {
+          featuredItems.splice(index, 1);
+          renderFeatured();
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    function renderFeaturedModal() {
+      const list = $("#featuredProductsList");
+      const search = $("#featuredSearch").value.toLowerCase();
+      const allProducts = getAllProducts();
+
+      const filtered = allProducts.filter(p =>
+        p.name.toLowerCase().includes(search) &&
+        !featuredItems.includes(p.id)
+      );
+
+      list.innerHTML = "";
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="muted" style="padding:20px;text-align:center;">Aucun produit disponible</div>';
+        return;
+      }
+
+      filtered.forEach(product => {
+        const item = document.createElement("div");
+        item.style.cssText = "display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--stroke);border-radius:10px;cursor:pointer;transition:background .12s;";
+        item.onmouseenter = () => item.style.background = "rgba(255,255,255,.06)";
+        item.onmouseleave = () => item.style.background = "";
+
+        let imgSrc = product.image ? "../" + product.image : "";
+
+        item.innerHTML = `
+          <div style="width:40px;height:40px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.18);">
+            ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);">🍔</div>'}
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
+            <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:var(--brand);">${(product.priceSolo || product.price || 0).toFixed(2)}€</div>
+          <button type="button" class="btn btn-good" style="padding:6px 12px;font-size:11px;">+ Ajouter</button>
+        `;
+
+        item.querySelector('button').addEventListener('click', (e) => {
+          e.stopPropagation();
+          featuredItems.push(product.id);
+          renderFeatured();
+          renderFeaturedModal();
+          toast("success", "Ajouté", `"${product.name}" ajouté à la sélection.`);
+        });
+
+        list.appendChild(item);
+      });
+    }
+
+    $("#btnAddFeatured").addEventListener("click", () => {
+      renderFeaturedModal();
+      openModal("#modalFeatured");
+    });
+
+    $("#featuredSearch").addEventListener("input", () => {
+      renderFeaturedModal();
+    });
+
+    $("#btnSaveFeatured").addEventListener("click", async () => {
+      const title = $("#featuredTitle").value.trim() || 'Sélection pour vous';
+      const subtitle = $("#featuredSubtitle").value.trim() || 'Nos produits les plus appréciés';
+
+      try {
+        await apiPostJson({
+          action: "update_featured",
+          featured: {
+            enabled: true,
+            title,
+            subtitle,
+            items: featuredItems
+          }
+        });
+        toast("success", "Sauvegardé", "La sélection a été mise à jour.");
+        await boot();
+      } catch(err) {
+        toast("error", "Erreur", err?.message ?? "Impossible de sauvegarder.");
+      }
+    });
+
     async function boot(){
       const data = await apiGet();
       state.menu = data;
@@ -1420,6 +1615,7 @@ $csrfToken = getCsrfToken();
       }
       render();
       renderFormules();
+      renderFeatured();
     }
 
     boot().catch((err)=>{

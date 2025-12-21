@@ -88,16 +88,21 @@ const Products = {
 
         grid.innerHTML = featuredProducts.map(product => {
             const price = product.priceSolo || product.price || 0;
+            const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
             return `
-                <div class="featured-card" onclick="Products.openProductModal('${product.id}')">
-                    <div class="product-image-wrapper">
+                <div class="featured-card">
+                    <div class="product-image-wrapper" onclick="Products.openProductModal('${product.id}')">
                         <img src="../${product.image}" alt="${product.name}" class="product-image"
                              onerror="this.style.display='none'">
                         ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
                     </div>
                     <div class="product-info">
-                        <h3 class="product-name">${product.name}</h3>
-                        <span class="product-price">${Config.formatPrice(price)}</span>
+                        <h3 class="product-name" onclick="Products.openProductModal('${product.id}')">${product.name}</h3>
+                        <p class="product-desc">${desc}</p>
+                        <div class="product-footer">
+                            <span class="product-price">${Config.formatPrice(price)}</span>
+                            <button class="product-add-btn" onclick="event.stopPropagation(); Products.openProductModal('${product.id}')">Ajouter</button>
+                        </div>
                     </div>
                 </div>
             `;

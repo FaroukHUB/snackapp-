@@ -82,7 +82,10 @@ const Config = {
         root.style.setProperty('--primary-light', this.lightenColor(primaryColor, 90));
 
         // Secondary & accent
-        if (theme.secondary) root.style.setProperty('--secondary', theme.secondary);
+        if (theme.secondary) {
+            root.style.setProperty('--secondary', theme.secondary);
+            root.style.setProperty('--secondary-dark', this.darkenColor(theme.secondary, 15));
+        }
         if (theme.accent) root.style.setProperty('--accent', theme.accent);
 
         // Background colors
