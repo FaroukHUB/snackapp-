@@ -75,6 +75,7 @@ $useMySQL = false;
    ========================= */
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // GET est public (le front en a besoin)
     // Charger directement depuis menu.json (déjà formaté)
     $menuJsonPath = SNACK_ROOT . '/config/menu.json';
 
@@ -144,6 +145,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 /* =========================
    POST ACTIONS
    ========================= */
+
+// Vérifier l'authentification admin pour les POST
+if (!isAdminLoggedIn()) {
+    jsonError('Non autorisé', 401);
+}
 
 $input = readInput();
 
@@ -494,6 +500,22 @@ switch ($action) {
 
         if (!$productId) {
             jsonError('ID produit manquant');
+        }
+
+        // Récupérer l'image du produit avant suppression pour la nettoyer
+        $imagePath = null;
+        if (isset($runtime['customProducts'][$productId]['image'])) {
+            $imagePath = $runtime['customProducts'][$productId]['image'];
+        } elseif (isset($runtime['products'][$productId]['image'])) {
+            $imagePath = $runtime['products'][$productId]['image'];
+        }
+
+        // Supprimer l'image si elle existe
+        if ($imagePath) {
+            $fullPath = SNACK_ROOT . '/' . ltrim($imagePath, '/');
+            if (file_exists($fullPath) && strpos($imagePath, '/uploads/') !== false) {
+                @unlink($fullPath);
+            }
         }
 
         if (isset($runtime['customProducts'][$productId])) {

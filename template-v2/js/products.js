@@ -13,6 +13,14 @@ const Products = {
     selectedDrink: null, // For menu drink selection
 
     /**
+     * Capitalize first letter of a string
+     */
+    capitalize(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    },
+
+    /**
      * Initialize products display
      */
     init() {
@@ -180,7 +188,7 @@ const Products = {
                     ${cat.name}
                 </h2>
                 <div class="products-grid">
-                    ${this.renderProducts(cat.items, cat.id)}
+                    ${this.renderProducts(cat.items || [], cat.id)}
                 </div>
             </section>
         `).join('');
@@ -190,6 +198,7 @@ const Products = {
      * Render products for a category
      */
     renderProducts(products, categoryId) {
+        if (!products || !Array.isArray(products)) return '';
         return products.map(product => {
             const isUnavailable = product.status === 'unavailable';
             const price = product.price || product.priceSolo || 0;

@@ -78,6 +78,47 @@ function syncMenuStatuses() {
         }
     }
 
+    // Synchroniser les formules
+    $formules = $menuData['formules'] ?? [];
+
+    // Appliquer les patches du runtime
+    if (!empty($runtime['formules'])) {
+        foreach ($runtime['formules'] as $id => $patch) {
+            foreach ($formules as &$f) {
+                if ($f['id'] === $id) {
+                    $f = array_merge($f, $patch);
+                    $updated++;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Ajouter les formules custom
+    if (!empty($runtime['customFormules'])) {
+        foreach ($runtime['customFormules'] as $formule) {
+            $exists = false;
+            foreach ($formules as $existing) {
+                if ($existing['id'] === $formule['id']) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
+                $formules[] = $formule;
+                $updated++;
+            }
+        }
+    }
+
+    // Supprimer les formules marquées comme supprimées
+    if (!empty($runtime['deletedFormules'])) {
+        $formules = array_filter($formules, fn($f) => !in_array($f['id'], $runtime['deletedFormules'], true));
+        $formules = array_values($formules);
+    }
+
+    $menuData['formules'] = $formules;
+
     // Sauvegarder
     $json = json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     file_put_contents($menuJsonPath, $json);

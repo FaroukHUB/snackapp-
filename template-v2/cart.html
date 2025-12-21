@@ -919,7 +919,7 @@
             clearCart() {
                 if (confirm('Voulez-vous vraiment vider le panier ?')) {
                     Cart.clear();
-                    this.updateView();
+                    this.render();
                     this.showToast('Panier vidé', 'success');
                 }
             },
