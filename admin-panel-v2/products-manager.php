@@ -54,11 +54,13 @@ session_start();
     .btn:hover{transform: translateY(-2px);background: linear-gradient(135deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.08) 100%);box-shadow: 0 4px 12px rgba(0,0,0,.2)}
     .btn:active{transform: translateY(0)}
     .btn-primary{
-      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
       border-color: transparent;
-      box-shadow: 0 2px 10px rgba(96,165,250,.3);
+      box-shadow: 0 2px 12px rgba(34,197,94,.4);
+      color: #fff;
+      font-weight: 600;
     }
-    .btn-primary:hover{background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%);box-shadow: 0 4px 16px rgba(96,165,250,.4)}
+    .btn-primary:hover{background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);box-shadow: 0 4px 18px rgba(34,197,94,.5)}
     .btn-good{background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-color: transparent;box-shadow: 0 2px 10px rgba(22,163,74,.3)}
     .btn-good:hover{background: rgba(22,163,74,.22)}
     .btn-ghost{background: transparent}
