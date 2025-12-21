@@ -3,40 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- SEO -->
-    <title>Programme Fidélité | Fabrik Burger - Gagnez des récompenses</title>
-    <meta name="description" content="Découvrez le programme de fidélité Fabrik Burger : cumulez des points à chaque commande et débloquez des récompenses exclusives. 1€ dépensé = 10 points !">
-    <link rel="canonical" href="https://fabrikburger.fr/fidelite">
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Programme Fidélité Fabrik Burger">
-    <meta property="og:description" content="Cumulez des points et gagnez des burgers gratuits ! 1€ = 10 points.">
-    <meta property="og:image" content="images/og-fidelite.jpg">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="images/favicon.png">
-
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Styles -->
+    <title>Programme Fidélité | Restaurant</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="page-fidelite">
+<body>
     <!-- Header -->
-    <header class="header header-dark">
+    <header class="header">
         <div class="header-left">
-            <a href="index.html" class="back-btn">
+            <a href="index.html" class="back-link">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <a href="index.html" class="logo">
-                <span class="logo-text">Fabrik Burger</span>
-            </a>
+            <div class="logo">
+                <span class="logo-text">Programme Fidélité</span>
+            </div>
         </div>
         <div class="header-right">
             <a href="cart.html" class="cart-btn">
@@ -46,183 +30,134 @@
         </div>
     </header>
 
-    <!-- Hero Fidélité -->
-    <section class="page-hero fidelite-hero">
-        <div class="page-hero-bg"></div>
-        <div class="page-hero-content">
+    <!-- Main Content -->
+    <main class="page-content">
+        <!-- Hero Section -->
+        <section class="page-hero">
             <div class="hero-icon">
                 <i class="fas fa-star"></i>
             </div>
-            <h1 class="page-title">Programme<br><span class="accent">Fidélité</span></h1>
-            <p class="page-subtitle">Cumulez des points à chaque commande et débloquez des récompenses exclusives</p>
-        </div>
-    </section>
+            <h1>Programme Fidélité</h1>
+            <p>Cumulez des points à chaque commande et débloquez des récompenses exclusives</p>
+        </section>
 
-    <!-- Comment ça marche -->
-    <section class="page-section">
-        <div class="container">
-            <h2 class="section-title"><i class="fas fa-question-circle"></i> Comment ça marche ?</h2>
-
-            <div class="how-it-works">
-                <!-- Étape 1 -->
+        <!-- Comment ça marche -->
+        <section class="info-section">
+            <h2><i class="fas fa-question-circle"></i> Comment ça marche ?</h2>
+            <div class="steps-grid">
                 <div class="step-card">
                     <div class="step-number">1</div>
-                    <div class="step-icon">
-                        <i class="fas fa-shopping-bag"></i>
-                    </div>
+                    <div class="step-icon"><i class="fas fa-shopping-bag"></i></div>
                     <h3>Commandez</h3>
                     <p>Passez votre commande en Click & Collect ou sur place</p>
                 </div>
-
-                <!-- Étape 2 -->
                 <div class="step-card">
                     <div class="step-number">2</div>
-                    <div class="step-icon">
-                        <i class="fas fa-coins"></i>
-                    </div>
+                    <div class="step-icon"><i class="fas fa-coins"></i></div>
                     <h3>Cumulez</h3>
                     <p>Gagnez <strong>10 points</strong> par euro dépensé</p>
                 </div>
-
-                <!-- Étape 3 -->
                 <div class="step-card">
                     <div class="step-number">3</div>
-                    <div class="step-icon">
-                        <i class="fas fa-gift"></i>
-                    </div>
+                    <div class="step-icon"><i class="fas fa-gift"></i></div>
                     <h3>Profitez</h3>
                     <p>Échangez vos points contre des récompenses</p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Points Visual -->
-    <section class="page-section points-section">
-        <div class="container">
-            <div class="points-visual-card">
-                <div class="points-visual">
-                    <div class="coin-big">
-                        <span>1€</span>
-                        <small>dépensé</small>
-                    </div>
-                    <div class="equals-big">=</div>
-                    <div class="points-big">
-                        <span class="number">10</span>
-                        <span class="label">POINTS</span>
-                        <small>gagnés</small>
-                    </div>
+        <!-- Points Visual -->
+        <section class="info-section highlight-section">
+            <div class="points-visual">
+                <div class="points-item">
+                    <span class="points-value">1€</span>
+                    <span class="points-label">dépensé</span>
                 </div>
-                <p class="points-example">
-                    <i class="fas fa-lightbulb"></i>
-                    Exemple : Une commande de <strong>15€</strong> = <strong>150 points</strong> cumulés !
-                </p>
+                <div class="points-equals">=</div>
+                <div class="points-item accent">
+                    <span class="points-value">10</span>
+                    <span class="points-label">POINTS</span>
+                </div>
             </div>
-        </div>
-    </section>
+            <p class="points-example">
+                <i class="fas fa-lightbulb"></i>
+                Exemple : Une commande de <strong>15€</strong> = <strong>150 points</strong> cumulés !
+            </p>
+        </section>
 
-    <!-- Récompenses -->
-    <section class="page-section rewards-section">
-        <div class="container">
-            <h2 class="section-title"><i class="fas fa-gift"></i> Les Récompenses</h2>
+        <!-- Récompenses -->
+        <section class="info-section">
+            <h2><i class="fas fa-gift"></i> Les Récompenses</h2>
             <p class="section-desc">Échangez vos points contre ces récompenses exclusives</p>
-
             <div class="rewards-grid">
-                <!-- Reward 1 -->
                 <div class="reward-card">
                     <div class="reward-badge">500 pts</div>
-                    <div class="reward-icon">
-                        <i class="fas fa-cookie"></i>
-                    </div>
+                    <div class="reward-icon"><i class="fas fa-cookie"></i></div>
                     <h3>Cookie offert</h3>
                     <p>Un délicieux cookie maison</p>
                 </div>
-
-                <!-- Reward 2 -->
                 <div class="reward-card">
                     <div class="reward-badge">800 pts</div>
-                    <div class="reward-icon">
-                        <i class="fas fa-glass-water"></i>
-                    </div>
+                    <div class="reward-icon"><i class="fas fa-glass-water"></i></div>
                     <h3>Boisson offerte</h3>
                     <p>Boisson au choix</p>
                 </div>
-
-                <!-- Reward 3 -->
                 <div class="reward-card featured">
                     <div class="reward-badge">1500 pts</div>
-                    <div class="reward-icon">
-                        <i class="fas fa-burger"></i>
-                    </div>
+                    <div class="reward-icon"><i class="fas fa-burger"></i></div>
                     <h3>Burger offert</h3>
                     <p>Le Fabrik ou Le Classic</p>
                 </div>
-
-                <!-- Reward 4 -->
                 <div class="reward-card">
                     <div class="reward-badge">2500 pts</div>
-                    <div class="reward-icon">
-                        <i class="fas fa-box"></i>
-                    </div>
+                    <div class="reward-icon"><i class="fas fa-box"></i></div>
                     <h3>Menu complet</h3>
                     <p>Burger + Frites + Boisson</p>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Consulter mes points -->
-    <section class="page-section cta-section">
-        <div class="container">
+        <!-- CTA -->
+        <section class="info-section cta-section">
             <div class="cta-card">
-                <div class="cta-content">
-                    <h2>Consultez vos points</h2>
-                    <p>Accédez à votre carte de fidélité pour voir vos points et récompenses disponibles</p>
-                </div>
-                <a href="../loyalty-card.php" class="btn-cta">
-                    <i class="fas fa-id-card"></i>
-                    Ma carte fidélité
+                <h2>Consultez vos points</h2>
+                <p>Accédez à votre carte de fidélité pour voir vos points et récompenses disponibles</p>
+                <a href="../loyalty-card.php" class="btn-primary">
+                    <i class="fas fa-id-card"></i> Ma carte fidélité
                 </a>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- FAQ Fidélité -->
-    <section class="page-section faq-section">
-        <div class="container">
-            <h2 class="section-title"><i class="fas fa-question"></i> Questions fréquentes</h2>
-
+        <!-- FAQ -->
+        <section class="info-section">
+            <h2><i class="fas fa-question"></i> Questions fréquentes</h2>
             <div class="faq-list">
                 <details class="faq-item">
                     <summary>Comment créer mon compte fidélité ?</summary>
                     <p>Votre compte est créé automatiquement avec votre numéro de téléphone lors de votre première commande. Pas besoin d'inscription !</p>
                 </details>
-
                 <details class="faq-item">
                     <summary>Mes points expirent-ils ?</summary>
                     <p>Vos points sont valables 12 mois à partir de votre dernière commande. Commandez régulièrement pour les conserver !</p>
                 </details>
-
                 <details class="faq-item">
                     <summary>Comment utiliser mes récompenses ?</summary>
                     <p>Lors de votre prochaine commande, indiquez que vous souhaitez utiliser vos points. Nous déduirons automatiquement la récompense.</p>
                 </details>
-
                 <details class="faq-item">
                     <summary>Les points sont-ils valables sur les plateformes de livraison ?</summary>
-                    <p>Non, les points fidélité ne sont valables que pour les commandes Click & Collect et sur place. Les commandes Uber Eats et Deliveroo ne sont pas éligibles.</p>
+                    <p>Non, les points fidélité ne sont valables que pour les commandes Click & Collect et sur place.</p>
                 </details>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Footer simple -->
-    <footer class="page-footer">
-        <a href="index.html" class="btn-back-home">
-            <i class="fas fa-home"></i> Retour à l'accueil
-        </a>
-        <p>&copy; 2024 Fabrik Burger</p>
-    </footer>
+        <!-- Footer -->
+        <footer class="page-footer">
+            <a href="index.html" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Retour au menu
+            </a>
+        </footer>
+    </main>
 
     <script src="js/cart.js"></script>
     <script>

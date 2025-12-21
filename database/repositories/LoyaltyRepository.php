@@ -154,15 +154,46 @@ class LoyaltyRepository {
     
     /**
      * Classement des clients par points
+     * Lit depuis le fichier JSON des clients
      */
     public static function getLeaderboard(int $restaurantId, int $limit = 10): array {
-        return Database::fetchAll(
-            "SELECT id, name, phone, loyalty_points, orders_count, total_spent 
-             FROM customers 
-             WHERE restaurant_id = ? AND loyalty_points > 0 
-             ORDER BY loyalty_points DESC 
-             LIMIT ?",
-            [$restaurantId, $limit]
-        );
+        // Chemin vers le fichier JSON des clients
+        $jsonPath = __DIR__ . '/../../admin-panel-v2/data/customers.json';
+
+        if (!file_exists($jsonPath)) {
+            return [];
+        }
+
+        $content = file_get_contents($jsonPath);
+        $customers = json_decode($content, true);
+
+        if (!is_array($customers)) {
+            return [];
+        }
+
+        // Filtrer les clients avec des points > 0
+        $customersWithPoints = array_filter($customers, function($c) {
+            return isset($c['loyalty_points']) && $c['loyalty_points'] > 0;
+        });
+
+        // Trier par points décroissants
+        usort($customersWithPoints, function($a, $b) {
+            return ($b['loyalty_points'] ?? 0) - ($a['loyalty_points'] ?? 0);
+        });
+
+        // Limiter les résultats
+        $leaderboard = array_slice($customersWithPoints, 0, $limit);
+
+        // Formater les résultats pour correspondre au format attendu
+        return array_map(function($c) {
+            return [
+                'id' => $c['id'] ?? '',
+                'name' => $c['name'] ?? 'Client',
+                'phone' => $c['phone'] ?? '',
+                'loyalty_points' => (int) ($c['loyalty_points'] ?? 0),
+                'orders_count' => (int) ($c['orders_count'] ?? 0),
+                'total_spent' => (float) ($c['total_spent'] ?? 0)
+            ];
+        }, $leaderboard);
     }
 }
