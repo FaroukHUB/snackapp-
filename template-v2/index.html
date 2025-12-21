@@ -3,12 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commander | Restaurant</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- SEO Meta Tags -->
+    <title>Fabrik Burger · Burgers gourmets halal à Lille (Wazemmes)</title>
+    <meta name="description" content="Fabrik Burger à Lille Wazemmes : burgers gourmets 100% halal, frites maison et desserts. Click & Collect ou livraison Uber Eats / Deliveroo.">
+    <meta name="keywords" content="burger halal lille, fabrik burger, restaurant halal wazemmes, burger gourmet lille, click and collect lille">
+    <meta name="author" content="Fabrik Burger">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://fabrikburger.fr/">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="restaurant">
+    <meta property="og:title" content="Fabrik Burger · Burgers gourmets halal à Lille">
+    <meta property="og:description" content="Découvrez nos burgers gourmets 100% halal à Lille. Commandez en Click & Collect ou faites-vous livrer !">
+    <meta property="og:image" content="images/og-cover.jpg">
+    <meta property="og:url" content="https://fabrikburger.fr/">
+    <meta property="og:locale" content="fr_FR">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Fabrik Burger · Burgers gourmets halal à Lille">
+    <meta name="twitter:description" content="Découvrez nos burgers gourmets 100% halal à Lille. Click & Collect ou livraison !">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "name": "Fabrik Burger",
+        "image": "https://fabrikburger.fr/images/restaurant.jpg",
+        "url": "https://fabrikburger.fr",
+        "telephone": "+33374455427",
+        "priceRange": "€€",
+        "servesCuisine": ["Burger", "Fast Food", "Halal"],
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "110 Rue des Postes",
+            "addressLocality": "Lille",
+            "postalCode": "59000",
+            "addressCountry": "FR"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 50.624939,
+            "longitude": 3.0551876
+        },
+        "openingHoursSpecification": [
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": "Monday", "opens": "18:30", "closes": "23:30"},
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": "Tuesday", "opens": "18:30", "closes": "23:30"},
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": "Wednesday", "opens": "18:30", "closes": "23:30"},
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": "Thursday", "opens": "18:30", "closes": "23:30"},
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": "Friday", "opens": "18:30", "closes": "01:00"},
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "18:30", "closes": "01:00"},
+            {"@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "18:30", "closes": "00:00"}
+        ],
+        "sameAs": [
+            "https://www.facebook.com/Fabrik-Burger-Page",
+            "https://www.instagram.com/fabrik.burger/"
+        ]
+    }
+    </script>
 </head>
 <body>
     <!-- Header -->
@@ -17,55 +89,144 @@
             <button class="menu-toggle" id="menuToggle" aria-label="Menu">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo">
-                <img src="" alt="" id="logoImg" class="logo-img">
-                <span class="logo-text" id="logoText">Restaurant</span>
-            </div>
+            <a href="index.html" class="logo">
+                <img src="" alt="Fabrik Burger" id="logoImg" class="logo-img">
+                <span class="logo-text" id="logoText">Fabrik Burger</span>
+            </a>
         </div>
-        <div class="header-center">
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Rechercher un produit..." id="searchInput">
-            </div>
-        </div>
+        <nav class="header-nav" id="headerNav">
+            <a href="#menu" class="nav-link">Menu</a>
+            <a href="fidelite.html" class="nav-link">Fidélité</a>
+            <a href="click-collect.html" class="nav-link">Click & Collect</a>
+            <a href="#contact" class="nav-link">Contact</a>
+        </nav>
         <div class="header-right">
-            <button class="cart-btn" id="cartBtn">
+            <button class="cart-btn" id="cartBtn" aria-label="Panier">
                 <i class="fas fa-shopping-bag"></i>
                 <span class="cart-badge" id="cartBadge">0</span>
-                <span class="cart-total" id="cartTotal">0,00 €</span>
             </button>
         </div>
     </header>
 
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="hero-pattern"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge">100% HALAL</div>
+            <h1 class="hero-title">
+                <span class="hero-title-line">BURGERS</span>
+                <span class="hero-title-line accent">GOURMETS</span>
+            </h1>
+            <p class="hero-subtitle">Faits maison à Lille depuis 2020</p>
+            <div class="hero-actions">
+                <a href="#menu" class="btn-hero btn-primary">
+                    <i class="fas fa-utensils"></i> Voir le menu
+                </a>
+                <a href="click-collect.html" class="btn-hero btn-secondary">
+                    <i class="fas fa-shopping-bag"></i> Commander
+                </a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <!-- Burger illustration codée -->
+            <div class="burger-illustration">
+                <div class="burger-layer bun-top"></div>
+                <div class="burger-layer lettuce"></div>
+                <div class="burger-layer cheese"></div>
+                <div class="burger-layer patty"></div>
+                <div class="burger-layer tomato"></div>
+                <div class="burger-layer bun-bottom"></div>
+            </div>
+        </div>
+        <div class="hero-scroll">
+            <span>Découvrir</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- Feature Cards Section -->
+    <section class="features-section">
+        <div class="features-grid">
+            <!-- Click & Collect Card -->
+            <a href="click-collect.html" class="feature-card feature-clickcollect">
+                <div class="feature-icon">
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">CLICK<br>&amp; COLLECT</h3>
+                    <p class="feature-desc">Commandez en ligne, récupérez sur place</p>
+                    <span class="feature-cta">Commander <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Fidélité Card -->
+            <a href="fidelite.html" class="feature-card feature-fidelity">
+                <div class="feature-icon">
+                    <div class="loyalty-visual">
+                        <div class="coin">1€</div>
+                        <div class="equals">=</div>
+                        <div class="points">
+                            <span class="points-number">10</span>
+                            <span class="points-label">PTS</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">FIDÉLITÉ</h3>
+                    <p class="feature-desc">Cumulez des points, gagnez des récompenses</p>
+                    <span class="feature-cta">Voir les avantages <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+
+            <!-- Livraison Card -->
+            <a href="#commander" class="feature-card feature-delivery">
+                <div class="feature-icon">
+                    <div class="delivery-visual">
+                        <i class="fas fa-motorcycle"></i>
+                        <div class="delivery-badge">30-45 min</div>
+                    </div>
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">LIVRAISON</h3>
+                    <p class="feature-desc">Via Uber Eats et Deliveroo</p>
+                    <span class="feature-cta">Se faire livrer <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+        </div>
+    </section>
+
     <!-- Main Layout -->
-    <div class="main-layout">
+    <div class="main-layout" id="menu">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <nav class="sidebar-nav">
                 <div class="sidebar-section">
-                    <h3 class="sidebar-title">Menu</h3>
+                    <h3 class="sidebar-title">Notre Carte</h3>
                     <ul class="nav-list" id="categoryNav">
                         <!-- Categories will be injected here -->
                     </ul>
                 </div>
                 <div class="sidebar-section">
-                    <h3 class="sidebar-title">Infos</h3>
+                    <h3 class="sidebar-title">Informations</h3>
                     <ul class="nav-list nav-list-secondary">
-                        <li><a href="../loyalty-card.php" class="loyalty-link"><i class="fas fa-star"></i> Ma Fidélité</a></li>
+                        <li><a href="fidelite.html"><i class="fas fa-star"></i> Programme Fidélité</a></li>
+                        <li><a href="click-collect.html"><i class="fas fa-shopping-bag"></i> Click & Collect</a></li>
                         <li><a href="#contact"><i class="fas fa-phone"></i> Contact</a></li>
                         <li><a href="#horaires"><i class="fas fa-clock"></i> Horaires</a></li>
-                        <li id="sidebarPlatforms"><a href="#commander"><i class="fas fa-motorcycle"></i> Commander</a></li>
                         <li><a href="#localisation"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
-                        <li><a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a></li>
                     </ul>
                 </div>
             </nav>
-
-            <!-- Restaurant Info in Sidebar -->
             <div class="sidebar-footer">
                 <div class="restaurant-status" id="restaurantStatus">
                     <span class="status-dot open"></span>
-                    <span>Ouvert jusqu'à 23h30</span>
+                    <span>Ouvert</span>
                 </div>
                 <div class="restaurant-address" id="restaurantAddress">
                     <i class="fas fa-map-marker-alt"></i>
@@ -79,7 +240,7 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Hero Section with Formules -->
+            <!-- Formules Section -->
             <section class="formules-section" id="formulesSection">
                 <div class="section-header">
                     <h2><i class="fas fa-fire"></i> Nos Formules</h2>
@@ -98,33 +259,25 @@
             <!-- Contact Section -->
             <section class="info-section" id="contact">
                 <h2><i class="fas fa-phone"></i> Contact</h2>
-                <div class="info-content" id="contactContent">
-                    <!-- Contact info will be injected -->
-                </div>
+                <div class="info-content" id="contactContent"></div>
             </section>
 
             <!-- Hours Section -->
             <section class="info-section" id="horaires">
                 <h2><i class="fas fa-clock"></i> Horaires</h2>
-                <div class="info-content" id="horairesContent">
-                    <!-- Hours will be injected -->
-                </div>
+                <div class="info-content" id="horairesContent"></div>
             </section>
 
             <!-- Delivery Platforms Section -->
             <section class="info-section" id="commander">
                 <h2><i class="fas fa-motorcycle"></i> Commander en ligne</h2>
-                <div class="platforms-grid" id="platformsGrid">
-                    <!-- Platforms will be injected -->
-                </div>
+                <div class="platforms-grid" id="platformsGrid"></div>
             </section>
 
             <!-- Map Section -->
             <section class="info-section" id="localisation">
                 <h2><i class="fas fa-map-marker-alt"></i> Nous trouver</h2>
-                <div class="map-container" id="mapContainer">
-                    <!-- Map will be injected -->
-                </div>
+                <div class="map-container" id="mapContainer"></div>
                 <a href="#" id="directionsBtn" class="directions-btn" target="_blank">
                     <i class="fas fa-directions"></i> Itinéraire
                 </a>
@@ -133,12 +286,63 @@
             <!-- FAQ Section -->
             <section class="info-section" id="faq">
                 <h2><i class="fas fa-question-circle"></i> FAQ</h2>
-                <div class="faq-list" id="faqContent">
-                    <!-- FAQ will be injected -->
-                </div>
+                <div class="faq-list" id="faqContent"></div>
             </section>
         </main>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-main">
+            <div class="footer-brand">
+                <img src="" alt="Fabrik Burger" id="footerLogo" class="footer-logo">
+                <p class="footer-tagline">Burgers gourmets halal à Lille</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Menu</h4>
+                    <ul>
+                        <li><a href="#burgers">Burgers</a></li>
+                        <li><a href="#extras">Extras</a></li>
+                        <li><a href="#desserts">Desserts</a></li>
+                        <li><a href="#boissons">Boissons</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="click-collect.html">Click & Collect</a></li>
+                        <li><a href="fidelite.html">Programme Fidélité</a></li>
+                        <li><a href="#commander">Livraison</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Infos</h4>
+                    <ul>
+                        <li><a href="#horaires">Horaires</a></li>
+                        <li><a href="#localisation">Nous trouver</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-social">
+                <h4>Suivez-nous</h4>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/Fabrik-Burger-Page" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/fabrik.burger/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Fabrik Burger. Tous droits réservés.</p>
+            <div class="footer-legal">
+                <a href="#">Mentions légales</a>
+                <a href="#">CGV</a>
+                <a href="#">Politique de confidentialité</a>
+            </div>
+        </div>
+    </footer>
 
     <!-- Product Modal -->
     <div class="modal" id="productModal">
@@ -171,25 +375,19 @@
                     <!-- Remove Ingredients -->
                     <div class="modal-ingredients" id="modalIngredients">
                         <h4><i class="fas fa-minus-circle"></i> Retirer des ingrédients</h4>
-                        <div class="ingredients-list" id="ingredientsList">
-                            <!-- Ingredients will be injected -->
-                        </div>
+                        <div class="ingredients-list" id="ingredientsList"></div>
                     </div>
 
                     <!-- Add Supplements -->
                     <div class="modal-supplements" id="modalSupplements">
                         <h4><i class="fas fa-plus-circle"></i> Ajouter des suppléments</h4>
-                        <div class="supplements-list" id="supplementsList">
-                            <!-- Supplements will be injected -->
-                        </div>
+                        <div class="supplements-list" id="supplementsList"></div>
                     </div>
 
                     <!-- Menu Drink Selection -->
                     <div class="modal-drinks hidden" id="modalDrinks">
                         <h4><i class="fas fa-glass-cheers"></i> Choisir votre boisson</h4>
-                        <div class="drinks-list" id="drinksList">
-                            <!-- Drinks will be injected -->
-                        </div>
+                        <div class="drinks-list" id="drinksList"></div>
                     </div>
 
                     <!-- Quantity & Add to Cart -->
@@ -210,7 +408,7 @@
         </div>
     </div>
 
-    <!-- Mini Cart Drawer (for quick view) -->
+    <!-- Mini Cart Drawer -->
     <div class="mini-cart" id="miniCart">
         <div class="mini-cart-header">
             <h3><i class="fas fa-shopping-bag"></i> Votre commande</h3>
@@ -219,9 +417,7 @@
                 <button class="mini-cart-close" id="miniCartClose"><i class="fas fa-times"></i></button>
             </div>
         </div>
-        <div class="mini-cart-items" id="miniCartItems">
-            <!-- Cart items preview -->
-        </div>
+        <div class="mini-cart-items" id="miniCartItems"></div>
         <div class="mini-cart-footer">
             <div class="mini-cart-total">
                 <span>Total</span>
