@@ -1,121 +1,154 @@
 {
-  "_comment": "Configuration Le Marvelous - À COMPLÉTER",
   "_version": "1.0",
+  "_comment": "Configuration Le Marvelous - Diner 50's Algérie",
 
   "client": {
     "id": "le-marvelous",
     "name": "Le Marvelous",
-    "domain": "lemarvelous.fr",
+    "domain": "marvelous.mon-agenceweb.fr",
     "created_at": "2024-12-21",
-    "status": "pending"
+    "status": "deploying"
   },
 
   "branding": {
     "colors": {
-      "primary": "#TODO",
-      "primary_dark": "#TODO",
-      "secondary": "#TODO",
-      "accent": "#TODO"
+      "primary": "#2ec4b6",
+      "primary_dark": "#043b36",
+      "secondary": "#0b0b0f",
+      "accent": "#ff6fae",
+      "background": "#f9fafb",
+      "surface": "#ffffff",
+      "text": "#1f2937",
+      "header_bg": "#0b0b0f",
+      "header_text": "#ffffff"
     },
     "fonts": {
       "heading": "Inter",
       "body": "Inter"
     },
     "logo": {
-      "file": "logo.svg",
+      "file": "marvel.jpeg",
       "favicon": "favicon.png",
-      "og_image": "hero.jpg"
+      "og_image": "marvelhero.png"
     }
   },
 
   "restaurant": {
-    "name": "Le Marvelous",
-    "tagline": "TODO - Slogan",
-    "description": "TODO - Description SEO",
-    "cuisine_type": ["TODO"],
-    "price_range": "€€",
+    "name": "Le MARVELOUS",
+    "tagline": "Diner 50's · Crêpes, gaufres & coffee",
+    "description": "Le MARVELOUS à Ouled Moussa (Riad City, Cité OMS 562 logements) : crêpes salées signature, crêpes sucrées, gaufres, boissons & menu enfant. Sur place, à emporter et livraison en commande directe.",
+    "cuisine_type": ["Crêperie", "Diner 50's", "Coffee Shop"],
+    "price_range": "DA",
+    "is_halal": true,
+    "currency": "DZD",
+    "currency_symbol": "DA",
+
+    "special_rooms": [
+      { "name": "Salle Femmes", "description": "Espace réservé aux femmes" },
+      { "name": "Salle Familles", "description": "Espace réservé aux familles" }
+    ],
 
     "address": {
-      "street": "TODO",
-      "city": "TODO",
-      "postal_code": "TODO",
-      "country": "FR"
+      "street": "Riad City, Cité OMS 562 logements",
+      "city": "Ouled Moussa",
+      "postal_code": "35520",
+      "country": "DZ",
+      "latitude": 36.7053937,
+      "longitude": 3.3693709
     },
 
     "contact": {
-      "phone": "TODO",
-      "phone_display": "TODO",
-      "email": "TODO",
-      "whatsapp": "TODO"
+      "phone": "+213556782194",
+      "phone_display": "0556 78 21 94",
+      "email": "",
+      "whatsapp": "+213556782194",
+      "whatsapp_orders": true
     },
 
     "social": {
-      "instagram": "TODO",
-      "facebook": "TODO",
+      "instagram": "https://www.instagram.com/lemarvelous.50/",
+      "facebook": "",
       "tiktok": ""
     },
 
+    "google": {
+      "rating": 5.0,
+      "review_count": 87,
+      "maps_url": "https://www.google.com/maps?q=Le%20MARVELOUS%20Ouled%20Moussa",
+      "maps_embed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3198.7146763237606!2d3.3693709!3d36.705393699999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128e5df9ea007565%3A0x61e9a9aae68c8648!2sLe%20MARVELOUS!5e0!3m2!1sfr!2sdz!4v1765556127293!5m2!1sfr!2sdz"
+    },
+
     "opening_hours": [
-      { "day": "lundi", "opens": "TODO", "closes": "TODO" },
-      { "day": "mardi", "opens": "TODO", "closes": "TODO" },
-      { "day": "mercredi", "opens": "TODO", "closes": "TODO" },
-      { "day": "jeudi", "opens": "TODO", "closes": "TODO" },
-      { "day": "vendredi", "opens": "TODO", "closes": "TODO" },
-      { "day": "samedi", "opens": "TODO", "closes": "TODO" },
-      { "day": "dimanche", "opens": "TODO", "closes": "TODO" }
+      { "day": "lundi", "opens": "07:00", "closes": "21:30" },
+      { "day": "mardi", "opens": "07:00", "closes": "21:30" },
+      { "day": "mercredi", "opens": "07:00", "closes": "21:30" },
+      { "day": "jeudi", "opens": "07:00", "closes": "21:30" },
+      { "day": "vendredi", "slots": [
+        { "opens": "07:00", "closes": "11:30" },
+        { "opens": "15:30", "closes": "21:30" }
+      ]},
+      { "day": "samedi", "opens": "07:00", "closes": "21:30" },
+      { "day": "dimanche", "opens": "07:00", "closes": "21:30" }
     ],
 
     "delivery": {
       "enabled": true,
-      "platforms": []
+      "platforms": [
+        {
+          "id": "whatsapp-direct",
+          "name": "Livraison directe",
+          "url": "https://wa.me/213556782194",
+          "icon": "whatsapp"
+        }
+      ]
     },
 
     "features": {
       "click_collect": true,
       "loyalty_program": true,
       "online_payment": false,
-      "table_ordering": false
+      "table_ordering": true,
+      "women_room": true,
+      "family_room": true
     }
   },
 
-  "menu": {
-    "categories": [],
-    "supplements": {
-      "enabled": true,
-      "items": []
+  "reviews": [
+    {
+      "author": "HA HD",
+      "rating": 5,
+      "text": "Très bon et beau restaurant, décoration style américaine faite avec goût. Petit déjeuner sur place ou à emporter, sandwichs et gâteaux. Croissants très bons, jus d'orange frais.",
+      "date": "il y a 4 mois"
     },
-    "formules": {
-      "enabled": false,
-      "menu_supplement": 0,
-      "includes": []
+    {
+      "author": "fay Bel",
+      "rating": 5,
+      "text": "Très bon restaurant style fast food à Ouled Moussa. Agréable surprise ! Tout était très bon : crêpes salées, riz au poulet crousty, tortillas.",
+      "date": "il y a un mois"
+    },
+    {
+      "author": "Rtc Ivry",
+      "rating": 5,
+      "text": "Très très bon restaurant. Les enfants étaient ravis. Crêpes sucrées et salées excellentes. Aucun regret.",
+      "date": "il y a 4 mois"
     }
-  },
-
-  "loyalty": {
-    "enabled": true,
-    "points_per_euro": 10,
-    "rewards": []
-  },
+  ],
 
   "seo": {
-    "title": "Le Marvelous - TODO Ville | Commandez en ligne",
-    "meta_description": "TODO",
-    "keywords": [],
-    "google_analytics": "",
-    "google_maps_embed": ""
+    "title": "Le MARVELOUS · Diner 50's à Ouled Moussa · Crêpes & Coffee",
+    "meta_description": "Le MARVELOUS à Ouled Moussa (Riad City, Cité OMS 562 logements) : crêpes salées signature, crêpes sucrées, gaufres, boissons & menu enfant. Sur place, à emporter et livraison en commande directe.",
+    "keywords": ["crêpes ouled moussa", "diner 50s algérie", "le marvelous", "gaufres algérie", "coffee shop boumerdes"]
   },
+
+  "faq": [
+    { "question": "Quels moyens de paiement acceptez-vous ?", "answer": "Argent liquide uniquement." },
+    { "question": "Livrez-vous ?", "answer": "Oui, livraison en commande directe (WhatsApp / téléphone)." },
+    { "question": "Convient-il pour les familles ?", "answer": "Oui, nous avons une salle dédiée aux familles et un menu enfant." },
+    { "question": "Y a-t-il un espace pour les femmes ?", "answer": "Oui, nous disposons d'une salle réservée aux femmes." },
+    { "question": "Peut-on regarder du sport sur place ?", "answer": "Oui, écrans disponibles pour regarder du sport." }
+  ],
 
   "admin": {
-    "default_password": "CHANGER_MOI",
-    "notification_email": "",
-    "notification_whatsapp": ""
-  },
-
-  "images_needed": [
-    "[ ] logo.svg - Logo vectoriel",
-    "[ ] logo.png - Logo PNG (512x512)",
-    "[ ] favicon.png - Favicon (32x32)",
-    "[ ] hero.jpg - Image hero (1200x630)",
-    "[ ] Photos produits"
-  ]
+    "notification_whatsapp": "+213556782194"
+  }
 }
