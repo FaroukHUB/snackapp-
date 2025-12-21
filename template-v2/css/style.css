@@ -802,6 +802,28 @@ ul {
 /* ============================================
    INFO SECTIONS
    ============================================ */
+/* Horizontal row for info sections */
+.info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.info-row .info-section {
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .info-row {
+        grid-template-columns: 1fr;
+    }
+
+    .info-row .info-section {
+        margin-bottom: 0;
+    }
+}
+
 .info-section {
     background: var(--white);
     border-radius: var(--border-radius);
