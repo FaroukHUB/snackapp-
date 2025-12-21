@@ -40,6 +40,20 @@
     background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%);
 }
 
+/* Hero variant with primary color (for Fidélité page) */
+.page-hero--primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.page-hero--primary .page-hero-overlay {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.page-hero .hero-icon--light {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+}
+
 .page-hero-bg {
     position: absolute;
     inset: 0;
@@ -79,7 +93,7 @@
     margin: 0 auto 25px;
     font-size: 36px;
     color: white;
-    box-shadow: 0 10px 40px rgba(230, 57, 70, 0.4);
+    box-shadow: 0 10px 40px color-mix(in srgb, var(--primary) 40%, transparent);
 }
 
 .page-hero h1 {
@@ -172,7 +186,7 @@
     flex-shrink: 0;
     position: relative;
     z-index: 1;
-    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+    box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 30%, transparent);
 }
 
 .timeline-content {
@@ -471,13 +485,13 @@
     font-weight: 700;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(230, 57, 70, 0.4);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--primary) 40%, transparent);
 }
 
 .btn-primary:hover {
     background: var(--primary-dark);
     transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(230, 57, 70, 0.5);
+    box-shadow: 0 8px 30px color-mix(in srgb, var(--primary) 50%, transparent);
 }
 
 .btn-secondary {

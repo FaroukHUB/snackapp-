@@ -2,8 +2,8 @@
     "version": 1,
     "featured": {
         "enabled": true,
-        "title": "🔥 Les préférés de nos clients",
-        "subtitle": "Nos burgers gourmets les plus populaires",
+        "title": "Sélection pour vous",
+        "subtitle": "Nos produits les plus appréciés",
         "items": [
             "le-fabrik",
             "le-seguin",

@@ -96,13 +96,13 @@
     font-weight: 700;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(230, 57, 70, 0.4);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--primary) 40%, transparent);
 }
 
 .hero-cta:hover {
     background: var(--primary-dark);
     transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(230, 57, 70, 0.5);
+    box-shadow: 0 8px 30px color-mix(in srgb, var(--primary) 50%, transparent);
 }
 
 .hero-cta i {
@@ -333,12 +333,21 @@
     z-index: 1;
 }
 
-/* Loyalty card special style */
+/* Click & Collect card style - uses theme colors */
+.feature-card:not(.loyalty-card) .feature-card-overlay {
+    background: linear-gradient(
+        135deg,
+        var(--gray-900) 0%,
+        var(--gray-800) 100%
+    );
+}
+
+/* Loyalty card special style - uses primary color */
 .feature-card.loyalty-card .feature-card-overlay {
     background: linear-gradient(
         135deg,
-        rgba(230, 57, 70, 0.9) 0%,
-        rgba(193, 18, 31, 0.95) 100%
+        var(--primary) 0%,
+        var(--primary-dark) 100%
     );
 }
 
