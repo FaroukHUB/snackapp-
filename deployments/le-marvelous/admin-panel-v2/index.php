@@ -318,7 +318,7 @@ $action = $_POST['action'];
                                 SNACK_RESTAURANT_ID,
                                 $pointsEarned,
                                 $order['id'],
-                                'Commande #' . ($order['order_number'] ?? $order['id']) . ' - ' . number_format($orderTotal, 2) . '€'
+                                'Commande #' . ($order['order_number'] ?? $order['id']) . ' - ' . number_format($orderTotal, 0) . ' DA'
                             );
                         }
                     }
@@ -936,7 +936,7 @@ if (isset($_GET['export'])) {
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-size: 18px; font-weight: bold; color: <?php echo $primaryColor; ?>;"><?php echo number_format($order['total'] ?? 0, 2); ?>€</div>
+                            <div style="font-size: 18px; font-weight: bold; color: <?php echo $primaryColor; ?>;"><?php echo number_format($order['total'] ?? 0, 0); ?> DA</div>
                             <span style="color: #6b7280; font-size: 11px;">#<?php echo htmlspecialchars($order['id']); ?></span>
                         </div>
                     </div>
@@ -1170,7 +1170,7 @@ if (isset($_GET['export'])) {
                                     <?php endif; ?>
                                 </td>
                                 <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: <?= $primaryColor ?>;"><?= $ordersCount ?></td>
-                                <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: #10b981;"><?= number_format($totalSpent, 0) ?>€</td>
+                                <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: #10b981;"><?= number_format($totalSpent, 0) ?> DA</td>
                                 <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: #f59e0b;"><?= $loyaltyPoints ?></td>
                                 <td style="padding: 10px 15px;"><?= $badge ?></td>
                                 <td style="padding: 10px 15px;">
@@ -1244,7 +1244,7 @@ if (isset($_GET['export'])) {
                 <select id="rewardType" onchange="toggleRewardValue()" required
                        style="width: 100%; padding: 12px; border: 1px solid #374151; border-radius: 10px; font-size: 1em; box-sizing: border-box; background: #1e293b; color: white;">
                     <option value="discount_percent">Réduction en %</option>
-                    <option value="discount_amount">Réduction en €</option>
+                    <option value="discount_amount">Réduction en DA</option>
                     <option value="free_product">Produit gratuit</option>
                     <option value="free_delivery">Livraison gratuite</option>
                 </select>
@@ -1397,13 +1397,13 @@ if (isset($_GET['export'])) {
                         <div style="color: #9ca3af; font-size: 11px;">Commandes</div>
                     </div>
                     <div class="stat-card" style="border-left: 4px solid <?php echo $primaryColor; ?>;">
-                        <div style="color: <?php echo $primaryColor; ?>;"><i class="fas fa-euro-sign"></i></div>
-                        <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($archiveTotal, 0); ?>€</div>
+                        <div style="color: <?php echo $primaryColor; ?>;"><i class="fas fa-coins"></i></div>
+                        <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($archiveTotal, 0); ?> DA</div>
                         <div style="color: #9ca3af; font-size: 11px;">CA Total</div>
                     </div>
                     <div class="stat-card" style="border-left: 4px solid #10b981;">
                         <div style="color: #10b981;"><i class="fas fa-shopping-basket"></i></div>
-                        <div class="stat-number" style="color: #10b981;"><?php echo $archiveCount > 0 ? number_format($archiveTotal / $archiveCount, 1) : 0; ?>€</div>
+                        <div class="stat-number" style="color: #10b981;"><?php echo $archiveCount > 0 ? number_format($archiveTotal / $archiveCount, 0) : 0; ?> DA</div>
                         <div style="color: #9ca3af; font-size: 11px;">Panier moyen</div>
                     </div>
                 </div>
@@ -1436,7 +1436,7 @@ if (isset($_GET['export'])) {
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-size: 18px; font-weight: bold; color: <?php echo $primaryColor; ?>;"><?php echo number_format($dayTotal, 2); ?>€</div>
+                            <div style="font-size: 18px; font-weight: bold; color: <?php echo $primaryColor; ?>;"><?php echo number_format($dayTotal, 0); ?> DA</div>
                         </div>
                     </div>
 
@@ -1461,7 +1461,7 @@ if (isset($_GET['export'])) {
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>; font-size: 14px;"><?php echo number_format($order['total'] ?? 0, 2); ?>€</div>
+                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>; font-size: 14px;"><?php echo number_format($order['total'] ?? 0, 0); ?> DA</div>
                             <span style="background: #10b98122; color: #10b981; padding: 2px 8px; border-radius: 10px; font-size: 9px;"><i class="fas fa-check"></i> Terminée</span>
                         </div>
                     </div>
@@ -1857,19 +1857,19 @@ if (isset($_GET['export'])) {
             <div class="stats" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
                 <div class="stat-card" style="border-left: 4px solid #10b981;">
                     <div style="color: #10b981;"><i class="fas fa-calendar-day"></i></div>
-                    <div class="stat-number" style="color: #10b981;"><?php echo number_format($stats['revenue'] ?? 0, 0); ?>€</div>
+                    <div class="stat-number" style="color: #10b981;"><?php echo number_format($stats['revenue'] ?? 0, 0); ?> DA</div>
                     <div style="color: #9ca3af; font-size: 11px;">Aujourd'hui</div>
                     <div style="color: #6b7280; font-size: 10px; margin-top: 4px;"><?php echo $stats['today'] ?? 0; ?> commandes</div>
                 </div>
                 <div class="stat-card" style="border-left: 4px solid #3b82f6;">
                     <div style="color: #3b82f6;"><i class="fas fa-calendar-week"></i></div>
-                    <div class="stat-number" style="color: #3b82f6;"><?php echo number_format($weekStats['revenue'] ?? 0, 0); ?>€</div>
+                    <div class="stat-number" style="color: #3b82f6;"><?php echo number_format($weekStats['revenue'] ?? 0, 0); ?> DA</div>
                     <div style="color: #9ca3af; font-size: 11px;">Semaine</div>
                     <div style="color: #6b7280; font-size: 10px; margin-top: 4px;"><?php echo $weekStats['orders'] ?? 0; ?> commandes</div>
                 </div>
                 <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
                     <div style="color: #8b5cf6;"><i class="fas fa-calendar-alt"></i></div>
-                    <div class="stat-number" style="color: #8b5cf6;"><?php echo number_format($monthStats['revenue'] ?? 0, 0); ?>€</div>
+                    <div class="stat-number" style="color: #8b5cf6;"><?php echo number_format($monthStats['revenue'] ?? 0, 0); ?> DA</div>
                     <div style="color: #9ca3af; font-size: 11px;">Mois</div>
                     <div style="color: #6b7280; font-size: 10px; margin-top: 4px;"><?php echo $monthStats['orders'] ?? 0; ?> commandes</div>
                 </div>
@@ -1879,7 +1879,7 @@ if (isset($_GET['export'])) {
             <div class="stats" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 20px;">
                 <div class="stat-card" style="border-left: 4px solid <?php echo $primaryColor; ?>;">
                     <div style="color: <?php echo $primaryColor; ?>;"><i class="fas fa-shopping-basket"></i></div>
-                    <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($monthStats['avg_order'] ?? 0, 1); ?>€</div>
+                    <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($monthStats['avg_order'] ?? 0, 0); ?> DA</div>
                     <div style="color: #9ca3af; font-size: 11px;">Panier moyen</div>
                 </div>
                 <div class="stat-card" style="border-left: 4px solid #f59e0b;">
@@ -1910,7 +1910,7 @@ if (isset($_GET['export'])) {
                         </div>
                         <div style="text-align: right;">
                             <div style="color: <?php echo $primaryColor; ?>; font-weight: bold; font-size: 14px;"><?php echo $product['qty']; ?> vendus</div>
-                            <div style="color: #10b981; font-size: 12px;"><?php echo number_format($product['revenue'], 0); ?>€</div>
+                            <div style="color: #10b981; font-size: 12px;"><?php echo number_format($product['revenue'], 0); ?> DA</div>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -1959,7 +1959,7 @@ if (isset($_GET['export'])) {
                             $isToday = $day['date'] === date('Y-m-d');
                         ?>
                         <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                            <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#9ca3af'; ?>; margin-bottom: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo number_format($day['revenue'], 0); ?>€</span>
+                            <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#9ca3af'; ?>; margin-bottom: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo number_format($day['revenue'], 0); ?> DA</span>
                             <div style="width: 100%; background: <?php echo $isToday ? 'linear-gradient(180deg, #10b981, #059669)' : '#374151'; ?>; height: <?php echo max($height, 4); ?>px; border-radius: 4px 4px 0 0;"></div>
                             <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#6b7280'; ?>; margin-top: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo $dayName; ?></span>
                         </div>
@@ -1991,7 +1991,7 @@ if (isset($_GET['export'])) {
                         </label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <label style="color: #9ca3af;">Points par euro :</label>
+                        <label style="color: #9ca3af;">Points par 100 DA :</label>
                         <input type="number" id="pointsPerEuro" value="<?= $loyaltyConfig['points_per_euro'] ?? 1 ?>" min="1" max="100" onchange="updateLoyaltyConfig()" style="width: 70px; padding: 8px; background: #1e293b; border: 1px solid #374151; border-radius: 8px; color: white; text-align: center;">
                     </div>
                 </div>
@@ -2032,7 +2032,7 @@ if (isset($_GET['export'])) {
                         <?php foreach ($loyaltyRewards as $reward):
                             $typeLabels = [
                                 'discount_percent' => 'Réduction %',
-                                'discount_amount' => 'Réduction €',
+                                'discount_amount' => 'Réduction DA',
                                 'free_product' => 'Produit gratuit',
                                 'free_delivery' => 'Livraison gratuite'
                             ];
@@ -2049,7 +2049,7 @@ if (isset($_GET['export'])) {
                                     <span style="background: #374151; color: #d1d5db; padding: 3px 10px; border-radius: 20px; font-size: 11px; margin-left: 5px;">
                                         <?= $typeLabel ?>
                                         <?php if ($reward['reward_type'] !== 'free_product' && $reward['reward_type'] !== 'free_delivery'): ?>
-                                            : <?= $reward['reward_value'] ?><?= $reward['reward_type'] === 'discount_percent' ? '%' : '€' ?>
+                                            : <?= $reward['reward_value'] ?><?= $reward['reward_type'] === 'discount_percent' ? '%' : ' DA' ?>
                                         <?php endif; ?>
                                     </span>
                                 </div>
@@ -2108,7 +2108,7 @@ if (isset($_GET['export'])) {
                 <?php foreach ($category['items'] ?? [] as $item): ?>
                 <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #374151;">
                     <span><?php echo htmlspecialchars($item['name'] ?? ''); ?></span>
-                    <span style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($item['priceSolo'] ?? $item['price'] ?? 0, 2); ?>€</span>
+                    <span style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($item['priceSolo'] ?? $item['price'] ?? 0, 0); ?> DA</span>
                 </div>
                 <?php endforeach; ?>
             </div>

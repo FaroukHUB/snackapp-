@@ -62,7 +62,7 @@ function renderCustomers(customers) {
                 </div>
                 <div>
                     <span class="text-gray-400">Dépensé:</span>
-                    <span class="text-white font-semibold ml-2">${customer.total_spent.toFixed(2)}€</span>
+                    <span class="text-white font-semibold ml-2">${customer.total_spent|0} DA</span>
                 </div>
             </div>
 
@@ -104,7 +104,7 @@ function showCustomerDetails(customerId) {
                     <div class="text-sm text-gray-400 mt-1">Commandes</div>
                 </div>
                 <div class="glass rounded-xl p-4 text-center">
-                    <div class="text-3xl font-bold text-white">${customer.total_spent.toFixed(2)}€</div>
+                    <div class="text-3xl font-bold text-white">${customer.total_spent|0} DA</div>
                     <div class="text-sm text-gray-400 mt-1">Dépensé</div>
                 </div>
                 <div class="glass rounded-xl p-4 text-center">

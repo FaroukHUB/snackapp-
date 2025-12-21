@@ -162,7 +162,7 @@ function renderOrders(orders) {
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-2xl font-bold text-white">${order.total}€</div>
+                    <div class="text-2xl font-bold text-white">${order.total} DA</div>
                     ${order.estimated_time ? `
                         <div class="text-sm text-gray-400 mt-1">
                             <i class="fas fa-hourglass-half mr-1"></i>${order.estimated_time} min
@@ -176,7 +176,7 @@ function renderOrders(orders) {
                     ${order.items.map(item => `
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-300">${item.quantity}x ${item.name}</span>
-                            <span class="text-gray-400">${item.price}€</span>
+                            <span class="text-gray-400">${item.price} DA</span>
                         </div>
                     `).join('')}
                 </div>
@@ -350,14 +350,14 @@ function showOrderDetails(orderId) {
                     ${order.items.map(item => `
                         <div class="flex justify-between">
                             <span class="text-gray-300">${item.quantity}x ${item.name}</span>
-                            <span class="text-white">${item.price}€</span>
+                            <span class="text-white">${item.price} DA</span>
                         </div>
                     `).join('')}
                 </div>
             </div>
             <div class="border-t border-white/10 pt-4 flex items-center justify-between">
                 <span class="text-gray-400 font-semibold">Total</span>
-                <span class="text-2xl font-bold text-white">${order.total}€</span>
+                <span class="text-2xl font-bold text-white">${order.total} DA</span>
             </div>
         </div>
     `;
@@ -415,7 +415,7 @@ function initCharts() {
             data: {
                 labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
                 datasets: [{
-                    label: 'Ventes (€)',
+                    label: 'Ventes (DA)',
                     data: [0, 0, 0, 0, 0, 0, 0],
                     borderColor: window.APP_CONFIG.primaryColor,
                     backgroundColor: `${window.APP_CONFIG.primaryColor}20`,
@@ -518,17 +518,17 @@ function updateDashboardStats(stats) {
         <div class="glass-strong rounded-2xl p-6">
             <div class="text-gray-400 text-sm mb-1">Aujourd'hui</div>
             <div class="text-3xl font-bold text-white">${stats.today.orders}</div>
-            <div class="text-sm text-gray-400 mt-1">${stats.today.revenue.toFixed(2)}€</div>
+            <div class="text-sm text-gray-400 mt-1">${stats.today.revenue|0} DA</div>
         </div>
         <div class="glass-strong rounded-2xl p-6">
             <div class="text-gray-400 text-sm mb-1">Cette semaine</div>
             <div class="text-3xl font-bold text-white">${stats.week.orders}</div>
-            <div class="text-sm text-gray-400 mt-1">${stats.week.revenue.toFixed(2)}€</div>
+            <div class="text-sm text-gray-400 mt-1">${stats.week.revenue|0} DA</div>
         </div>
         <div class="glass-strong rounded-2xl p-6">
             <div class="text-gray-400 text-sm mb-1">Ce mois</div>
             <div class="text-3xl font-bold text-white">${stats.month.orders}</div>
-            <div class="text-sm text-gray-400 mt-1">${stats.month.revenue.toFixed(2)}€</div>
+            <div class="text-sm text-gray-400 mt-1">${stats.month.revenue|0} DA</div>
         </div>
         <div class="glass-strong rounded-2xl p-6">
             <div class="text-gray-400 text-sm mb-1">Clients total</div>

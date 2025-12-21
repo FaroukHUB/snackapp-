@@ -144,7 +144,7 @@ class OrderNotificationSystem {
                 <h2 style="color:#fff;margin:15px 0;">NOUVELLE COMMANDE</h2>
                 <p style="font-size:24px;color:#fff;font-weight:bold;margin:10px 0;">${customerName}</p>
                 <p style="color:#9ca3af;font-size:12px;margin:5px 0;">#${order.id}</p>
-                <p style="font-size:36px;color:#10b981;font-weight:bold;margin:20px 0;">${total}€</p>
+                <p style="font-size:36px;color:#10b981;font-weight:bold;margin:20px 0;">${total} DA</p>
                 <button onclick="orderNotificationSystem.acceptOrder()"
                     style="padding:15px 40px;border-radius:50px;background:#10b981;color:white;border:none;font-size:18px;cursor:pointer;">
                     ✅ ACCEPTER
