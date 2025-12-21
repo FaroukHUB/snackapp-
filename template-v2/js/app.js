@@ -151,7 +151,7 @@ const App = {
                 const target = document.getElementById(targetId);
 
                 if (target) {
-                    const headerHeight = document.querySelector('.header-bk')?.offsetHeight || 70;
+                    const headerHeight = document.querySelector('.header-main')?.offsetHeight || 70;
                     const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
 
                     window.scrollTo({

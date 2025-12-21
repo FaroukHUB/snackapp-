@@ -1,6 +1,6 @@
 /* ============================================
    PRODUCTS.JS - Products & Formules Display
-   Template V2 - SnackApp (BK Style)
+   Template V2 - SnackApp
    ============================================ */
 
 const Products = {
@@ -9,12 +9,12 @@ const Products = {
     currentQuantity: 1,
     selectedSupplements: [],
     removedIngredients: [],
-    menuType: 'solo', // 'solo' or 'menu'
-    selectedDrink: null, // For menu drink selection
-    activeCategory: 'all', // Current category filter
+    menuType: 'solo',
+    selectedDrink: null,
+    activeCategory: 'all',
 
     /**
-     * Capitalize first letter of a string
+     * Capitalize first letter
      */
     capitalize(str) {
         if (!str) return '';
@@ -59,7 +59,6 @@ const Products = {
 
         nav.innerHTML = html;
 
-        // Handle category click to filter and scroll
         nav.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -92,17 +91,14 @@ const Products = {
 
         nav.innerHTML = html;
 
-        // Handle category click
         nav.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const catId = link.dataset.category;
                 this.filterByCategory(catId);
-                // Close mobile menu
                 document.getElementById('mobileMenu')?.classList.remove('active');
                 document.getElementById('mobileMenuOverlay')?.classList.remove('active');
                 document.body.style.overflow = '';
-                // Scroll to menu
                 setTimeout(() => {
                     document.getElementById('menuSection')?.scrollIntoView({ behavior: 'smooth' });
                 }, 100);
@@ -111,7 +107,7 @@ const Products = {
     },
 
     /**
-     * Render featured products section (horizontal scroll, BK style)
+     * Render featured products section
      */
     renderFeatured() {
         const grid = document.getElementById('featuredGrid');
@@ -127,12 +123,10 @@ const Products = {
             return;
         }
 
-        // Update title if configured
         if (titleEl && featured.title) {
             titleEl.textContent = featured.title;
         }
 
-        // Get featured products
         const featuredProducts = featured.items
             .map(id => Config.getProduct(id))
             .filter(p => p && p.status !== 'unavailable');
@@ -144,17 +138,30 @@ const Products = {
 
         grid.innerHTML = featuredProducts.map(product => {
             const hasImage = product.image && product.image.trim() !== '';
+            const price = product.priceSolo || product.price || 0;
+            const shortDesc = product.description ? product.description.substring(0, 60) + '...' : '';
 
             return `
-                <div class="product-card-bk" onclick="Products.openProductModal('${product.id}')">
+                <div class="product-card" onclick="Products.openProductModal('${product.id}')">
                     <div class="product-image">
                         ${hasImage
                             ? `<img src="../${product.image}" alt="${product.name}" onerror="this.parentElement.innerHTML='<div class=\\'image-placeholder\\'><i class=\\'fas fa-utensils\\'></i></div>'">`
                             : '<div class="image-placeholder"><i class="fas fa-utensils"></i></div>'}
                     </div>
-                    <div class="product-name">${product.name}</div>
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-desc">${shortDesc}</div>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                ${Config.formatPrice(price)}
+                                ${product.priceMenu ? `<small>Menu ${Config.formatPrice(product.priceMenu)}</small>` : ''}
+                            </div>
+                            <button class="add-btn" onclick="event.stopPropagation(); Products.openProductModal('${product.id}')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
                     ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
-                    ${product.isSignature ? '<span class="product-badge">Signature</span>' : ''}
                 </div>
             `;
         }).join('');
@@ -194,7 +201,6 @@ const Products = {
         container.addEventListener('click', (e) => {
             const tab = e.target.closest('.category-tab');
             if (!tab) return;
-
             const category = tab.dataset.category;
             this.filterByCategory(category);
         });
@@ -206,13 +212,11 @@ const Products = {
     filterByCategory(categoryId) {
         this.activeCategory = categoryId;
 
-        // Update active tab
         document.querySelectorAll('.category-tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.category === categoryId);
         });
 
-        // Filter products
-        const cards = document.querySelectorAll('#productsGrid .product-card-bk');
+        const cards = document.querySelectorAll('#productsGrid .product-card');
         cards.forEach(card => {
             const cardCategory = card.dataset.category;
             if (categoryId === 'all' || cardCategory === categoryId) {
@@ -224,7 +228,7 @@ const Products = {
     },
 
     /**
-     * Render all products in grid (BK style)
+     * Render all products in grid
      */
     renderProductsGrid() {
         const grid = document.getElementById('productsGrid');
@@ -233,7 +237,6 @@ const Products = {
         const categories = Config.getCategories();
         let allProducts = [];
 
-        // Collect all products with their category
         categories.forEach(cat => {
             if (cat.items && Array.isArray(cat.items)) {
                 cat.items.forEach(product => {
@@ -246,18 +249,31 @@ const Products = {
             const isUnavailable = product.status === 'unavailable';
             const hasImage = product.image && product.image.trim() !== '';
             const cardClick = isUnavailable ? '' : `Products.openProductModal('${product.id}')`;
+            const price = product.priceSolo || product.price || 0;
+            const shortDesc = product.description ? product.description.substring(0, 50) + '...' : '';
 
             return `
-                <div class="product-card-bk ${isUnavailable ? 'unavailable' : ''}"
+                <div class="product-card ${isUnavailable ? 'unavailable' : ''}"
                      data-product-id="${product.id}"
                      data-category="${product.categoryId}"
-                     onclick="${cardClick}">
+                     onclick="${cardClick}"
+                     style="position: relative;">
                     <div class="product-image">
                         ${hasImage
                             ? `<img src="../${product.image}" alt="${product.name}" onerror="this.parentElement.innerHTML='<div class=\\'image-placeholder\\'><i class=\\'fas fa-utensils\\'></i></div>'">`
                             : '<div class="image-placeholder"><i class="fas fa-utensils"></i></div>'}
                     </div>
-                    <div class="product-name">${product.name}</div>
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-desc">${shortDesc}</div>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                ${Config.formatPrice(price)}
+                                ${product.priceMenu ? `<small>Menu ${Config.formatPrice(product.priceMenu)}</small>` : ''}
+                            </div>
+                            ${!isUnavailable ? `<button class="add-btn" onclick="event.stopPropagation(); Products.openProductModal('${product.id}')"><i class="fas fa-plus"></i></button>` : ''}
+                        </div>
+                    </div>
                     ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
                 </div>
             `;
@@ -302,7 +318,7 @@ const Products = {
             footerLogo.textContent = Config.restaurant?.name || 'Restaurant';
         }
 
-        // Hero content (optional override)
+        // Hero content
         const heroTitle = document.getElementById('heroTitle');
         const heroSubtitle = document.getElementById('heroSubtitle');
         if (heroTitle && Config.restaurant?.heroTitle) {
@@ -422,7 +438,6 @@ const Products = {
         backdrop?.addEventListener('click', () => this.closeModal());
         closeBtn?.addEventListener('click', () => this.closeModal());
 
-        // Quantity buttons
         document.getElementById('qtyMinus')?.addEventListener('click', () => {
             if (this.currentQuantity > 1) {
                 this.currentQuantity--;
@@ -435,12 +450,10 @@ const Products = {
             this.updateModalUI();
         });
 
-        // Add to cart button
         document.getElementById('addToCartBtn')?.addEventListener('click', () => {
             this.addCurrentToCart();
         });
 
-        // Close on Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') this.closeModal();
         });
@@ -450,12 +463,9 @@ const Products = {
      * Open product modal
      */
     openProductModal(productId) {
-        console.log('Opening modal for product:', productId);
         const product = Config.getProduct(productId);
-        console.log('Product found:', product);
         if (!product) return;
 
-        // Reset state
         this.currentProduct = product;
         this.currentQuantity = 1;
         this.selectedSupplements = [];
@@ -465,7 +475,6 @@ const Products = {
 
         const modal = document.getElementById('productModal');
 
-        // Update modal content
         const imgEl = document.getElementById('modalImage');
         if (product.image) {
             imgEl.src = '../' + product.image;
@@ -486,7 +495,6 @@ const Products = {
             menuToggleSection.style.display = '';
             document.getElementById('priceSolo').textContent = Config.formatPrice(product.priceSolo || 0);
             document.getElementById('priceMenu').textContent = Config.formatPrice(product.priceMenu || 0);
-            // Reset toggle to solo
             document.querySelectorAll('.menu-option').forEach(opt => {
                 opt.classList.toggle('active', opt.dataset.type === 'solo');
             });
@@ -514,7 +522,7 @@ const Products = {
             ingredientsSection.style.display = 'none';
         }
 
-        // Render supplements
+        // Supplements
         const supplements = Config.getSupplementsForCategory(product.categoryId);
         const supplementsContainer = document.getElementById('modalSupplements');
         const supplementsList = document.getElementById('supplementsList');
@@ -538,7 +546,7 @@ const Products = {
             supplementsContainer.style.display = 'none';
         }
 
-        // Render drinks selection (for menu option)
+        // Drinks
         const drinksContainer = document.getElementById('modalDrinks');
         const drinksList = document.getElementById('drinksList');
         const drinks = Config.getDrinks();
@@ -549,7 +557,6 @@ const Products = {
                     ${drink.name}
                 </div>
             `).join('');
-            // Hide by default (shown when menu is selected)
             drinksContainer.classList.add('hidden');
             drinksContainer.style.display = 'none';
         } else {
@@ -570,7 +577,6 @@ const Products = {
         const drink = drinks.find(d => d.id === drinkId);
         this.selectedDrink = drink || null;
 
-        // Update UI
         document.querySelectorAll('.drink-item').forEach(item => {
             item.classList.toggle('selected', item.dataset.id === drinkId);
         });
@@ -582,7 +588,6 @@ const Products = {
     setMenuType(type) {
         this.menuType = type;
 
-        // Show/hide drinks section
         const drinksContainer = document.getElementById('modalDrinks');
         if (type === 'menu') {
             drinksContainer.classList.remove('hidden');
@@ -613,7 +618,6 @@ const Products = {
             this.removedIngredients.push(ingredient);
         }
 
-        // Update UI
         document.querySelectorAll('.ingredient-item').forEach(item => {
             const ing = item.dataset.ingredient;
             item.classList.toggle('removed', this.removedIngredients.includes(ing));
@@ -634,7 +638,6 @@ const Products = {
             this.selectedSupplements.push(sup);
         }
 
-        // Update UI
         document.querySelectorAll('.supplement-item').forEach(item => {
             const id = item.dataset.id;
             if (this.selectedSupplements.find(s => s.id === id)) {
@@ -648,12 +651,11 @@ const Products = {
     },
 
     /**
-     * Update modal UI (quantity, total price)
+     * Update modal UI
      */
     updateModalUI() {
         document.getElementById('qtyValue').textContent = this.currentQuantity;
 
-        // Calculate total based on menu type
         let basePrice = 0;
         if (this.menuType === 'menu' && this.currentProduct?.priceMenu) {
             basePrice = this.currentProduct.priceMenu;
@@ -662,24 +664,20 @@ const Products = {
         }
 
         let total = basePrice;
-
-        // Add supplements
         this.selectedSupplements.forEach(sup => {
             total += sup.price || 0;
         });
-
         total *= this.currentQuantity;
 
         document.getElementById('addToCartPrice').textContent = Config.formatPrice(total);
     },
 
     /**
-     * Add current modal product to cart
+     * Add current product to cart
      */
     addCurrentToCart() {
         if (!this.currentProduct) return;
 
-        // Create product with correct price based on menu type
         const productToAdd = { ...this.currentProduct };
 
         if (this.menuType === 'menu' && this.currentProduct.priceMenu) {
@@ -704,16 +702,6 @@ const Products = {
     },
 
     /**
-     * Quick add product without modal (no supplements)
-     */
-    quickAdd(productId) {
-        const product = Config.getProduct(productId);
-        if (!product) return;
-
-        Cart.addItem(product, 1, [], {});
-    },
-
-    /**
      * Close modal
      */
     closeModal() {
@@ -732,7 +720,6 @@ const Products = {
         const closeBtn = document.getElementById('searchClose');
         const input = document.getElementById('searchInput');
 
-        // Toggle search bar
         toggle?.addEventListener('click', () => {
             container?.classList.toggle('active');
             if (container?.classList.contains('active')) {
@@ -740,14 +727,12 @@ const Products = {
             }
         });
 
-        // Close search
         closeBtn?.addEventListener('click', () => {
             container?.classList.remove('active');
             if (input) input.value = '';
             this.filterProducts('');
         });
 
-        // Search input
         if (input) {
             let debounceTimer;
             input.addEventListener('input', (e) => {
@@ -764,13 +749,12 @@ const Products = {
      */
     filterProducts(searchTerm) {
         const term = searchTerm.toLowerCase().trim();
-        const cards = document.querySelectorAll('#productsGrid .product-card-bk, #featuredGrid .product-card-bk');
+        const cards = document.querySelectorAll('#productsGrid .product-card, #featuredGrid .product-card');
 
         cards.forEach(card => {
             const name = card.querySelector('.product-name')?.textContent.toLowerCase() || '';
 
             if (!term || name.includes(term)) {
-                // Check if it matches category filter too
                 const cardCategory = card.dataset.category;
                 if (this.activeCategory === 'all' || cardCategory === this.activeCategory || !card.dataset.category) {
                     card.style.display = '';
@@ -782,5 +766,4 @@ const Products = {
     }
 };
 
-// Export for use in other modules
 window.Products = Products;
