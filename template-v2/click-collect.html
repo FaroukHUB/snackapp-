@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Click & Collect | Restaurant</title>
+    <title>Click & Collect | Commander en ligne</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/pages.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,13 +13,13 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
+    <header class="header" style="background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(10px);">
         <div class="header-left">
             <a href="index.html" class="back-link">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div class="logo">
-                <span class="logo-text">Click & Collect</span>
+                <span class="logo-text" style="color: white;">Click & Collect</span>
             </div>
         </div>
         <div class="header-right">
@@ -34,119 +34,160 @@
     <main class="page-content">
         <!-- Hero Section -->
         <section class="page-hero">
-            <div class="hero-icon">
-                <i class="fas fa-shopping-bag"></i>
+            <div class="page-hero-bg">
+                <img src="images/click-collect-hero.jpg" alt="Click & Collect" onerror="this.style.display='none'">
             </div>
-            <h1>Click & Collect</h1>
-            <p>Commandez en ligne, récupérez sur place sans attente</p>
+            <div class="page-hero-overlay"></div>
+            <div class="page-hero-content">
+                <div class="hero-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <h1>Commandez en ligne, récupérez sur place</h1>
+                <p>Passez votre commande en quelques clics et venez la récupérer sans attendre. Simple, rapide et économique.</p>
+            </div>
         </section>
 
-        <!-- Avantages -->
-        <section class="info-section">
+        <!-- Advantages -->
+        <section class="page-section">
             <div class="advantages-grid">
-                <div class="advantage-card">
-                    <div class="advantage-icon"><i class="fas fa-bolt"></i></div>
-                    <h3>Rapide</h3>
-                    <p>Votre commande prête en 15-20 min</p>
+                <div class="advantage-card fade-in">
+                    <div class="advantage-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Prêt en 15-20 min</h3>
+                    <p>Votre commande préparée dès votre arrivée</p>
                 </div>
-                <div class="advantage-card">
-                    <div class="advantage-icon"><i class="fas fa-piggy-bank"></i></div>
-                    <h3>Économique</h3>
-                    <p>Pas de frais de livraison</p>
+                <div class="advantage-card fade-in">
+                    <div class="advantage-icon">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <h3>0€ de frais</h3>
+                    <p>Économisez les frais de livraison</p>
                 </div>
-                <div class="advantage-card">
-                    <div class="advantage-icon"><i class="fas fa-star"></i></div>
+                <div class="advantage-card fade-in">
+                    <div class="advantage-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
                     <h3>Points fidélité</h3>
                     <p>Cumulez des points à chaque commande</p>
                 </div>
             </div>
         </section>
 
-        <!-- Comment commander -->
-        <section class="info-section">
-            <h2><i class="fas fa-list-ol"></i> Comment commander ?</h2>
-            <div class="steps-timeline">
-                <div class="timeline-step">
-                    <div class="timeline-number">1</div>
-                    <div class="timeline-content">
-                        <h3>Choisissez vos produits</h3>
-                        <p>Parcourez notre menu et ajoutez vos produits favoris au panier</p>
+        <!-- How it works -->
+        <section class="page-section alt-bg">
+            <div class="section-inner">
+                <h2 class="section-title"><i class="fas fa-list-ol"></i> Comment ça marche ?</h2>
+                <div class="steps-timeline">
+                    <div class="timeline-step fade-in">
+                        <div class="timeline-number">1</div>
+                        <div class="timeline-content">
+                            <h3>Composez votre commande</h3>
+                            <p>Parcourez notre menu et sélectionnez vos burgers, accompagnements et boissons préférés. Personnalisez chaque produit selon vos goûts.</p>
+                        </div>
                     </div>
-                </div>
-                <div class="timeline-step">
-                    <div class="timeline-number">2</div>
-                    <div class="timeline-content">
-                        <h3>Validez votre commande</h3>
-                        <p>Renseignez votre numéro de téléphone et choisissez l'heure de retrait</p>
+                    <div class="timeline-step fade-in">
+                        <div class="timeline-number">2</div>
+                        <div class="timeline-content">
+                            <h3>Validez et choisissez votre créneau</h3>
+                            <p>Renseignez votre <span class="highlight">numéro de téléphone</span> et sélectionnez l'heure de retrait souhaitée. Nous nous occupons du reste !</p>
+                        </div>
                     </div>
-                </div>
-                <div class="timeline-step">
-                    <div class="timeline-number">3</div>
-                    <div class="timeline-content">
-                        <h3>Récupérez au restaurant</h3>
-                        <p>Présentez-vous à l'heure choisie, votre commande sera prête !</p>
+                    <div class="timeline-step fade-in">
+                        <div class="timeline-number">3</div>
+                        <div class="timeline-content">
+                            <h3>Recevez votre notification</h3>
+                            <p>Dès que votre commande est prête, vous recevez une <span class="highlight">notification WhatsApp</span>. Pratique pour savoir exactement quand venir !</p>
+                            <div class="whatsapp-highlight">
+                                <i class="fab fa-whatsapp"></i>
+                                <div class="whatsapp-highlight-text">
+                                    <h4>Notification en temps réel</h4>
+                                    <p>Vous êtes averti instantanément via WhatsApp</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-step fade-in">
+                        <div class="timeline-number">4</div>
+                        <div class="timeline-content">
+                            <h3>Récupérez votre commande</h3>
+                            <p>Présentez-vous au restaurant et récupérez votre commande toute chaude, prête à être dégustée. Payez sur place ou en ligne, au choix !</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- CTA Commander -->
-        <section class="info-section cta-section">
-            <div class="cta-card">
+        <section class="page-section">
+            <div class="cta-section">
                 <h2>Prêt à commander ?</h2>
-                <p>Découvrez notre menu et composez votre commande</p>
-                <a href="index.html" class="btn-primary">
+                <p>Découvrez nos burgers gourmets et composez votre commande en quelques clics</p>
+                <a href="index.html#menuSection" class="btn-primary">
                     <i class="fas fa-utensils"></i> Voir le menu
                 </a>
             </div>
         </section>
 
         <!-- Infos pratiques -->
-        <section class="info-section">
-            <h2><i class="fas fa-info-circle"></i> Infos pratiques</h2>
-            <div class="info-grid">
-                <div class="info-card">
-                    <div class="info-icon"><i class="fas fa-clock"></i></div>
-                    <h3>Horaires de retrait</h3>
-                    <ul class="hours-list">
-                        <li><span>Lun - Jeu</span> <span>18h30 - 23h30</span></li>
-                        <li><span>Ven - Sam</span> <span>18h30 - 01h00</span></li>
-                        <li><span>Dimanche</span> <span>18h30 - 00h00</span></li>
-                    </ul>
-                </div>
-                <div class="info-card">
-                    <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                    <h3>Adresse</h3>
-                    <p>110 Rue des Postes<br>59000 Lille</p>
-                </div>
-                <div class="info-card">
-                    <div class="info-icon"><i class="fas fa-phone"></i></div>
-                    <h3>Contact</h3>
-                    <p>03 74 45 54 27</p>
-                    <small>En cas de question sur votre commande</small>
+        <section class="page-section alt-bg">
+            <div class="section-inner">
+                <h2 class="section-title"><i class="fas fa-info-circle"></i> Infos pratiques</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3>Horaires de retrait</h3>
+                        <ul class="hours-list">
+                            <li><span>Lun - Jeu</span> <span>18h30 - 23h30</span></li>
+                            <li><span>Ven - Sam</span> <span>18h30 - 01h00</span></li>
+                            <li><span>Dimanche</span> <span>18h30 - 00h00</span></li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h3>Adresse du restaurant</h3>
+                        <p>110 Rue des Postes<br>59000 Lille</p>
+                        <small>Parking gratuit à proximité</small>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <h3>Besoin d'aide ?</h3>
+                        <p>03 74 45 54 27</p>
+                        <small>Pour toute question sur votre commande</small>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- FAQ -->
-        <section class="info-section">
-            <h2><i class="fas fa-question"></i> Questions fréquentes</h2>
+        <section class="page-section">
+            <h2 class="section-title"><i class="fas fa-question-circle"></i> Questions fréquentes</h2>
             <div class="faq-list">
                 <details class="faq-item">
                     <summary>Combien de temps à l'avance puis-je commander ?</summary>
-                    <p>Vous pouvez commander pour un retrait dans les 2 heures suivantes, pendant nos horaires d'ouverture.</p>
+                    <p>Vous pouvez commander pour un retrait dans les 2 heures suivantes pendant nos horaires d'ouverture. Passez votre commande et venez la récupérer quand elle est prête !</p>
                 </details>
                 <details class="faq-item">
-                    <summary>Puis-je modifier ma commande ?</summary>
-                    <p>Une fois la commande validée, contactez-nous rapidement par téléphone pour toute modification.</p>
+                    <summary>Comment savoir quand ma commande est prête ?</summary>
+                    <p>Vous recevez automatiquement une notification WhatsApp dès que votre commande est prête. Assurez-vous de renseigner un numéro de téléphone valide lors de la commande.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>Puis-je modifier ou annuler ma commande ?</summary>
+                    <p>Une fois la commande validée, contactez-nous rapidement par téléphone au 03 74 45 54 27 pour toute modification. Nous ferons notre maximum pour vous satisfaire.</p>
                 </details>
                 <details class="faq-item">
                     <summary>Que se passe-t-il si je suis en retard ?</summary>
-                    <p>Pas de souci ! Nous gardons votre commande au chaud. Prévenez-nous si vous avez plus de 30 minutes de retard.</p>
+                    <p>Pas de panique ! Nous gardons votre commande au chaud. Si vous avez plus de 30 minutes de retard, prévenez-nous par téléphone pour que nous puissions nous organiser.</p>
                 </details>
                 <details class="faq-item">
-                    <summary>Puis-je payer sur place ?</summary>
-                    <p>Oui, vous pouvez payer par carte ou en espèces lors du retrait de votre commande.</p>
+                    <summary>Quels sont les moyens de paiement acceptés ?</summary>
+                    <p>Vous pouvez payer par carte bancaire ou en espèces lors du retrait de votre commande. Le paiement en ligne sera bientôt disponible.</p>
                 </details>
             </div>
         </section>

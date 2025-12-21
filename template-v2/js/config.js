@@ -173,6 +173,13 @@ const Config = {
     },
 
     /**
+     * Get featured products configuration
+     */
+    getFeatured() {
+        return this.featured || {};
+    },
+
+    /**
      * Get supplements for a category
      */
     getSupplementsForCategory(categoryId) {

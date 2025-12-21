@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commander | Restaurant</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,14 +50,19 @@
                     </ul>
                 </div>
                 <div class="sidebar-section">
+                    <h3 class="sidebar-title">Découvrir</h3>
+                    <ul class="nav-list nav-list-secondary">
+                        <li><a href="click-collect.html"><i class="fas fa-shopping-bag"></i> Click & Collect</a></li>
+                        <li><a href="fidelite.html"><i class="fas fa-star"></i> Programme Fidélité</a></li>
+                    </ul>
+                </div>
+                <div class="sidebar-section">
                     <h3 class="sidebar-title">Infos</h3>
                     <ul class="nav-list nav-list-secondary">
-                        <li><a href="../loyalty-card.php" class="loyalty-link"><i class="fas fa-star"></i> Ma Fidélité</a></li>
                         <li><a href="#contact"><i class="fas fa-phone"></i> Contact</a></li>
                         <li><a href="#horaires"><i class="fas fa-clock"></i> Horaires</a></li>
-                        <li id="sidebarPlatforms"><a href="#commander"><i class="fas fa-motorcycle"></i> Commander</a></li>
+                        <li id="sidebarPlatforms"><a href="#commander"><i class="fas fa-motorcycle"></i> Livraison</a></li>
                         <li><a href="#localisation"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
-                        <li><a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a></li>
                     </ul>
                 </div>
             </nav>
@@ -79,10 +85,84 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Hero Section with Formules -->
+            <!-- Hero Section -->
+            <section class="hero-section" id="heroSection">
+                <div class="hero-bg">
+                    <img src="images/hero-burger.jpg" alt="Burgers gourmets" id="heroImage">
+                </div>
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <i class="fas fa-fire"></i>
+                        <span>Burgers Artisanaux</span>
+                    </div>
+                    <h1 class="hero-title" id="heroTitle">Des burgers <span>gourmets</span> faits maison</h1>
+                    <p class="hero-subtitle" id="heroSubtitle">Viandes de qualité, produits frais et recettes uniques. Commandez et récupérez en quelques clics.</p>
+                    <a href="#menuSection" class="hero-cta">
+                        <i class="fas fa-utensils"></i>
+                        Voir le menu
+                    </a>
+                </div>
+                <div class="scroll-indicator">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </section>
+
+            <!-- Featured Products Section -->
+            <section class="featured-section" id="featuredSection">
+                <div class="section-container">
+                    <div class="section-header">
+                        <h2 id="featuredTitle"><i class="fas fa-fire"></i> Sélection pour vous</h2>
+                        <p id="featuredSubtitle">Nos produits les plus appréciés</p>
+                    </div>
+                    <div class="featured-grid" id="featuredGrid">
+                        <!-- Featured products will be injected here by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feature Cards: Click & Collect + Fidélité -->
+            <section class="features-section">
+                <div class="features-grid">
+                    <!-- Click & Collect Card -->
+                    <a href="click-collect.html" class="feature-card">
+                        <div class="feature-card-bg">
+                            <img src="images/click-collect-bg.jpg" alt="Click and Collect" onerror="this.style.display='none'">
+                        </div>
+                        <div class="feature-card-overlay"></div>
+                        <div class="feature-card-content">
+                            <div class="feature-card-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <h3 class="feature-card-title">Click & Collect</h3>
+                            <p class="feature-card-desc">Commandez en ligne et récupérez votre commande en quelques minutes. Rapide, simple et sans attente.</p>
+                            <span class="feature-card-link">
+                                Découvrir <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- Fidélité Card -->
+                    <a href="fidelite.html" class="feature-card loyalty-card">
+                        <div class="feature-card-overlay"></div>
+                        <div class="feature-card-content">
+                            <div class="feature-card-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3 class="feature-card-title">Votre fidélité récompensée</h3>
+                            <p class="feature-card-desc">Cumulez des points à chaque commande et débloquez des récompenses exclusives. C'est simple et gratuit !</p>
+                            <span class="feature-card-link">
+                                En savoir plus <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Formules Section -->
             <section class="formules-section" id="formulesSection">
                 <div class="section-header">
-                    <h2><i class="fas fa-fire"></i> Nos Formules</h2>
+                    <h2><i class="fas fa-tags"></i> Nos Formules</h2>
                     <p class="section-subtitle">Économisez avec nos menus combinés</p>
                 </div>
                 <div class="formules-grid" id="formulesGrid">
@@ -90,10 +170,12 @@
                 </div>
             </section>
 
-            <!-- Products Sections -->
-            <div id="productsContainer">
-                <!-- Product sections will be injected here -->
-            </div>
+            <!-- Menu Section -->
+            <section id="menuSection">
+                <div id="productsContainer">
+                    <!-- Product sections will be injected here -->
+                </div>
+            </section>
 
             <!-- Contact Section -->
             <section class="info-section" id="contact">
@@ -128,14 +210,6 @@
                 <a href="#" id="directionsBtn" class="directions-btn" target="_blank">
                     <i class="fas fa-directions"></i> Itinéraire
                 </a>
-            </section>
-
-            <!-- FAQ Section -->
-            <section class="info-section" id="faq">
-                <h2><i class="fas fa-question-circle"></i> FAQ</h2>
-                <div class="faq-list" id="faqContent">
-                    <!-- FAQ will be injected -->
-                </div>
             </section>
         </main>
     </div>

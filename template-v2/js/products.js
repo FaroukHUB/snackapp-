@@ -25,12 +25,78 @@ const Products = {
      */
     init() {
         this.renderSidebar();
+        this.renderFeatured();
         this.renderFormules();
         this.renderAllCategories();
         this.renderRestaurantInfo();
         this.setupModal();
         this.setupSearch();
         this.setupImageErrorHandling();
+    },
+
+    /**
+     * Render featured products section
+     */
+    renderFeatured() {
+        const grid = document.getElementById('featuredGrid');
+        const section = document.getElementById('featuredSection');
+        const titleEl = document.getElementById('featuredTitle');
+        const subtitleEl = document.getElementById('featuredSubtitle');
+
+        if (!grid || !section) return;
+
+        const featured = Config.getFeatured();
+
+        if (!featured || !featured.enabled || !featured.items || featured.items.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        // Update title and subtitle if configured
+        if (titleEl && featured.title) {
+            titleEl.innerHTML = `<i class="fas fa-fire"></i> ${featured.title.replace(/^[^\w\s]+\s*/, '')}`;
+        }
+        if (subtitleEl && featured.subtitle) {
+            subtitleEl.textContent = featured.subtitle;
+        }
+
+        // Get featured products
+        const featuredProducts = featured.items
+            .map(id => Config.getProduct(id))
+            .filter(p => p && p.status !== 'unavailable');
+
+        if (featuredProducts.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        grid.innerHTML = featuredProducts.map((product, index) => {
+            const price = product.priceSolo || product.price || 0;
+            const hasImage = product.image && product.image.trim() !== '';
+
+            return `
+                <div class="featured-card fade-in-up" onclick="Products.openProductModal('${product.id}')" style="animation-delay: ${index * 0.1}s">
+                    <div class="featured-card-image">
+                        ${hasImage ? `<img src="../${product.image}" alt="${product.name}" onerror="this.parentElement.innerHTML='<div class=\\'image-placeholder\\'><i class=\\'fas fa-utensils\\'></i></div>'">` : '<div class="image-placeholder"><i class="fas fa-utensils"></i></div>'}
+                        ${product.badge ? `<span class="featured-card-badge">${product.badge}</span>` : ''}
+                        ${product.isSignature ? '<span class="featured-card-badge">Signature</span>' : ''}
+                    </div>
+                    <div class="featured-card-content">
+                        <h3 class="featured-card-title">${product.name}</h3>
+                        <p class="featured-card-desc">${product.description || ''}</p>
+                        <div class="featured-card-footer">
+                            <div class="featured-card-price">
+                                ${Config.formatPrice(price)}
+                                ${product.priceMenu ? `<small>Menu ${Config.formatPrice(product.priceMenu)}</small>` : ''}
+                            </div>
+                            <button class="featured-card-btn" onclick="event.stopPropagation(); Products.openProductModal('${product.id}')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     },
 
     /**
