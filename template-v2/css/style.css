@@ -49,6 +49,91 @@
 }
 
 /* ============================================
+   MODERN ANIMATIONS
+   ============================================ */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Apply animations to elements */
+.product-card {
+    animation: fadeInUp 0.4s ease backwards;
+}
+
+.product-card:nth-child(1) { animation-delay: 0.05s; }
+.product-card:nth-child(2) { animation-delay: 0.1s; }
+.product-card:nth-child(3) { animation-delay: 0.15s; }
+.product-card:nth-child(4) { animation-delay: 0.2s; }
+.product-card:nth-child(5) { animation-delay: 0.25s; }
+.product-card:nth-child(6) { animation-delay: 0.3s; }
+
+.formule-card {
+    animation: scaleIn 0.4s ease backwards;
+}
+
+.section-title {
+    animation: fadeIn 0.5s ease;
+}
+
+/* Smooth hover effects */
+.product-card {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+}
+
+.formule-card {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.formule-card:hover {
+    transform: translateY(-8px) scale(1.02);
+}
+
+/* Button interactions */
+.btn-primary, .add-to-cart-btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover, .add-to-cart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(var(--primary), 0.3);
+}
+
+.btn-primary:active, .add-to-cart-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ============================================
    RESET & BASE
    ============================================ */
 *, *::before, *::after {
@@ -1689,8 +1774,16 @@ ul {
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE - Ultra Modern Mobile Experience
    ============================================ */
+
+/* Touch target minimum size for accessibility */
+@media (pointer: coarse) {
+    button, a, .product-card, .formule-card, .category-btn {
+        min-height: 44px;
+    }
+}
+
 @media (max-width: 1024px) {
     .header-center {
         display: none;
@@ -1702,11 +1795,12 @@ ul {
 
     .sidebar {
         transform: translateX(-100%);
-        transition: var(--transition-slow);
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .sidebar.active {
         transform: translateX(0);
+        box-shadow: 10px 0 40px rgba(0,0,0,0.3);
     }
 
     .sidebar-overlay.active {
@@ -1725,8 +1819,14 @@ ul {
 }
 
 @media (max-width: 768px) {
+    :root {
+        --header-height: 60px;
+    }
+
     .header {
         padding: 0 16px;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
     }
 
     .logo-text {
@@ -1738,16 +1838,38 @@ ul {
     }
 
     .main-content {
-        padding: 20px 16px;
+        padding: 16px;
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
     }
 
+    /* Formules style moderne */
     .formules-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
 
+    .formule-card {
+        border-radius: 20px;
+    }
+
+    .formule-card-content {
+        padding: 20px;
+    }
+
+    /* Produits grille 2 colonnes */
     .products-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
+    }
+
+    .product-card {
+        border-radius: 16px;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .product-card:active {
+        transform: scale(0.98);
     }
 
     .product-info {
@@ -1756,6 +1878,7 @@ ul {
 
     .product-name {
         font-size: 14px;
+        font-weight: 600;
     }
 
     .product-description {
@@ -1763,45 +1886,176 @@ ul {
     }
 
     .product-price {
-        font-size: 16px;
+        font-size: 15px;
+        font-weight: 700;
     }
 
+    /* Modal plein écran style app */
     .modal-content {
         max-height: 100vh;
         height: 100%;
         border-radius: 0;
+        animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
 
     .modal-image {
-        height: 200px;
+        height: 220px;
     }
 
-    .toast-container {
-        left: 16px;
+    .modal-close {
+        top: 16px;
         right: 16px;
-        bottom: 16px;
+        width: 40px;
+        height: 40px;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+    }
+
+    /* Toast moderne */
+    .toast-container {
+        left: 12px;
+        right: 12px;
+        bottom: calc(16px + env(safe-area-inset-bottom));
     }
 
     .toast {
         min-width: auto;
         width: 100%;
+        border-radius: 16px;
+        backdrop-filter: blur(20px);
+    }
+
+    /* Category pills scroll horizontal */
+    .category-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        padding: 8px 0;
+    }
+    .category-nav::-webkit-scrollbar { display: none; }
+    .category-btn {
+        scroll-snap-align: start;
+        white-space: nowrap;
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-size: 14px;
     }
 }
 
 @media (max-width: 480px) {
-    .products-grid {
-        grid-template-columns: 1fr;
+    .main-content {
+        padding: 12px;
+        padding-bottom: calc(90px + env(safe-area-inset-bottom));
     }
 
-    .formule-card-content {
+    /* Produits en liste sur très petits écrans */
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .product-card {
+        display: flex;
+        flex-direction: row;
+        border-radius: 16px;
+    }
+
+    .product-image-wrapper {
+        width: 100px;
+        height: 100px;
+        flex-shrink: 0;
+        border-radius: 16px 0 0 16px;
+    }
+
+    .product-image {
+        border-radius: 16px 0 0 16px;
+    }
+
+    .product-info {
+        flex: 1;
+        display: flex;
         flex-direction: column;
-        text-align: center;
+        justify-content: center;
+        padding: 14px;
+    }
+
+    .product-name {
+        font-size: 15px;
+        margin-bottom: 4px;
+    }
+
+    .product-footer {
+        margin-top: auto;
+    }
+
+    /* Formules compactes */
+    .formule-card-content {
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
     }
 
     .formule-image-wrapper {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto;
+        width: 70px;
+        height: 70px;
+        flex-shrink: 0;
+    }
+
+    .formule-info {
+        flex: 1;
+        text-align: left;
+    }
+
+    .formule-title {
+        font-size: 16px;
+    }
+
+    .formule-description {
+        font-size: 13px;
+        -webkit-line-clamp: 2;
+    }
+
+    /* Section titles */
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 12px;
+    }
+
+    /* Header compact */
+    .header {
+        height: 56px;
+    }
+
+    .logo img {
+        height: 32px;
+    }
+
+    /* Boutons d'action */
+    .btn-primary, .add-to-cart-btn {
+        padding: 14px 24px;
+        font-size: 15px;
+        border-radius: 14px;
+        font-weight: 600;
+    }
+}
+
+/* Animation pour les interactions tactiles */
+@media (hover: none) and (pointer: coarse) {
+    .product-card, .formule-card, .btn-primary {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .product-card:active, .formule-card:active {
+        transform: scale(0.97);
+        transition: transform 0.1s ease;
     }
 }
 
