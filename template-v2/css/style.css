@@ -1067,61 +1067,110 @@ ul {
     font-size: 18px;
 }
 
-/* Delivery Platforms */
+/* Delivery Platforms - New Big Cards */
 .platforms-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 600px;
 }
 
-.platform-btn {
+.platform-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px 24px;
+    border-radius: var(--border-radius-lg);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    min-height: 160px;
+}
+
+.platform-logo-wrapper {
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 16px 20px;
-    border-radius: var(--border-radius-sm);
-    font-weight: 600;
-    font-size: 14px;
-    transition: var(--transition);
-    text-decoration: none;
 }
 
-.platform-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.platform-btn img {
-    height: 24px;
+.platform-logo {
+    height: 28px;
     width: auto;
+    max-width: 140px;
 }
 
-.platform-btn.uber-eats {
-    background: #06C167;
+.platform-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.platform-cta {
+    font-size: 13px;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.platform-cta i {
+    font-size: 11px;
+    transition: transform 0.2s ease;
+}
+
+.platform-card:hover .platform-cta i {
+    transform: translateX(4px);
+}
+
+.platform-card.uber-eats {
+    background: linear-gradient(135deg, #142328, #1a3a3a);
     color: white;
 }
 
-.platform-btn.uber-eats:hover {
-    background: #05a857;
+.platform-card.uber-eats:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(6, 193, 103, 0.3);
 }
 
-.platform-btn.deliveroo {
-    background: #00CCBC;
+.platform-card.uber-eats .platform-logo {
+    fill: #06C167;
+}
+
+.platform-card.deliveroo {
+    background: linear-gradient(135deg, #00CCBC, #00b3a6);
     color: white;
 }
 
-.platform-btn.deliveroo:hover {
-    background: #00b3a6;
+.platform-card.deliveroo:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 204, 188, 0.4);
 }
 
-.platform-btn.just-eat {
-    background: #FF8000;
+.platform-card.just-eat {
+    background: linear-gradient(135deg, #FF8000, #e67300);
     color: white;
 }
 
-.platform-btn.just-eat:hover {
-    background: #e67300;
+.platform-card.just-eat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(255, 128, 0, 0.4);
+}
+
+@media (max-width: 480px) {
+    .platforms-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .platform-card {
+        padding: 24px 20px;
+        min-height: 130px;
+    }
+
+    .platform-name {
+        font-size: 16px;
+    }
 }
 
 /* ============================================
