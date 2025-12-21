@@ -1820,6 +1820,26 @@ if (isset($_GET['export'])) {
                 <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Gérez votre menu, ajoutez des produits, modifiez les prix et les catégories.</p>
                 <a href="products-manager.php" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"><i class="fas fa-burger"></i> Gérer le menu</a>
             </div>
+
+            <!-- Sécurité PIN -->
+            <div class="card" style="border-left: 4px solid #ef4444;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-lock" style="color: #ef4444;"></i> Code PIN (Stats & Archives)</h3>
+                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Modifiez le code PIN pour accéder aux statistiques et archives. Nécessite l'ancien PIN.</p>
+                <div id="pinChangeForm">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div>
+                            <label style="color: #9ca3af; font-size: 11px; display: block; margin-bottom: 5px;">Ancien PIN</label>
+                            <input type="password" id="oldPinInput" maxlength="8" placeholder="••••" style="width: 100%; padding: 10px; background: #2a2a3e; border: 1px solid #444; border-radius: 8px; color: #fff;">
+                        </div>
+                        <div>
+                            <label style="color: #9ca3af; font-size: 11px; display: block; margin-bottom: 5px;">Nouveau PIN (4-8 chiffres)</label>
+                            <input type="password" id="newPinInput" maxlength="8" placeholder="••••" style="width: 100%; padding: 10px; background: #2a2a3e; border: 1px solid #444; border-radius: 8px; color: #fff;">
+                        </div>
+                    </div>
+                    <button type="button" onclick="changePin()" class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"><i class="fas fa-key"></i> Changer le PIN</button>
+                    <p id="pinChangeResult" style="margin-top: 10px; font-size: 12px; display: none;"></p>
+                </div>
+            </div>
         </div>
 
         <!-- STATS -->
@@ -2102,30 +2122,173 @@ if (isset($_GET['export'])) {
         <button class="nav-btn" data-section="settings"><i class="fas fa-cog"></i><div>Réglages</div></button>
     </div>
 
+    <!-- Modal PIN -->
+    <div id="pinModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:#1a1a2e; border-radius:16px; padding:30px; max-width:320px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <div style="font-size:48px; margin-bottom:15px;">🔒</div>
+            <h3 style="margin:0 0 10px; color:#fff;">Accès restreint</h3>
+            <p style="color:#9ca3af; font-size:13px; margin-bottom:20px;">Entrez le code PIN pour accéder à cette section</p>
+            <div style="display:flex; gap:8px; justify-content:center; margin-bottom:20px;">
+                <input type="password" id="pinDigit1" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff;" onkeyup="pinInputHandler(this, 1)">
+                <input type="password" id="pinDigit2" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff;" onkeyup="pinInputHandler(this, 2)">
+                <input type="password" id="pinDigit3" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff;" onkeyup="pinInputHandler(this, 3)">
+                <input type="password" id="pinDigit4" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff;" onkeyup="pinInputHandler(this, 4)">
+            </div>
+            <p id="pinError" style="color:#ef4444; font-size:12px; margin-bottom:15px; display:none;">PIN incorrect</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="closePinModal()" style="flex:1; padding:12px; background:#333; border:none; border-radius:10px; color:#fff; cursor:pointer;">Annuler</button>
+                <button onclick="validatePin()" style="flex:1; padding:12px; background:linear-gradient(135deg,#3b82f6,#2563eb); border:none; border-radius:10px; color:#fff; cursor:pointer; font-weight:600;">Valider</button>
+            </div>
+        </div>
+    </div>
+
     <script src="notification-sound.js"></script>
     <script>
-        // Navigation
+        // PIN Protection
+        const PROTECTED_SECTIONS = ['stats', 'archives'];
+        let pinUnlocked = false;
+        let pendingSection = null;
+
+        // Vérifier le statut PIN au chargement
+        fetch('api/admin-pin.php?action=check').then(r => r.json()).then(data => {
+            pinUnlocked = data.unlocked || false;
+        }).catch(() => {});
+
+        function showPinModal(section) {
+            pendingSection = section;
+            document.getElementById('pinModal').style.display = 'flex';
+            document.getElementById('pinDigit1').focus();
+            document.getElementById('pinError').style.display = 'none';
+            ['pinDigit1','pinDigit2','pinDigit3','pinDigit4'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        function closePinModal() {
+            document.getElementById('pinModal').style.display = 'none';
+            pendingSection = null;
+        }
+
+        function pinInputHandler(input, index) {
+            if (input.value.length === 1 && index < 4) {
+                document.getElementById('pinDigit' + (index + 1)).focus();
+            }
+            if (input.value.length === 1 && index === 4) {
+                validatePin();
+            }
+            // Backspace
+            if (input.value.length === 0 && index > 1) {
+                document.getElementById('pinDigit' + (index - 1)).focus();
+            }
+        }
+
+        function validatePin() {
+            const pin = ['pinDigit1','pinDigit2','pinDigit3','pinDigit4'].map(id => document.getElementById(id).value).join('');
+            if (pin.length !== 4) return;
+
+            fetch('api/admin-pin.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: 'verify', pin })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    pinUnlocked = true;
+                    closePinModal();
+                    if (pendingSection) {
+                        actuallyNavigate(pendingSection);
+                    }
+                } else {
+                    document.getElementById('pinError').style.display = 'block';
+                    document.getElementById('pinDigit1').focus();
+                    ['pinDigit1','pinDigit2','pinDigit3','pinDigit4'].forEach(id => {
+                        document.getElementById(id).value = '';
+                        document.getElementById(id).style.borderColor = '#ef4444';
+                    });
+                    setTimeout(() => {
+                        ['pinDigit1','pinDigit2','pinDigit3','pinDigit4'].forEach(id => document.getElementById(id).style.borderColor = '#444');
+                    }, 500);
+                }
+            }).catch(() => {
+                document.getElementById('pinError').textContent = 'Erreur de connexion';
+                document.getElementById('pinError').style.display = 'block';
+            });
+        }
+
+        function actuallyNavigate(section) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-section="' + section + '"]').classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section-' + section).classList.add('active');
+            window.location.hash = section;
+            window.scrollTo(0, 0);
+        }
+
+        // Navigation avec protection PIN
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                document.getElementById('section-' + btn.dataset.section).classList.add('active');
-                window.location.hash = btn.dataset.section;
-                window.scrollTo(0, 0);
+                const section = btn.dataset.section;
+                if (PROTECTED_SECTIONS.includes(section) && !pinUnlocked) {
+                    showPinModal(section);
+                    return;
+                }
+                actuallyNavigate(section);
             });
         });
 
         // Hash navigation - supporte toutes les sections
         function navigateToSection(section) {
+            if (PROTECTED_SECTIONS.includes(section) && !pinUnlocked) {
+                showPinModal(section);
+                return;
+            }
             const btn = document.querySelector('[data-section="' + section + '"]');
-            if (btn) btn.click();
+            if (btn) actuallyNavigate(section);
         }
 
         // Charger la section depuis le hash au démarrage
         const hash = window.location.hash.replace('#', '');
         if (hash && document.querySelector('[data-section="' + hash + '"]')) {
-            navigateToSection(hash);
+            setTimeout(() => navigateToSection(hash), 100);
+        }
+
+        // Change PIN
+        function changePin() {
+            const oldPin = document.getElementById('oldPinInput').value;
+            const newPin = document.getElementById('newPinInput').value;
+            const result = document.getElementById('pinChangeResult');
+
+            if (!oldPin || oldPin.length < 4) {
+                result.textContent = 'Entrez l\'ancien PIN (4 chiffres minimum)';
+                result.style.color = '#ef4444';
+                result.style.display = 'block';
+                return;
+            }
+            if (!newPin || newPin.length < 4 || !/^\d+$/.test(newPin)) {
+                result.textContent = 'Le nouveau PIN doit contenir 4-8 chiffres';
+                result.style.color = '#ef4444';
+                result.style.display = 'block';
+                return;
+            }
+
+            fetch('api/admin-pin.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: 'change', old_pin: oldPin, new_pin: newPin })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    result.textContent = '✅ PIN modifié avec succès !';
+                    result.style.color = '#10b981';
+                    document.getElementById('oldPinInput').value = '';
+                    document.getElementById('newPinInput').value = '';
+                    pinUnlocked = false; // Force re-auth avec nouveau PIN
+                } else {
+                    result.textContent = '❌ ' + (data.message || 'Erreur');
+                    result.style.color = '#ef4444';
+                }
+                result.style.display = 'block';
+            }).catch(() => {
+                result.textContent = '❌ Erreur de connexion';
+                result.style.color = '#ef4444';
+                result.style.display = 'block';
+            });
         }
 
         // Restaurant status
