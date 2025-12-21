@@ -1386,58 +1386,6 @@ if (isset($_GET['export'])) {
                 </form>
             </div>
 
-            <!-- Couleurs du thème -->
-            <div class="card" style="border-left: 4px solid #8b5cf6;">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-palette" style="color: #8b5cf6;"></i> Couleurs du site</h3>
-
-                <?php
-                $theme = $restaurantSettings['theme'] ?? [];
-                ?>
-
-                <div style="display: grid; gap: 20px;">
-                    <!-- Couleur principale -->
-                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                        <input type="color" id="color-primary" value="<?php echo $theme['primary'] ?? '#e67e22'; ?>" style="width: 50px; height: 40px; border: none; cursor: pointer; border-radius: 8px;">
-                        <div>
-                            <strong style="font-size: 14px;">Couleur principale</strong>
-                            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Boutons, liens, prix, badges, icônes actives</p>
-                        </div>
-                    </div>
-
-                    <!-- Couleur d'accent -->
-                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                        <input type="color" id="color-accent" value="<?php echo $theme['accent'] ?? '#f39c12'; ?>" style="width: 50px; height: 40px; border: none; cursor: pointer; border-radius: 8px;">
-                        <div>
-                            <strong style="font-size: 14px;">Couleur d'accent</strong>
-                            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Survol des boutons, éléments surlignés</p>
-                        </div>
-                    </div>
-
-                    <!-- Fond de page -->
-                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                        <input type="color" id="color-background" value="<?php echo $theme['background'] ?? '#1a1a2e'; ?>" style="width: 50px; height: 40px; border: none; cursor: pointer; border-radius: 8px;">
-                        <div>
-                            <strong style="font-size: 14px;">Fond de page</strong>
-                            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Arrière-plan du site</p>
-                        </div>
-                    </div>
-
-                    <!-- Cartes produits -->
-                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                        <input type="color" id="color-cardBg" value="<?php echo $theme['cardBackground'] ?? '#252540'; ?>" style="width: 50px; height: 40px; border: none; cursor: pointer; border-radius: 8px;">
-                        <div>
-                            <strong style="font-size: 14px;">Cartes produits</strong>
-                            <p style="color: #9ca3af; font-size: 12px; margin: 4px 0 0;">Fond des cartes produits, formules, panier</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="button" onclick="saveThemeColors()" class="btn"><i class="fas fa-save"></i> Enregistrer</button>
-                    <button type="button" onclick="resetThemeColors()" class="btn btn-gray"><i class="fas fa-undo"></i> Réinitialiser</button>
-                </div>
-            </div>
-
             <!-- Livraison & Plateformes -->
             <div class="card" style="border-left: 4px solid #f59e0b;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-truck" style="color: #f59e0b;"></i> Livraison & Plateformes</h3>
@@ -2709,47 +2657,6 @@ function deletePlatform(platformId) {
         }
     })
     .catch(() => showToast('Erreur réseau', 'error'));
-}
-
-// ===== Gestion Couleurs du Thème =====
-function saveThemeColors() {
-    const colors = {
-        primary: document.getElementById('color-primary').value,
-        accent: document.getElementById('color-accent').value,
-        background: document.getElementById('color-background').value,
-        cardBackground: document.getElementById('color-cardBg').value
-    };
-
-    fetch('api/restaurant-status.php?action=save_theme', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(colors)
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            showToast('Couleurs sauvegardées !');
-        } else {
-            showToast(data.error || 'Erreur', 'error');
-        }
-    })
-    .catch(() => showToast('Erreur réseau', 'error'));
-}
-
-function resetThemeColors() {
-    const defaults = {
-        primary: '#e67e22',
-        accent: '#f39c12',
-        background: '#1a1a2e',
-        cardBackground: '#252540'
-    };
-
-    document.getElementById('color-primary').value = defaults.primary;
-    document.getElementById('color-accent').value = defaults.accent;
-    document.getElementById('color-background').value = defaults.background;
-    document.getElementById('color-cardBg').value = defaults.cardBackground;
-
-    showToast('Couleurs réinitialisées. Cliquez sur Enregistrer pour appliquer.');
 }
 
 // ===== Export CSV par mois =====
