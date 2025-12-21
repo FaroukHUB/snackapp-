@@ -144,12 +144,12 @@ class OrderRepository {
                     'total_price' => ($item['price'] ?? 0) * ($item['quantity'] ?? 1)
                 ]);
 
-                // Ajouter les suppléments
+                // Ajouter les suppléments (sans foreign key pour éviter les erreurs)
                 if (!empty($item['supplements'])) {
                     foreach ($item['supplements'] as $sup) {
                         Database::insert('order_item_supplements', [
                             'order_item_id' => $itemId,
-                            'supplement_id' => $sup['id'] ?? null,
+                            'supplement_id' => null, // On ne référence pas la table supplements
                             'supplement_name' => $sup['name'] ?? (is_string($sup) ? $sup : ''),
                             'price' => $sup['price'] ?? 0
                         ]);
