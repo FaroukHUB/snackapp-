@@ -15,6 +15,9 @@ const Config = {
     // State
     isLoaded: false,
 
+    // Cache for computed values
+    _cache: {},
+
     // Paths - adjust based on your setup
     basePath: '../config/',
 
@@ -181,8 +184,11 @@ const Config = {
      * Get drinks for menu selection
      */
     getDrinks() {
-        const drinksCategory = this.menu?.categories?.find(c => c.id === 'boissons');
-        return (drinksCategory?.items || []).filter(d => d.status === 'available');
+        if (!this._cache.drinks) {
+            const drinksCategory = this.menu?.categories?.find(c => c.id === 'boissons');
+            this._cache.drinks = (drinksCategory?.items || []).filter(d => d.status === 'available');
+        }
+        return this._cache.drinks;
     },
 
     /**
@@ -228,7 +234,10 @@ const Config = {
      * Get available formules
      */
     getAvailableFormules() {
-        return this.formules.filter(f => f.status === 'available');
+        if (!this._cache.availableFormules) {
+            this._cache.availableFormules = this.formules.filter(f => f.status === 'available');
+        }
+        return this._cache.availableFormules;
     },
 
     /**

@@ -1,11 +1,14 @@
 <?php
 // products-manager.php
-session_start();
+require_once __DIR__ . '/bootstrap.php';
+requireAdmin();
+$csrfToken = getCsrfToken();
 ?><!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="csrf-token" content="<?= e($csrfToken) ?>">
   <title>Admin • Produits</title>
 
   <style>
@@ -687,6 +690,16 @@ session_start();
       }[c]));
     }
 
+    // CSRF token for secure requests
+    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    function appendCsrf(formData) {
+      if (formData instanceof FormData) {
+        formData.append('csrf_token', CSRF_TOKEN);
+      }
+      return formData;
+    }
+
     function openModal(id){
       const overlay = $(id);
       overlay.setAttribute("aria-hidden","false");
@@ -921,7 +934,6 @@ session_start();
         // Si une image est sélectionnée, utiliser FormData
         if (imageFile) {
           const formData = new FormData();
-          formData.set("action", "update_product");
           formData.set("product_id", productId);
           formData.set("name", name);
           formData.set("description", description);
@@ -932,9 +944,7 @@ session_start();
           formData.set("supplements", JSON.stringify(supplements));
           formData.set("image", imageFile);
 
-          const res = await fetch(API, { method: "POST", body: formData });
-          const data = await res.json().catch(() => null);
-          if (!res.ok || !data || data.success !== true) throw new Error(data?.message ?? "Erreur API");
+          await apiPostMultipart(formData, "update_product");
         } else {
           await apiPostJson({
             action: "update_product",
@@ -971,29 +981,41 @@ session_start();
     });
 
     // ===== API =====
+    function getErrorMessage(res, data) {
+      if (data?.message) return data.message;
+      if (res.status === 401) return "Session expirée. Veuillez vous reconnecter.";
+      if (res.status === 403) return "Accès refusé. Token CSRF invalide.";
+      if (res.status === 404) return "Ressource introuvable.";
+      if (res.status >= 500) return "Erreur serveur. Réessayez plus tard.";
+      if (!navigator.onLine) return "Pas de connexion internet.";
+      return "Erreur de communication avec le serveur.";
+    }
+
     async function apiGet(){
       const res = await fetch(API, { method: "GET" });
       const data = await res.json().catch(()=>null);
-      if (!res.ok || !data || data.success !== true) throw new Error(data?.message ?? "Erreur API");
+      if (!res.ok || !data || data.success !== true) throw new Error(getErrorMessage(res, data));
       return data;
     }
 
     async function apiPostJson(payload){
+      payload.csrf_token = CSRF_TOKEN;
       const res = await fetch(API, {
         method: "POST",
-        headers: {"Content-Type":"application/json"},
+        headers: {"Content-Type":"application/json", "X-CSRF-Token": CSRF_TOKEN},
         body: JSON.stringify(payload)
       });
       const data = await res.json().catch(()=>null);
-      if (!res.ok || !data || data.success !== true) throw new Error(data?.message ?? "Erreur API");
+      if (!res.ok || !data || data.success !== true) throw new Error(getErrorMessage(res, data));
       return data;
     }
 
-    async function apiPostMultipart(formData){
-      formData.set("action", "add_product");
+    async function apiPostMultipart(formData, action = null){
+      if (action) formData.set("action", action);
+      formData.set("csrf_token", CSRF_TOKEN);
       const res = await fetch(API, { method:"POST", body: formData });
       const data = await res.json().catch(()=>null);
-      if (!res.ok || !data || data.success !== true) throw new Error(data?.message ?? "Erreur API");
+      if (!res.ok || !data || data.success !== true) throw new Error(getErrorMessage(res, data));
       return data;
     }
 
@@ -1307,7 +1329,6 @@ session_start();
 
       try {
         const formData = new FormData();
-        formData.set("action", formuleId ? "update_formule" : "add_formule");
         if (formuleId) formData.set("formule_id", formuleId);
         formData.set("name", name);
         formData.set("description", description);
@@ -1318,9 +1339,7 @@ session_start();
         formData.set("includes", JSON.stringify(includes));
         if (imageFile) formData.set("image", imageFile);
 
-        const res = await fetch(API, { method: "POST", body: formData });
-        const data = await res.json().catch(() => null);
-        if (!res.ok || !data || data.success !== true) throw new Error(data?.message ?? "Erreur API");
+        await apiPostMultipart(formData, formuleId ? "update_formule" : "add_formule");
 
         toast("success", formuleId ? "Formule modifiée" : "Formule ajoutée", `"${name}" a été enregistrée.`);
         closeModal($("#modalFormule"));

@@ -59,7 +59,7 @@ function handleImageUpload(string $baseId): ?string {
         jsonError('Échec sauvegarde image');
     }
 
-    return '/images/uploads/' . $filename;
+    return 'images/uploads/' . $filename;
 }
 
 /* =========================
@@ -149,6 +149,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 // Vérifier l'authentification admin pour les POST
 if (!isAdminLoggedIn()) {
     jsonError('Non autorisé', 401);
+}
+
+// Vérifier le token CSRF
+$csrfToken = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+if (!$csrfToken) {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $csrfToken = $input['csrf_token'] ?? null;
+}
+if (!validateCsrfToken($csrfToken)) {
+    jsonError('Token CSRF invalide', 403);
 }
 
 $input = readInput();

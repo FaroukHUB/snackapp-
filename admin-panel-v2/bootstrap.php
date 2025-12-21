@@ -119,3 +119,42 @@ function jsonError(string $message, int $statusCode = 400): void {
 function jsonSuccess(array $data = [], string $message = 'OK'): void {
     jsonResponse(array_merge(['success' => true, 'message' => $message], $data));
 }
+
+/**
+ * CSRF Protection
+ */
+function generateCsrfToken(): string {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function getCsrfToken(): string {
+    return $_SESSION['csrf_token'] ?? generateCsrfToken();
+}
+
+function validateCsrfToken(?string $token): bool {
+    if (empty($token) || empty($_SESSION['csrf_token'])) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
+function requireCsrf(): void {
+    $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+    if (!validateCsrfToken($token)) {
+        if (str_contains($_SERVER['CONTENT_TYPE'] ?? '', 'json')) {
+            jsonError('Token CSRF invalide', 403);
+        }
+        http_response_code(403);
+        die('Token CSRF invalide');
+    }
+}
+
+/**
+ * Helper: Escape HTML pour éviter XSS
+ */
+function e(string $str): string {
+    return htmlspecialchars($str, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
