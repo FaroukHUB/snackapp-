@@ -3850,46 +3850,10 @@ ul {
     }
 }
 
-/* Featured Section */
+/* Featured Section - Grid layout on mobile (NO horizontal scroll) */
 @media (max-width: 768px) {
     .featured-section {
         margin-bottom: 24px;
-    }
-
-    .featured-grid {
-        display: flex;
-        overflow-x: auto;
-        gap: 12px;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 4px;
-        margin: 0 -16px;
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-
-    .featured-grid::-webkit-scrollbar {
-        display: none;
-    }
-
-    .featured-grid .product-card {
-        min-width: 150px;
-        max-width: 150px;
-        scroll-snap-align: start;
-        flex-shrink: 0;
-    }
-}
-
-@media (max-width: 480px) {
-    .featured-grid {
-        margin: 0 -12px;
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-
-    .featured-grid .product-card {
-        min-width: 140px;
-        max-width: 140px;
     }
 }
 
