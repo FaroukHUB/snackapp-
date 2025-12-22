@@ -310,25 +310,42 @@ function addOrder(bool $useMySQL) {
         $customers = loadData('customers.json') ?? [];
         $phone = $requestData['customer_phone'];
         $found = false;
+        $customerId = null;
+        $isNewCustomer = false;
 
         foreach ($customers as &$c) {
             if ($c['phone'] === $phone) {
                 $c['orders_count'] = ($c['orders_count'] ?? 0) + 1;
                 $c['total_spent'] = ($c['total_spent'] ?? 0) + $requestData['total'];
+                $c['loyalty_points'] = ($c['loyalty_points'] ?? 0) + (int)$requestData['total'];
                 $c['last_order'] = date('Y-m-d H:i:s');
                 $c['name'] = $requestData['customer_name'] ?? $c['name'];
+                $customerId = $c['customer_id'] ?? null;
                 $found = true;
                 break;
             }
         }
 
         if (!$found) {
+            // Generate simple customer ID: MAR-XXXX
+            $maxId = 0;
+            foreach ($customers as $c) {
+                if (isset($c['customer_id']) && preg_match('/MAR-(\d+)/', $c['customer_id'], $m)) {
+                    $maxId = max($maxId, (int)$m[1]);
+                }
+            }
+            $customerId = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
+            $isNewCustomer = true;
+
             $customers[] = [
+                'customer_id' => $customerId,
                 'name' => $requestData['customer_name'] ?? 'Client',
                 'phone' => $phone,
                 'orders_count' => 1,
                 'total_spent' => $requestData['total'],
-                'last_order' => date('Y-m-d H:i:s')
+                'loyalty_points' => (int)$requestData['total'],
+                'last_order' => date('Y-m-d H:i:s'),
+                'registered_at' => date('Y-m-d H:i:s')
             ];
         }
 
@@ -336,7 +353,9 @@ function addOrder(bool $useMySQL) {
 
         jsonSuccess([
             'order_id' => $orderId,
-            'order' => $newOrder
+            'order' => $newOrder,
+            'customer_id' => $customerId,
+            'is_new_customer' => $isNewCustomer
         ]);
     }
 }

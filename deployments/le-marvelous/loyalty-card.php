@@ -22,13 +22,10 @@ $primaryColor = $restaurantConfig['theme']['primary'] ?? $restaurantConfig['bran
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'lookup') {
     header('Content-Type: application/json');
 
-    $phone = trim($_POST['phone'] ?? '');
+    $input = trim($_POST['phone'] ?? '');
 
-    // Clean phone number (remove spaces, dashes, etc.)
-    $phone = preg_replace('/[^0-9+]/', '', $phone);
-
-    if (empty($phone) || strlen($phone) < 6) {
-        echo json_encode(['success' => false, 'message' => 'Numero de telephone invalide']);
+    if (empty($input) || strlen($input) < 4) {
+        echo json_encode(['success' => false, 'message' => 'Entrez votre numero de telephone ou votre ID client (MAR-XXXX)']);
         exit;
     }
 
@@ -38,17 +35,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $customers = json_decode(file_get_contents($dataDir . 'customers.json'), true) ?: [];
     }
 
-    // Search for customer by phone (partial match at end)
     $found = null;
-    foreach ($customers as $customer) {
-        $customerPhone = preg_replace('/[^0-9+]/', '', $customer['phone'] ?? '');
 
-        // Match if phone ends with the search term or exact match
-        if ($customerPhone === $phone ||
-            substr($customerPhone, -strlen($phone)) === $phone ||
-            substr($phone, -strlen($customerPhone)) === $customerPhone) {
-            $found = $customer;
-            break;
+    // Check if input is a customer ID (MAR-XXXX format)
+    if (preg_match('/^MAR-\d{4}$/i', strtoupper($input))) {
+        $searchId = strtoupper($input);
+        foreach ($customers as $customer) {
+            if (strtoupper($customer['customer_id'] ?? '') === $searchId) {
+                $found = $customer;
+                break;
+            }
+        }
+    } else {
+        // Search by phone number
+        $phone = preg_replace('/[^0-9+]/', '', $input);
+
+        if (strlen($phone) >= 6) {
+            foreach ($customers as $customer) {
+                $customerPhone = preg_replace('/[^0-9+]/', '', $customer['phone'] ?? '');
+
+                // Match if phone ends with the search term or exact match
+                if ($customerPhone === $phone ||
+                    substr($customerPhone, -strlen($phone)) === $phone ||
+                    substr($phone, -strlen($customerPhone)) === $customerPhone) {
+                    $found = $customer;
+                    break;
+                }
+            }
         }
     }
 
@@ -56,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         echo json_encode([
             'success' => true,
             'customer' => [
+                'customer_id' => $found['customer_id'] ?? null,
                 'name' => $found['name'] ?? 'Client',
                 'points' => (int)($found['loyalty_points'] ?? 0),
                 'orders_count' => (int)($found['orders_count'] ?? 0),
@@ -67,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } else {
         echo json_encode([
             'success' => false,
-            'message' => 'Aucun compte trouve avec ce numero. Passez votre premiere commande pour creer votre carte fidelite !'
+            'message' => 'Aucun compte trouve. Passez votre premiere commande pour obtenir votre carte fidelite !'
         ]);
     }
     exit;
@@ -535,16 +549,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <i class="fas fa-id-card"></i>
             </div>
             <h2 class="lookup-title">Consultez vos points</h2>
-            <p class="lookup-subtitle">Entrez votre numero de telephone pour voir votre solde de points fidelite</p>
+            <p class="lookup-subtitle">Entrez votre numero de telephone ou votre ID client</p>
 
             <form id="lookupForm">
                 <div class="phone-input-group">
-                    <i class="fas fa-phone phone-icon"></i>
-                    <input type="tel"
+                    <i class="fas fa-user phone-icon"></i>
+                    <input type="text"
                            class="phone-input"
                            id="phoneInput"
-                           placeholder="06 12 34 56 78"
-                           autocomplete="tel"
+                           placeholder="Tel: 0540... ou ID: MAR-0001"
+                           autocomplete="off"
                            required>
                 </div>
                 <button type="submit" class="lookup-btn" id="lookupBtn">
@@ -579,6 +593,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <div class="points-label">Points</div>
                 </div>
                 <div class="card-customer" id="customerName">Client</div>
+                <div id="customerIdDisplay" style="margin-top: 12px; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 2px; display: inline-block;"></div>
             </div>
 
             <!-- Stats -->
@@ -693,6 +708,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             document.getElementById('customerName').textContent = customer.name || 'Client';
             document.getElementById('ordersCount').textContent = customer.orders_count || 0;
             document.getElementById('totalSpent').textContent = Math.round(customer.total_spent || 0);
+
+            // Show customer ID
+            const idDisplay = document.getElementById('customerIdDisplay');
+            if (customer.customer_id) {
+                idDisplay.textContent = 'ID: ' + customer.customer_id;
+                idDisplay.style.display = 'inline-block';
+            } else {
+                idDisplay.style.display = 'none';
+            }
 
             // Update reward status based on points
             const points = customer.points || 0;

@@ -839,6 +839,13 @@
                 <a href="../loyalty-card.php" style="display: block; margin-top: 6px; color: white; font-size: 12px; text-decoration: underline;">Voir ma carte fidélité</a>
             </div>
 
+            <!-- Customer ID (for new customers) -->
+            <div id="customerIdSection" style="display: none; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border: 2px solid #0ea5e9; border-radius: 12px; padding: 16px; margin: 12px 0; text-align: center;">
+                <p style="color: #0369a1; font-size: 13px; margin: 0 0 8px 0;">🎉 Bienvenue ! Votre ID fidélité :</p>
+                <p id="customerIdValue" style="color: #0c4a6e; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: 2px;">MAR-0001</p>
+                <p style="color: #0369a1; font-size: 11px; margin: 8px 0 0 0;">Conservez cet ID pour suivre vos points</p>
+            </div>
+
             <!-- Actions - More Prominent -->
             <div class="confirmation-actions">
                 <!-- Primary Action: Return to Menu -->
@@ -1146,7 +1153,9 @@
                     if (result.success || result.order_id) {
                         // Show confirmation with real order number from API
                         const orderNumber = result.order_id || result.order?.order_number || 'XXXX';
-                        this.showConfirmation(orderNumber, name, phone, address, note, savedItems, savedSubtotal, savedDiscount);
+                        const customerId = result.customer_id || null;
+                        const isNewCustomer = result.is_new_customer || false;
+                        this.showConfirmation(orderNumber, name, phone, address, note, savedItems, savedSubtotal, savedDiscount, 0, customerId, isNewCustomer);
                     } else {
                         // API returns 'message' not 'error'
                         throw new Error(result.message || result.error || 'Erreur lors de la commande');
@@ -1160,9 +1169,18 @@
                 }
             },
 
-            showConfirmation(orderNumber, customerName, customerPhone, customerAddress, note, items, subtotal, discount, loyaltyPoints = 0) {
+            showConfirmation(orderNumber, customerName, customerPhone, customerAddress, note, items, subtotal, discount, loyaltyPoints = 0, customerId = null, isNewCustomer = false) {
                 // Update modal
                 document.getElementById('confirmationOrderNumber').textContent = `#${orderNumber}`;
+
+                // Show customer ID for new customers
+                const customerIdSection = document.getElementById('customerIdSection');
+                if (customerId && isNewCustomer) {
+                    document.getElementById('customerIdValue').textContent = customerId;
+                    customerIdSection.style.display = 'block';
+                } else {
+                    customerIdSection.style.display = 'none';
+                }
 
                 // Show loyalty points if earned
                 const loyaltyDiv = document.getElementById('loyaltyEarned');
