@@ -113,13 +113,38 @@ const Products = {
     },
 
     /**
-     * Apply section alternate backgrounds using theme color
+     * Apply alternating section backgrounds using theme color
+     * Creates visual separation between categories
      */
     applySectionBackgrounds() {
         const primaryColor = Config.restaurant?.theme?.primary || '#e63946';
-        // Create a very light tint of the primary color (5% opacity)
-        const lightTint = this.hexToRgba(primaryColor, 0.03);
-        document.documentElement.style.setProperty('--section-alt-bg', lightTint);
+        const sections = document.querySelectorAll('.product-section');
+
+        // Create CSS variables for section styling
+        const root = document.documentElement;
+        root.style.setProperty('--section-alt-bg', this.hexToRgba(primaryColor, 0.04));
+        root.style.setProperty('--section-border-accent', this.hexToRgba(primaryColor, 0.15));
+
+        // Apply alternating backgrounds to sections
+        sections.forEach((section, index) => {
+            if (index % 2 === 1) {
+                // Odd sections get subtle colored background
+                section.style.background = this.hexToRgba(primaryColor, 0.04);
+                section.style.marginLeft = '-16px';
+                section.style.marginRight = '-16px';
+                section.style.paddingLeft = '16px';
+                section.style.paddingRight = '16px';
+                section.style.borderRadius = '0';
+            }
+
+            // Add accent border to section titles
+            const title = section.querySelector('h2');
+            if (title) {
+                title.style.borderLeft = `4px solid ${primaryColor}`;
+                title.style.paddingLeft = '12px';
+                title.style.marginLeft = '-4px';
+            }
+        });
     },
 
     /**

@@ -655,30 +655,32 @@ ul {
    PRODUCT SECTION
    ============================================ */
 .product-section {
-    margin-bottom: 64px;
-    padding-bottom: 48px;
-    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: 32px;
+    padding: 24px 0;
+    border-bottom: none;
     scroll-margin-top: calc(var(--header-height) + 24px);
+    transition: background 0.3s ease;
 }
 
 .product-section:last-child {
-    border-bottom: none;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 
 .product-section h2 {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--gray-900);
     margin-bottom: 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    transition: all 0.3s ease;
 }
 
 .product-section h2 i {
     color: var(--primary);
-    font-size: 20px;
+    font-size: 18px;
+    transition: color 0.3s ease;
 }
 
 .products-grid {
@@ -2808,33 +2810,10 @@ ul {
 }
 
 /* ============================================
-   PRODUCT SECTION WITH SEPARATION
+   PRODUCT SECTION - ALTERNATING BACKGROUNDS
+   Backgrounds are applied via JS based on theme color
    ============================================ */
-.product-section {
-    margin-bottom: 64px;
-    padding-bottom: 48px;
-    border-bottom: 1px solid var(--gray-200);
-    scroll-margin-top: calc(var(--header-height) + 24px);
-}
-
-.product-section:last-child {
-    border-bottom: none;
-}
-
-.product-section h2 {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.product-section h2 i {
-    color: var(--primary);
-    font-size: 18px;
-}
+/* Base styles already defined above - this section removed to avoid conflicts */
 
 /* ============================================
    FORMULES - SMALLER CARDS
@@ -2956,18 +2935,23 @@ ul {
     }
 
     .product-section {
-        margin-bottom: 48px;
-        padding-bottom: 32px;
+        margin-bottom: 24px;
+        padding: 20px 0;
     }
 
     .product-section h2 {
-        font-size: 18px;
+        font-size: 16px;
+        gap: 8px;
+    }
+
+    .product-section h2 i {
+        font-size: 16px;
     }
 
     .featured-section,
     .services-section {
-        margin-bottom: 48px;
-        padding-bottom: 32px;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
     }
 }
 
