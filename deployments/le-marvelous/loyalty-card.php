@@ -2,11 +2,12 @@
 /**
  * Loyalty Card - Customer Points Lookup
  * Le Marvelous - SnackApp
+ * Uses MySQL via CustomerRepository
  */
 
-// Configuration
-$useMySQL = false;
-$dataDir = __DIR__ . '/admin-panel-v2/data/';
+// Load bootstrap for MySQL access
+require_once __DIR__ . '/admin-panel-v2/bootstrap.php';
+
 $configDir = __DIR__ . '/config/';
 
 // Load restaurant config
@@ -25,60 +26,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $input = trim($_POST['phone'] ?? '');
 
     if (empty($input) || strlen($input) < 4) {
-        echo json_encode(['success' => false, 'message' => 'Entrez votre numero de telephone ou votre code fidelite (MAR-XXXX)']);
+        echo json_encode(['success' => false, 'message' => 'Entrez votre numero de telephone ou votre code fidelite (SNACK-XXXX)']);
         exit;
-    }
-
-    // Load customers
-    $customers = [];
-    if (file_exists($dataDir . 'customers.json')) {
-        $customers = json_decode(file_get_contents($dataDir . 'customers.json'), true) ?: [];
     }
 
     $found = null;
 
-    // Check if input is a loyalty code (MAR-XXXX format)
-    if (preg_match('/^MAR-\d{4}$/i', strtoupper($input))) {
+    // Check if input is a loyalty code (SNACK-XXXX format)
+    if (preg_match('/^SNACK-[A-Z0-9]{4}$/i', strtoupper($input))) {
         $searchCode = strtoupper($input);
-        foreach ($customers as $customer) {
-            if (strtoupper($customer['loyalty_code'] ?? '') === $searchCode) {
-                $found = $customer;
-                break;
-            }
-        }
+        $found = CustomerRepository::getByLoyaltyCode($searchCode);
     } else {
-        // Search by phone number
+        // Search by phone number - try exact match first
         $phone = preg_replace('/[^0-9+]/', '', $input);
 
         if (strlen($phone) >= 6) {
-            foreach ($customers as $customer) {
-                $customerPhone = preg_replace('/[^0-9+]/', '', $customer['phone'] ?? '');
+            // Try exact match
+            $found = CustomerRepository::getByPhone(SNACK_RESTAURANT_ID, $phone);
 
-                // Match if phone ends with the search term or exact match
-                if ($customerPhone === $phone ||
-                    substr($customerPhone, -strlen($phone)) === $phone ||
-                    substr($phone, -strlen($customerPhone)) === $customerPhone) {
-                    $found = $customer;
-                    break;
+            // If not found, try flexible matching via search
+            if (!$found) {
+                $results = CustomerRepository::search(SNACK_RESTAURANT_ID, $phone);
+                if (!empty($results)) {
+                    // Find best match (phone ends with search term)
+                    foreach ($results as $customer) {
+                        $customerPhone = preg_replace('/[^0-9+]/', '', $customer['phone'] ?? '');
+                        if (substr($customerPhone, -strlen($phone)) === $phone ||
+                            substr($phone, -strlen($customerPhone)) === $customerPhone) {
+                            $found = $customer;
+                            break;
+                        }
+                    }
                 }
             }
         }
     }
 
     if ($found) {
-        // Get loyalty_code
-        $loyaltyCode = $found['loyalty_code'] ?? null;
-
         echo json_encode([
             'success' => true,
             'customer' => [
-                'loyalty_code' => $loyaltyCode,
+                'loyalty_code' => $found['loyalty_code'] ?? null,
                 'name' => $found['name'] ?? 'Client',
                 'points' => (int)($found['loyalty_points'] ?? 0),
                 'orders_count' => (int)($found['orders_count'] ?? 0),
                 'total_spent' => (float)($found['total_spent'] ?? 0),
-                'last_order' => $found['last_order'] ?? null,
-                'member_since' => $found['registered_at'] ?? null
+                'last_order' => $found['last_order_at'] ?? null,
+                'member_since' => $found['created_at'] ?? null
             ]
         ]);
     } else {
@@ -560,7 +554,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <input type="text"
                            class="phone-input"
                            id="phoneInput"
-                           placeholder="Tel: 0540... ou Code: MAR-0001"
+                           placeholder="Tel: 0540... ou Code: SNACK-XXXX"
                            autocomplete="off"
                            required>
                 </div>
