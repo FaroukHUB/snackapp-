@@ -136,14 +136,20 @@ class OrderNotificationSystem {
         `;
 
         const customerName = order.customer_name || 'Nouveau client';
-        const total = (typeof order.total === 'number') ? order.total.toFixed(2) : '0.00';
+        // Fix: Parse total properly - handle string, number, or undefined
+        let totalNum = parseFloat(order.total) || 0;
+        // Round to integer for DA (no decimals in Algerian Dinars)
+        const total = Math.round(totalNum);
+
+        // Count items for display
+        const itemsCount = (order.items || []).reduce((sum, item) => sum + (item.quantity || 1), 0);
 
         modal.innerHTML = `
             <div style="background:#2a2a3e;padding:40px;border-radius:20px;text-align:center;max-width:400px;" onclick="event.stopPropagation()">
                 <div style="font-size:80px">🔔</div>
                 <h2 style="color:#fff;margin:15px 0;">NOUVELLE COMMANDE</h2>
                 <p style="font-size:24px;color:#fff;font-weight:bold;margin:10px 0;">${customerName}</p>
-                <p style="color:#9ca3af;font-size:12px;margin:5px 0;">#${order.id}</p>
+                <p style="color:#9ca3af;font-size:12px;margin:5px 0;">#${order.id} • ${itemsCount} article${itemsCount > 1 ? 's' : ''}</p>
                 <p style="font-size:36px;color:#10b981;font-weight:bold;margin:20px 0;">${total} DA</p>
                 <button onclick="orderNotificationSystem.acceptOrder()"
                     style="padding:15px 40px;border-radius:50px;background:#10b981;color:white;border:none;font-size:18px;cursor:pointer;">

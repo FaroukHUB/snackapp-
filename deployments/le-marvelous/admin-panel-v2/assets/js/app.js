@@ -162,7 +162,7 @@ function renderOrders(orders) {
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-2xl font-bold text-white">${order.total} DA</div>
+                    <div class="text-2xl font-bold text-white">${Math.round(parseFloat(order.total) || 0)} DA</div>
                     ${order.estimated_time ? `
                         <div class="text-sm text-gray-400 mt-1">
                             <i class="fas fa-hourglass-half mr-1"></i>${order.estimated_time} min
@@ -175,8 +175,8 @@ function renderOrders(orders) {
                 <div class="space-y-2">
                     ${order.items.map(item => `
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-300">${item.quantity}x ${item.name}</span>
-                            <span class="text-gray-400">${item.price} DA</span>
+                            <span class="text-gray-300">${item.quantity || 1}x ${item.name}</span>
+                            <span class="text-gray-400">${Math.round(parseFloat(item.price) || 0)} DA</span>
                         </div>
                     `).join('')}
                 </div>
@@ -349,15 +349,15 @@ function showOrderDetails(orderId) {
                 <div class="space-y-2">
                     ${order.items.map(item => `
                         <div class="flex justify-between">
-                            <span class="text-gray-300">${item.quantity}x ${item.name}</span>
-                            <span class="text-white">${item.price} DA</span>
+                            <span class="text-gray-300">${item.quantity || 1}x ${item.name}</span>
+                            <span class="text-white">${Math.round(parseFloat(item.price) || 0)} DA</span>
                         </div>
                     `).join('')}
                 </div>
             </div>
             <div class="border-t border-white/10 pt-4 flex items-center justify-between">
                 <span class="text-gray-400 font-semibold">Total</span>
-                <span class="text-2xl font-bold text-white">${order.total} DA</span>
+                <span class="text-2xl font-bold text-white">${Math.round(parseFloat(order.total) || 0)} DA</span>
             </div>
         </div>
     `;

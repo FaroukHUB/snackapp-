@@ -82,9 +82,14 @@ const Cart = {
             });
         }
 
-        this.save();
-        this.updateUI();
+        // Show toast FIRST for instant feedback
         this.showAddedToast(item.name);
+
+        // Save and update UI asynchronously for better perceived performance
+        requestAnimationFrame(() => {
+            this.save();
+            this.updateUI();
+        });
 
         return true;
     },
@@ -216,36 +221,55 @@ const Cart = {
         return this.items.length === 0;
     },
 
+    // Cached DOM references for performance
+    _cachedElements: null,
+
     /**
-     * Update all UI elements
+     * Get cached DOM elements (lazy initialization)
+     */
+    getCachedElements() {
+        if (!this._cachedElements) {
+            this._cachedElements = {
+                badge: document.getElementById('cartBadge'),
+                total: document.getElementById('cartTotal'),
+                miniTotal: document.getElementById('miniCartTotal'),
+                miniCartItems: document.getElementById('miniCartItems')
+            };
+        }
+        return this._cachedElements;
+    },
+
+    /**
+     * Update all UI elements (optimized)
      */
     updateUI() {
-        // Update badge
-        const badge = document.getElementById('cartBadge');
-        if (badge) {
-            const count = this.getItemCount();
-            badge.textContent = count;
-            badge.dataset.count = count;
+        const els = this.getCachedElements();
+        const count = this.getItemCount();
+        const subtotal = this.getSubtotal();
+        const formattedTotal = Config.formatPrice(subtotal);
+
+        // Batch DOM updates
+        if (els.badge) {
+            els.badge.textContent = count;
+            els.badge.dataset.count = count;
         }
 
-        // Update total in header
-        const total = document.getElementById('cartTotal');
-        if (total) {
-            total.textContent = Config.formatPrice(this.getSubtotal());
+        if (els.total) {
+            els.total.textContent = formattedTotal;
         }
 
-        // Update mini cart total
-        const miniTotal = document.getElementById('miniCartTotal');
-        if (miniTotal) {
-            miniTotal.textContent = Config.formatPrice(this.getSubtotal());
+        if (els.miniTotal) {
+            els.miniTotal.textContent = formattedTotal;
         }
 
-        // Update mini cart items
-        this.renderMiniCart();
+        // Update mini cart items (only if visible/exists)
+        if (els.miniCartItems) {
+            this.renderMiniCart();
+        }
 
         // Call custom callback if defined
         if (typeof this.onUpdate === 'function') {
-            this.onUpdate(this.items, this.getSubtotal());
+            this.onUpdate(this.items, subtotal);
         }
     },
 

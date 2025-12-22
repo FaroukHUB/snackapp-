@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Votre Panier - Finaliser la Commande | Fabrik Burger</title>
-    <meta name="description" content="Finalisez votre commande chez Fabrik Burger. Vérifiez votre panier et validez pour un retrait Click & Collect rapide.">
+    <title>Votre Panier - Finaliser la Commande | Le Marvelous</title>
+    <meta name="description" content="Finalisez votre commande chez Le Marvelous. Vérifiez votre panier et validez pour un retrait Click & Collect rapide.">
     <meta name="robots" content="noindex, nofollow">
 
     <!-- Favicon & Theme -->
-    <link rel="icon" type="image/svg+xml" href="../images/fabriklogo.svg">
+    <link rel="icon" type="image/svg+xml" href="../images/logo.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="../images/apple-touch-icon.png">
-    <meta name="theme-color" content="#e63946">
+    <meta name="theme-color" content="#2ec4b6">
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
@@ -599,6 +599,68 @@
                 grid-template-columns: 1fr;
             }
 
+            /* Mobile Confirmation Modal - Improved */
+            .confirmation-modal {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            .confirmation-content {
+                width: 100%;
+                max-width: 100%;
+                border-radius: 24px 24px 0 0;
+                padding: 24px 20px 32px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .confirmation-icon {
+                width: 64px;
+                height: 64px;
+                font-size: 28px;
+                margin-bottom: 16px;
+            }
+
+            .confirmation-content h2 {
+                font-size: 20px;
+            }
+
+            .confirmation-content .order-number {
+                font-size: 32px;
+                margin: 12px 0;
+            }
+
+            .google-review-prompt {
+                padding: 12px !important;
+                margin: 12px 0 !important;
+            }
+
+            .google-review-prompt p {
+                font-size: 12px !important;
+                margin-bottom: 8px !important;
+            }
+
+            .google-review-btn {
+                padding: 10px 16px !important;
+                font-size: 13px !important;
+            }
+
+            .confirmation-actions {
+                margin-top: 16px;
+                gap: 10px;
+            }
+
+            .btn-whatsapp, .btn-secondary {
+                padding: 16px;
+                font-size: 15px;
+            }
+
+            .btn-secondary {
+                background: var(--primary);
+                color: white;
+                font-weight: 700;
+            }
+
             .upsell-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -747,39 +809,51 @@
     <!-- Confirmation Modal -->
     <div class="confirmation-modal" id="confirmationModal">
         <div class="confirmation-content">
+            <!-- Success Animation -->
             <div class="confirmation-icon">
                 <i class="fas fa-check"></i>
             </div>
-            <h2>Commande envoyée !</h2>
-            <p>Votre commande a bien été transmise</p>
+
+            <h2>Commande confirmée !</h2>
+            <p style="color: var(--gray-500); font-size: 14px;">Votre commande a bien été transmise au restaurant</p>
+
+            <!-- Order Number - Big & Prominent -->
             <div class="order-number" id="confirmationOrderNumber">#0000</div>
-            <p>Temps d'attente estimé : <strong>15-20 min</strong></p>
+
+            <!-- Wait Time -->
+            <div style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 12px 20px; border-radius: 12px; margin: 16px 0; display: inline-flex; align-items: center; gap: 10px;">
+                <i class="fas fa-clock"></i>
+                <span><strong>15-20 min</strong> d'attente estimé</span>
+            </div>
 
             <!-- Loyalty Points Earned -->
-            <div class="loyalty-earned" id="loyaltyEarned" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 12px 20px; border-radius: 12px; margin: 15px 0; text-align: center;">
+            <div class="loyalty-earned" id="loyaltyEarned" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 12px 20px; border-radius: 12px; margin: 12px 0; text-align: center;">
                 <i class="fas fa-star" style="margin-right: 6px;"></i>
                 <span id="loyaltyPointsText">+10 points fidélité</span>
                 <a href="../loyalty-card.php" style="display: block; margin-top: 6px; color: white; font-size: 12px; text-decoration: underline;">Voir ma carte fidélité</a>
             </div>
 
-            <!-- Google Review Request -->
-            <div class="google-review-prompt" style="background: #f8f9fa; border-radius: 12px; padding: 16px; margin: 20px 0; text-align: center;">
-                <p style="margin: 0 0 12px 0; color: #555; font-size: 14px;">
-                    En attendant votre commande, laissez-nous un avis sur Google !
-                </p>
-                <a href="https://search.google.com/local/writereview?placeid=ChIJZXUA6vldjhIRSIaM5qqp6WE" target="_blank" class="google-review-btn" style="display: inline-flex; align-items: center; gap: 10px; background: #fff; border: 2px solid #4285f4; color: #4285f4; padding: 12px 24px; border-radius: 30px; font-weight: 600; text-decoration: none; transition: all 0.3s;">
-                    <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_42x14dp.png" alt="Google" style="height: 20px;">
-                    Laisser un avis
+            <!-- Actions - More Prominent -->
+            <div class="confirmation-actions">
+                <!-- Primary Action: Return to Menu -->
+                <a href="index.html" class="btn-secondary" style="background: var(--primary); color: white; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i class="fas fa-utensils"></i>
+                    Retour au menu
+                </a>
+
+                <!-- Secondary: WhatsApp Receipt -->
+                <a href="#" class="btn-whatsapp" id="whatsappSelfLink" target="_blank" style="background: #25D366;">
+                    <i class="fab fa-whatsapp"></i>
+                    Recevoir le ticket sur WhatsApp
                 </a>
             </div>
 
-            <div class="confirmation-actions">
-                <a href="#" class="btn-whatsapp" id="whatsappSelfLink" target="_blank">
-                    <i class="fab fa-whatsapp"></i>
-                    Recevoir le récap sur WhatsApp
-                </a>
-                <a href="index.html" class="btn-secondary">
-                    Retour au menu
+            <!-- Google Review - Smaller, Less Prominent -->
+            <div class="google-review-prompt" style="background: transparent; border: 1px solid var(--gray-200); border-radius: 12px; padding: 12px; margin: 16px 0 0 0; text-align: center;">
+                <a href="https://search.google.com/local/writereview?placeid=ChIJZXUA6vldjhIRSIaM5qqp6WE" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; color: var(--gray-600); font-size: 13px; text-decoration: none;">
+                    <i class="fab fa-google" style="color: #4285f4;"></i>
+                    Laissez-nous un avis Google
+                    <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
                 </a>
             </div>
         </div>
