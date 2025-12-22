@@ -46,7 +46,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css?v=25">
+    <link rel="stylesheet" href="css/style.css?v=26">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -211,7 +211,7 @@
                     <h2><i class="fas fa-star"></i> <span id="featuredTitle">Sélection pour vous</span></h2>
                     <p class="section-subtitle" id="featuredSubtitle">Nos produits les plus appréciés</p>
                 </div>
-                <div class="featured-grid" id="featuredGrid" style="display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important;">
+                <div class="featured-grid" id="featuredGrid">
                     <!-- Featured products will be injected here -->
                 </div>
             </section>
@@ -456,5 +456,28 @@
     <script src="js/cart.js"></script>
     <script src="js/products.js"></script>
     <script src="js/app.js"></script>
+
+    <!-- Force 2-column grid on mobile -->
+    <script>
+    (function() {
+        function force2Columns() {
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.products-grid, .featured-grid').forEach(function(grid) {
+                    grid.style.cssText = 'display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important;';
+                });
+                document.querySelectorAll('.product-card, .featured-card').forEach(function(card) {
+                    card.style.cssText = 'width: 100% !important; min-width: 0 !important; max-width: 100% !important;';
+                });
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(force2Columns, 100);
+            setTimeout(force2Columns, 500);
+            setTimeout(force2Columns, 1000);
+        });
+        window.addEventListener('load', force2Columns);
+        window.addEventListener('resize', force2Columns);
+    })();
+    </script>
 </body>
 </html>
