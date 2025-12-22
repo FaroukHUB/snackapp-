@@ -278,9 +278,75 @@ function addOrder(bool $useMySQL) {
             ]);
 
             $order = OrderRepository::getById($orderId);
+
+            // Generate loyalty_code for customer
+            $loyaltyCode = null;
+            $isNewCustomer = false;
+            $phone = $requestData['customer_phone'];
+
+            // Load customers JSON to handle loyalty codes
+            require_once __DIR__ . '/../config.php';
+            $customers = loadData('customers.json') ?? [];
+
+            // Helper function to get max loyalty code number
+            $getMaxLoyaltyNum = function($customers) {
+                $maxId = 0;
+                foreach ($customers as $cust) {
+                    if (isset($cust['loyalty_code']) && preg_match('/MAR-(\d+)/', $cust['loyalty_code'], $m)) {
+                        $maxId = max($maxId, (int)$m[1]);
+                    }
+                }
+                return $maxId;
+            };
+
+            // Helper function to compare phone numbers (flexible matching)
+            $phonesMatch = function($phone1, $phone2) {
+                $clean1 = preg_replace('/[^0-9]/', '', $phone1);
+                $clean2 = preg_replace('/[^0-9]/', '', $phone2);
+                return strlen($clean1) >= 8 && strlen($clean2) >= 8 &&
+                       substr($clean1, -8) === substr($clean2, -8);
+            };
+
+            $found = false;
+            foreach ($customers as &$c) {
+                if ($phonesMatch($c['phone'] ?? '', $phone)) {
+                    // Generate loyalty_code if not exists
+                    if (empty($c['loyalty_code'])) {
+                        $maxId = $getMaxLoyaltyNum($customers);
+                        $c['loyalty_code'] = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
+                        $isNewCustomer = true;
+                    }
+                    $loyaltyCode = $c['loyalty_code'];
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                // New customer - create entry with loyalty_code
+                $maxId = $getMaxLoyaltyNum($customers);
+                $loyaltyCode = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
+                $isNewCustomer = true;
+
+                $customers[] = [
+                    'loyalty_code' => $loyaltyCode,
+                    'name' => $requestData['customer_name'] ?? 'Client',
+                    'phone' => $phone,
+                    'orders_count' => 0,
+                    'total_spent' => 0,
+                    'loyalty_points' => 0,
+                    'last_order' => date('Y-m-d H:i:s'),
+                    'registered_at' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            saveData('customers.json', $customers);
+
             jsonSuccess([
                 'order_id' => $order['order_number'],
-                'order' => $order
+                'order' => $order,
+                'loyalty_code' => $loyaltyCode,
+                'is_new_customer' => $isNewCustomer
             ]);
         } catch (Exception $e) {
             jsonError($e->getMessage());
