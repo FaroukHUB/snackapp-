@@ -271,15 +271,9 @@ if ($useMySQL) {
             </button>
         </form>
 
-        <?php if (!$useMySQL): ?>
-        <div class="hint">
-            <p>Mot de passe: fabrik2025</p>
-        </div>
-        <?php else: ?>
         <div class="hint">
             <p>Connectez-vous avec vos identifiants</p>
         </div>
-        <?php endif; ?>
 
         <div class="mode-badge">
             <i class="fas fa-database"></i>

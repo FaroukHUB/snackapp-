@@ -2,24 +2,24 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <!-- Homepage / Menu -->
     <url>
-        <loc>https://fabrikburger.fr/</loc>
-        <lastmod>2024-12-21</lastmod>
+        <loc>https://marvelous.mon-agenceweb.fr/template-v2/</loc>
+        <lastmod>2024-12-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
 
     <!-- Click & Collect -->
     <url>
-        <loc>https://fabrikburger.fr/click-collect.html</loc>
-        <lastmod>2024-12-21</lastmod>
+        <loc>https://marvelous.mon-agenceweb.fr/template-v2/click-collect.html</loc>
+        <lastmod>2024-12-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
 
-    <!-- Programme Fidélité -->
+    <!-- Programme Fidelite -->
     <url>
-        <loc>https://fabrikburger.fr/fidelite.html</loc>
-        <lastmod>2024-12-21</lastmod>
+        <loc>https://marvelous.mon-agenceweb.fr/template-v2/fidelite.html</loc>
+        <lastmod>2024-12-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>

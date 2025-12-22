@@ -1,23 +1,25 @@
-# Robots.txt for Fabrik Burger
-# https://fabrikburger.fr
+# Robots.txt for Le Marvelous
+# https://marvelous.mon-agenceweb.fr
 
 User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://fabrikburger.fr/sitemap.xml
+Sitemap: https://marvelous.mon-agenceweb.fr/template-v2/sitemap.xml
 
 # Disallow admin and private areas
 Disallow: /admin-panel-v2/
 Disallow: /api/
 Disallow: /config/
+Disallow: /database/
 
 # Allow crawling of important pages
-Allow: /index.html
-Allow: /click-collect.html
-Allow: /fidelite.html
-Allow: /css/
-Allow: /js/
+Allow: /template-v2/
+Allow: /template-v2/index.html
+Allow: /template-v2/click-collect.html
+Allow: /template-v2/fidelite.html
+Allow: /template-v2/css/
+Allow: /template-v2/js/
 Allow: /images/
 
 # Crawl-delay for politeness

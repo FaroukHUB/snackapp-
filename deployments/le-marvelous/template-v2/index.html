@@ -46,7 +46,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css?v=28">
+    <link rel="stylesheet" href="css/style.css?v=30">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -457,39 +457,5 @@
     <script src="js/products.js"></script>
     <script src="js/app.js"></script>
 
-    <!-- Force 2-column grid on mobile - V27 DEBUG -->
-    <script>
-    (function() {
-        console.log('=== GRID FIX V27 LOADED ===');
-
-        function force2Columns() {
-            var grids = document.querySelectorAll('.products-grid, .featured-grid');
-            console.log('Found grids:', grids.length);
-
-            grids.forEach(function(grid, i) {
-                grid.style.display = 'grid';
-                grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
-                grid.style.gap = '10px';
-                console.log('Applied to grid', i, grid.className);
-            });
-
-            document.querySelectorAll('.product-card, .featured-card').forEach(function(card) {
-                card.style.width = '100%';
-                card.style.minWidth = '0';
-                card.style.maxWidth = '100%';
-                card.style.boxSizing = 'border-box';
-            });
-        }
-
-        // Run multiple times to catch dynamically loaded content
-        setTimeout(force2Columns, 100);
-        setTimeout(force2Columns, 300);
-        setTimeout(force2Columns, 600);
-        setTimeout(force2Columns, 1000);
-        setTimeout(force2Columns, 2000);
-
-        window.addEventListener('load', force2Columns);
-    })();
-    </script>
 </body>
 </html>
