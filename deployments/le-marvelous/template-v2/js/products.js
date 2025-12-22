@@ -13,6 +13,7 @@ const Products = {
     selectedDrink: null, // For menu drink selection
     selectedSauce: null, // For special sauce selection (Crousti)
     selectedAccompagnement: null, // For accompaniment selection (salade/riz)
+    selectedVariant: null, // For product variants (sodas, jus, smoothies, etc.)
 
     /**
      * Capitalize first letter of a string
@@ -592,6 +593,7 @@ const Products = {
         this.selectedDrink = null;
         this.selectedSauce = null;
         this.selectedAccompagnement = null;
+        this.selectedVariant = null;
 
         const modal = document.getElementById('productModal');
 
@@ -642,6 +644,43 @@ const Products = {
         } else {
             ingredientsSection.classList.add('hidden');
             ingredientsSection.style.display = 'none';
+        }
+
+        // Render variants (for sodas, jus, smoothies, cocktails)
+        const variantsContainer = document.getElementById('modalVariants');
+        const variantsList = document.getElementById('variantsList');
+        const variantLabel = document.getElementById('variantLabel');
+
+        if (product.hasVariants && product.variants && product.variants.length > 0) {
+            // Filter only available variants
+            const availableVariants = product.variants.filter(v => v.available);
+
+            if (availableVariants.length > 0) {
+                variantsContainer.classList.remove('hidden');
+                variantsContainer.style.display = '';
+                variantLabel.textContent = product.variantLabel || 'Choisir une option';
+
+                variantsList.innerHTML = availableVariants.map((variant, index) => {
+                    const priceExtra = variant.price > 0 ? ` (+${Config.formatPrice(variant.price)})` : '';
+                    return `
+                        <div class="variant-item ${index === 0 ? 'selected' : ''}" data-id="${variant.id}" onclick="Products.selectVariant('${variant.id}')">
+                            <div class="variant-radio">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span class="variant-name">${variant.name}${priceExtra}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                // Select first variant by default
+                this.selectedVariant = availableVariants[0];
+            } else {
+                variantsContainer.classList.add('hidden');
+                variantsContainer.style.display = 'none';
+            }
+        } else {
+            variantsContainer.classList.add('hidden');
+            variantsContainer.style.display = 'none';
         }
 
         // Render supplements
@@ -810,6 +849,23 @@ const Products = {
     },
 
     /**
+     * Select variant option (for drinks)
+     */
+    selectVariant(variantId) {
+        if (!this.currentProduct?.variants) return;
+
+        const variant = this.currentProduct.variants.find(v => v.id === variantId);
+        this.selectedVariant = variant || null;
+
+        // Update UI - radio button style (only one selected)
+        document.querySelectorAll('.variant-item').forEach(item => {
+            item.classList.toggle('selected', item.dataset.id === variantId);
+        });
+
+        this.updateModalUI();
+    },
+
+    /**
      * Select sauce option (for Crousti)
      */
     selectSauce(sauceId) {
@@ -951,6 +1007,11 @@ const Products = {
 
         let total = basePrice;
 
+        // Add variant price if selected
+        if (this.selectedVariant && this.selectedVariant.price) {
+            total += this.selectedVariant.price;
+        }
+
         // Add supplements
         this.selectedSupplements.forEach(sup => {
             total += sup.price || 0;
@@ -986,7 +1047,8 @@ const Products = {
                 removedIngredients: [...this.removedIngredients],
                 selectedDrink: this.selectedDrink ? { ...this.selectedDrink } : null,
                 selectedSauce: this.selectedSauce ? { ...this.selectedSauce } : null,
-                selectedAccompagnement: this.selectedAccompagnement
+                selectedAccompagnement: this.selectedAccompagnement,
+                selectedVariant: this.selectedVariant ? { ...this.selectedVariant } : null
             }
         );
 

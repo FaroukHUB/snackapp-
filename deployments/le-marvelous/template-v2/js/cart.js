@@ -171,10 +171,15 @@ const Cart = {
     },
 
     /**
-     * Calculate item total (with supplements)
+     * Calculate item total (with supplements and variant)
      */
     getItemTotal(item) {
         let total = item.basePrice;
+
+        // Add variant price if any
+        if (item.options?.selectedVariant?.price) {
+            total += item.options.selectedVariant.price;
+        }
 
         // Add supplements prices
         if (item.supplements && item.supplements.length > 0) {
@@ -267,6 +272,7 @@ const Cart = {
             const selectedDrink = item.options?.selectedDrink;
             const selectedSauce = item.options?.selectedSauce;
             const selectedAccompagnement = item.options?.selectedAccompagnement;
+            const selectedVariant = item.options?.selectedVariant;
 
             return `
             <div class="mini-cart-item" data-index="${index}">
@@ -277,6 +283,11 @@ const Cart = {
                         ${item.name}
                         ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 9px; padding: 1px 4px; border-radius: 3px; margin-left: 4px;">MENU</span>' : ''}
                     </div>
+                    ${selectedVariant ? `
+                        <div class="mini-cart-item-variant" style="font-size: 11px; color: var(--primary); font-weight: 500;">
+                            → ${selectedVariant.name}
+                        </div>
+                    ` : ''}
                     ${selectedSauce ? `
                         <div class="mini-cart-item-sauce" style="font-size: 11px; color: var(--warning);">
                             🌶️ ${selectedSauce.name}
@@ -397,10 +408,14 @@ const Cart = {
             const selectedDrink = item.options?.selectedDrink;
             const selectedSauce = item.options?.selectedSauce;
             const selectedAccompagnement = item.options?.selectedAccompagnement;
+            const selectedVariant = item.options?.selectedVariant;
 
             message += `${item.quantity}x ${item.name}`;
             if (menuType === 'menu') {
                 message += ` (MENU)`;
+            }
+            if (selectedVariant) {
+                message += `\n   → ${selectedVariant.name}`;
             }
             if (selectedSauce) {
                 message += `\n   🌶️ Sauce: ${selectedSauce.name}`;

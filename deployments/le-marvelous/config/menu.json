@@ -356,8 +356,41 @@
                 "name": "Sodas & Eaux",
                 "description": "Boissons fraîches",
                 "items": [
-                    { "id": "soda", "name": "Soda", "description": "Ifri, Hamoud, Coca.", "price": 100, "status": "available" },
-                    { "id": "jus", "name": "Jus", "description": "Rouiba, Ifri.", "price": 100, "status": "available" },
+                    {
+                        "id": "soda",
+                        "name": "Soda",
+                        "description": "Choisissez votre soda.",
+                        "price": 100,
+                        "status": "available",
+                        "hasVariants": true,
+                        "variantLabel": "Choisir votre soda",
+                        "variants": [
+                            { "id": "coca", "name": "Coca-Cola", "price": 0, "available": true },
+                            { "id": "coca-zero", "name": "Coca-Cola Zero", "price": 0, "available": true },
+                            { "id": "fanta", "name": "Fanta Orange", "price": 0, "available": true },
+                            { "id": "sprite", "name": "Sprite", "price": 0, "available": true },
+                            { "id": "ifri", "name": "Ifri", "price": 0, "available": true },
+                            { "id": "hamoud", "name": "Hamoud Boualem", "price": 0, "available": true },
+                            { "id": "selecto", "name": "Selecto", "price": 0, "available": true }
+                        ]
+                    },
+                    {
+                        "id": "jus",
+                        "name": "Jus",
+                        "description": "Choisissez votre jus.",
+                        "price": 100,
+                        "status": "available",
+                        "hasVariants": true,
+                        "variantLabel": "Choisir votre jus",
+                        "variants": [
+                            { "id": "rouiba-orange", "name": "Rouiba Orange", "price": 0, "available": true },
+                            { "id": "rouiba-pomme", "name": "Rouiba Pomme", "price": 0, "available": true },
+                            { "id": "rouiba-mangue", "name": "Rouiba Mangue", "price": 0, "available": true },
+                            { "id": "rouiba-peche", "name": "Rouiba Pêche", "price": 0, "available": true },
+                            { "id": "ifri-citron", "name": "Ifri Citron", "price": 0, "available": true },
+                            { "id": "ifri-orange", "name": "Ifri Orange", "price": 0, "available": true }
+                        ]
+                    },
                     { "id": "eau-minerale", "name": "Eau Minérale", "description": "Eau plate.", "price": 50, "status": "available" },
                     { "id": "eau-petillante", "name": "Eau Pétillante", "description": "Eau gazeuse.", "price": 50, "status": "available" }
                 ]
@@ -367,9 +400,57 @@
                 "name": "Jus Frais & Cocktails",
                 "description": "Jus frais et smoothies",
                 "items": [
-                    { "id": "jus-frais", "name": "Jus Frais", "description": "Fruit de saison, selon arrivage.", "price": 200, "status": "available", "note": "À partir de" },
-                    { "id": "smoothie", "name": "Smoothie", "description": "Smoothie fruits frais.", "price": 300, "status": "available", "note": "À partir de" },
-                    { "id": "cocktail-maison", "name": "Cocktail Maison", "description": "Citron ou Mojito (sans alcool).", "price": 350, "status": "available", "note": "À partir de" }
+                    {
+                        "id": "jus-frais",
+                        "name": "Jus Frais",
+                        "description": "Fruit de saison pressé.",
+                        "price": 200,
+                        "status": "available",
+                        "note": "À partir de",
+                        "hasVariants": true,
+                        "variantLabel": "Fruit du moment",
+                        "variants": [
+                            { "id": "jus-orange", "name": "Orange Pressée", "price": 0, "available": true },
+                            { "id": "jus-citron", "name": "Citronnade", "price": 0, "available": true },
+                            { "id": "jus-pomme", "name": "Pomme", "price": 50, "available": true },
+                            { "id": "jus-fraise", "name": "Fraise", "price": 50, "available": false },
+                            { "id": "jus-mangue", "name": "Mangue", "price": 50, "available": false },
+                            { "id": "jus-banane", "name": "Banane", "price": 0, "available": true }
+                        ]
+                    },
+                    {
+                        "id": "smoothie",
+                        "name": "Smoothie",
+                        "description": "Smoothie fruits frais.",
+                        "price": 300,
+                        "status": "available",
+                        "note": "À partir de",
+                        "hasVariants": true,
+                        "variantLabel": "Choisir votre smoothie",
+                        "variants": [
+                            { "id": "smoothie-banane", "name": "Banane", "price": 0, "available": true },
+                            { "id": "smoothie-fraise", "name": "Fraise", "price": 0, "available": false },
+                            { "id": "smoothie-mangue", "name": "Mangue", "price": 50, "available": true },
+                            { "id": "smoothie-fruits-rouges", "name": "Fruits Rouges", "price": 50, "available": true },
+                            { "id": "smoothie-tropical", "name": "Tropical", "price": 50, "available": true }
+                        ]
+                    },
+                    {
+                        "id": "cocktail-maison",
+                        "name": "Cocktail Maison",
+                        "description": "Cocktails sans alcool.",
+                        "price": 350,
+                        "status": "available",
+                        "note": "À partir de",
+                        "hasVariants": true,
+                        "variantLabel": "Choisir votre cocktail",
+                        "variants": [
+                            { "id": "mojito-virgin", "name": "Virgin Mojito", "price": 0, "available": true },
+                            { "id": "citronnade-menthe", "name": "Citronnade Menthe", "price": 0, "available": true },
+                            { "id": "pina-colada", "name": "Piña Colada (sans alcool)", "price": 50, "available": true },
+                            { "id": "fruit-passion", "name": "Fruit de la Passion", "price": 50, "available": false }
+                        ]
+                    }
                 ]
             },
             {

@@ -1660,6 +1660,96 @@ ul {
     font-size: 13px;
 }
 
+/* Variant Options (Drinks - Sodas, Jus, etc.) */
+.modal-variants {
+    margin-bottom: 20px;
+}
+
+.modal-variants h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--gray-700);
+}
+
+.modal-variants h4 i {
+    color: var(--info);
+}
+
+.variants-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.variant-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--gray-50);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.variant-item:hover {
+    background: var(--gray-100);
+}
+
+.variant-item.selected {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.variant-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gray-300);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.variant-radio::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.variant-item.selected .variant-radio {
+    border-color: var(--primary);
+}
+
+.variant-item.selected .variant-radio::after {
+    opacity: 1;
+}
+
+.variant-name {
+    font-weight: 500;
+    color: var(--gray-800);
+    flex: 1;
+}
+
+.variant-price {
+    font-weight: 500;
+    color: var(--success);
+    font-size: 13px;
+}
+
 /* Menu/Solo Toggle */
 .modal-menu-toggle {
     margin-bottom: 20px;

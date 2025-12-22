@@ -794,6 +794,155 @@ switch ($action) {
         jsonSuccess();
         break;
 
+    // ===== VARIANTS (for drinks like Sodas, Jus, etc.) =====
+    case 'update_variant':
+        $productId = $input['product_id'] ?? null;
+        $variantId = $input['variant_id'] ?? null;
+        $available = isset($input['available']) ? (bool)$input['available'] : null;
+
+        if (!$productId || !$variantId) {
+            jsonError('ID produit et variante requis');
+        }
+
+        // Charger menu.json
+        $menuPath = SNACK_ROOT . '/config/menu.json';
+        if (!file_exists($menuPath)) {
+            jsonError('Fichier menu introuvable');
+        }
+
+        $menuData = json_decode(file_get_contents($menuPath), true);
+        if (!$menuData) {
+            jsonError('Erreur lecture menu');
+        }
+
+        // Trouver le produit et la variante
+        $found = false;
+        foreach ($menuData['menu']['categories'] as &$cat) {
+            foreach ($cat['items'] as &$item) {
+                if ($item['id'] === $productId && !empty($item['variants'])) {
+                    foreach ($item['variants'] as &$variant) {
+                        if ($variant['id'] === $variantId) {
+                            if ($available !== null) {
+                                $variant['available'] = $available;
+                            }
+                            $found = true;
+                            break 3;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$found) {
+            jsonError('Variante introuvable');
+        }
+
+        file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        jsonSuccess(['message' => 'Variante mise à jour']);
+        break;
+
+    case 'add_variant':
+        $productId = $input['product_id'] ?? null;
+        $name = trim((string)($input['name'] ?? ''));
+        $price = (float)($input['price'] ?? 0);
+
+        if (!$productId || $name === '') {
+            jsonError('ID produit et nom variante requis');
+        }
+
+        // Générer un ID pour la variante
+        $variantId = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+        $variantId = trim($variantId, '-');
+
+        // Charger menu.json
+        $menuPath = SNACK_ROOT . '/config/menu.json';
+        if (!file_exists($menuPath)) {
+            jsonError('Fichier menu introuvable');
+        }
+
+        $menuData = json_decode(file_get_contents($menuPath), true);
+        if (!$menuData) {
+            jsonError('Erreur lecture menu');
+        }
+
+        // Trouver le produit
+        $found = false;
+        foreach ($menuData['menu']['categories'] as &$cat) {
+            foreach ($cat['items'] as &$item) {
+                if ($item['id'] === $productId) {
+                    if (!isset($item['variants'])) {
+                        $item['variants'] = [];
+                        $item['hasVariants'] = true;
+                    }
+
+                    // Vérifier l'unicité de l'ID
+                    $existingIds = array_column($item['variants'], 'id');
+                    $baseId = $variantId;
+                    $i = 2;
+                    while (in_array($variantId, $existingIds, true)) {
+                        $variantId = $baseId . '-' . $i;
+                        $i++;
+                    }
+
+                    $item['variants'][] = [
+                        'id' => $variantId,
+                        'name' => $name,
+                        'price' => $price,
+                        'available' => true
+                    ];
+                    $found = true;
+                    break 2;
+                }
+            }
+        }
+
+        if (!$found) {
+            jsonError('Produit introuvable');
+        }
+
+        file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        jsonSuccess(['variant' => ['id' => $variantId, 'name' => $name, 'price' => $price]]);
+        break;
+
+    case 'delete_variant':
+        $productId = $input['product_id'] ?? null;
+        $variantId = $input['variant_id'] ?? null;
+
+        if (!$productId || !$variantId) {
+            jsonError('ID produit et variante requis');
+        }
+
+        // Charger menu.json
+        $menuPath = SNACK_ROOT . '/config/menu.json';
+        if (!file_exists($menuPath)) {
+            jsonError('Fichier menu introuvable');
+        }
+
+        $menuData = json_decode(file_get_contents($menuPath), true);
+        if (!$menuData) {
+            jsonError('Erreur lecture menu');
+        }
+
+        // Trouver le produit et supprimer la variante
+        $found = false;
+        foreach ($menuData['menu']['categories'] as &$cat) {
+            foreach ($cat['items'] as &$item) {
+                if ($item['id'] === $productId && !empty($item['variants'])) {
+                    $item['variants'] = array_values(array_filter($item['variants'], fn($v) => $v['id'] !== $variantId));
+                    $found = true;
+                    break 2;
+                }
+            }
+        }
+
+        if (!$found) {
+            jsonError('Produit ou variante introuvable');
+        }
+
+        file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        jsonSuccess(['message' => 'Variante supprimée']);
+        break;
+
     // ===== FEATURED PRODUCTS =====
     case 'update_featured':
         $featuredData = $input['featured'] ?? null;

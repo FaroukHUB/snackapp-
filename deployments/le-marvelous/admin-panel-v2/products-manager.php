@@ -663,6 +663,20 @@ $csrfToken = getCsrfToken();
             <label>Suppléments</label>
             <div id="editProductSupplementsList" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;"></div>
           </div>
+
+          <!-- Variants Section (for drinks like Sodas, Jus, etc.) -->
+          <div class="field" id="variantsSection" style="display:none;">
+            <label style="display:flex;align-items:center;gap:8px;">
+              <span>🥤 Variantes disponibles</span>
+              <span style="font-size:11px;color:var(--muted);">(activer/désactiver selon la saison)</span>
+            </label>
+            <div id="variantsList" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:200px;overflow-y:auto;"></div>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+              <input id="newVariantName" class="input" type="text" placeholder="Nouvelle variante..." style="flex:1;min-width:120px;" />
+              <input id="newVariantPrice" class="input" type="number" step="1" min="0" placeholder="Prix sup." style="width:80px;" />
+              <button type="button" class="btn btn-good" id="btnAddVariant" style="padding:8px 12px;">+ Ajouter</button>
+            </div>
+          </div>
         </div>
         <div class="modal-f">
           <button class="btn btn-danger" type="button" id="btnDeleteProduct">Supprimer</button>
@@ -1099,8 +1113,157 @@ $csrfToken = getCsrfToken();
       const productSups = product.supplements ?? state.menu?.supplements?.defaultForCategories?.[categoryId] ?? [];
       renderSupplementsCheckboxes("#editProductSupplementsList", productSups);
 
+      // Variantes (pour boissons type Sodas, Jus, etc.)
+      const variantsSection = $("#variantsSection");
+      if (product.hasVariants && product.variants && product.variants.length > 0) {
+        variantsSection.style.display = "block";
+        renderVariantsList(product.id, product.variants);
+      } else {
+        variantsSection.style.display = "none";
+      }
+
       openModal("#modalEditProduct");
     }
+
+    // ===== GESTION DES VARIANTES =====
+    function renderVariantsList(productId, variants) {
+      const container = $("#variantsList");
+      container.innerHTML = "";
+
+      if (!variants || variants.length === 0) {
+        container.innerHTML = '<p class="muted" style="padding:10px;">Aucune variante configurée.</p>';
+        return;
+      }
+
+      variants.forEach(variant => {
+        const div = document.createElement("div");
+        div.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--stroke);border-radius:10px;background:rgba(255,255,255,.04);";
+
+        const isAvailable = variant.available !== false;
+        const priceText = variant.price > 0 ? `+${variant.price} DA` : 'inclus';
+
+        div.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;flex:1;">
+            <span style="font-size:13px;font-weight:500;${!isAvailable ? 'text-decoration:line-through;color:var(--muted);' : ''}">${escapeHtml(variant.name)}</span>
+            <span style="font-size:11px;color:var(--muted);">${priceText}</span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn ${isAvailable ? 'btn-good' : 'btn-ghost'}" type="button" data-toggle-variant="${escapeHtml(variant.id)}" style="padding:4px 10px;font-size:11px;" title="${isAvailable ? 'Désactiver' : 'Activer'}">
+              ${isAvailable ? '✓ Dispo' : '✗ Indispo'}
+            </button>
+            <button class="btn btn-danger" type="button" data-delete-variant="${escapeHtml(variant.id)}" style="padding:4px 8px;font-size:11px;" title="Supprimer">✕</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      // Attacher les événements toggle
+      $$("[data-toggle-variant]", container).forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const variantId = btn.dataset.toggleVariant;
+          const variant = variants.find(v => v.id === variantId);
+          if (!variant) return;
+
+          const newAvailable = variant.available === false ? true : false;
+
+          try {
+            await apiPostJson({
+              action: "update_variant",
+              product_id: productId,
+              variant_id: variantId,
+              available: newAvailable
+            });
+            toast("success", "Variante mise à jour", `${variant.name} est maintenant ${newAvailable ? 'disponible' : 'indisponible'}.`);
+            await boot();
+            // Récupérer le produit mis à jour
+            const cats = getCategories();
+            for (const cat of cats) {
+              const prod = (cat.items || []).find(p => p.id === productId);
+              if (prod) {
+                renderVariantsList(productId, prod.variants);
+                break;
+              }
+            }
+          } catch(err) {
+            toast("error", "Erreur", err?.message ?? "Impossible de modifier.");
+          }
+        });
+      });
+
+      // Attacher les événements delete
+      $$("[data-delete-variant]", container).forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const variantId = btn.dataset.deleteVariant;
+          const variant = variants.find(v => v.id === variantId);
+          if (!variant) return;
+
+          if (!confirm(`Supprimer la variante "${variant.name}" ?`)) return;
+
+          try {
+            await apiPostJson({
+              action: "delete_variant",
+              product_id: productId,
+              variant_id: variantId
+            });
+            toast("success", "Variante supprimée", `${variant.name} a été supprimée.`);
+            await boot();
+            // Récupérer le produit mis à jour
+            const cats = getCategories();
+            for (const cat of cats) {
+              const prod = (cat.items || []).find(p => p.id === productId);
+              if (prod) {
+                if (prod.variants && prod.variants.length > 0) {
+                  renderVariantsList(productId, prod.variants);
+                } else {
+                  $("#variantsSection").style.display = "none";
+                }
+                break;
+              }
+            }
+          } catch(err) {
+            toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
+          }
+        });
+      });
+    }
+
+    // Ajouter une nouvelle variante
+    $("#btnAddVariant").addEventListener("click", async () => {
+      if (!currentEditProduct) return;
+
+      const name = $("#newVariantName").value.trim();
+      const price = parseFloat($("#newVariantPrice").value) || 0;
+
+      if (!name) {
+        toast("error", "Erreur", "Nom de variante requis");
+        return;
+      }
+
+      try {
+        await apiPostJson({
+          action: "add_variant",
+          product_id: currentEditProduct.id,
+          name,
+          price
+        });
+        toast("success", "Variante ajoutée", `${name} a été ajoutée.`);
+        $("#newVariantName").value = "";
+        $("#newVariantPrice").value = "";
+        await boot();
+        // Récupérer le produit mis à jour
+        const cats = getCategories();
+        for (const cat of cats) {
+          const prod = (cat.items || []).find(p => p.id === currentEditProduct.id);
+          if (prod) {
+            $("#variantsSection").style.display = "block";
+            renderVariantsList(currentEditProduct.id, prod.variants);
+            break;
+          }
+        }
+      } catch(err) {
+        toast("error", "Erreur", err?.message ?? "Impossible d'ajouter.");
+      }
+    });
 
     $("#formEditProduct").addEventListener("submit", async (e) => {
       e.preventDefault();
