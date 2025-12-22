@@ -3891,132 +3891,31 @@ ul {
 }
 
 /* ============================================
-   CRITICAL FIX V18: Block ALL horizontal scroll
-   ============================================ */
-
-/* GLOBAL - No horizontal scroll anywhere */
-html, body {
-    overflow-x: hidden !important;
-    max-width: 100vw !important;
-    width: 100% !important;
-}
-
-*, *::before, *::after {
-    max-width: 100vw;
-}
-
-@media (max-width: 768px) {
-    /* Force main content to not overflow */
-    .main-content,
-    .section-container,
-    body,
-    html {
-        overflow-x: hidden !important;
-        max-width: 100vw !important;
-        width: 100% !important;
-    }
-
-    /* Prevent any element from causing overflow */
-    * {
-        max-width: 100% !important;
-    }
-
-    /* Force ALL product grids to be 2-column grid */
-    .products-grid,
-    .featured-grid,
-    .product-section .products-grid,
-    #crepes-salees-signature .products-grid,
-    section .products-grid {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 12px !important;
-        overflow: visible !important;
-        overflow-x: visible !important;
-        flex-wrap: wrap !important;
-        max-width: 100% !important;
-        width: 100% !important;
-    }
-
-    /* Force product cards to be normal block elements */
-    .product-card,
-    .featured-card,
-    .products-grid > div,
-    .featured-grid > div {
-        display: block !important;
-        width: auto !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-        flex-shrink: 1 !important;
-    }
-
-    /* Ensure text content wraps */
-    .product-name,
-    .product-ingredients,
-    .product-desc,
-    .product-description {
-        white-space: normal !important;
-        word-wrap: break-word !important;
-        overflow-wrap: break-word !important;
-        max-width: 100% !important;
-    }
-
-    /* Product sections should not overflow */
-    .product-section,
-    .featured-section,
-    section[id] {
-        overflow-x: hidden !important;
-        max-width: 100% !important;
-    }
-}
-
-/* ============================================
-   MOBILE FIX V19 - Reset all problematic styles
+   MOBILE FIX V20: Clean 2-column grid
    ============================================ */
 @media (max-width: 768px) {
-    /* Reset sidebar padding on mobile */
     .main-layout {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
+        padding-left: 0;
+        padding-right: 0;
     }
 
     .main-content {
-        padding: 12px !important;
-        max-width: 100% !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+        padding: 10px;
     }
 
-    /* Product sections full width */
-    .product-section,
-    #productsContainer,
-    .featured-section {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Grid takes full width */
+    /* 2 columns for ALL product grids */
     .products-grid,
     .featured-grid {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 
-    /* Cards proper sizing */
+    /* Cards take full width of their column */
     .product-card,
     .featured-card {
-        display: flex !important;
-        flex-direction: column !important;
+        display: flex;
+        flex-direction: column;
         width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
