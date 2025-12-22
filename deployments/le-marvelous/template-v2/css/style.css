@@ -3144,6 +3144,7 @@ ul {
     max-width: 70px;
 }
 
+/* Default active color (for "Tout" button) */
 .category-pill.active .category-pill-icon {
     background: var(--primary-light);
     border-color: var(--primary);
@@ -3151,6 +3152,23 @@ ul {
 
 .category-pill.active .category-pill-label {
     color: var(--primary);
+}
+
+/* Alternating colors: Green for odd (1), Pink for even (2) */
+.category-pill.active[data-color-index="1"] .category-pill-icon {
+    background: rgba(76, 175, 80, 0.2);
+    border-color: #4CAF50;
+}
+.category-pill.active[data-color-index="1"] .category-pill-label {
+    color: #4CAF50;
+}
+
+.category-pill.active[data-color-index="2"] .category-pill-icon {
+    background: rgba(233, 30, 99, 0.2);
+    border-color: #E91E63;
+}
+.category-pill.active[data-color-index="2"] .category-pill-label {
+    color: #E91E63;
 }
 
 .category-pill:active .category-pill-icon {

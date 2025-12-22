@@ -279,15 +279,24 @@ const Products = {
 
         let html = '';
 
+        // Add "Tout" button to show all categories
+        html += `
+            <a href="#all" class="category-pill active" data-category="all" data-color-index="0">
+                <div class="category-pill-icon">🏠</div>
+                <span class="category-pill-label">Tout</span>
+            </a>
+        `;
+
         // Filter categories that have items
         const validCategories = categories.filter(cat => cat.items && cat.items.length > 0);
 
         validCategories.forEach((cat, index) => {
             const emoji = categoryEmojis[cat.id] || '🍽️';
-            const isActive = index === 0 ? 'active' : '';
+            // Alternating colors: 1=green, 2=pink, 1=green, 2=pink...
+            const colorIndex = (index % 2) + 1;
 
             html += `
-                <a href="#${cat.id}" class="category-pill ${isActive}" data-category="${cat.id}">
+                <a href="#${cat.id}" class="category-pill" data-category="${cat.id}" data-color-index="${colorIndex}">
                     <div class="category-pill-icon">${emoji}</div>
                     <span class="category-pill-label">${cat.name}</span>
                 </a>
@@ -296,36 +305,58 @@ const Products = {
 
         carousel.innerHTML = html;
 
-        // Setup click handlers for smooth scroll and active state
+        // Setup click handlers for smooth scroll, active state, and filtering
         carousel.querySelectorAll('.category-pill').forEach(pill => {
             pill.addEventListener('click', (e) => {
                 e.preventDefault();
-                const targetId = pill.getAttribute('href').slice(1);
-                const target = document.getElementById(targetId);
+                const targetId = pill.getAttribute('data-category');
 
-                if (target) {
-                    // Update active state
-                    carousel.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-                    pill.classList.add('active');
+                // Update active state
+                carousel.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
 
-                    // Smooth scroll
-                    const headerHeight = document.querySelector('.header')?.offsetHeight || 56;
-                    const navHeight = document.querySelector('.mobile-category-nav')?.offsetHeight || 80;
-                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - navHeight - 10;
+                // Filter sections - show only selected category or all
+                const allSections = document.querySelectorAll('.product-section');
+                const featuredSection = document.getElementById('featuredSection');
 
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'smooth'
+                if (targetId === 'all') {
+                    // Show all sections
+                    allSections.forEach(section => section.style.display = '');
+                    if (featuredSection) featuredSection.style.display = '';
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    // Hide all sections except selected
+                    allSections.forEach(section => {
+                        if (section.id === targetId) {
+                            section.style.display = '';
+                        } else {
+                            section.style.display = 'none';
+                        }
                     });
+                    // Hide featured section when filtering
+                    if (featuredSection) featuredSection.style.display = 'none';
 
-                    // Scroll pill into view
-                    pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    // Scroll to the selected section
+                    const target = document.getElementById(targetId);
+                    if (target) {
+                        const headerHeight = document.querySelector('.header')?.offsetHeight || 56;
+                        const navHeight = document.querySelector('.mobile-category-nav')?.offsetHeight || 80;
+                        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - navHeight - 10;
+
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
                 }
+
+                // Scroll pill into view
+                pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             });
         });
 
-        // Update active pill on scroll
-        this.setupMobileCategoryScrollSpy();
+        // Disable scroll spy when filtering (optional - keep simple)
     },
 
     /**
