@@ -324,8 +324,17 @@ function addOrder(bool $useMySQL) {
             return $maxId;
         };
 
+        // Helper function to compare phone numbers (flexible matching)
+        $phonesMatch = function($phone1, $phone2) {
+            $clean1 = preg_replace('/[^0-9]/', '', $phone1);
+            $clean2 = preg_replace('/[^0-9]/', '', $phone2);
+            // Match if last 8 digits are the same
+            return strlen($clean1) >= 8 && strlen($clean2) >= 8 &&
+                   substr($clean1, -8) === substr($clean2, -8);
+        };
+
         foreach ($customers as &$c) {
-            if ($c['phone'] === $phone) {
+            if ($phonesMatch($c['phone'] ?? '', $phone)) {
                 $c['orders_count'] = ($c['orders_count'] ?? 0) + 1;
                 $c['total_spent'] = ($c['total_spent'] ?? 0) + $requestData['total'];
                 $c['loyalty_points'] = ($c['loyalty_points'] ?? 0) + (int)$requestData['total'];
