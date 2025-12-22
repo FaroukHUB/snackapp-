@@ -66,10 +66,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if ($found) {
+        // Get customer_id (prefer MAR-XXXX format, fallback to old id)
+        $custId = $found['customer_id'] ?? null;
+        if (empty($custId) || strpos($custId, 'CUST') === 0) {
+            $custId = null; // Don't show old CUST format
+        }
+
         echo json_encode([
             'success' => true,
             'customer' => [
-                'customer_id' => $found['customer_id'] ?? null,
+                'customer_id' => $custId,
                 'name' => $found['name'] ?? 'Client',
                 'points' => (int)($found['loyalty_points'] ?? 0),
                 'orders_count' => (int)($found['orders_count'] ?? 0),

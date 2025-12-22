@@ -313,6 +313,17 @@ function addOrder(bool $useMySQL) {
         $customerId = null;
         $isNewCustomer = false;
 
+        // Helper function to get max MAR-XXXX ID
+        $getMaxMarId = function($customers) {
+            $maxId = 0;
+            foreach ($customers as $cust) {
+                if (isset($cust['customer_id']) && preg_match('/MAR-(\d+)/', $cust['customer_id'], $m)) {
+                    $maxId = max($maxId, (int)$m[1]);
+                }
+            }
+            return $maxId;
+        };
+
         foreach ($customers as &$c) {
             if ($c['phone'] === $phone) {
                 $c['orders_count'] = ($c['orders_count'] ?? 0) + 1;
@@ -321,14 +332,9 @@ function addOrder(bool $useMySQL) {
                 $c['last_order'] = date('Y-m-d H:i:s');
                 $c['name'] = $requestData['customer_name'] ?? $c['name'];
 
-                // Generate customer_id if not exists (for old customers)
-                if (empty($c['customer_id'])) {
-                    $maxId = 0;
-                    foreach ($customers as $cust) {
-                        if (isset($cust['customer_id']) && preg_match('/MAR-(\d+)/', $cust['customer_id'], $m)) {
-                            $maxId = max($maxId, (int)$m[1]);
-                        }
-                    }
+                // Generate customer_id if not exists OR if it's old CUST format
+                if (empty($c['customer_id']) || strpos($c['customer_id'] ?? '', 'CUST') === 0 || strpos($c['id'] ?? '', 'CUST') === 0) {
+                    $maxId = $getMaxMarId($customers);
                     $c['customer_id'] = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
                     $isNewCustomer = true; // Show ID to existing customers who just got one
                 }
@@ -340,12 +346,7 @@ function addOrder(bool $useMySQL) {
 
         if (!$found) {
             // Generate simple customer ID: MAR-XXXX
-            $maxId = 0;
-            foreach ($customers as $c) {
-                if (isset($c['customer_id']) && preg_match('/MAR-(\d+)/', $c['customer_id'], $m)) {
-                    $maxId = max($maxId, (int)$m[1]);
-                }
-            }
+            $maxId = $getMaxMarId($customers);
             $customerId = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
             $isNewCustomer = true;
 
