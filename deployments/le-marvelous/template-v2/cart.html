@@ -914,8 +914,40 @@
                 Cart.init();
                 Cart.onUpdate = () => this.render();
 
+                // Check restaurant status
+                this.checkRestaurantStatus();
+
                 // Initial render
                 this.render();
+            },
+
+            async checkRestaurantStatus() {
+                try {
+                    const res = await fetch('../admin-panel-v2/api/restaurant-status.php?action=get');
+                    const data = await res.json();
+                    if (data.success && data.status && !data.status.accepting_orders) {
+                        // Show closed banner
+                        const banner = document.createElement('div');
+                        banner.id = 'closedBanner';
+                        banner.innerHTML = `
+                            <div style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 16px 20px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                <i class="fas fa-store-slash"></i>
+                                Le restaurant est actuellement fermé aux commandes
+                            </div>
+                        `;
+                        document.querySelector('.cart-header').after(banner);
+
+                        // Disable submit button
+                        const submitBtn = document.getElementById('submitOrder');
+                        if (submitBtn) {
+                            submitBtn.disabled = true;
+                            submitBtn.style.opacity = '0.5';
+                            submitBtn.innerHTML = '<i class="fas fa-lock"></i> Restaurant fermé';
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not check restaurant status:', e);
+                }
             },
 
             render() {
@@ -1077,6 +1109,19 @@
                 const address = document.getElementById('customerAddress').value.trim();
                 const note = document.getElementById('customerNote').value.trim();
 
+                // Check if restaurant is accepting orders
+                try {
+                    const statusRes = await fetch('../admin-panel-v2/api/restaurant-status.php?action=get');
+                    const statusData = await statusRes.json();
+                    if (statusData.success && statusData.status && !statusData.status.accepting_orders) {
+                        this.showToast('🔒 Le restaurant est actuellement fermé aux commandes', 'error');
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Could not check restaurant status:', e);
+                    // Continue anyway if status check fails
+                }
+
                 // Validation
                 if (!name) {
                     this.showToast('Veuillez entrer votre nom', 'error');
@@ -1155,6 +1200,10 @@
                         const orderNumber = result.order_id || result.order?.order_number || 'XXXX';
                         const customerId = result.customer_id || null;
                         const isNewCustomer = result.is_new_customer || false;
+
+                        console.log('🆔 Customer ID:', customerId);
+                        console.log('🆕 Is New Customer:', isNewCustomer);
+
                         this.showConfirmation(orderNumber, name, phone, address, note, savedItems, savedSubtotal, savedDiscount, 0, customerId, isNewCustomer);
                     } else {
                         // API returns 'message' not 'error'

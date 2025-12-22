@@ -320,7 +320,19 @@ function addOrder(bool $useMySQL) {
                 $c['loyalty_points'] = ($c['loyalty_points'] ?? 0) + (int)$requestData['total'];
                 $c['last_order'] = date('Y-m-d H:i:s');
                 $c['name'] = $requestData['customer_name'] ?? $c['name'];
-                $customerId = $c['customer_id'] ?? null;
+
+                // Generate customer_id if not exists (for old customers)
+                if (empty($c['customer_id'])) {
+                    $maxId = 0;
+                    foreach ($customers as $cust) {
+                        if (isset($cust['customer_id']) && preg_match('/MAR-(\d+)/', $cust['customer_id'], $m)) {
+                            $maxId = max($maxId, (int)$m[1]);
+                        }
+                    }
+                    $c['customer_id'] = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
+                    $isNewCustomer = true; // Show ID to existing customers who just got one
+                }
+                $customerId = $c['customer_id'];
                 $found = true;
                 break;
             }
