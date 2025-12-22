@@ -265,6 +265,8 @@ const Cart = {
             const menuType = item.options?.menuType;
             const removedIngredients = item.options?.removedIngredients || [];
             const selectedDrink = item.options?.selectedDrink;
+            const selectedSauce = item.options?.selectedSauce;
+            const selectedAccompagnement = item.options?.selectedAccompagnement;
 
             return `
             <div class="mini-cart-item" data-index="${index}">
@@ -275,6 +277,16 @@ const Cart = {
                         ${item.name}
                         ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 9px; padding: 1px 4px; border-radius: 3px; margin-left: 4px;">MENU</span>' : ''}
                     </div>
+                    ${selectedSauce ? `
+                        <div class="mini-cart-item-sauce" style="font-size: 11px; color: var(--warning);">
+                            🌶️ ${selectedSauce.name}
+                        </div>
+                    ` : ''}
+                    ${selectedAccompagnement ? `
+                        <div class="mini-cart-item-accompagnement" style="font-size: 11px; color: var(--info);">
+                            🥗 Avec ${selectedAccompagnement}
+                        </div>
+                    ` : ''}
                     ${selectedDrink ? `
                         <div class="mini-cart-item-drink" style="font-size: 11px; color: var(--primary);">
                             🥤 ${selectedDrink.name}
@@ -383,10 +395,18 @@ const Cart = {
             const menuType = item.options?.menuType;
             const removedIngredients = item.options?.removedIngredients || [];
             const selectedDrink = item.options?.selectedDrink;
+            const selectedSauce = item.options?.selectedSauce;
+            const selectedAccompagnement = item.options?.selectedAccompagnement;
 
             message += `${item.quantity}x ${item.name}`;
             if (menuType === 'menu') {
                 message += ` (MENU)`;
+            }
+            if (selectedSauce) {
+                message += `\n   🌶️ Sauce: ${selectedSauce.name}`;
+            }
+            if (selectedAccompagnement) {
+                message += `\n   🥗 Accompagnement: ${selectedAccompagnement}`;
             }
             if (selectedDrink) {
                 message += `\n   🥤 Boisson: ${selectedDrink.name}`;

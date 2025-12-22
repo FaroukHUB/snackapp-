@@ -11,6 +11,8 @@ const Products = {
     removedIngredients: [],
     menuType: 'solo', // 'solo' or 'menu'
     selectedDrink: null, // For menu drink selection
+    selectedSauce: null, // For special sauce selection (Crousti)
+    selectedAccompagnement: null, // For accompaniment selection (salade/riz)
 
     /**
      * Capitalize first letter of a string
@@ -588,6 +590,8 @@ const Products = {
         this.removedIngredients = [];
         this.menuType = 'solo';
         this.selectedDrink = null;
+        this.selectedSauce = null;
+        this.selectedAccompagnement = null;
 
         const modal = document.getElementById('productModal');
 
@@ -683,6 +687,63 @@ const Products = {
             drinksContainer.style.display = 'none';
         }
 
+        // Render sauce options (for Crousti)
+        const sauceContainer = document.getElementById('modalSauce');
+        const sauceOptions = document.getElementById('sauceOptions');
+
+        if (product.hasSpecialSauce && product.sauceOptions && product.sauceOptions.length > 0) {
+            sauceContainer.classList.remove('hidden');
+            sauceContainer.style.display = '';
+            sauceOptions.innerHTML = product.sauceOptions.map((sauce, index) => `
+                <div class="sauce-item ${index === 0 ? 'selected' : ''}" data-id="${sauce.id}" onclick="Products.selectSauce('${sauce.id}')">
+                    <div class="sauce-radio">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span class="sauce-name">${sauce.name}</span>
+                </div>
+            `).join('');
+            // Select first sauce by default
+            this.selectedSauce = product.sauceOptions[0];
+        } else {
+            sauceContainer.classList.add('hidden');
+            sauceContainer.style.display = 'none';
+        }
+
+        // Render accompaniment options
+        const accompagnementContainer = document.getElementById('modalAccompagnement');
+        const accompagnementOptions = document.getElementById('accompagnementOptions');
+
+        // Get category info for accompaniment
+        const category = Config.getCategories().find(c => c.id === product.categoryId);
+        const hasAccompagnement = category?.hasAccompagnement || product.hasSpecialAccompagnement;
+
+        // Determine which accompaniment options to show
+        let accompOptions = [];
+        if (product.hasSpecialAccompagnement && product.accompagnementOptions) {
+            // Product-specific options (like Crousti with riz OR salade)
+            accompOptions = product.accompagnementOptions;
+        } else if (category?.hasAccompagnement && category?.accompagnementOptions) {
+            // Category-level options (salade for all savory crêpes)
+            accompOptions = category.accompagnementOptions;
+        }
+
+        if (hasAccompagnement && accompOptions.length > 0) {
+            accompagnementContainer.classList.remove('hidden');
+            accompagnementContainer.style.display = '';
+            accompagnementOptions.innerHTML = accompOptions.map(acc => `
+                <div class="accompagnement-item" data-id="${acc}" onclick="Products.toggleAccompagnement('${acc}')">
+                    <div class="accompagnement-checkbox">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span class="accompagnement-name">${this.capitalize(acc)}</span>
+                    <span class="accompagnement-price">Gratuit</span>
+                </div>
+            `).join('');
+        } else {
+            accompagnementContainer.classList.add('hidden');
+            accompagnementContainer.style.display = 'none';
+        }
+
         this.updateModalUI();
         console.log('Modal element:', modal);
         modal.classList.add('active');
@@ -745,6 +806,50 @@ const Products = {
         document.querySelectorAll('.ingredient-item').forEach(item => {
             const ing = item.dataset.ingredient;
             item.classList.toggle('removed', this.removedIngredients.includes(ing));
+        });
+    },
+
+    /**
+     * Select sauce option (for Crousti)
+     */
+    selectSauce(sauceId) {
+        if (!this.currentProduct?.sauceOptions) return;
+
+        const sauce = this.currentProduct.sauceOptions.find(s => s.id === sauceId);
+        this.selectedSauce = sauce || null;
+
+        // Update UI - radio button style (only one selected)
+        document.querySelectorAll('.sauce-item').forEach(item => {
+            item.classList.toggle('selected', item.dataset.id === sauceId);
+        });
+    },
+
+    /**
+     * Toggle accompaniment selection
+     */
+    toggleAccompagnement(accId) {
+        // Check if this product has special accompaniment (mutually exclusive like Crousti)
+        const hasSpecialAcc = this.currentProduct?.hasSpecialAccompagnement;
+
+        if (hasSpecialAcc) {
+            // Radio button behavior - only one can be selected
+            if (this.selectedAccompagnement === accId) {
+                this.selectedAccompagnement = null;
+            } else {
+                this.selectedAccompagnement = accId;
+            }
+        } else {
+            // Checkbox behavior for regular accompaniment
+            if (this.selectedAccompagnement === accId) {
+                this.selectedAccompagnement = null;
+            } else {
+                this.selectedAccompagnement = accId;
+            }
+        }
+
+        // Update UI
+        document.querySelectorAll('.accompagnement-item').forEach(item => {
+            item.classList.toggle('selected', item.dataset.id === this.selectedAccompagnement);
         });
     },
 
@@ -879,7 +984,9 @@ const Products = {
             {
                 menuType: this.menuType,
                 removedIngredients: [...this.removedIngredients],
-                selectedDrink: this.selectedDrink ? { ...this.selectedDrink } : null
+                selectedDrink: this.selectedDrink ? { ...this.selectedDrink } : null,
+                selectedSauce: this.selectedSauce ? { ...this.selectedSauce } : null,
+                selectedAccompagnement: this.selectedAccompagnement
             }
         );
 
