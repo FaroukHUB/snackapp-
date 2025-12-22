@@ -299,6 +299,39 @@ $csrfToken = getCsrfToken();
       color: var(--brand);
     }
 
+    /* ===== EMOJI SELECTOR ===== */
+    .emoji-option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      aspect-ratio: 1;
+      border: 1px solid var(--stroke);
+      border-radius: 10px;
+      background: rgba(0,0,0,.18);
+      cursor: pointer;
+      transition: all .15s ease;
+    }
+    .emoji-option:hover {
+      border-color: var(--brand);
+      background: rgba(96,165,250,.1);
+    }
+    .emoji-option input {
+      display: none;
+    }
+    .emoji-option span {
+      font-size: 22px;
+      transition: transform .15s ease;
+    }
+    .emoji-option.selected {
+      border-color: var(--brand);
+      background: rgba(96,165,250,.2);
+      box-shadow: 0 0 12px rgba(96,165,250,.3);
+    }
+    .emoji-option.selected span {
+      transform: scale(1.15);
+    }
+
     /* ===== RESPONSIVE MOBILE ===== */
     @media (max-width: 768px) {
       .wrap { padding: 16px 12px 80px; }
@@ -513,11 +546,81 @@ $csrfToken = getCsrfToken();
               </label>
             </div>
           </div>
+          <div class="field">
+            <label for="catEmoji">Emoji (affiché sur mobile)</label>
+            <div id="emojiSelector" style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:6px;">
+              <label class="emoji-option selected" data-emoji="🍽️" title="Général">
+                <input type="radio" name="emoji" value="🍽️" checked>
+                <span>🍽️</span>
+              </label>
+              <label class="emoji-option" data-emoji="🥞" title="Crêpes">
+                <input type="radio" name="emoji" value="🥞">
+                <span>🥞</span>
+              </label>
+              <label class="emoji-option" data-emoji="🧇" title="Gaufres">
+                <input type="radio" name="emoji" value="🧇">
+                <span>🧇</span>
+              </label>
+              <label class="emoji-option" data-emoji="🍫" title="Chocolat">
+                <input type="radio" name="emoji" value="🍫">
+                <span>🍫</span>
+              </label>
+              <label class="emoji-option" data-emoji="🥐" title="Viennoiserie">
+                <input type="radio" name="emoji" value="🥐">
+                <span>🥐</span>
+              </label>
+              <label class="emoji-option" data-emoji="🧀" title="Fromage">
+                <input type="radio" name="emoji" value="🧀">
+                <span>🧀</span>
+              </label>
+              <label class="emoji-option" data-emoji="☕" title="Café">
+                <input type="radio" name="emoji" value="☕">
+                <span>☕</span>
+              </label>
+              <label class="emoji-option" data-emoji="🥤" title="Soda">
+                <input type="radio" name="emoji" value="🥤">
+                <span>🥤</span>
+              </label>
+              <label class="emoji-option" data-emoji="🧃" title="Jus">
+                <input type="radio" name="emoji" value="🧃">
+                <span>🧃</span>
+              </label>
+              <label class="emoji-option" data-emoji="🍨" title="Dessert">
+                <input type="radio" name="emoji" value="🍨">
+                <span>🍨</span>
+              </label>
+              <label class="emoji-option" data-emoji="👶" title="Enfant">
+                <input type="radio" name="emoji" value="👶">
+                <span>👶</span>
+              </label>
+              <label class="emoji-option" data-emoji="🌯" title="Wrap">
+                <input type="radio" name="emoji" value="🌯">
+                <span>🌯</span>
+              </label>
+              <label class="emoji-option" data-emoji="🍔" title="Burger">
+                <input type="radio" name="emoji" value="🍔">
+                <span>🍔</span>
+              </label>
+              <label class="emoji-option" data-emoji="🍕" title="Pizza">
+                <input type="radio" name="emoji" value="🍕">
+                <span>🍕</span>
+              </label>
+              <label class="emoji-option" data-emoji="🥗" title="Salade">
+                <input type="radio" name="emoji" value="🥗">
+                <span>🥗</span>
+              </label>
+              <label class="emoji-option" data-emoji="⭐" title="Spécial">
+                <input type="radio" name="emoji" value="⭐">
+                <span>⭐</span>
+              </label>
+            </div>
+          </div>
+          <input type="hidden" id="catEditId" name="edit_id" value="">
           <p class="muted" style="margin:0">L'identifiant technique est généré automatiquement.</p>
         </div>
         <div class="modal-f">
           <button class="btn btn-ghost" type="button" data-close>Annuler</button>
-          <button class="btn btn-good" type="submit">Enregistrer</button>
+          <button class="btn btn-good" type="submit" id="catSubmitBtn">Enregistrer</button>
         </div>
       </form>
     </div>
@@ -926,17 +1029,99 @@ $csrfToken = getCsrfToken();
     // Initialize on page load
     initIconSelector();
 
-    $("#btnAddCategory").addEventListener("click", () => {
+    // ===== EMOJI SELECTOR LOGIC =====
+    function initEmojiSelector() {
+      const container = $("#emojiSelector");
+      if (!container) return;
+
+      const options = $$(".emoji-option", container);
+
+      // Set initial selected state
+      options.forEach(opt => {
+        const input = opt.querySelector("input");
+        if (input && input.checked) {
+          opt.classList.add("selected");
+        }
+
+        // Handle click/change
+        opt.addEventListener("click", () => {
+          options.forEach(o => o.classList.remove("selected"));
+          opt.classList.add("selected");
+          if (opt.querySelector("input")) opt.querySelector("input").checked = true;
+        });
+      });
+    }
+
+    initEmojiSelector();
+
+    // Reset both selectors to default
+    function resetCategoryModal(isEdit = false) {
       $("#formCategory").reset();
+      $("#catEditId").value = "";
+      $("#modalCategoryTitle").textContent = isEdit ? "Modifier la catégorie" : "Ajouter une catégorie";
+      $("#catSubmitBtn").textContent = isEdit ? "Modifier" : "Enregistrer";
+
       // Reset icon selector to first option
-      const options = $$("#iconSelector .icon-option");
-      options.forEach((o, i) => {
+      const iconOptions = $$("#iconSelector .icon-option");
+      iconOptions.forEach((o, i) => {
         o.classList.toggle("selected", i === 0);
         const input = o.querySelector("input");
         if (input) input.checked = (i === 0);
       });
+
+      // Reset emoji selector to first option
+      const emojiOptions = $$("#emojiSelector .emoji-option");
+      emojiOptions.forEach((o, i) => {
+        o.classList.toggle("selected", i === 0);
+        const input = o.querySelector("input");
+        if (input) input.checked = (i === 0);
+      });
+    }
+
+    $("#btnAddCategory").addEventListener("click", () => {
+      resetCategoryModal(false);
       openModal("#modalCategory");
     });
+
+    // Open category modal for editing
+    function openEditCategoryModal(categoryId) {
+      resetCategoryModal(true);
+
+      // Find category in menu
+      const categories = getAllCategories();
+      const cat = categories.find(c => c.id === categoryId);
+      if (!cat) {
+        toast("error", "Erreur", "Catégorie non trouvée");
+        return;
+      }
+
+      // Fill form
+      $("#catName").value = cat.name || "";
+      $("#catDesc").value = cat.description || "";
+      $("#catEditId").value = cat.id;
+
+      // Set icon if exists
+      const icon = state.menu?.categoryIcons?.[categoryId] || "fa-utensils";
+      const iconOptions = $$("#iconSelector .icon-option");
+      iconOptions.forEach(o => {
+        const isMatch = o.dataset.icon === icon;
+        o.classList.toggle("selected", isMatch);
+        const input = o.querySelector("input");
+        if (input) input.checked = isMatch;
+      });
+
+      // Set emoji if exists
+      const emoji = state.menu?.categoryEmojis?.[categoryId] || "🍽️";
+      const emojiOptions = $$("#emojiSelector .emoji-option");
+      emojiOptions.forEach(o => {
+        const isMatch = o.dataset.emoji === emoji;
+        o.classList.toggle("selected", isMatch);
+        const input = o.querySelector("input");
+        if (input) input.checked = isMatch;
+      });
+
+      openModal("#modalCategory");
+    }
 
     function getSupplements(){
       return state.menu?.supplements?.catalog ?? {};
@@ -1381,6 +1566,11 @@ $csrfToken = getCsrfToken();
       return state.menu?.menu?.categories ?? [];
     }
 
+    // Alias for openEditCategoryModal usage
+    function getAllCategories(){
+      return getCategories();
+    }
+
     function selectCategory(id){
       state.selectedCategoryId = id;
       render();
@@ -1400,19 +1590,39 @@ $csrfToken = getCsrfToken();
       list.innerHTML = "";
       filtered.forEach(c=>{
         const itemsCount = Array.isArray(c.items) ? c.items.length : 0;
+        const emoji = state.menu?.categoryEmojis?.[c.id] || "🍽️";
+        const wrapper = document.createElement("div");
+        wrapper.style.cssText = "display:flex;gap:4px;align-items:stretch;";
+
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "cat";
+        btn.style.flex = "1";
         btn.setAttribute("aria-selected", String(c.id === state.selectedCategoryId));
         btn.innerHTML = `
-          <div style="min-width:0;text-align:left">
+          <span style="font-size:20px;margin-right:8px;">${emoji}</span>
+          <div style="min-width:0;text-align:left;flex:1;">
             <strong>${escapeHtml(c.name ?? "")}</strong>
             <small>${escapeHtml(c.description ?? "")}</small>
           </div>
           <span class="badge">${itemsCount}</span>
         `;
         btn.addEventListener("click", ()=>selectCategory(c.id));
-        list.appendChild(btn);
+
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className = "btn btn-ghost";
+        editBtn.style.cssText = "padding:8px 10px;min-width:auto;";
+        editBtn.title = "Modifier la catégorie";
+        editBtn.innerHTML = '<i class="fas fa-pen" style="font-size:12px;"></i>';
+        editBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openEditCategoryModal(c.id);
+        });
+
+        wrapper.appendChild(btn);
+        wrapper.appendChild(editBtn);
+        list.appendChild(wrapper);
       });
 
       if (!state.selectedCategoryId && filtered[0]?.id) {
@@ -1512,14 +1722,23 @@ $csrfToken = getCsrfToken();
       const name = String(fd.get("name") ?? "").trim();
       const description = String(fd.get("description") ?? "").trim();
       const icon = String(fd.get("icon") ?? "fa-utensils").trim();
+      const emoji = String(fd.get("emoji") ?? "🍽️").trim();
+      const editId = String(fd.get("edit_id") ?? "").trim();
+
+      const isEdit = editId !== "";
 
       try{
-        await apiPostJson({ action:"add_category", name, description, icon });
-        toast("success","Catégorie ajoutée", `"${name}" a été enregistrée.`);
+        if (isEdit) {
+          await apiPostJson({ action:"edit_category", id: editId, name, description, icon, emoji });
+          toast("success","Catégorie modifiée", `"${name}" a été mise à jour.`);
+        } else {
+          await apiPostJson({ action:"add_category", name, description, icon, emoji });
+          toast("success","Catégorie ajoutée", `"${name}" a été enregistrée.`);
+        }
         closeModal($("#modalCategory"));
         await boot();
       }catch(err){
-        toast("error","Erreur", err?.message ?? "Impossible d'ajouter la catégorie.");
+        toast("error","Erreur", err?.message ?? "Impossible d'enregistrer la catégorie.");
       }
     });
 

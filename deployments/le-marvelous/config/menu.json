@@ -546,5 +546,16 @@
         "sodas-eaux": "fa-bottle-water",
         "jus-cocktails": "fa-glass-water",
         "menu-enfant": "fa-child"
+    },
+    "categoryEmojis": {
+        "crepes-salees-signature": "🥞",
+        "sucres-sales": "🥐",
+        "crepes-sucrees": "🍫",
+        "gaufres": "🧇",
+        "bubble-waffle": "🧇",
+        "boissons-chaudes": "☕",
+        "sodas-eaux": "🥤",
+        "jus-cocktails": "🧃",
+        "menu-enfant": "👶"
     }
 }

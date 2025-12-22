@@ -360,6 +360,7 @@ switch ($action) {
         $name = trim((string)($input['name'] ?? ''));
         $description = trim((string)($input['description'] ?? ''));
         $icon = trim((string)($input['icon'] ?? 'fa-utensils'));
+        $emoji = trim((string)($input['emoji'] ?? '🍽️'));
 
         if ($name === '') {
             jsonError('Nom manquant');
@@ -391,7 +392,7 @@ switch ($action) {
 
         saveMenuRuntime($runtime);
 
-        // Sauvegarder l'icône dans menu.json
+        // Sauvegarder l'icône et l'emoji dans menu.json
         $menuPath = SNACK_ROOT . '/config/menu.json';
         if (file_exists($menuPath)) {
             $menuData = json_decode(file_get_contents($menuPath), true);
@@ -399,12 +400,79 @@ switch ($action) {
                 if (!isset($menuData['categoryIcons'])) {
                     $menuData['categoryIcons'] = [];
                 }
+                if (!isset($menuData['categoryEmojis'])) {
+                    $menuData['categoryEmojis'] = [];
+                }
                 $menuData['categoryIcons'][$id] = $icon;
+                $menuData['categoryEmojis'][$id] = $emoji;
                 file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             }
         }
 
-        jsonSuccess(['category' => ['id' => $id, 'name' => $name, 'icon' => $icon]]);
+        jsonSuccess(['category' => ['id' => $id, 'name' => $name, 'icon' => $icon, 'emoji' => $emoji]]);
+        break;
+
+    case 'edit_category':
+        $id = trim((string)($input['id'] ?? ''));
+        $name = trim((string)($input['name'] ?? ''));
+        $description = trim((string)($input['description'] ?? ''));
+        $icon = trim((string)($input['icon'] ?? ''));
+        $emoji = trim((string)($input['emoji'] ?? ''));
+
+        if ($id === '' || $name === '') {
+            jsonError('ID ou nom manquant');
+        }
+
+        // Vérifier si la catégorie existe dans menu.json
+        $menuPath = SNACK_ROOT . '/config/menu.json';
+        $menuData = file_exists($menuPath) ? json_decode(file_get_contents($menuPath), true) : null;
+
+        $found = false;
+        $isCustom = isset($runtime['customCategories'][$id]);
+
+        // Chercher dans les catégories du menu
+        if ($menuData && isset($menuData['menu']['categories'])) {
+            foreach ($menuData['menu']['categories'] as &$cat) {
+                if ($cat['id'] === $id) {
+                    $cat['name'] = $name;
+                    $cat['description'] = $description;
+                    $found = true;
+                    break;
+                }
+            }
+            unset($cat);
+        }
+
+        // Chercher dans les catégories custom
+        if ($isCustom) {
+            $runtime['customCategories'][$id]['name'] = $name;
+            $runtime['customCategories'][$id]['description'] = $description;
+            saveMenuRuntime($runtime);
+            $found = true;
+        }
+
+        if (!$found) {
+            jsonError('Catégorie non trouvée');
+        }
+
+        // Mettre à jour les icônes/emojis
+        if ($menuData) {
+            if (!isset($menuData['categoryIcons'])) {
+                $menuData['categoryIcons'] = [];
+            }
+            if (!isset($menuData['categoryEmojis'])) {
+                $menuData['categoryEmojis'] = [];
+            }
+            if ($icon !== '') {
+                $menuData['categoryIcons'][$id] = $icon;
+            }
+            if ($emoji !== '') {
+                $menuData['categoryEmojis'][$id] = $emoji;
+            }
+            file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        }
+
+        jsonSuccess(['category' => ['id' => $id, 'name' => $name, 'icon' => $icon, 'emoji' => $emoji]]);
         break;
 
     case 'add_product':

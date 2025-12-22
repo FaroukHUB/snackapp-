@@ -2188,9 +2188,10 @@ if (isset($_GET['export'])) {
                 body: JSON.stringify({ action: 'verify', pin })
             }).then(r => r.json()).then(data => {
                 if (data.success) {
+                    const section = pendingSection; // Sauvegarder avant fermeture
                     closePinModal();
-                    if (pendingSection) {
-                        actuallyNavigate(pendingSection);
+                    if (section) {
+                        actuallyNavigate(section);
                     }
                 } else {
                     document.getElementById('pinError').style.display = 'block';

@@ -11,6 +11,7 @@ const Config = {
     supplements: {},
     upsellRules: [],
     categoryIcons: {},
+    categoryEmojis: {},
 
     // State
     isLoaded: false,
@@ -62,6 +63,7 @@ const Config = {
         this.supplements = data.supplements || {};
         this.upsellRules = data.upsellRules || [];
         this.categoryIcons = data.categoryIcons || {};
+        this.categoryEmojis = data.categoryEmojis || {};
         this.featured = data.featured || {};
         this.menuOptions = data.menuOptions || {};
     },

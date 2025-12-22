@@ -259,23 +259,7 @@ const Products = {
         if (!carousel) return;
 
         const categories = Config.getCategories();
-        const icons = Config.categoryIcons;
-
-        // Category emoji mapping for visual appeal
-        const categoryEmojis = {
-            'crepes-signature': '🥞',
-            'crepes-salees': '🧀',
-            'crepes-sucrees': '🍫',
-            'la-crousti': '🌯',
-            'nos-sucres-sales': '🥐',
-            'gaufres': '🧇',
-            'boissons': '🥤',
-            'boissons-chaudes': '☕',
-            'boissons-fraiches': '🧃',
-            'desserts': '🍨',
-            'menu-enfant': '👶',
-            'supplements': '➕'
-        };
+        const emojis = Config.categoryEmojis || {};
 
         let html = '';
 
@@ -291,7 +275,7 @@ const Products = {
         const validCategories = categories.filter(cat => cat.items && cat.items.length > 0);
 
         validCategories.forEach((cat, index) => {
-            const emoji = categoryEmojis[cat.id] || '🍽️';
+            const emoji = emojis[cat.id] || '🍽️';
             // Alternating colors: 1=green, 2=pink, 1=green, 2=pink...
             const colorIndex = (index % 2) + 1;
 
