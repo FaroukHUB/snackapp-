@@ -3969,18 +3969,106 @@ html, body {
     }
 }
 
-/* Even smaller screens - still 2 columns */
-@media (max-width: 480px) {
+/* ============================================
+   MOBILE FIX V19 - Reset all problematic styles
+   ============================================ */
+@media (max-width: 768px) {
+    /* Reset sidebar padding on mobile */
+    .main-layout {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .main-content {
+        padding: 12px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Product sections full width */
+    .product-section,
+    #productsContainer,
+    .featured-section {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Grid takes full width */
     .products-grid,
-    .featured-grid,
-    .product-section .products-grid {
+    .featured-grid {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
     }
 
-    .product-card {
-        display: block !important;
+    /* Cards proper sizing */
+    .product-card,
+    .featured-card {
+        display: flex !important;
         flex-direction: column !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+
+    /* Card content doesn't overflow */
+    .product-info,
+    .product-name,
+    .product-ingredients {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        box-sizing: border-box !important;
+    }
+
+    .product-name {
+        white-space: nowrap !important;
+    }
+
+    .product-ingredients {
+        white-space: nowrap !important;
+        font-size: 11px !important;
+    }
+}
+
+/* Even smaller screens */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 8px !important;
+    }
+
+    .products-grid,
+    .featured-grid {
+        gap: 8px !important;
+    }
+
+    .product-card .product-info {
+        padding: 8px !important;
+    }
+
+    .product-name {
+        font-size: 12px !important;
+    }
+
+    .product-ingredients {
+        font-size: 10px !important;
+    }
+
+    .product-price {
+        font-size: 13px !important;
     }
 }

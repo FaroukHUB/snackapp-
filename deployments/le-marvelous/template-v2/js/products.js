@@ -140,11 +140,8 @@ const Products = {
             const colorIndex = index % 3;
 
             if (colorIndex !== 0) {
-                // Apply colored background (without negative margins to avoid horizontal scroll)
+                // Apply colored background only - no padding/margin to avoid layout issues
                 section.style.background = colors[colorIndex];
-                section.style.borderRadius = '12px';
-                section.style.padding = '16px';
-                section.style.marginBottom = '16px';
             }
 
             // Add accent border to section titles
