@@ -91,7 +91,10 @@ const Products = {
 
         grid.innerHTML = featuredProducts.map(product => {
             const price = product.priceSolo || product.price || 0;
-            const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
+            // Use baseIngredients if available, otherwise fall back to description
+            const ingredients = product.baseIngredients && product.baseIngredients.length > 0
+                ? product.baseIngredients.join(', ')
+                : (product.description || '');
             return `
                 <div class="featured-card">
                     <div class="product-image-wrapper" onclick="Products.openProductModal('${product.id}')">
@@ -101,7 +104,7 @@ const Products = {
                     </div>
                     <div class="product-info">
                         <h3 class="product-name" onclick="Products.openProductModal('${product.id}')">${product.name}</h3>
-                        <p class="product-desc">${desc}</p>
+                        <p class="product-ingredients">${ingredients}</p>
                         <div class="product-footer">
                             <span class="product-price">${Config.formatPrice(price)}</span>
                             <button class="product-add-btn" onclick="event.stopPropagation(); Products.openProductModal('${product.id}')">Ajouter</button>

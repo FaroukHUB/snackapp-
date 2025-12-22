@@ -2671,7 +2671,7 @@ ul {
     margin-bottom: 4px;
 }
 
-.featured-card .product-desc {
+.featured-card .product-ingredients {
     font-size: 11px;
     color: var(--gray-500);
     margin-bottom: 8px;
@@ -2680,6 +2680,7 @@ ul {
     -webkit-box-orient: vertical;
     overflow: hidden;
     min-height: 28px;
+    font-style: italic;
 }
 
 .featured-card .product-footer {
@@ -3379,6 +3380,63 @@ ul {
         color: white !important;
         border: none !important;
         cursor: pointer !important;
+    }
+
+    /* ========== FEATURED CARDS MOBILE ========== */
+    .featured-card {
+        display: block !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        background: var(--white, #fff) !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+    }
+
+    .featured-card .product-image-wrapper {
+        height: 100px !important;
+        padding-top: 0 !important;
+    }
+
+    .featured-card .product-info {
+        padding: 10px !important;
+    }
+
+    .featured-card .product-name {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        margin-bottom: 4px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .featured-card .product-ingredients {
+        font-size: 10px !important;
+        color: var(--gray-500) !important;
+        margin-bottom: 6px !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        min-height: auto !important;
+        font-style: italic !important;
+    }
+
+    .featured-card .product-footer {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+    }
+
+    .featured-card .product-price {
+        font-size: 13px !important;
+        font-weight: 700 !important;
+    }
+
+    .featured-card .product-add-btn {
+        padding: 6px 10px !important;
+        font-size: 10px !important;
+        border-radius: 8px !important;
     }
 }
 
