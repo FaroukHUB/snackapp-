@@ -774,14 +774,21 @@
             </div>
 
             <div class="confirmation-actions">
-                <a href="#" class="btn-whatsapp" id="whatsappSelfLink" target="_blank">
+                <a href="#" class="btn-whatsapp" id="whatsappRestaurantLink" target="_blank" style="background: #128C7E;">
                     <i class="fab fa-whatsapp"></i>
-                    Recevoir le récap sur WhatsApp
+                    📤 Envoyer la commande au restaurant
+                </a>
+                <a href="#" class="btn-whatsapp" id="whatsappSelfLink" target="_blank" style="background: #25D366;">
+                    <i class="fab fa-whatsapp"></i>
+                    📥 Garder une copie pour moi
                 </a>
                 <a href="index.html" class="btn-secondary">
                     Retour au menu
                 </a>
             </div>
+            <p style="font-size: 12px; color: #888; margin-top: 12px; text-align: center;">
+                ⚠️ Cliquez sur "Envoyer au restaurant" pour finaliser votre commande
+            </p>
         </div>
     </div>
 
@@ -1089,7 +1096,7 @@
                     }
                 }
 
-                // Generate receipt link
+                // Generate receipt link for customer
                 const receiptLink = this.generateReceiptLink(
                     orderNumber,
                     customerName,
@@ -1100,6 +1107,18 @@
                     discount
                 );
                 document.getElementById('whatsappSelfLink').href = receiptLink;
+
+                // Generate order link for restaurant
+                const restaurantLink = this.generateRestaurantOrderLink(
+                    orderNumber,
+                    customerName,
+                    customerPhone,
+                    customerAddress,
+                    items,
+                    subtotal,
+                    discount
+                );
+                document.getElementById('whatsappRestaurantLink').href = restaurantLink;
 
                 // Show modal
                 document.getElementById('confirmationModal').classList.add('active');
@@ -1188,6 +1207,86 @@
                 const fullPhone = cleanPhone.startsWith('213') ? cleanPhone : '213' + cleanPhone.replace(/^0/, '');
 
                 return `https://wa.me/${fullPhone}?text=${encodeURIComponent(receipt)}`;
+            },
+
+            generateRestaurantOrderLink(orderNumber, customerName, customerPhone, customerAddress, items, subtotal, discount) {
+                const restaurant = Config.restaurant || {};
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('fr-FR');
+                const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+                const total = subtotal - discount;
+
+                let order = `🔔 *NOUVELLE COMMANDE*\n`;
+                order += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+                order += `📅 ${dateStr} à ${timeStr}\n`;
+                order += `🎫 Commande N° *${orderNumber}*\n\n`;
+
+                order += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                order += `👤 *CLIENT*\n`;
+                order += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                order += `Nom: ${customerName}\n`;
+                order += `Tél: ${customerPhone}\n`;
+                if (customerAddress) {
+                    order += `📍 ${customerAddress}\n`;
+                }
+                order += `\n`;
+
+                order += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                order += `📋 *COMMANDE*\n`;
+                order += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+                // Items
+                items.forEach(item => {
+                    const itemTotal = (item.basePrice + (item.supplements || []).reduce((sum, s) => sum + (s.price || 0), 0)) * item.quantity;
+                    order += `${item.quantity}x *${item.name}*\n`;
+                    order += `   ${Config.formatPrice(itemTotal)}\n`;
+
+                    // Menu type
+                    if (item.options?.menuType === 'menu') {
+                        order += `   → Menu\n`;
+                    }
+
+                    // Drink
+                    if (item.options?.selectedDrink) {
+                        order += `   🥤 ${item.options.selectedDrink.name}\n`;
+                    }
+
+                    // Side
+                    if (item.options?.selectedSide) {
+                        order += `   🍟 ${item.options.selectedSide.name}\n`;
+                    }
+
+                    // Variant
+                    if (item.options?.selectedVariant) {
+                        order += `   ✓ ${item.options.selectedVariant.name}\n`;
+                    }
+
+                    // Supplements
+                    if (item.supplements && item.supplements.length > 0) {
+                        order += `   + ${item.supplements.map(s => s.name).join(', ')}\n`;
+                    }
+                    order += `\n`;
+                });
+
+                order += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                if (discount > 0) {
+                    order += `Sous-total: ${Config.formatPrice(subtotal)}\n`;
+                    order += `Remise: -${Config.formatPrice(discount)}\n`;
+                    order += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                }
+                order += `💰 *TOTAL: ${Config.formatPrice(total)}*\n`;
+                order += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+                order += `⏰ Merci de préparer cette commande !`;
+
+                // Send to restaurant's WhatsApp
+                const restaurantPhone = restaurant.contact?.whatsappOrdersNumber ||
+                                       restaurant.contact?.phone?.replace(/[^0-9]/g, '') ||
+                                       '213556782194';
+
+                return `https://wa.me/${restaurantPhone}?text=${encodeURIComponent(order)}`;
             },
 
             showToast(message, type = 'success') {
