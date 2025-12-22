@@ -198,34 +198,59 @@ const Config = {
 
     /**
      * Get upsell suggestions based on cart contents
+     * Smart distribution: 1-2 items per category for variety
      */
     getUpsellSuggestions(cartCategories) {
         const suggestions = [];
+        const categoryProducts = {};
 
         for (const rule of this.upsellRules) {
-            // Check if any cart category matches the rule's "when" condition
             const matches = rule.when.some(cat => cartCategories.includes(cat));
             if (matches) {
-                // Get products from suggested categories
+                // Collect products from each suggested category
                 rule.suggest.forEach(suggestedCat => {
-                    const products = this.getProductsByCategory(suggestedCat)
-                        .filter(p => p.status === 'available')
-                        .slice(0, 3); // Max 3 per category
-
-                    products.forEach(product => {
-                        if (!suggestions.find(s => s.id === product.id)) {
-                            suggestions.push({
-                                ...product,
-                                categoryId: suggestedCat,
-                                upsellMessage: rule.message
-                            });
-                        }
-                    });
+                    if (!categoryProducts[suggestedCat]) {
+                        categoryProducts[suggestedCat] = this.getProductsByCategory(suggestedCat)
+                            .filter(p => p.status === 'available')
+                            .map(p => ({ ...p, categoryId: suggestedCat, upsellMessage: rule.message }));
+                    }
                 });
+                break; // Use first matching rule only
             }
         }
 
-        return suggestions.slice(0, 6); // Max 6 total suggestions
+        // Smart distribution: take items round-robin from each category
+        const categories = Object.keys(categoryProducts);
+        const maxTotal = 6;
+        const maxPerCategory = Math.max(1, Math.ceil(maxTotal / categories.length));
+        const taken = {};
+
+        // Round 1: Take 1 from each category
+        for (const cat of categories) {
+            if (suggestions.length >= maxTotal) break;
+            const products = categoryProducts[cat];
+            if (products.length > 0) {
+                suggestions.push(products[0]);
+                taken[cat] = 1;
+            }
+        }
+
+        // Round 2+: Fill remaining slots
+        let round = 1;
+        while (suggestions.length < maxTotal && round < maxPerCategory) {
+            for (const cat of categories) {
+                if (suggestions.length >= maxTotal) break;
+                const products = categoryProducts[cat];
+                const alreadyTaken = taken[cat] || 0;
+                if (products.length > alreadyTaken) {
+                    suggestions.push(products[alreadyTaken]);
+                    taken[cat] = alreadyTaken + 1;
+                }
+            }
+            round++;
+        }
+
+        return suggestions;
     },
 
     /**

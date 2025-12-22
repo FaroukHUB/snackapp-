@@ -897,6 +897,25 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Variant Selection Modal (for drinks with choices) -->
+    <div class="confirmation-modal" id="variantModal">
+        <div class="confirmation-content" style="max-width: 380px;">
+            <div style="text-align: center; margin-bottom: 16px;">
+                <i class="fas fa-glass-water" id="variantModalIcon" style="font-size: 40px; color: var(--primary);"></i>
+            </div>
+            <h2 id="variantModalTitle" style="font-size: 20px; margin-bottom: 8px;">Choisissez votre boisson</h2>
+            <p id="variantModalSubtitle" style="color: var(--gray-600); font-size: 14px; margin-bottom: 20px;"></p>
+
+            <div id="variantOptions" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;">
+                <!-- Variants will be inserted here -->
+            </div>
+
+            <button onclick="CartPage.closeVariantModal()" style="margin-top: 20px; padding: 12px 24px; background: var(--gray-200); color: var(--gray-700); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
+                Annuler
+            </button>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/config.js"></script>
     <script src="js/cart.js"></script>
@@ -1056,11 +1075,100 @@
                 }).join('');
             },
 
+            // Current product for variant selection
+            currentVariantProduct: null,
+
             quickAddUpsell(productId) {
                 const product = Config.getProduct(productId);
-                if (product) {
+                if (!product) return;
+
+                // Check if product has variants (like Soda, Jus)
+                if (product.hasVariants && product.variants && product.variants.length > 0) {
+                    this.showVariantModal(product);
+                } else {
                     Cart.addItem(product, 1, [], {});
+                    this.showToast(`${product.name} ajouté !`, 'success');
                 }
+            },
+
+            showVariantModal(product) {
+                this.currentVariantProduct = product;
+
+                // Update modal content
+                document.getElementById('variantModalTitle').textContent = product.variantLabel || `Choisissez votre ${product.name}`;
+                document.getElementById('variantModalSubtitle').textContent = product.description || '';
+
+                // Set icon based on product type
+                const icon = document.getElementById('variantModalIcon');
+                if (product.id.includes('soda')) {
+                    icon.className = 'fas fa-bottle-water';
+                } else if (product.id.includes('jus')) {
+                    icon.className = 'fas fa-glass-water';
+                } else if (product.id.includes('smoothie')) {
+                    icon.className = 'fas fa-blender';
+                } else if (product.id.includes('cocktail')) {
+                    icon.className = 'fas fa-martini-glass-citrus';
+                } else {
+                    icon.className = 'fas fa-mug-hot';
+                }
+
+                // Generate variant options
+                const optionsContainer = document.getElementById('variantOptions');
+                const availableVariants = product.variants.filter(v => v.available !== false);
+
+                optionsContainer.innerHTML = availableVariants.map(variant => {
+                    const extraPrice = variant.price > 0 ? ` (+${Config.formatPrice(variant.price)})` : '';
+                    return `
+                        <button onclick="CartPage.selectVariant('${variant.id}')" style="
+                            padding: 14px 16px;
+                            background: var(--gray-50);
+                            border: 2px solid var(--gray-200);
+                            border-radius: 10px;
+                            font-size: 15px;
+                            font-weight: 500;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            text-align: left;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        " onmouseover="this.style.borderColor='var(--primary)';this.style.background='var(--primary-light)'" onmouseout="this.style.borderColor='var(--gray-200)';this.style.background='var(--gray-50)'">
+                            <span>${variant.name}</span>
+                            <span style="color: var(--primary); font-weight: 600;">${Config.formatPrice((product.price || 0) + (variant.price || 0))}${extraPrice ? '' : ''}</span>
+                        </button>
+                    `;
+                }).join('');
+
+                // Show modal
+                document.getElementById('variantModal').classList.add('active');
+            },
+
+            selectVariant(variantId) {
+                if (!this.currentVariantProduct) return;
+
+                const variant = this.currentVariantProduct.variants.find(v => v.id === variantId);
+                if (!variant) return;
+
+                // Create item with variant info
+                const itemName = `${this.currentVariantProduct.name} - ${variant.name}`;
+                const itemPrice = (this.currentVariantProduct.price || 0) + (variant.price || 0);
+
+                // Add to cart with variant as a modified product
+                const productWithVariant = {
+                    ...this.currentVariantProduct,
+                    name: itemName,
+                    price: itemPrice,
+                    selectedVariant: variant
+                };
+
+                Cart.addItem(productWithVariant, 1, [], { variantId: variantId, variantName: variant.name });
+                this.showToast(`${itemName} ajouté !`, 'success');
+                this.closeVariantModal();
+            },
+
+            closeVariantModal() {
+                document.getElementById('variantModal').classList.remove('active');
+                this.currentVariantProduct = null;
             },
 
             updateSummary() {

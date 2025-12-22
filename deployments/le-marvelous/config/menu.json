@@ -126,20 +126,31 @@
                     {
                         "id": "viennoiseries",
                         "name": "Viennoiseries Pur Beurre",
-                        "description": "Tarifs et disponibilité selon arrivage.",
+                        "description": "Fraîches du jour, selon arrivage.",
                         "price": 150,
                         "image": "",
                         "status": "available",
-                        "note": "À partir de"
+                        "hasVariants": true,
+                        "variantLabel": "Choisir votre viennoiserie",
+                        "variants": [
+                            { "id": "croissant", "name": "Croissant Pur Beurre", "price": 0, "available": true },
+                            { "id": "pain-chocolat", "name": "Pain au Chocolat Pur Beurre", "price": 0, "available": true }
+                        ]
                     },
                     {
                         "id": "patisserie",
                         "name": "Pâtisserie",
-                        "description": "Les pâtisseries sont présentées en vitrine.",
-                        "price": 300,
+                        "description": "Nos pâtisseries maison en vitrine.",
+                        "price": 0,
                         "image": "",
                         "status": "available",
-                        "note": "À partir de"
+                        "hasVariants": true,
+                        "variantLabel": "Choisir votre pâtisserie",
+                        "variants": [
+                            { "id": "tarte-citron", "name": "Tarte Citron Meringuée", "price": 300, "available": true },
+                            { "id": "tarte-fraise", "name": "Tarte Fraise", "price": 350, "available": true },
+                            { "id": "fraisier", "name": "Fraisier", "price": 450, "available": true }
+                        ]
                     },
                     {
                         "id": "croque-monsieur",
@@ -524,16 +535,46 @@
     "formules": [],
     "upsellRules": [
         {
-            "when": ["crepes-salees-signature", "sucres-sales"],
-            "suggest": ["boissons-chaudes", "sodas-eaux", "jus-cocktails"],
-            "message": "Une boisson avec votre plat ?",
+            "when": ["crepes-salees-signature"],
+            "suggest": ["crepes-sucrees", "gaufres", "sodas-eaux", "boissons-chaudes"],
+            "message": "Un dessert ou une boisson ?",
             "priority": 1
         },
         {
-            "when": ["crepes-sucrees", "gaufres", "bubble-waffle"],
-            "suggest": ["boissons-chaudes"],
-            "message": "Un café pour accompagner ?",
+            "when": ["sucres-sales"],
+            "suggest": ["crepes-sucrees", "sodas-eaux", "jus-cocktails", "boissons-chaudes"],
+            "message": "Une boisson pour accompagner ?",
+            "priority": 1
+        },
+        {
+            "when": ["crepes-sucrees"],
+            "suggest": ["gaufres", "bubble-waffle", "boissons-chaudes", "jus-cocktails"],
+            "message": "Une autre gourmandise ?",
             "priority": 2
+        },
+        {
+            "when": ["gaufres"],
+            "suggest": ["crepes-sucrees", "bubble-waffle", "boissons-chaudes", "jus-cocktails"],
+            "message": "Encore une douceur ?",
+            "priority": 2
+        },
+        {
+            "when": ["bubble-waffle"],
+            "suggest": ["crepes-sucrees", "gaufres", "jus-cocktails", "boissons-chaudes"],
+            "message": "Un petit extra ?",
+            "priority": 2
+        },
+        {
+            "when": ["boissons-chaudes"],
+            "suggest": ["crepes-sucrees", "gaufres", "bubble-waffle"],
+            "message": "Une douceur avec votre café ?",
+            "priority": 3
+        },
+        {
+            "when": ["sodas-eaux", "jus-cocktails"],
+            "suggest": ["crepes-sucrees", "gaufres"],
+            "message": "Un dessert avec votre boisson ?",
+            "priority": 3
         }
     ],
     "categoryIcons": {
