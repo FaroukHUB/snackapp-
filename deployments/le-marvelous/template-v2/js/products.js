@@ -471,6 +471,11 @@ const Products = {
             const price = product.price || product.priceSolo || 0;
             const cardClick = isUnavailable ? '' : `Products.openProductModal('${product.id}')`;
 
+            // Format ingredients list
+            const ingredients = product.baseIngredients && product.baseIngredients.length > 0
+                ? product.baseIngredients.join(', ')
+                : '';
+
             return `
                 <div class="product-card ${isUnavailable ? 'unavailable' : ''}"
                      data-product-id="${product.id}"
@@ -482,7 +487,7 @@ const Products = {
                     </div>
                     <div class="product-info">
                         <h3 class="product-name">${product.name}</h3>
-                        <p class="product-description">${product.description || ''}</p>
+                        ${ingredients ? `<p class="product-ingredients">${ingredients}</p>` : ''}
                         <div class="product-footer">
                             <span class="product-price">${Config.formatPrice(price)}</span>
                             ${!isUnavailable ? `<button class="product-add-btn">Ajouter</button>` : ''}

@@ -770,6 +770,18 @@ ul {
     overflow: hidden;
 }
 
+.product-ingredients {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-style: italic;
+}
+
 .product-description {
     font-size: 13px;
     color: var(--gray-500);
@@ -866,6 +878,64 @@ ul {
 .info-content a {
     color: var(--primary);
     font-weight: 500;
+}
+
+/* Reviews Section */
+.reviews-section {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.reviews-header {
+    margin-bottom: 20px;
+}
+
+.reviews-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.rating-stars {
+    color: #f59e0b;
+    font-size: 20px;
+}
+
+.rating-score {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.reviews-subtitle {
+    color: var(--gray-500);
+    font-size: 14px;
+    margin: 0;
+}
+
+.google-review-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 2px solid #4285f4;
+    color: #4285f4;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.google-review-btn:hover {
+    background: #4285f4;
+    color: #fff;
+}
+
+.google-review-btn:hover img {
+    filter: brightness(0) invert(1);
 }
 
 /* Contact Cards */
@@ -3249,11 +3319,25 @@ ul {
         font-size: 13px !important;
         font-weight: 600 !important;
         line-height: 1.3 !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 4px !important;
         color: var(--gray-800, #333) !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
+    }
+
+    /* Product Ingredients on Mobile */
+    .product-card .product-ingredients,
+    .products-grid .product-card .product-ingredients {
+        display: block !important;
+        font-size: 10px !important;
+        color: var(--gray-500, #888) !important;
+        margin-bottom: 6px !important;
+        line-height: 1.3 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        font-style: italic !important;
     }
 
     /* Hide Description on Mobile */

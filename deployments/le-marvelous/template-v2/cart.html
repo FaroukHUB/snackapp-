@@ -762,6 +762,17 @@
                 <a href="../loyalty-card.php" style="display: block; margin-top: 6px; color: white; font-size: 12px; text-decoration: underline;">Voir ma carte fidélité</a>
             </div>
 
+            <!-- Google Review Request -->
+            <div class="google-review-prompt" style="background: #f8f9fa; border-radius: 12px; padding: 16px; margin: 20px 0; text-align: center;">
+                <p style="margin: 0 0 12px 0; color: #555; font-size: 14px;">
+                    En attendant votre commande, laissez-nous un avis sur Google !
+                </p>
+                <a href="https://search.google.com/local/writereview?placeid=ChIJN1t_tDeuEmsRUsoyG83frY4" target="_blank" class="google-review-btn" style="display: inline-flex; align-items: center; gap: 10px; background: #fff; border: 2px solid #4285f4; color: #4285f4; padding: 12px 24px; border-radius: 30px; font-weight: 600; text-decoration: none; transition: all 0.3s;">
+                    <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_42x14dp.png" alt="Google" style="height: 20px;">
+                    Laisser un avis
+                </a>
+            </div>
+
             <div class="confirmation-actions">
                 <a href="#" class="btn-whatsapp" id="whatsappSelfLink" target="_blank">
                     <i class="fab fa-whatsapp"></i>
@@ -1104,9 +1115,6 @@
                 const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
                 const total = subtotal - discount;
-                const tvaRate = 0.10; // 10% TVA restauration
-                const totalHT = total / (1 + tvaRate);
-                const tvaAmount = total - totalHT;
 
                 let receipt = `🧾 *TICKET DE CAISSE*\n`;
                 receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
@@ -1162,14 +1170,12 @@
                 });
 
                 receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-                receipt += `Sous-total: ${Config.formatPrice(subtotal)}\n`;
                 if (discount > 0) {
+                    receipt += `Sous-total: ${Config.formatPrice(subtotal)}\n`;
                     receipt += `Remise: -${Config.formatPrice(discount)}\n`;
+                    receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
                 }
-                receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-                receipt += `Total HT: ${Config.formatPrice(totalHT)}\n`;
-                receipt += `TVA (10%): ${Config.formatPrice(tvaAmount)}\n`;
-                receipt += `*TOTAL TTC: ${Config.formatPrice(total)}*\n`;
+                receipt += `*TOTAL: ${Config.formatPrice(total)}*\n`;
                 receipt += `━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
                 receipt += `✅ *Commande confirmée*\n`;
@@ -1178,8 +1184,8 @@
 
                 // Send to customer's own WhatsApp
                 const cleanPhone = customerPhone.replace(/[^0-9]/g, '');
-                // Add French country code if not present
-                const fullPhone = cleanPhone.startsWith('33') ? cleanPhone : '33' + cleanPhone.replace(/^0/, '');
+                // Add Algeria country code if not present
+                const fullPhone = cleanPhone.startsWith('213') ? cleanPhone : '213' + cleanPhone.replace(/^0/, '');
 
                 return `https://wa.me/${fullPhone}?text=${encodeURIComponent(receipt)}`;
             },
