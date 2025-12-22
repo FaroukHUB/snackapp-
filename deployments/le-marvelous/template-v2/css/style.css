@@ -685,7 +685,7 @@ ul {
 
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
 }
 
@@ -2637,8 +2637,8 @@ ul {
 
 .featured-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
 }
 
 .featured-card {
