@@ -2637,10 +2637,8 @@ ul {
 
 .featured-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    max-width: 1000px;
-    margin: 0 auto;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
 }
 
 .featured-card {
