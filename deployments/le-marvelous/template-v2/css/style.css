@@ -3891,9 +3891,20 @@ ul {
 }
 
 /* ============================================
-   CRITICAL FIX V15: Force grid layout on mobile
-   Prevent ALL horizontal scrolling on product grids
+   CRITICAL FIX V18: Block ALL horizontal scroll
    ============================================ */
+
+/* GLOBAL - No horizontal scroll anywhere */
+html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+}
+
+*, *::before, *::after {
+    max-width: 100vw;
+}
+
 @media (max-width: 768px) {
     /* Force main content to not overflow */
     .main-content,
@@ -3902,6 +3913,12 @@ ul {
     html {
         overflow-x: hidden !important;
         max-width: 100vw !important;
+        width: 100% !important;
+    }
+
+    /* Prevent any element from causing overflow */
+    * {
+        max-width: 100% !important;
     }
 
     /* Force ALL product grids to be 2-column grid */
