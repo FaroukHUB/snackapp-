@@ -136,13 +136,30 @@ class OrderNotificationSystem {
         `;
 
         const customerName = order.customer_name || 'Nouveau client';
+
+        // Debug: Log the order to see what we're getting
+        console.log('📦 Nouvelle commande reçue:', order);
+        console.log('💰 Total brut:', order.total, 'Type:', typeof order.total);
+
         // Fix: Parse total properly - handle string, number, or undefined
         let totalNum = parseFloat(order.total) || 0;
+
+        // Fallback: If total is 0, calculate from items
+        if (totalNum === 0 && order.items && order.items.length > 0) {
+            totalNum = order.items.reduce((sum, item) => {
+                const itemPrice = parseFloat(item.price) || 0;
+                const qty = parseInt(item.quantity) || 1;
+                return sum + (itemPrice * qty);
+            }, 0);
+            console.log('💰 Total calculé depuis items:', totalNum);
+        }
+
         // Round to integer for DA (no decimals in Algerian Dinars)
         const total = Math.round(totalNum);
+        console.log('💰 Total final affiché:', total, 'DA');
 
         // Count items for display
-        const itemsCount = (order.items || []).reduce((sum, item) => sum + (item.quantity || 1), 0);
+        const itemsCount = (order.items || []).reduce((sum, item) => sum + (parseInt(item.quantity) || 1), 0);
 
         modal.innerHTML = `
             <div style="background:#2a2a3e;padding:40px;border-radius:20px;text-align:center;max-width:400px;" onclick="event.stopPropagation()">
