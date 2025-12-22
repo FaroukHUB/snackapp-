@@ -81,6 +81,14 @@
     100% { background-position: 200% 0; }
 }
 
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+}
+
 /* Apply animations to elements */
 .product-card {
     animation: fadeInUp 0.4s ease backwards;
@@ -1721,17 +1729,18 @@ ul {
 }
 
 .variant-radio::after {
-    content: '';
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--primary);
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 10px;
+    color: var(--white);
     opacity: 0;
     transition: var(--transition);
 }
 
 .variant-item.selected .variant-radio {
     border-color: var(--primary);
+    background: var(--primary);
 }
 
 .variant-item.selected .variant-radio::after {
@@ -3009,5 +3018,680 @@ ul {
         padding-right: 12px;
         padding-top: 24px;
         padding-bottom: 24px;
+    }
+}
+
+/* ============================================
+   MOBILE CATEGORY NAVIGATION - ROUND ICONS
+   Style moderne type food app (Uber Eats, Deliveroo)
+   ============================================ */
+.mobile-category-nav {
+    display: none;
+    position: sticky;
+    top: var(--header-height);
+    z-index: 50;
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-100);
+    padding: 12px 0;
+    margin: 0 -16px 16px -16px;
+    width: calc(100% + 32px);
+}
+
+.category-carousel {
+    display: flex;
+    gap: 16px;
+    padding: 0 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.category-carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.category-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 70px;
+    padding: 8px 4px;
+    cursor: pointer;
+    scroll-snap-align: center;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.category-pill-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.category-pill-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70px;
+}
+
+.category-pill.active .category-pill-icon {
+    background: var(--primary-light);
+    border-color: var(--primary);
+}
+
+.category-pill.active .category-pill-label {
+    color: var(--primary);
+}
+
+.category-pill:active .category-pill-icon {
+    transform: scale(0.95);
+}
+
+/* Show on mobile only */
+@media (max-width: 1024px) {
+    .mobile-category-nav {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-category-nav {
+        margin: 0 -12px 12px -12px;
+        width: calc(100% + 24px);
+        padding: 10px 0;
+    }
+
+    .category-carousel {
+        gap: 12px;
+        padding: 0 12px;
+    }
+
+    .category-pill {
+        min-width: 64px;
+    }
+
+    .category-pill-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .category-pill-label {
+        font-size: 10px;
+        max-width: 64px;
+    }
+}
+
+/* ============================================
+   ULTRA RESPONSIVE OVERHAUL - MOBILE APP FEEL
+   ============================================ */
+
+/* Mobile Header - Ultra clean */
+@media (max-width: 768px) {
+    .header {
+        height: 56px;
+        padding: 0 12px;
+        gap: 8px;
+    }
+
+    .logo-img {
+        height: 36px;
+    }
+
+    .cart-btn {
+        padding: 8px 14px;
+        font-size: 13px;
+        border-radius: 24px;
+    }
+
+    .cart-badge {
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
+        top: -4px;
+        right: -4px;
+    }
+}
+
+/* Product Cards - Modern Grid */
+@media (max-width: 768px) {
+    .products-grid,
+    .featured-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .product-card {
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        background: var(--white);
+        overflow: hidden;
+    }
+
+    .product-card:hover {
+        transform: none;
+    }
+
+    .product-card:active {
+        transform: scale(0.98);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .product-image-wrapper {
+        aspect-ratio: 4/3;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .product-info {
+        padding: 10px 12px 12px;
+    }
+
+    .product-name {
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-price {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .add-to-cart-btn {
+        display: none;
+    }
+}
+
+/* Modal - Bottom Sheet Style on Mobile */
+@media (max-width: 768px) {
+    .modal {
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        max-height: 92vh;
+        max-height: 92dvh;
+        height: auto;
+        border-radius: 24px 24px 0 0;
+        animation: slideUpModal 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    @keyframes slideUpModal {
+        from {
+            transform: translateY(100%);
+            opacity: 0.5;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-image {
+        height: 200px;
+        border-radius: 24px 24px 0 0;
+        flex-shrink: 0;
+    }
+
+    .modal-image img {
+        border-radius: 24px 24px 0 0;
+    }
+
+    .modal-close {
+        position: fixed;
+        top: auto;
+        bottom: calc(92vh - 40px);
+        bottom: calc(92dvh - 40px);
+        right: 16px;
+        width: 36px;
+        height: 36px;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        z-index: 10;
+    }
+
+    .modal-details {
+        padding: 16px;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    #modalTitle {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .modal-description {
+        font-size: 13px;
+        color: var(--gray-500);
+        margin-bottom: 16px;
+    }
+
+    /* Menu toggle buttons */
+    .menu-toggle-options {
+        gap: 10px;
+    }
+
+    .menu-option {
+        padding: 14px;
+        border-radius: 14px;
+    }
+
+    .option-label {
+        font-size: 14px;
+    }
+
+    .option-price {
+        font-size: 15px;
+    }
+
+    /* Supplements, Sauce, etc */
+    .modal-supplements h4,
+    .modal-sauce h4,
+    .modal-accompagnement h4,
+    .modal-variants h4,
+    .modal-ingredients h4 {
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .supplement-item,
+    .sauce-item,
+    .accompagnement-item,
+    .variant-item,
+    .ingredient-item {
+        padding: 10px 12px;
+        border-radius: 10px;
+    }
+
+    /* Bottom action bar */
+    .modal-actions {
+        position: sticky;
+        bottom: 0;
+        background: var(--white);
+        padding: 12px 16px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--gray-100);
+        margin: 16px -16px -16px -16px;
+        margin-bottom: calc(-16px - env(safe-area-inset-bottom));
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .quantity-selector {
+        background: var(--gray-100);
+        border-radius: 12px;
+        padding: 4px;
+    }
+
+    .qty-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+    }
+
+    .qty-value {
+        min-width: 32px;
+        font-size: 16px;
+    }
+
+    .btn-add-cart {
+        flex: 1;
+        padding: 14px 20px;
+        border-radius: 14px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+}
+
+/* Mini Cart - Slide from bottom on mobile */
+@media (max-width: 768px) {
+    .mini-cart {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        width: 100%;
+        max-width: 100%;
+        max-height: 70vh;
+        max-height: 70dvh;
+        border-radius: 24px 24px 0 0;
+        transform: translateY(100%);
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+    }
+
+    .mini-cart.active {
+        transform: translateY(0);
+    }
+
+    .mini-cart-header {
+        padding: 16px;
+        border-radius: 24px 24px 0 0;
+    }
+
+    .mini-cart-header::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: var(--gray-300);
+        border-radius: 2px;
+    }
+
+    .mini-cart-items {
+        max-height: calc(70vh - 180px);
+        max-height: calc(70dvh - 180px);
+    }
+
+    .mini-cart-footer {
+        padding: 16px;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+
+    .btn-view-cart {
+        padding: 14px;
+        border-radius: 14px;
+        font-size: 15px;
+    }
+}
+
+/* Hero Section - Compact on mobile */
+@media (max-width: 768px) {
+    .hero-section {
+        height: 140px;
+        margin-bottom: 0;
+        border-radius: 0;
+        margin-left: -16px;
+        margin-right: -16px;
+        width: calc(100% + 32px);
+    }
+
+    .hero-content {
+        bottom: 12px;
+        left: 12px;
+    }
+
+    .hero-content h1 {
+        font-size: 18px;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .hero-content p {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        height: 120px;
+        margin-left: -12px;
+        margin-right: -12px;
+        width: calc(100% + 24px);
+    }
+}
+
+/* Services Section - Horizontal scroll on mobile */
+@media (max-width: 768px) {
+    .services-grid {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+        margin: 0 -16px;
+        padding: 0 16px 4px 16px;
+    }
+
+    .services-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .service-card {
+        min-width: 260px;
+        scroll-snap-align: start;
+        border-radius: 14px;
+        padding: 14px;
+    }
+
+    .service-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .service-content h3 {
+        font-size: 14px;
+    }
+
+    .service-content p {
+        font-size: 12px;
+    }
+}
+
+/* Formules - Full width cards */
+@media (max-width: 768px) {
+    .formules-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .formule-card {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .formule-image {
+        height: 140px;
+    }
+
+    .formule-card-content {
+        padding: 14px;
+    }
+
+    .formule-name {
+        font-size: 16px;
+    }
+
+    .formule-price {
+        font-size: 18px;
+    }
+}
+
+/* Section Headers - Compact */
+@media (max-width: 768px) {
+    .section-header {
+        margin-bottom: 14px;
+    }
+
+    .section-header h2 {
+        font-size: 18px;
+        gap: 8px;
+    }
+
+    .section-header h2 i {
+        font-size: 16px;
+    }
+
+    .section-subtitle {
+        font-size: 12px;
+    }
+}
+
+/* Info Sections - Stack on mobile */
+@media (max-width: 768px) {
+    .info-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .info-section {
+        border-radius: 0;
+        padding: 20px 16px;
+    }
+
+    .info-section h2 {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+}
+
+/* Platforms Grid */
+@media (max-width: 768px) {
+    .platforms-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .platform-card {
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .platform-logo {
+        height: 28px;
+    }
+}
+
+/* FAQ */
+@media (max-width: 768px) {
+    .faq-item {
+        border-radius: 12px;
+        margin-bottom: 8px;
+    }
+
+    .faq-question {
+        padding: 14px;
+        font-size: 14px;
+    }
+
+    .faq-answer {
+        padding: 0 14px 14px;
+        font-size: 13px;
+    }
+}
+
+/* Toast - Full width bottom */
+@media (max-width: 768px) {
+    .toast-container {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        bottom: calc(8px + env(safe-area-inset-bottom));
+    }
+
+    .toast {
+        border-radius: 14px;
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Featured Section */
+@media (max-width: 768px) {
+    .featured-section {
+        margin-bottom: 24px;
+    }
+
+    .featured-grid {
+        display: flex;
+        overflow-x: auto;
+        gap: 12px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+        margin: 0 -16px;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .featured-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .featured-grid .product-card {
+        min-width: 150px;
+        max-width: 150px;
+        scroll-snap-align: start;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .featured-grid {
+        margin: 0 -12px;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .featured-grid .product-card {
+        min-width: 140px;
+        max-width: 140px;
+    }
+}
+
+/* Hide sidebar category name on very small screens for pills */
+@media (max-width: 360px) {
+    .category-pill-label {
+        font-size: 9px;
+    }
+
+    .category-pill-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 18px;
+    }
+
+    .category-pill {
+        min-width: 58px;
+    }
+}
+
+/* Smooth scrolling and touch improvements */
+@media (hover: none) and (pointer: coarse) {
+    .product-card:hover {
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .formule-card:hover {
+        transform: none;
+    }
+
+    * {
+        -webkit-tap-highlight-color: transparent;
     }
 }

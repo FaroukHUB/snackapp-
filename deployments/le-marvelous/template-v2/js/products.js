@@ -214,6 +214,117 @@ const Products = {
 
         // Setup scroll spy
         this.setupScrollSpy();
+
+        // Also render mobile category nav
+        this.renderMobileCategoryNav();
+    },
+
+    /**
+     * Render mobile category navigation (round icons carousel)
+     */
+    renderMobileCategoryNav() {
+        const carousel = document.getElementById('categoryCarousel');
+        if (!carousel) return;
+
+        const categories = Config.getCategories();
+        const icons = Config.categoryIcons;
+
+        // Category emoji mapping for visual appeal
+        const categoryEmojis = {
+            'crepes-signature': '🥞',
+            'crepes-salees': '🧀',
+            'crepes-sucrees': '🍫',
+            'la-crousti': '🌯',
+            'nos-sucres-sales': '🥐',
+            'gaufres': '🧇',
+            'boissons': '🥤',
+            'boissons-chaudes': '☕',
+            'boissons-fraiches': '🧃',
+            'desserts': '🍨',
+            'menu-enfant': '👶',
+            'supplements': '➕'
+        };
+
+        let html = '';
+
+        // Filter categories that have items
+        const validCategories = categories.filter(cat => cat.items && cat.items.length > 0);
+
+        validCategories.forEach((cat, index) => {
+            const emoji = categoryEmojis[cat.id] || '🍽️';
+            const isActive = index === 0 ? 'active' : '';
+
+            html += `
+                <a href="#${cat.id}" class="category-pill ${isActive}" data-category="${cat.id}">
+                    <div class="category-pill-icon">${emoji}</div>
+                    <span class="category-pill-label">${cat.name}</span>
+                </a>
+            `;
+        });
+
+        carousel.innerHTML = html;
+
+        // Setup click handlers for smooth scroll and active state
+        carousel.querySelectorAll('.category-pill').forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = pill.getAttribute('href').slice(1);
+                const target = document.getElementById(targetId);
+
+                if (target) {
+                    // Update active state
+                    carousel.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+
+                    // Smooth scroll
+                    const headerHeight = document.querySelector('.header')?.offsetHeight || 56;
+                    const navHeight = document.querySelector('.mobile-category-nav')?.offsetHeight || 80;
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - navHeight - 10;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+
+                    // Scroll pill into view
+                    pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            });
+        });
+
+        // Update active pill on scroll
+        this.setupMobileCategoryScrollSpy();
+    },
+
+    /**
+     * Setup scroll spy for mobile category navigation
+     */
+    setupMobileCategoryScrollSpy() {
+        const sections = document.querySelectorAll('.product-section');
+        const pills = document.querySelectorAll('.category-pill');
+        const carousel = document.getElementById('categoryCarousel');
+
+        if (!sections.length || !pills.length) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    pills.forEach(pill => {
+                        pill.classList.remove('active');
+                        if (pill.getAttribute('href') === `#${id}`) {
+                            pill.classList.add('active');
+                            // Scroll pill into view
+                            pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        }
+                    });
+                }
+            });
+        }, {
+            rootMargin: '-30% 0px -60% 0px'
+        });
+
+        sections.forEach(section => observer.observe(section));
     },
 
     /**
@@ -660,20 +771,18 @@ const Products = {
                 variantsContainer.style.display = '';
                 variantLabel.textContent = product.variantLabel || 'Choisir une option';
 
-                variantsList.innerHTML = availableVariants.map((variant, index) => {
+                variantsList.innerHTML = availableVariants.map((variant) => {
                     const priceExtra = variant.price > 0 ? ` (+${Config.formatPrice(variant.price)})` : '';
                     return `
-                        <div class="variant-item ${index === 0 ? 'selected' : ''}" data-id="${variant.id}" onclick="Products.selectVariant('${variant.id}')">
-                            <div class="variant-radio">
-                                <i class="fas fa-check"></i>
-                            </div>
+                        <div class="variant-item" data-id="${variant.id}" onclick="Products.selectVariant('${variant.id}')">
+                            <div class="variant-radio"></div>
                             <span class="variant-name">${variant.name}${priceExtra}</span>
                         </div>
                     `;
                 }).join('');
 
-                // Select first variant by default
-                this.selectedVariant = availableVariants[0];
+                // No pre-selection - user must click to select
+                this.selectedVariant = null;
             } else {
                 variantsContainer.classList.add('hidden');
                 variantsContainer.style.display = 'none';
@@ -1027,6 +1136,23 @@ const Products = {
      */
     addCurrentToCart() {
         if (!this.currentProduct) return;
+
+        // Validate variant selection for products that require it
+        if (this.currentProduct.hasVariants && this.currentProduct.variants?.length > 0) {
+            const availableVariants = this.currentProduct.variants.filter(v => v.available);
+            if (availableVariants.length > 0 && !this.selectedVariant) {
+                // Highlight variants section
+                const variantsSection = document.getElementById('modalVariants');
+                if (variantsSection) {
+                    variantsSection.style.animation = 'shake 0.4s ease';
+                    variantsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        variantsSection.style.animation = '';
+                    }, 400);
+                }
+                return;
+            }
+        }
 
         // Create product with correct price based on menu type
         const productToAdd = { ...this.currentProduct };
