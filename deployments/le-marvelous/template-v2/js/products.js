@@ -113,23 +113,32 @@ const Products = {
     },
 
     /**
-     * Apply alternating section backgrounds using theme color
-     * Creates visual separation between categories
+     * Apply alternating section backgrounds using theme colors
+     * Pattern: blanc / rose léger / vert léger
      */
     applySectionBackgrounds() {
         const primaryColor = Config.restaurant?.theme?.primary || '#e63946';
         const sections = document.querySelectorAll('.product-section');
 
-        // Create CSS variables for section styling
+        // Theme colors - très léger
+        const colors = [
+            'transparent',                      // Blanc (section 0, 3, 6...)
+            'rgba(255, 192, 203, 0.12)',       // Rose très léger (section 1, 4, 7...)
+            'rgba(144, 238, 144, 0.10)'        // Vert très léger (section 2, 5, 8...)
+        ];
+
+        // Create CSS variables
         const root = document.documentElement;
-        root.style.setProperty('--section-alt-bg', this.hexToRgba(primaryColor, 0.04));
-        root.style.setProperty('--section-border-accent', this.hexToRgba(primaryColor, 0.15));
+        root.style.setProperty('--section-pink', colors[1]);
+        root.style.setProperty('--section-green', colors[2]);
 
         // Apply alternating backgrounds to sections
         sections.forEach((section, index) => {
-            if (index % 2 === 1) {
-                // Odd sections get subtle colored background
-                section.style.background = this.hexToRgba(primaryColor, 0.04);
+            const colorIndex = index % 3;
+
+            if (colorIndex !== 0) {
+                // Apply colored background
+                section.style.background = colors[colorIndex];
                 section.style.marginLeft = '-16px';
                 section.style.marginRight = '-16px';
                 section.style.paddingLeft = '16px';
