@@ -3976,74 +3976,56 @@ ul {
 }
 
 /* ============================================
-   MOBILE FIX V22: FINAL OVERRIDE - 2 COLUMNS
-   This MUST be at the end to override everything
+   MOBILE FIX V23: ULTIMATE 2-COLUMN OVERRIDE
    ============================================ */
 @media screen and (max-width: 768px) {
-    /* Force 2 columns with maximum specificity */
+    /* ALL grids = 2 columns */
     .products-grid,
     .featured-grid,
-    div.products-grid,
-    div.featured-grid,
-    section.product-section .products-grid,
-    section.product-section div.products-grid,
+    #featuredGrid,
     #productsContainer .products-grid,
-    .main-content .products-grid,
-    .main-content .product-section .products-grid {
+    section.featured-section .featured-grid,
+    section.featured-section #featuredGrid,
+    .main-content .featured-grid,
+    .main-content #featuredGrid {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
-        grid-template-rows: auto !important;
         gap: 10px !important;
         width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
     }
 
-    /* Cards must fit in columns */
+    /* ALL cards = column width */
     .product-card,
     .featured-card,
-    .products-grid .product-card,
+    #featuredGrid .featured-card,
     .featured-grid .featured-card {
         width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
-        box-sizing: border-box !important;
-        flex: none !important;
-        display: flex !important;
-        flex-direction: column !important;
     }
 }
 
 @media screen and (max-width: 480px) {
-    /* Same override for smaller phones */
     .products-grid,
     .featured-grid,
-    div.products-grid,
-    div.featured-grid,
-    section.product-section .products-grid,
-    section.product-section div.products-grid,
+    #featuredGrid,
     #productsContainer .products-grid,
-    .main-content .products-grid,
-    .main-content .product-section .products-grid {
+    section.featured-section .featured-grid,
+    section.featured-section #featuredGrid,
+    .main-content .featured-grid,
+    .main-content #featuredGrid {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
-        grid-template-rows: auto !important;
         gap: 8px !important;
         width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
     }
 
     .product-card,
     .featured-card,
-    .products-grid .product-card,
+    #featuredGrid .featured-card,
     .featured-grid .featured-card {
         width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
-        box-sizing: border-box !important;
-        flex: none !important;
-        display: flex !important;
-        flex-direction: column !important;
     }
 }
