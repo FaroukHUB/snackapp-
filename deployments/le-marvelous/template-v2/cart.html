@@ -752,7 +752,18 @@
                         </div>
                         <div class="form-row">
                             <label for="customerPhone"><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp *</label>
-                            <input type="tel" id="customerPhone" placeholder="06 12 34 56 78" required>
+                            <div style="display: flex; gap: 8px;">
+                                <select id="countryCode" style="width: 110px; padding: 12px 8px; border: 1px solid var(--gray-300); border-radius: 8px; font-size: 14px; background: white; cursor: pointer;">
+                                    <option value="+213">🇩🇿 +213</option>
+                                    <option value="+33">🇫🇷 +33</option>
+                                    <option value="+212">🇲🇦 +212</option>
+                                    <option value="+216">🇹🇳 +216</option>
+                                    <option value="+32">🇧🇪 +32</option>
+                                    <option value="+41">🇨🇭 +41</option>
+                                    <option value="+1">🇺🇸 +1</option>
+                                </select>
+                                <input type="tel" id="customerPhone" placeholder="540 56 50 01" required style="flex: 1;">
+                            </div>
                             <small style="color: var(--gray-500); font-size: 12px; margin-top: 4px; display: block;">Recevez votre confirmation sur WhatsApp</small>
                         </div>
                     </div>
@@ -1105,7 +1116,9 @@
 
             async submitOrder() {
                 const name = document.getElementById('customerName').value.trim();
-                const phone = document.getElementById('customerPhone').value.trim();
+                const countryCode = document.getElementById('countryCode').value;
+                const phoneNumber = document.getElementById('customerPhone').value.trim().replace(/^0+/, ''); // Remove leading zeros
+                const phone = countryCode + phoneNumber; // Combine country code + number
                 const address = document.getElementById('customerAddress').value.trim();
                 const note = document.getElementById('customerNote').value.trim();
 
@@ -1341,11 +1354,10 @@
                 receipt += `_Ce ticket fait foi de justificatif._`;
 
                 // Send to customer's own WhatsApp
+                // Phone is already formatted with country code (e.g., +213540565001)
                 const cleanPhone = customerPhone.replace(/[^0-9]/g, '');
-                // Add Algeria country code if not present
-                const fullPhone = cleanPhone.startsWith('213') ? cleanPhone : '213' + cleanPhone.replace(/^0/, '');
 
-                return `https://wa.me/${fullPhone}?text=${encodeURIComponent(receipt)}`;
+                return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(receipt)}`;
             },
 
             showToast(message, type = 'success') {
