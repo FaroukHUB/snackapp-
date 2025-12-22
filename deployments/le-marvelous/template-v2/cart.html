@@ -852,9 +852,9 @@
 
             <!-- Customer ID (for new customers) -->
             <div id="customerIdSection" style="display: none; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border: 2px solid #0ea5e9; border-radius: 12px; padding: 16px; margin: 12px 0; text-align: center;">
-                <p style="color: #0369a1; font-size: 13px; margin: 0 0 8px 0;">🎉 Bienvenue ! Votre ID fidélité :</p>
+                <p style="color: #0369a1; font-size: 13px; margin: 0 0 8px 0;">🎉 Bienvenue ! Votre Code Fidélité :</p>
                 <p id="customerIdValue" style="color: #0c4a6e; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: 2px;">MAR-0001</p>
-                <p style="color: #0369a1; font-size: 11px; margin: 8px 0 0 0;">Conservez cet ID pour suivre vos points</p>
+                <p style="color: #0369a1; font-size: 11px; margin: 8px 0 0 0;">Conservez ce code pour suivre vos points</p>
             </div>
 
             <!-- Actions - More Prominent -->
@@ -1211,13 +1211,13 @@
                     if (result.success || result.order_id) {
                         // Show confirmation with real order number from API
                         const orderNumber = result.order_id || result.order?.order_number || 'XXXX';
-                        const customerId = result.customer_id || null;
+                        const loyaltyCode = result.loyalty_code || null;
                         const isNewCustomer = result.is_new_customer || false;
 
-                        console.log('🆔 Customer ID:', customerId);
+                        console.log('🎫 Code Fidélité:', loyaltyCode);
                         console.log('🆕 Is New Customer:', isNewCustomer);
 
-                        this.showConfirmation(orderNumber, name, phone, address, note, savedItems, savedSubtotal, savedDiscount, 0, customerId, isNewCustomer);
+                        this.showConfirmation(orderNumber, name, phone, address, note, savedItems, savedSubtotal, savedDiscount, 0, loyaltyCode, isNewCustomer);
                     } else {
                         // API returns 'message' not 'error'
                         throw new Error(result.message || result.error || 'Erreur lors de la commande');
@@ -1231,14 +1231,14 @@
                 }
             },
 
-            showConfirmation(orderNumber, customerName, customerPhone, customerAddress, note, items, subtotal, discount, loyaltyPoints = 0, customerId = null, isNewCustomer = false) {
+            showConfirmation(orderNumber, customerName, customerPhone, customerAddress, note, items, subtotal, discount, loyaltyPoints = 0, loyaltyCode = null, isNewCustomer = false) {
                 // Update modal
                 document.getElementById('confirmationOrderNumber').textContent = `#${orderNumber}`;
 
-                // Show customer ID for new customers
+                // Show loyalty code for new customers
                 const customerIdSection = document.getElementById('customerIdSection');
-                if (customerId && isNewCustomer) {
-                    document.getElementById('customerIdValue').textContent = customerId;
+                if (loyaltyCode && isNewCustomer) {
+                    document.getElementById('customerIdValue').textContent = loyaltyCode;
                     customerIdSection.style.display = 'block';
                 } else {
                     customerIdSection.style.display = 'none';

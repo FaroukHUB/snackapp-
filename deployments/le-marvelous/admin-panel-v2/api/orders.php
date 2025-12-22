@@ -310,14 +310,14 @@ function addOrder(bool $useMySQL) {
         $customers = loadData('customers.json') ?? [];
         $phone = $requestData['customer_phone'];
         $found = false;
-        $customerId = null;
+        $loyaltyCode = null;
         $isNewCustomer = false;
 
-        // Helper function to get max MAR-XXXX ID
-        $getMaxMarId = function($customers) {
+        // Helper function to get max loyalty code number
+        $getMaxLoyaltyNum = function($customers) {
             $maxId = 0;
             foreach ($customers as $cust) {
-                if (isset($cust['customer_id']) && preg_match('/MAR-(\d+)/', $cust['customer_id'], $m)) {
+                if (isset($cust['loyalty_code']) && preg_match('/MAR-(\d+)/', $cust['loyalty_code'], $m)) {
                     $maxId = max($maxId, (int)$m[1]);
                 }
             }
@@ -341,26 +341,26 @@ function addOrder(bool $useMySQL) {
                 $c['last_order'] = date('Y-m-d H:i:s');
                 $c['name'] = $requestData['customer_name'] ?? $c['name'];
 
-                // Generate customer_id if not exists OR if it's old CUST format
-                if (empty($c['customer_id']) || strpos($c['customer_id'] ?? '', 'CUST') === 0 || strpos($c['id'] ?? '', 'CUST') === 0) {
-                    $maxId = $getMaxMarId($customers);
-                    $c['customer_id'] = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
-                    $isNewCustomer = true; // Show ID to existing customers who just got one
+                // Generate loyalty_code if not exists
+                if (empty($c['loyalty_code'])) {
+                    $maxId = $getMaxLoyaltyNum($customers);
+                    $c['loyalty_code'] = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
+                    $isNewCustomer = true; // Show code to existing customers who just got one
                 }
-                $customerId = $c['customer_id'];
+                $loyaltyCode = $c['loyalty_code'];
                 $found = true;
                 break;
             }
         }
 
         if (!$found) {
-            // Generate simple customer ID: MAR-XXXX
-            $maxId = $getMaxMarId($customers);
-            $customerId = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
+            // Generate simple loyalty code: MAR-XXXX
+            $maxId = $getMaxLoyaltyNum($customers);
+            $loyaltyCode = 'MAR-' . str_pad((string)($maxId + 1), 4, '0', STR_PAD_LEFT);
             $isNewCustomer = true;
 
             $customers[] = [
-                'customer_id' => $customerId,
+                'loyalty_code' => $loyaltyCode,
                 'name' => $requestData['customer_name'] ?? 'Client',
                 'phone' => $phone,
                 'orders_count' => 1,
@@ -376,7 +376,7 @@ function addOrder(bool $useMySQL) {
         jsonSuccess([
             'order_id' => $orderId,
             'order' => $newOrder,
-            'customer_id' => $customerId,
+            'loyalty_code' => $loyaltyCode,
             'is_new_customer' => $isNewCustomer
         ]);
     }

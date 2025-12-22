@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $input = trim($_POST['phone'] ?? '');
 
     if (empty($input) || strlen($input) < 4) {
-        echo json_encode(['success' => false, 'message' => 'Entrez votre numero de telephone ou votre ID client (MAR-XXXX)']);
+        echo json_encode(['success' => false, 'message' => 'Entrez votre numero de telephone ou votre code fidelite (MAR-XXXX)']);
         exit;
     }
 
@@ -37,11 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     $found = null;
 
-    // Check if input is a customer ID (MAR-XXXX format)
+    // Check if input is a loyalty code (MAR-XXXX format)
     if (preg_match('/^MAR-\d{4}$/i', strtoupper($input))) {
-        $searchId = strtoupper($input);
+        $searchCode = strtoupper($input);
         foreach ($customers as $customer) {
-            if (strtoupper($customer['customer_id'] ?? '') === $searchId) {
+            if (strtoupper($customer['loyalty_code'] ?? '') === $searchCode) {
                 $found = $customer;
                 break;
             }
@@ -66,16 +66,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if ($found) {
-        // Get customer_id (prefer MAR-XXXX format, fallback to old id)
-        $custId = $found['customer_id'] ?? null;
-        if (empty($custId) || strpos($custId, 'CUST') === 0) {
-            $custId = null; // Don't show old CUST format
-        }
+        // Get loyalty_code
+        $loyaltyCode = $found['loyalty_code'] ?? null;
 
         echo json_encode([
             'success' => true,
             'customer' => [
-                'customer_id' => $custId,
+                'loyalty_code' => $loyaltyCode,
                 'name' => $found['name'] ?? 'Client',
                 'points' => (int)($found['loyalty_points'] ?? 0),
                 'orders_count' => (int)($found['orders_count'] ?? 0),
@@ -555,7 +552,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 <i class="fas fa-id-card"></i>
             </div>
             <h2 class="lookup-title">Consultez vos points</h2>
-            <p class="lookup-subtitle">Entrez votre numero de telephone ou votre ID client</p>
+            <p class="lookup-subtitle">Entrez votre numero de telephone ou votre code fidelite</p>
 
             <form id="lookupForm">
                 <div class="phone-input-group">
@@ -563,7 +560,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     <input type="text"
                            class="phone-input"
                            id="phoneInput"
-                           placeholder="Tel: 0540... ou ID: MAR-0001"
+                           placeholder="Tel: 0540... ou Code: MAR-0001"
                            autocomplete="off"
                            required>
                 </div>
@@ -715,10 +712,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             document.getElementById('ordersCount').textContent = customer.orders_count || 0;
             document.getElementById('totalSpent').textContent = Math.round(customer.total_spent || 0);
 
-            // Show customer ID
+            // Show loyalty code
             const idDisplay = document.getElementById('customerIdDisplay');
-            if (customer.customer_id) {
-                idDisplay.textContent = 'ID: ' + customer.customer_id;
+            if (customer.loyalty_code) {
+                idDisplay.textContent = 'Code: ' + customer.loyalty_code;
                 idDisplay.style.display = 'inline-block';
             } else {
                 idDisplay.style.display = 'none';
