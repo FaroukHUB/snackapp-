@@ -244,13 +244,10 @@ const Config = {
     },
 
     /**
-     * Format price for display
+     * Format price for display (DA = Dinar Algérien)
      */
     formatPrice(price) {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'EUR'
-        }).format(price);
+        return Math.round(price) + ' DA';
     },
 
     /**

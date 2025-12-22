@@ -724,15 +724,15 @@
                 <div class="cart-summary">
                     <div class="cart-summary-row">
                         <span>Sous-total</span>
-                        <span id="summarySubtotal">0,00 €</span>
+                        <span id="summarySubtotal">0 DA</span>
                     </div>
                     <div class="cart-summary-row" id="discountRow" style="display: none;">
                         <span>Réduction</span>
-                        <span id="summaryDiscount" style="color: var(--success);">-0,00 €</span>
+                        <span id="summaryDiscount" style="color: var(--success);">-0 DA</span>
                     </div>
                     <div class="cart-summary-row total">
                         <span>Total</span>
-                        <span class="price" id="summaryTotal">0,00 €</span>
+                        <span class="price" id="summaryTotal">0 DA</span>
                     </div>
 
                     <button type="button" class="submit-order" id="submitOrder" onclick="CartPage.submitOrder()">
@@ -953,7 +953,7 @@
                     this.showToast('Code promo appliqué : -10%', 'success');
                 } else if (code === 'FABRIK5') {
                     this.discount = 5;
-                    this.showToast('Code promo appliqué : -5€', 'success');
+                    this.showToast('Code promo appliqué : -500 DA', 'success');
                 } else {
                     this.discount = 0;
                     this.showToast('Code promo invalide', 'error');
