@@ -685,7 +685,7 @@ ul {
 
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
@@ -2812,11 +2812,14 @@ ul {
 
 /* ============================================
    PRODUCT GRID - SMALLER CARDS (4-5 per row)
+   Only applies to LARGE screens
    ============================================ */
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
+@media (min-width: 1400px) {
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+    }
 }
 
 .product-card {
@@ -3969,5 +3972,78 @@ ul {
 
     .product-price {
         font-size: 13px !important;
+    }
+}
+
+/* ============================================
+   MOBILE FIX V22: FINAL OVERRIDE - 2 COLUMNS
+   This MUST be at the end to override everything
+   ============================================ */
+@media screen and (max-width: 768px) {
+    /* Force 2 columns with maximum specificity */
+    .products-grid,
+    .featured-grid,
+    div.products-grid,
+    div.featured-grid,
+    section.product-section .products-grid,
+    section.product-section div.products-grid,
+    #productsContainer .products-grid,
+    .main-content .products-grid,
+    .main-content .product-section .products-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: auto !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Cards must fit in columns */
+    .product-card,
+    .featured-card,
+    .products-grid .product-card,
+    .featured-grid .featured-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        flex: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    /* Same override for smaller phones */
+    .products-grid,
+    .featured-grid,
+    div.products-grid,
+    div.featured-grid,
+    section.product-section .products-grid,
+    section.product-section div.products-grid,
+    #productsContainer .products-grid,
+    .main-content .products-grid,
+    .main-content .product-section .products-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: auto !important;
+        gap: 8px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .product-card,
+    .featured-card,
+    .products-grid .product-card,
+    .featured-grid .featured-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        flex: none !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
 }
