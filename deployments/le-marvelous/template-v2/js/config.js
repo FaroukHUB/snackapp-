@@ -235,6 +235,7 @@ const Config = {
 
         // Smart distribution: take items round-robin from each category
         const categories = Object.keys(categoryProducts);
+        if (categories.length === 0) return suggestions;
         const maxTotal = 6;
         const maxPerCategory = Math.max(1, Math.ceil(maxTotal / categories.length));
         const taken = {};
