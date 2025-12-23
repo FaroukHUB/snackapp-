@@ -942,13 +942,15 @@
 
                 // Initialize cart
                 Cart.init();
-                Cart.onUpdate = () => this.render();
+                // Don't set Cart.onUpdate - we manually control rendering on this page
+                // to avoid double renders and potential loops
 
                 // Check restaurant status
                 this.checkRestaurantStatus();
 
                 // Initial render
                 this.render();
+                console.log('CartPage initialized, items:', Cart.items.length);
             },
 
             async checkRestaurantStatus() {
@@ -1218,8 +1220,8 @@
                 if (Cart.items[index]) {
                     Cart.items.splice(index, 1);
                     Cart.save();
-                    Cart.updateUI();
                     this.render();
+                    this.updateSummary();
                 }
             },
 
@@ -1227,8 +1229,8 @@
                 if (Cart.items[index]) {
                     Cart.items[index].quantity++;
                     Cart.save();
-                    Cart.updateUI();
                     this.render();
+                    this.updateSummary();
                 }
             },
 
@@ -1240,8 +1242,8 @@
                         Cart.items[index].quantity--;
                     }
                     Cart.save();
-                    Cart.updateUI();
                     this.render();
+                    this.updateSummary();
                 }
             },
 
