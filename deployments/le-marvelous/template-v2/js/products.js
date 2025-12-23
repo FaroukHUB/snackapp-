@@ -822,14 +822,46 @@ const Products = {
                 variantsContainer.style.display = '';
                 variantLabel.textContent = product.variantLabel || 'Choisir une option';
 
+                // Check if any variant has an image
+                const hasImages = availableVariants.some(v => v.image);
+
                 variantsList.innerHTML = availableVariants.map((variant) => {
                     const priceExtra = variant.price > 0 ? ` (+${Config.formatPrice(variant.price)})` : '';
-                    return `
-                        <div class="variant-item" data-id="${variant.id}" onclick="Products.selectVariant('${variant.id}')">
-                            <div class="variant-radio"></div>
-                            <span class="variant-name">${variant.name}${priceExtra}</span>
-                        </div>
-                    `;
+                    const priceDisplay = variant.price > 0 ? Config.formatPrice(variant.price) : '';
+
+                    // If variant has image, show image layout
+                    if (variant.image) {
+                        return `
+                            <div class="variant-item variant-with-image" data-id="${variant.id}" onclick="Products.selectVariant('${variant.id}')">
+                                <img src="../${variant.image}" alt="${variant.name}" class="variant-image" onerror="this.style.display='none'">
+                                <div class="variant-details">
+                                    <span class="variant-name">${variant.name}</span>
+                                    ${priceDisplay ? `<span class="variant-price">${priceDisplay}</span>` : ''}
+                                </div>
+                                <div class="variant-radio"></div>
+                            </div>
+                        `;
+                    } else if (hasImages) {
+                        // If other variants have images but this one doesn't, show placeholder
+                        return `
+                            <div class="variant-item variant-with-image" data-id="${variant.id}" onclick="Products.selectVariant('${variant.id}')">
+                                <div class="variant-image-placeholder"><i class="fas fa-image"></i></div>
+                                <div class="variant-details">
+                                    <span class="variant-name">${variant.name}</span>
+                                    ${priceDisplay ? `<span class="variant-price">${priceDisplay}</span>` : ''}
+                                </div>
+                                <div class="variant-radio"></div>
+                            </div>
+                        `;
+                    } else {
+                        // No images at all, standard layout
+                        return `
+                            <div class="variant-item" data-id="${variant.id}" onclick="Products.selectVariant('${variant.id}')">
+                                <div class="variant-radio"></div>
+                                <span class="variant-name">${variant.name}${priceExtra}</span>
+                            </div>
+                        `;
+                    }
                 }).join('');
 
                 // No pre-selection - user must click to select

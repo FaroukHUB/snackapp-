@@ -1409,24 +1409,73 @@ $csrfToken = getCsrfToken();
 
       variants.forEach(variant => {
         const div = document.createElement("div");
-        div.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--stroke);border-radius:10px;background:rgba(255,255,255,.04);";
+        div.style.cssText = "display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--stroke);border-radius:10px;background:rgba(255,255,255,.04);margin-bottom:6px;";
 
         const isAvailable = variant.available !== false;
         const priceText = variant.price > 0 ? `+${variant.price} DA` : 'inclus';
 
+        // Image preview or placeholder
+        const imageHtml = variant.image
+          ? `<img src="../${escapeHtml(variant.image)}" style="width:50px;height:50px;border-radius:8px;object-fit:cover;cursor:pointer;" onclick="document.getElementById('variantImage_${escapeHtml(variant.id)}').click()" title="Cliquer pour changer l'image">`
+          : `<div style="width:50px;height:50px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px dashed var(--stroke);" onclick="document.getElementById('variantImage_${escapeHtml(variant.id)}').click()" title="Ajouter une image"><i class="fas fa-camera" style="color:var(--muted);font-size:16px;"></i></div>`;
+
         div.innerHTML = `
-          <div style="display:flex;align-items:center;gap:10px;flex:1;">
-            <span style="font-size:13px;font-weight:500;${!isAvailable ? 'text-decoration:line-through;color:var(--muted);' : ''}">${escapeHtml(variant.name)}</span>
-            <span style="font-size:11px;color:var(--muted);">${priceText}</span>
+          <div style="flex-shrink:0;">
+            ${imageHtml}
+            <input type="file" id="variantImage_${escapeHtml(variant.id)}" accept="image/jpeg,image/png,image/webp" style="display:none;" data-variant-image="${escapeHtml(variant.id)}" />
           </div>
-          <div style="display:flex;gap:6px;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:500;${!isAvailable ? 'text-decoration:line-through;color:var(--muted);' : ''}">${escapeHtml(variant.name)}</div>
+            <div style="font-size:11px;color:var(--muted);">${priceText}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
             <button class="btn ${isAvailable ? 'btn-good' : 'btn-ghost'}" type="button" data-toggle-variant="${escapeHtml(variant.id)}" style="padding:4px 10px;font-size:11px;" title="${isAvailable ? 'Désactiver' : 'Activer'}">
-              ${isAvailable ? '✓ Dispo' : '✗ Indispo'}
+              ${isAvailable ? '✓' : '✗'}
             </button>
             <button class="btn btn-danger" type="button" data-delete-variant="${escapeHtml(variant.id)}" style="padding:4px 8px;font-size:11px;" title="Supprimer">✕</button>
           </div>
         `;
         container.appendChild(div);
+      });
+
+      // Attacher les événements d'upload image
+      $$("[data-variant-image]", container).forEach(input => {
+        input.addEventListener("change", async (e) => {
+          const variantId = input.dataset.variantImage;
+          const file = e.target.files[0];
+          if (!file) return;
+
+          if (file.size > 2 * 1024 * 1024) {
+            toast("error", "Erreur", "Image trop lourde (max 2MB)");
+            return;
+          }
+
+          try {
+            const formData = new FormData();
+            formData.set("action", "update_variant_image");
+            formData.set("product_id", productId);
+            formData.set("variant_id", variantId);
+            formData.set("image", file);
+            formData.set("csrf_token", CSRF_TOKEN);
+
+            const res = await fetch(API, { method: "POST", body: formData });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || "Erreur upload");
+
+            toast("success", "Image ajoutée", "L'image de la variante a été enregistrée.");
+            await boot();
+            const cats = getCategories();
+            for (const cat of cats) {
+              const prod = (cat.items || []).find(p => p.id === productId);
+              if (prod) {
+                renderVariantsList(productId, prod.variants);
+                break;
+              }
+            }
+          } catch(err) {
+            toast("error", "Erreur", err?.message ?? "Impossible d'uploader l'image.");
+          }
+        });
       });
 
       // Attacher les événements toggle

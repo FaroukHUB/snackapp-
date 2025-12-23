@@ -909,6 +909,96 @@ switch ($action) {
         jsonSuccess(['message' => 'Variante mise à jour']);
         break;
 
+    case 'update_variant_image':
+        $productId = $input['product_id'] ?? $_POST['product_id'] ?? null;
+        $variantId = $input['variant_id'] ?? $_POST['variant_id'] ?? null;
+
+        if (!$productId || !$variantId) {
+            jsonError('ID produit et variante requis');
+        }
+
+        // Gérer l'upload d'image
+        $fileKey = null;
+        if (!empty($_FILES['image'])) $fileKey = 'image';
+        if (!empty($_FILES['imageFile'])) $fileKey = 'imageFile';
+
+        if (!$fileKey) {
+            jsonError('Aucune image fournie');
+        }
+
+        $file = $_FILES[$fileKey];
+        if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+            jsonError('Upload invalide');
+        }
+
+        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        $mime = mime_content_type($file['tmp_name']) ?: '';
+        if (!isset($allowed[$mime])) {
+            jsonError('Format image non supporté (jpg/png/webp)');
+        }
+
+        // Créer le dossier pour les images de variantes
+        $uploadsDir = SNACK_ROOT . '/images/variants';
+        if (!is_dir($uploadsDir)) {
+            mkdir($uploadsDir, 0775, true);
+        }
+
+        $filename = $productId . '-' . $variantId . '-' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
+        $dest = $uploadsDir . '/' . $filename;
+
+        if (!move_uploaded_file($file['tmp_name'], $dest)) {
+            jsonError('Échec sauvegarde image');
+        }
+
+        $imagePath = 'images/variants/' . $filename;
+
+        // Charger menu.json et mettre à jour la variante
+        $menuPath = SNACK_ROOT . '/config/menu.json';
+        if (!file_exists($menuPath)) {
+            jsonError('Fichier menu introuvable');
+        }
+
+        $menuData = json_decode(file_get_contents($menuPath), true);
+        if (!$menuData) {
+            jsonError('Erreur lecture menu');
+        }
+
+        // Trouver la variante et mettre à jour l'image
+        $found = false;
+        $oldImage = null;
+        foreach ($menuData['menu']['categories'] as &$cat) {
+            foreach ($cat['items'] as &$item) {
+                if ($item['id'] === $productId && !empty($item['variants'])) {
+                    foreach ($item['variants'] as &$variant) {
+                        if ($variant['id'] === $variantId) {
+                            $oldImage = $variant['image'] ?? null;
+                            $variant['image'] = $imagePath;
+                            $found = true;
+                            break 3;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$found) {
+            // Supprimer l'image uploadée si variante non trouvée
+            @unlink($dest);
+            jsonError('Variante introuvable');
+        }
+
+        // Supprimer l'ancienne image si elle existe
+        if ($oldImage && strpos($oldImage, '/variants/') !== false) {
+            $oldPath = SNACK_ROOT . '/' . ltrim($oldImage, '/');
+            if (file_exists($oldPath)) {
+                @unlink($oldPath);
+            }
+        }
+
+        file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        jsonSuccess(['image' => $imagePath, 'message' => 'Image variante mise à jour']);
+        break;
+
     case 'add_variant':
         $productId = $input['product_id'] ?? null;
         $name = trim((string)($input['name'] ?? ''));
