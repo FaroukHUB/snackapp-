@@ -119,8 +119,21 @@ function syncMenuStatuses() {
 
     $menuData['formules'] = $formules;
 
+    // Vérification de sécurité : s'assurer que les données critiques existent
+    if (empty($menuData['supplements']['defaultForCategories']) || empty($menuData['upsellRules'])) {
+        error_log('sync-menu.php: ABORT - données critiques manquantes (defaultForCategories ou upsellRules)');
+        return ['success' => false, 'error' => 'Données critiques manquantes, sync annulé'];
+    }
+
     // Sauvegarder
     $json = json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    // Vérifier que l'encodage JSON a fonctionné
+    if ($json === false) {
+        error_log('sync-menu.php: ABORT - erreur encodage JSON: ' . json_last_error_msg());
+        return ['success' => false, 'error' => 'Erreur encodage JSON'];
+    }
+
     file_put_contents($menuJsonPath, $json);
 
     return ['success' => true, 'updated' => $updated];
