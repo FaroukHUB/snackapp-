@@ -997,12 +997,12 @@
                 const container = document.getElementById('cartItems');
                 if (!container) return;
 
-                container.innerHTML = Cart.items.map(item => {
+                container.innerHTML = Cart.items.map((item, index) => {
                     const menuType = item.options?.menuType;
                     const removedIngredients = item.options?.removedIngredients || [];
 
                     return `
-                    <div class="cart-item" data-key="${item.key}">
+                    <div class="cart-item" data-index="${index}">
                         <img src="../${item.image}" alt="${item.name}" class="cart-item-image"
                              onerror="this.style.display='none'">
                         <div class="cart-item-details">
@@ -1023,15 +1023,15 @@
                             <div class="cart-item-price">${Config.formatPrice(Cart.getItemTotal(item))}</div>
                         </div>
                         <div class="cart-item-actions">
-                            <button class="cart-item-remove" onclick="Cart.removeItem('${item.key}')">
+                            <button class="cart-item-remove" onclick="CartPage.removeByIndex(${index})">
                                 <i class="fas fa-trash"></i>
                             </button>
                             <div class="cart-item-qty">
-                                <button onclick="Cart.decrement('${item.key}')">
+                                <button onclick="CartPage.decrementByIndex(${index})">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <span>${item.quantity}</span>
-                                <button onclick="Cart.increment('${item.key}')">
+                                <button onclick="CartPage.incrementByIndex(${index})">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -1191,6 +1191,37 @@
                     Cart.clear();
                     this.render();
                     this.showToast('Panier vidé', 'success');
+                }
+            },
+
+            removeByIndex(index) {
+                if (Cart.items[index]) {
+                    Cart.items.splice(index, 1);
+                    Cart.save();
+                    Cart.updateUI();
+                    this.render();
+                }
+            },
+
+            incrementByIndex(index) {
+                if (Cart.items[index]) {
+                    Cart.items[index].quantity++;
+                    Cart.save();
+                    Cart.updateUI();
+                    this.render();
+                }
+            },
+
+            decrementByIndex(index) {
+                if (Cart.items[index]) {
+                    if (Cart.items[index].quantity <= 1) {
+                        Cart.items.splice(index, 1);
+                    } else {
+                        Cart.items[index].quantity--;
+                    }
+                    Cart.save();
+                    Cart.updateUI();
+                    this.render();
                 }
             },
 
