@@ -332,7 +332,7 @@ const Cart = {
                             🥤 ${selectedDrink.name}
                         </div>
                     ` : ''}
-                    ${(item.supplements && item.supplements.length > 0) ? `
+                    ${item.supplements.length > 0 ? `
                         <div class="mini-cart-item-supplements" style="font-size: 11px; color: var(--success);">
                             + ${item.supplements.map(s => s.name).join(', ')}
                         </div>
@@ -401,7 +401,7 @@ const Cart = {
         this.items.forEach(item => {
             summary += `${item.quantity}x ${item.name}\n`;
 
-            if (item.supplements && item.supplements.length > 0) {
+            if (item.supplements.length > 0) {
                 summary += `   + ${item.supplements.map(s => s.name).join(', ')}\n`;
             }
 
@@ -455,7 +455,7 @@ const Cart = {
             if (selectedDrink) {
                 message += `\n   🥤 Boisson: ${selectedDrink.name}`;
             }
-            if (item.supplements && item.supplements.length > 0) {
+            if (item.supplements.length > 0) {
                 message += `\n   ✅ +${item.supplements.map(s => s.name).join(', ')}`;
             }
             if (removedIngredients.length > 0) {
