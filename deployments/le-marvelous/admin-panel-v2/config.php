@@ -331,11 +331,19 @@ function applyRuntimeToConfig($config, $runtime) {
             if (isset($deletedCategories[$categoryId])) continue;
 
             $catIndex = $catsById[$categoryId];
-            $exists = false;
-            foreach ($config['menu']['categories'][$catIndex]['items'] as $it) {
-                if (($it['id'] ?? null) === $pid) { $exists = true; break; }
+            $existsIndex = null;
+            foreach ($config['menu']['categories'][$catIndex]['items'] as $itemIdx => $it) {
+                if (($it['id'] ?? null) === $pid) { $existsIndex = $itemIdx; break; }
             }
-            if (!$exists) {
+            if ($existsIndex !== null) {
+                // Product exists - UPDATE it with the latest customProducts data
+                $config['menu']['categories'][$catIndex]['items'][$existsIndex] = array_merge(
+                    $config['menu']['categories'][$catIndex]['items'][$existsIndex],
+                    $p,
+                    ['id' => $pid]
+                );
+            } else {
+                // Product doesn't exist - add it
                 $config['menu']['categories'][$catIndex]['items'][] = array_merge(['id' => $pid], $p);
             }
         }
