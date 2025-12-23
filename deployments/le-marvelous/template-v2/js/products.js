@@ -786,15 +786,18 @@ const Products = {
             menuToggleSection.style.display = 'none';
         }
 
-        // Ingredients to remove (only for savory categories, NOT for sweet)
+        // Ingredients to remove (only for savory signature crêpes)
         const ingredientsSection = document.getElementById('modalIngredients');
         const ingredientsList = document.getElementById('ingredientsList');
         const hasIngredients = product.baseIngredients && product.baseIngredients.length > 0;
         const sweetCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
         const isSweetCategory = sweetCategories.includes(product.categoryId);
+        // Categories where we hide the "retirer des ingrédients" section
+        const hideIngredientsCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle', 'sucres-sales'];
+        const shouldHideIngredients = hideIngredientsCategories.includes(product.categoryId);
 
-        // Hide ingredients section for sweet categories (crêpes sucrées, gaufres, bubble waffle)
-        if (hasIngredients && !isSweetCategory) {
+        // Hide ingredients section for sweet categories and sucres-sales
+        if (hasIngredients && !shouldHideIngredients) {
             ingredientsSection.classList.remove('hidden');
             ingredientsSection.style.display = '';
             ingredientsList.innerHTML = product.baseIngredients.map(ing => `
@@ -882,6 +885,7 @@ const Products = {
 
         // Render supplements
         const supplements = Config.getSupplementsForCategory(product.categoryId);
+        console.log('Category:', product.categoryId, '| Supplements count:', supplements.length, supplements);
         const supplementsContainer = document.getElementById('modalSupplements');
         const supplementsList = document.getElementById('supplementsList');
 

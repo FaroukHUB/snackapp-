@@ -182,6 +182,7 @@ const Config = {
      */
     getSupplementsForCategory(categoryId) {
         const supplementIds = this.supplements?.defaultForCategories?.[categoryId] || [];
+        console.log('getSupplementsForCategory:', categoryId, '| IDs:', supplementIds, '| catalog keys:', Object.keys(this.supplements?.catalog || {}));
         return supplementIds.map(id => this.supplements.catalog?.[id]).filter(Boolean);
     },
 
