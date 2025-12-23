@@ -786,12 +786,15 @@ const Products = {
             menuToggleSection.style.display = 'none';
         }
 
-        // Ingredients to remove
+        // Ingredients to remove (only for savory categories, NOT for sweet)
         const ingredientsSection = document.getElementById('modalIngredients');
         const ingredientsList = document.getElementById('ingredientsList');
         const hasIngredients = product.baseIngredients && product.baseIngredients.length > 0;
+        const sweetCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
+        const isSweetCategory = sweetCategories.includes(product.categoryId);
 
-        if (hasIngredients) {
+        // Hide ingredients section for sweet categories (crêpes sucrées, gaufres, bubble waffle)
+        if (hasIngredients && !isSweetCategory) {
             ingredientsSection.classList.remove('hidden');
             ingredientsSection.style.display = '';
             ingredientsList.innerHTML = product.baseIngredients.map(ing => `
@@ -848,17 +851,60 @@ const Products = {
         if (supplements.length > 0) {
             supplementsContainer.classList.remove('hidden');
             supplementsContainer.style.display = '';
-            supplementsList.innerHTML = supplements.map(sup => `
-                <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
-                    <div class="supplement-info">
-                        <div class="supplement-checkbox">
-                            <i class="fas fa-check" style="font-size: 12px;"></i>
+
+            // For sweet categories, organize by type with headers
+            if (isSweetCategory) {
+                const sweetTypes = Config.getSweetTypes();
+                const grouped = {};
+
+                // Group supplements by type
+                supplements.forEach(sup => {
+                    const type = sup.type || 'extra';
+                    if (!grouped[type]) grouped[type] = [];
+                    grouped[type].push(sup);
+                });
+
+                // Sort types by order
+                const sortedTypes = Object.keys(grouped).sort((a, b) => {
+                    return (sweetTypes[a]?.order ?? 99) - (sweetTypes[b]?.order ?? 99);
+                });
+
+                // Build HTML with headers
+                let html = '';
+                sortedTypes.forEach(type => {
+                    const typeInfo = sweetTypes[type] || { label: type };
+                    html += `<div class="supplement-group-header">${typeInfo.label}</div>`;
+                    html += `<div class="supplement-group">`;
+                    grouped[type].forEach(sup => {
+                        html += `
+                            <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
+                                <div class="supplement-info">
+                                    <div class="supplement-checkbox">
+                                        <i class="fas fa-check" style="font-size: 12px;"></i>
+                                    </div>
+                                    <span class="supplement-name">${sup.name}</span>
+                                </div>
+                                <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                });
+                supplementsList.innerHTML = html;
+            } else {
+                // Regular display for savory categories
+                supplementsList.innerHTML = supplements.map(sup => `
+                    <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
+                        <div class="supplement-info">
+                            <div class="supplement-checkbox">
+                                <i class="fas fa-check" style="font-size: 12px;"></i>
+                            </div>
+                            <span class="supplement-name">${sup.name}</span>
                         </div>
-                        <span class="supplement-name">${sup.name}</span>
+                        <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
                     </div>
-                    <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
-                </div>
-            `).join('');
+                `).join('');
+            }
         } else {
             supplementsContainer.classList.add('hidden');
             supplementsContainer.style.display = 'none';

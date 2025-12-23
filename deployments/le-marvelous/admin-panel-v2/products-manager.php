@@ -1127,24 +1127,111 @@ $csrfToken = getCsrfToken();
       return state.menu?.supplements?.catalog ?? {};
     }
 
-    function renderSupplementsCheckboxes(containerId, selectedIds = []){
+    // Catégories qui ont des suppléments
+    const SWEET_CATEGORIES = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
+    const SAVORY_CATEGORIES = ['crepes-salees-signature'];
+    const NO_SUPPLEMENT_CATEGORIES = ['boissons-chaudes', 'sodas-eaux', 'jus-cocktails', 'viennoiseries', 'patisseries', 'menu-enfant'];
+
+    function renderSupplementsCheckboxes(containerId, selectedIds = [], categoryId = null){
       const container = $(containerId);
-      const supplements = getSupplements();
+      const allSupplements = getSupplements();
       container.innerHTML = "";
 
-      Object.values(supplements).forEach(sup => {
-        const label = document.createElement("label");
-        label.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--stroke);border-radius:10px;cursor:pointer;background:rgba(0,0,0,.18);font-size:13px;";
-        const checked = selectedIds.includes(sup.id) ? "checked" : "";
-        label.innerHTML = `
-          <input type="checkbox" name="supplements[]" value="${escapeHtml(sup.id)}" ${checked} style="width:16px;height:16px;" />
-          ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} DA)</span>
-        `;
-        container.appendChild(label);
-      });
+      // Catégories sans suppléments
+      if (NO_SUPPLEMENT_CATEGORIES.includes(categoryId)) {
+        container.innerHTML = '<span class="muted">Cette catégorie n\'a pas de suppléments.</span>';
+        return;
+      }
 
-      if (Object.keys(supplements).length === 0) {
-        container.innerHTML = '<span class="muted">Aucun supplément. Ajoutez-en via le bouton "Suppléments".</span>';
+      // Filtrer selon la catégorie
+      let filteredSupplements = Object.values(allSupplements);
+
+      if (SAVORY_CATEGORIES.includes(categoryId)) {
+        // Crêpes salées → seulement suppléments salés
+        filteredSupplements = filteredSupplements.filter(s => s.flavor === 'sale');
+
+        // Affichage simple pour les salés
+        filteredSupplements.forEach(sup => {
+          const label = document.createElement("label");
+          label.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--stroke);border-radius:10px;cursor:pointer;background:rgba(0,0,0,.18);font-size:13px;";
+          const checked = selectedIds.includes(sup.id) ? "checked" : "";
+          label.innerHTML = `
+            <input type="checkbox" name="supplements[]" value="${escapeHtml(sup.id)}" ${checked} style="width:16px;height:16px;" />
+            ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} DA)</span>
+          `;
+          container.appendChild(label);
+        });
+      }
+      else if (SWEET_CATEGORIES.includes(categoryId)) {
+        // Crêpes sucrées, gaufres, bubble waffle → suppléments sucrés organisés par type
+        filteredSupplements = filteredSupplements.filter(s => s.flavor === 'sucre');
+
+        const sweetTypes = state.menu?.supplements?.sweetTypes ?? {
+          base: { label: "Base", order: 1 },
+          croquant: { label: "Croquant", order: 2 },
+          fruit: { label: "Fruit", order: 3 },
+          prime: { label: "Prime", order: 4 },
+          coulis: { label: "Coulis", order: 5 },
+          extra: { label: "Extra", order: 6 }
+        };
+
+        // Grouper par type
+        const grouped = {};
+        filteredSupplements.forEach(sup => {
+          const type = sup.type || 'extra';
+          if (!grouped[type]) grouped[type] = [];
+          grouped[type].push(sup);
+        });
+
+        // Trier les types par ordre
+        const sortedTypes = Object.keys(grouped).sort((a, b) => {
+          return (sweetTypes[a]?.order ?? 99) - (sweetTypes[b]?.order ?? 99);
+        });
+
+        // Afficher par groupe avec headers
+        sortedTypes.forEach(type => {
+          const typeInfo = sweetTypes[type] || { label: type };
+
+          // Header du groupe
+          const header = document.createElement("div");
+          header.style.cssText = "width:100%;font-weight:bold;font-size:14px;color:#10b981;margin-top:12px;margin-bottom:6px;border-bottom:1px solid var(--stroke);padding-bottom:4px;";
+          header.textContent = typeInfo.label;
+          container.appendChild(header);
+
+          // Suppléments du groupe
+          const groupContainer = document.createElement("div");
+          groupContainer.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;";
+
+          grouped[type].forEach(sup => {
+            const label = document.createElement("label");
+            label.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--stroke);border-radius:10px;cursor:pointer;background:rgba(0,0,0,.18);font-size:13px;";
+            const checked = selectedIds.includes(sup.id) ? "checked" : "";
+            label.innerHTML = `
+              <input type="checkbox" name="supplements[]" value="${escapeHtml(sup.id)}" ${checked} style="width:16px;height:16px;" />
+              ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} DA)</span>
+            `;
+            groupContainer.appendChild(label);
+          });
+
+          container.appendChild(groupContainer);
+        });
+      }
+      else {
+        // Autres catégories → tous les suppléments (fallback)
+        filteredSupplements.forEach(sup => {
+          const label = document.createElement("label");
+          label.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--stroke);border-radius:10px;cursor:pointer;background:rgba(0,0,0,.18);font-size:13px;";
+          const checked = selectedIds.includes(sup.id) ? "checked" : "";
+          label.innerHTML = `
+            <input type="checkbox" name="supplements[]" value="${escapeHtml(sup.id)}" ${checked} style="width:16px;height:16px;" />
+            ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} DA)</span>
+          `;
+          container.appendChild(label);
+        });
+      }
+
+      if (filteredSupplements.length === 0) {
+        container.innerHTML = '<span class="muted">Aucun supplément disponible pour cette catégorie.</span>';
       }
     }
 
@@ -1156,7 +1243,7 @@ $csrfToken = getCsrfToken();
       // Récupérer les suppléments par défaut de la catégorie
       const catId = prefCatId || state.selectedCategoryId;
       const defaultSups = state.menu?.supplements?.defaultForCategories?.[catId] ?? [];
-      renderSupplementsCheckboxes("#productSupplementsList", defaultSups);
+      renderSupplementsCheckboxes("#productSupplementsList", defaultSups, catId);
 
       openModal("#modalProduct");
     }
@@ -1296,7 +1383,7 @@ $csrfToken = getCsrfToken();
 
       // Suppléments du produit (ou par défaut de la catégorie)
       const productSups = product.supplements ?? state.menu?.supplements?.defaultForCategories?.[categoryId] ?? [];
-      renderSupplementsCheckboxes("#editProductSupplementsList", productSups);
+      renderSupplementsCheckboxes("#editProductSupplementsList", productSups, categoryId);
 
       // Variantes (pour boissons type Sodas, Jus, etc.)
       const variantsSection = $("#variantsSection");

@@ -186,6 +186,20 @@ const Config = {
     },
 
     /**
+     * Get sweet types configuration for organized supplement display
+     */
+    getSweetTypes() {
+        return this.supplements?.sweetTypes || {
+            base: { label: "Base", order: 1 },
+            croquant: { label: "Croquant", order: 2 },
+            fruit: { label: "Fruit", order: 3 },
+            prime: { label: "Prime", order: 4 },
+            coulis: { label: "Coulis", order: 5 },
+            extra: { label: "Extra", order: 6 }
+        };
+    },
+
+    /**
      * Get drinks for menu selection
      */
     getDrinks() {

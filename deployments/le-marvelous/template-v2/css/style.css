@@ -1545,6 +1545,29 @@ ul {
     color: var(--primary);
 }
 
+/* Supplement Group Headers (for sweet categories) */
+.supplement-group-header {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--primary);
+    margin: 16px 0 8px 0;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--primary-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.supplement-group-header:first-child {
+    margin-top: 0;
+}
+
+.supplement-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
 /* Drinks Selection (Menu) */
 .modal-drinks {
     margin-bottom: 20px;
