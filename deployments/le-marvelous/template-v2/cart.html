@@ -928,29 +928,47 @@
             discount: 0,
 
             async init() {
-                // Load config
-                await Config.init();
+                try {
+                    console.log('CartPage.init() starting...');
 
-                // Check delivery setting and hide option if disabled
-                const deliveryEnabled = Config.restaurant?.delivery?.enabled ?? true;
-                const deliveryOption = document.querySelector('.mode-option[data-mode="delivery"]');
-                if (!deliveryEnabled && deliveryOption) {
-                    deliveryOption.style.display = 'none';
-                    // Make pickup take full width
-                    document.querySelector('.mode-selector').style.gridTemplateColumns = '1fr';
+                    // Load config
+                    const configLoaded = await Config.init();
+                    console.log('Config.init() result:', configLoaded);
+
+                    if (!configLoaded) {
+                        console.error('Config failed to load!');
+                    }
+
+                    // Check delivery setting and hide option if disabled
+                    const deliveryEnabled = Config.restaurant?.delivery?.enabled ?? true;
+                    const deliveryOption = document.querySelector('.mode-option[data-mode="delivery"]');
+                    if (!deliveryEnabled && deliveryOption) {
+                        deliveryOption.style.display = 'none';
+                        // Make pickup take full width
+                        document.querySelector('.mode-selector').style.gridTemplateColumns = '1fr';
+                    }
+
+                    // Initialize cart
+                    Cart.init();
+                    console.log('Cart.init() completed, items:', Cart.items.length);
+
+                    // Check restaurant status
+                    this.checkRestaurantStatus();
+
+                    // Initial render
+                    this.render();
+                    console.log('CartPage.init() completed successfully');
+                } catch (error) {
+                    console.error('CartPage.init() ERROR:', error);
+                    // Show error to user
+                    document.body.innerHTML = `<div style="padding: 40px; text-align: center;">
+                        <h2 style="color: #ef4444;">Erreur de chargement</h2>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #2ec4b6; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Réessayer
+                        </button>
+                    </div>`;
                 }
-
-                // Initialize cart
-                Cart.init();
-                // Don't set Cart.onUpdate - we manually control rendering on this page
-                // to avoid double renders and potential loops
-
-                // Check restaurant status
-                this.checkRestaurantStatus();
-
-                // Initial render
-                this.render();
-                console.log('CartPage initialized, items:', Cart.items.length);
             },
 
             async checkRestaurantStatus() {
