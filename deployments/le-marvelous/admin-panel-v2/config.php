@@ -224,8 +224,30 @@ function saveMenuRuntime($runtime) {
  * Ce fichier est lu par snack-runtime.js
  */
 function generatePublicMenuJson($runtime) {
+    $menuJsonPath = __DIR__ . '/../config/menu.json';
+
+    // Essayer de charger la config JS, sinon utiliser menu.json existant
     $config = loadConfig();
-    if (!$config) return false;
+
+    if (!$config) {
+        // Fallback: lire le menu.json existant comme base
+        if (file_exists($menuJsonPath)) {
+            $existingMenu = json_decode(file_get_contents($menuJsonPath), true);
+            if ($existingMenu) {
+                $config = [
+                    'menu' => $existingMenu['menu'] ?? ['categories' => []],
+                    'featured' => $existingMenu['featured'] ?? null,
+                    'formula' => $existingMenu['formula'] ?? null,
+                    'formules' => $existingMenu['formules'] ?? []
+                ];
+            }
+        }
+
+        // Si toujours pas de config, créer une structure vide
+        if (!$config) {
+            $config = ['menu' => ['categories' => []]];
+        }
+    }
 
     $merged = applyRuntimeToConfig($config, $runtime);
 
