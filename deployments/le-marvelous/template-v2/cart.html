@@ -942,42 +942,13 @@
 
                 // Initialize cart
                 Cart.init();
+                Cart.onUpdate = () => this.render();
 
                 // Check restaurant status
                 this.checkRestaurantStatus();
 
                 // Initial render
                 this.render();
-            },
-
-            // Cart item actions using index (not key - key contains JSON with quotes that break HTML)
-            removeItem(index) {
-                if (Cart.items[index]) {
-                    Cart.items.splice(index, 1);
-                    Cart.save();
-                    this.render();
-                }
-            },
-
-            incrementItem(index) {
-                if (Cart.items[index]) {
-                    Cart.items[index].quantity++;
-                    Cart.save();
-                    this.render();
-                }
-            },
-
-            decrementItem(index) {
-                const item = Cart.items[index];
-                if (item) {
-                    if (item.quantity <= 1) {
-                        Cart.items.splice(index, 1);
-                    } else {
-                        item.quantity--;
-                    }
-                    Cart.save();
-                    this.render();
-                }
             },
 
             async checkRestaurantStatus() {
@@ -1026,13 +997,12 @@
                 const container = document.getElementById('cartItems');
                 if (!container) return;
 
-                container.innerHTML = Cart.items.map((item, index) => {
+                container.innerHTML = Cart.items.map(item => {
                     const menuType = item.options?.menuType;
                     const removedIngredients = item.options?.removedIngredients || [];
-                    const supplements = item.supplements || [];
 
                     return `
-                    <div class="cart-item">
+                    <div class="cart-item" data-key="${item.key}">
                         <img src="../${item.image}" alt="${item.name}" class="cart-item-image"
                              onerror="this.style.display='none'">
                         <div class="cart-item-details">
@@ -1040,9 +1010,9 @@
                                 ${item.name}
                                 ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">MENU</span>' : ''}
                             </div>
-                            ${supplements.length > 0 ? `
+                            ${item.supplements.length > 0 ? `
                                 <div class="cart-item-supplements" style="color: var(--success);">
-                                    <i class="fas fa-plus-circle" style="font-size: 11px;"></i> ${supplements.map(s => s.name).join(', ')}
+                                    <i class="fas fa-plus-circle" style="font-size: 11px;"></i> ${item.supplements.map(s => s.name).join(', ')}
                                 </div>
                             ` : ''}
                             ${removedIngredients.length > 0 ? `
@@ -1053,15 +1023,15 @@
                             <div class="cart-item-price">${Config.formatPrice(Cart.getItemTotal(item))}</div>
                         </div>
                         <div class="cart-item-actions">
-                            <button type="button" class="cart-item-remove" onclick="CartPage.removeItem(${index})">
+                            <button class="cart-item-remove" onclick="Cart.removeItem(decodeURIComponent('${encodeURIComponent(item.key)}'))">
                                 <i class="fas fa-trash"></i>
                             </button>
                             <div class="cart-item-qty">
-                                <button type="button" onclick="CartPage.decrementItem(${index})">
+                                <button onclick="Cart.decrement(decodeURIComponent('${encodeURIComponent(item.key)}'))">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <span>${item.quantity}</span>
-                                <button type="button" onclick="CartPage.incrementItem(${index})">
+                                <button onclick="Cart.increment(decodeURIComponent('${encodeURIComponent(item.key)}'))">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
