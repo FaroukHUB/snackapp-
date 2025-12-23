@@ -838,14 +838,6 @@ $csrfToken = getCsrfToken();
           </div>
 
           <div class="field">
-            <label>Contenu de la formule</label>
-            <div id="formuleIncludes" style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
-              <!-- Les includes seront ajoutés dynamiquement -->
-            </div>
-            <button type="button" class="btn btn-ghost" id="btnAddInclude" style="margin-top:8px;">+ Ajouter un élément</button>
-          </div>
-
-          <div class="field">
             <label for="formuleStatus">Statut</label>
             <select id="formuleStatus" name="status" class="select">
               <option value="available">Disponible</option>
@@ -1901,7 +1893,6 @@ $csrfToken = getCsrfToken();
 
     // ===== GESTION DES FORMULES =====
     let currentEditFormule = null;
-    let formuleIncludesCount = 0;
 
     function getFormules(){
       return state.menu?.formules ?? [];
@@ -1911,8 +1902,6 @@ $csrfToken = getCsrfToken();
       currentEditFormule = formule;
       const form = $("#formFormule");
       form.reset();
-      formuleIncludesCount = 0;
-      $("#formuleIncludes").innerHTML = "";
       $("#formuleImgPreview").style.display = "none";
 
       if (formule) {
@@ -1932,70 +1921,18 @@ $csrfToken = getCsrfToken();
           $("#formuleImgPreview").src = "../" + formule.image;
           $("#formuleImgPreview").style.display = "block";
         }
-
-        // Ajouter les includes existants
-        (formule.includes ?? []).forEach(inc => addFormuleInclude(inc));
       } else {
         // Mode ajout
         $("#modalFormuleTitle").textContent = "Ajouter une formule";
         $("#formuleId").value = "";
         $("#btnDeleteFormule").style.display = "none";
-        // Ajouter un include vide par défaut
-        addFormuleInclude();
       }
 
       openModal("#modalFormule");
     }
 
-    function addFormuleInclude(data = null){
-      const container = $("#formuleIncludes");
-      const cats = getCategories();
-      const idx = formuleIncludesCount++;
-
-      const div = document.createElement("div");
-      div.className = "formule-include-row";
-      div.style.cssText = "display:flex;gap:8px;align-items:center;padding:10px;border:1px solid var(--stroke);border-radius:10px;background:rgba(0,0,0,.18);";
-
-      const typeVal = data?.type ?? "category";
-      const labelVal = data?.label ?? "";
-      const qtyVal = data?.quantity ?? 1;
-      const catIdVal = data?.categoryId ?? "";
-      const prodIdVal = data?.productId ?? "";
-
-      div.innerHTML = `
-        <select name="include_type_${idx}" class="select" style="width:110px;" onchange="toggleIncludeType(this, ${idx})">
-          <option value="category" ${typeVal === 'category' ? 'selected' : ''}>Catégorie</option>
-          <option value="product" ${typeVal === 'product' ? 'selected' : ''}>Produit</option>
-        </select>
-        <select name="include_cat_${idx}" class="select include-cat" style="width:140px;${typeVal === 'product' ? 'display:none;' : ''}">
-          <option value="">-- Catégorie --</option>
-          ${cats.map(c => `<option value="${escapeHtml(c.id)}" ${c.id === catIdVal ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
-        </select>
-        <input name="include_prod_${idx}" class="input include-prod" type="text" placeholder="ID produit" value="${escapeHtml(prodIdVal)}" style="width:140px;${typeVal === 'category' ? 'display:none;' : ''}" />
-        <input name="include_label_${idx}" class="input" type="text" placeholder="Label affiché" value="${escapeHtml(labelVal)}" style="flex:1;min-width:100px;" />
-        <input name="include_qty_${idx}" class="input" type="number" min="1" value="${qtyVal}" style="width:60px;" />
-        <button type="button" class="btn btn-danger" style="padding:6px 10px;" onclick="this.closest('.formule-include-row').remove()">✕</button>
-      `;
-
-      container.appendChild(div);
-    }
-
-    window.toggleIncludeType = function(select, idx) {
-      const row = select.closest('.formule-include-row');
-      const catSelect = row.querySelector('.include-cat');
-      const prodInput = row.querySelector('.include-prod');
-      if (select.value === 'category') {
-        catSelect.style.display = '';
-        prodInput.style.display = 'none';
-      } else {
-        catSelect.style.display = 'none';
-        prodInput.style.display = '';
-      }
-    };
-
     $("#btnAddFormule").addEventListener("click", () => openFormuleModal());
     $("#btnAddFormuleInline").addEventListener("click", () => openFormuleModal());
-    $("#btnAddInclude").addEventListener("click", () => addFormuleInclude());
 
     $("#formuleImage").addEventListener("change", (e) => {
       const file = e.target.files && e.target.files[0];
@@ -2017,24 +1954,6 @@ $csrfToken = getCsrfToken();
       const status = $("#formuleStatus").value;
       const imageFile = $("#formuleImage").files[0];
 
-      // Collecter les includes
-      const includes = [];
-      $$(".formule-include-row").forEach((row, idx) => {
-        const type = row.querySelector(`[name^="include_type_"]`).value;
-        const label = row.querySelector(`[name^="include_label_"]`).value.trim();
-        const qty = parseInt(row.querySelector(`[name^="include_qty_"]`).value) || 1;
-
-        if (!label) return;
-
-        const inc = { type, label, quantity: qty };
-        if (type === 'category') {
-          inc.categoryId = row.querySelector('.include-cat').value;
-        } else {
-          inc.productId = row.querySelector('.include-prod').value.trim();
-        }
-        includes.push(inc);
-      });
-
       try {
         const formData = new FormData();
         if (formuleId) formData.set("formule_id", formuleId);
@@ -2044,7 +1963,6 @@ $csrfToken = getCsrfToken();
         if (originalPrice !== null) formData.set("originalPrice", originalPrice);
         if (badge) formData.set("badge", badge);
         formData.set("status", status);
-        formData.set("includes", JSON.stringify(includes));
         if (imageFile) formData.set("image", imageFile);
 
         await apiPostMultipart(formData, formuleId ? "update_formule" : "add_formule");

@@ -250,6 +250,45 @@ function generatePublicMenuJson($runtime) {
         $publicData['formula'] = $config['formula'];
     }
 
+    // ===== GESTION DES FORMULES =====
+    $formules = $config['formules'] ?? [];
+
+    // Appliquer les patches des formules modifiées
+    if (!empty($runtime['formules'])) {
+        foreach ($runtime['formules'] as $id => $patch) {
+            foreach ($formules as &$f) {
+                if ($f['id'] === $id) {
+                    $f = array_merge($f, $patch);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Ajouter les formules custom
+    if (!empty($runtime['customFormules'])) {
+        foreach ($runtime['customFormules'] as $f) {
+            $exists = false;
+            foreach ($formules as $existing) {
+                if ($existing['id'] === $f['id']) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
+                $formules[] = $f;
+            }
+        }
+    }
+
+    // Supprimer les formules marquées comme supprimées
+    if (!empty($runtime['deletedFormules'])) {
+        $formules = array_filter($formules, fn($f) => !in_array($f['id'], $runtime['deletedFormules'], true));
+        $formules = array_values($formules);
+    }
+
+    $publicData['formules'] = $formules;
+
     $menuJsonPath = __DIR__ . '/../config/menu.json';
     $json = json_encode($publicData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 

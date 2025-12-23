@@ -769,9 +769,6 @@ switch ($action) {
 
         saveMenuRuntime($runtime);
 
-        // Sync vers menu.json
-        syncFormulesToMenu($runtime);
-
         jsonSuccess(['formule' => $formule]);
         break;
 
@@ -828,9 +825,6 @@ switch ($action) {
 
         saveMenuRuntime($runtime);
 
-        // Sync vers menu.json
-        syncFormulesToMenu($runtime);
-
         jsonSuccess(['formule' => $patch]);
         break;
 
@@ -855,9 +849,6 @@ switch ($action) {
         }
 
         saveMenuRuntime($runtime);
-
-        // Sync vers menu.json
-        syncFormulesToMenu($runtime);
 
         jsonSuccess();
         break;
