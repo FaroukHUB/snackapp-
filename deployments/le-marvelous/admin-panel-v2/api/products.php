@@ -118,10 +118,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 }
             }
 
-            // Ajouter les formules custom
+            // Ajouter les formules custom (seulement si pas déjà dans menu.json)
             if (!empty($runtime['customFormules'])) {
+                $existingIds = array_column($formules, 'id');
                 foreach ($runtime['customFormules'] as $f) {
-                    $formules[] = $f;
+                    if (!in_array($f['id'], $existingIds, true)) {
+                        $formules[] = $f;
+                    }
                 }
             }
 
