@@ -997,48 +997,67 @@
                 const container = document.getElementById('cartItems');
                 if (!container) return;
 
-                container.innerHTML = Cart.items.map((item, index) => {
-                    const menuType = item.options?.menuType;
-                    const removedIngredients = item.options?.removedIngredients || [];
-                    const supplements = item.supplements || [];
+                console.log('renderItems called, Cart.items:', Cart.items);
 
-                    return `
-                    <div class="cart-item" data-index="${index}">
-                        <img src="../${item.image}" alt="${item.name}" class="cart-item-image"
-                             onerror="this.style.display='none'">
-                        <div class="cart-item-details">
-                            <div class="cart-item-name">
-                                ${item.name}
-                                ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">MENU</span>' : ''}
-                            </div>
-                            ${supplements.length > 0 ? `
-                                <div class="cart-item-supplements" style="color: var(--success);">
-                                    <i class="fas fa-plus-circle" style="font-size: 11px;"></i> ${supplements.map(s => s.name).join(', ')}
+                try {
+                    const html = Cart.items.map((item, index) => {
+                        console.log('Rendering item', index, ':', item);
+                        const menuType = item.options?.menuType;
+                        const removedIngredients = item.options?.removedIngredients || [];
+                        const supplements = item.supplements || [];
+                        const itemTotal = Cart.getItemTotal(item);
+                        console.log('Item total:', itemTotal);
+
+                        return `
+                        <div class="cart-item" data-index="${index}">
+                            <img src="../${item.image || ''}" alt="${item.name || ''}" class="cart-item-image"
+                                 onerror="this.style.display='none'">
+                            <div class="cart-item-details">
+                                <div class="cart-item-name">
+                                    ${item.name || 'Sans nom'}
+                                    ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">MENU</span>' : ''}
                                 </div>
-                            ` : ''}
-                            ${removedIngredients.length > 0 ? `
-                                <div class="cart-item-removed" style="color: var(--error); font-size: 13px;">
-                                    <i class="fas fa-minus-circle" style="font-size: 11px;"></i> Sans: ${removedIngredients.join(', ')}
+                                ${supplements.length > 0 ? `
+                                    <div class="cart-item-supplements" style="color: var(--success);">
+                                        <i class="fas fa-plus-circle" style="font-size: 11px;"></i> ${supplements.map(s => s.name).join(', ')}
+                                    </div>
+                                ` : ''}
+                                ${removedIngredients.length > 0 ? `
+                                    <div class="cart-item-removed" style="color: var(--error); font-size: 13px;">
+                                        <i class="fas fa-minus-circle" style="font-size: 11px;"></i> Sans: ${removedIngredients.join(', ')}
+                                    </div>
+                                ` : ''}
+                                <div class="cart-item-price">${Config.formatPrice(itemTotal)}</div>
+                            </div>
+                            <div class="cart-item-actions">
+                                <button class="cart-item-remove" onclick="CartPage.removeByIndex(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <div class="cart-item-qty">
+                                    <button onclick="CartPage.decrementByIndex(${index})">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span>${item.quantity || 1}</span>
+                                    <button onclick="CartPage.incrementByIndex(${index})">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                 </div>
-                            ` : ''}
-                            <div class="cart-item-price">${Config.formatPrice(Cart.getItemTotal(item))}</div>
-                        </div>
-                        <div class="cart-item-actions">
-                            <button class="cart-item-remove" onclick="CartPage.removeByIndex(${index})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <div class="cart-item-qty">
-                                <button onclick="CartPage.decrementByIndex(${index})">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <span>${item.quantity}</span>
-                                <button onclick="CartPage.incrementByIndex(${index})">
-                                    <i class="fas fa-plus"></i>
-                                </button>
                             </div>
                         </div>
-                    </div>
-                `}).join('');
+                    `}).join('');
+
+                    container.innerHTML = html;
+                    console.log('renderItems completed successfully');
+                } catch (error) {
+                    console.error('Error in renderItems:', error);
+                    container.innerHTML = `<div style="padding: 20px; color: red; text-align: center;">
+                        Erreur d'affichage: ${error.message}<br>
+                        <button onclick="localStorage.removeItem('snackapp_cart_v2'); location.reload();"
+                                style="margin-top: 10px; padding: 8px 16px; background: #e63946; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Vider le panier et réessayer
+                        </button>
+                    </div>`;
+                }
             },
 
             renderUpsell() {
