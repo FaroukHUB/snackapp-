@@ -91,10 +91,8 @@ const Products = {
 
         grid.innerHTML = featuredProducts.map(product => {
             const price = product.priceSolo || product.price || 0;
-            // Use baseIngredients if available, otherwise fall back to description
-            const ingredients = product.baseIngredients && product.baseIngredients.length > 0
-                ? product.baseIngredients.join(', ')
-                : (product.description || '');
+            // Always use description for display text
+            const ingredients = product.description || '';
             return `
                 <div class="featured-card">
                     <div class="product-image-wrapper" onclick="Products.openProductModal('${product.id}')">
@@ -484,10 +482,8 @@ const Products = {
             const price = product.price || product.priceSolo || 0;
             const cardClick = isUnavailable ? '' : `Products.openProductModal('${product.id}')`;
 
-            // Format ingredients list
-            const ingredients = product.baseIngredients && product.baseIngredients.length > 0
-                ? product.baseIngredients.join(', ')
-                : '';
+            // Always use description for display text
+            const ingredients = product.description || '';
 
             return `
                 <div class="product-card ${isUnavailable ? 'unavailable' : ''}"
