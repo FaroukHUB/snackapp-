@@ -145,6 +145,7 @@
                         "image": "",
                         "status": "available",
                         "hasVariants": true,
+                        "variantPriceIsTotal": true,
                         "variantLabel": "Choisir votre pâtisserie",
                         "variants": [
                             { "id": "tarte-citron", "name": "Tarte Citron Meringuée", "price": 300, "available": true },

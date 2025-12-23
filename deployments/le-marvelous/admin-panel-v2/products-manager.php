@@ -1130,7 +1130,7 @@ $csrfToken = getCsrfToken();
     // Catégories qui ont des suppléments
     const SWEET_CATEGORIES = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
     const SAVORY_CATEGORIES = ['crepes-salees-signature'];
-    const NO_SUPPLEMENT_CATEGORIES = ['boissons-chaudes', 'sodas-eaux', 'jus-cocktails', 'viennoiseries', 'patisseries', 'menu-enfant'];
+    const NO_SUPPLEMENT_CATEGORIES = ['boissons-chaudes', 'sodas-eaux', 'jus-cocktails', 'viennoiseries', 'patisseries', 'menu-enfant', 'sucres-sales'];
 
     function renderSupplementsCheckboxes(containerId, selectedIds = [], categoryId = null){
       const container = $(containerId);

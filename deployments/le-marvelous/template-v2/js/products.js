@@ -824,9 +824,14 @@ const Products = {
 
                 // Check if any variant has an image
                 const hasImages = availableVariants.some(v => v.image);
+                // Check if variant price is the total price (not an extra)
+                const variantPriceIsTotal = product.variantPriceIsTotal === true;
 
                 variantsList.innerHTML = availableVariants.map((variant) => {
-                    const priceExtra = variant.price > 0 ? ` (+${Config.formatPrice(variant.price)})` : '';
+                    // If variantPriceIsTotal, show price without "+" prefix
+                    const priceExtra = variant.price > 0
+                        ? (variantPriceIsTotal ? ` (${Config.formatPrice(variant.price)})` : ` (+${Config.formatPrice(variant.price)})`)
+                        : '';
                     const priceDisplay = variant.price > 0 ? Config.formatPrice(variant.price) : '';
 
                     // If variant has image, show image layout
@@ -1244,7 +1249,12 @@ const Products = {
 
         // Add variant price if selected
         if (this.selectedVariant && this.selectedVariant.price) {
-            total += this.selectedVariant.price;
+            // If variantPriceIsTotal is true, use variant price AS the total (not add to it)
+            if (this.currentProduct?.variantPriceIsTotal) {
+                total = this.selectedVariant.price;
+            } else {
+                total += this.selectedVariant.price;
+            }
         }
 
         // Add supplements
