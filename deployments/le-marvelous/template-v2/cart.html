@@ -942,13 +942,45 @@
 
                 // Initialize cart
                 Cart.init();
-                Cart.onUpdate = () => this.render();
+
+                // Setup cart item buttons event delegation (once)
+                this.setupCartItemEvents();
 
                 // Check restaurant status
                 this.checkRestaurantStatus();
 
                 // Initial render
                 this.render();
+            },
+
+            setupCartItemEvents() {
+                const container = document.getElementById('cartItems');
+                if (!container) return;
+
+                container.addEventListener('click', (e) => {
+                    const btn = e.target.closest('[data-action]');
+                    if (!btn) return;
+
+                    const action = btn.dataset.action;
+                    const index = parseInt(btn.dataset.index);
+                    const item = Cart.items[index];
+                    if (!item) return;
+
+                    if (action === 'remove') {
+                        Cart.items.splice(index, 1);
+                    } else if (action === 'increment') {
+                        item.quantity++;
+                    } else if (action === 'decrement') {
+                        if (item.quantity <= 1) {
+                            Cart.items.splice(index, 1);
+                        } else {
+                            item.quantity--;
+                        }
+                    }
+
+                    Cart.save();
+                    this.render();
+                });
             },
 
             async checkRestaurantStatus() {
@@ -1039,38 +1071,6 @@
                         </div>
                     </div>
                 `}).join('');
-
-                // Attach event listeners using delegation
-                container.onclick = (e) => {
-                    const btn = e.target.closest('[data-action]');
-                    if (!btn) return;
-
-                    const action = btn.dataset.action;
-                    const index = parseInt(btn.dataset.index);
-                    const item = Cart.items[index];
-                    if (!item) return;
-
-                    if (action === 'remove') {
-                        Cart.items.splice(index, 1);
-                        Cart.save();
-                        Cart.updateUI();
-                        this.render();
-                    } else if (action === 'increment') {
-                        item.quantity++;
-                        Cart.save();
-                        Cart.updateUI();
-                        this.render();
-                    } else if (action === 'decrement') {
-                        if (item.quantity <= 1) {
-                            Cart.items.splice(index, 1);
-                        } else {
-                            item.quantity--;
-                        }
-                        Cart.save();
-                        Cart.updateUI();
-                        this.render();
-                    }
-                };
             },
 
             renderUpsell() {
