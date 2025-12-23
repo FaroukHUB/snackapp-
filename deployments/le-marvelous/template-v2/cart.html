@@ -997,12 +997,13 @@
                 const container = document.getElementById('cartItems');
                 if (!container) return;
 
-                container.innerHTML = Cart.items.map(item => {
+                container.innerHTML = Cart.items.map((item, index) => {
                     const menuType = item.options?.menuType;
                     const removedIngredients = item.options?.removedIngredients || [];
+                    const supplements = item.supplements || [];
 
                     return `
-                    <div class="cart-item" data-key="${item.key}">
+                    <div class="cart-item" data-index="${index}">
                         <img src="../${item.image}" alt="${item.name}" class="cart-item-image"
                              onerror="this.style.display='none'">
                         <div class="cart-item-details">
@@ -1010,9 +1011,9 @@
                                 ${item.name}
                                 ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">MENU</span>' : ''}
                             </div>
-                            ${item.supplements.length > 0 ? `
+                            ${supplements.length > 0 ? `
                                 <div class="cart-item-supplements" style="color: var(--success);">
-                                    <i class="fas fa-plus-circle" style="font-size: 11px;"></i> ${item.supplements.map(s => s.name).join(', ')}
+                                    <i class="fas fa-plus-circle" style="font-size: 11px;"></i> ${supplements.map(s => s.name).join(', ')}
                                 </div>
                             ` : ''}
                             ${removedIngredients.length > 0 ? `
@@ -1023,21 +1024,53 @@
                             <div class="cart-item-price">${Config.formatPrice(Cart.getItemTotal(item))}</div>
                         </div>
                         <div class="cart-item-actions">
-                            <button class="cart-item-remove" onclick="Cart.removeItem('${item.key}')">
+                            <button class="cart-item-remove" data-action="remove" data-index="${index}">
                                 <i class="fas fa-trash"></i>
                             </button>
                             <div class="cart-item-qty">
-                                <button onclick="Cart.decrement('${item.key}')">
+                                <button data-action="decrement" data-index="${index}">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <span>${item.quantity}</span>
-                                <button onclick="Cart.increment('${item.key}')">
+                                <button data-action="increment" data-index="${index}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                 `}).join('');
+
+                // Attach event listeners using delegation
+                container.onclick = (e) => {
+                    const btn = e.target.closest('[data-action]');
+                    if (!btn) return;
+
+                    const action = btn.dataset.action;
+                    const index = parseInt(btn.dataset.index);
+                    const item = Cart.items[index];
+                    if (!item) return;
+
+                    if (action === 'remove') {
+                        Cart.items.splice(index, 1);
+                        Cart.save();
+                        Cart.updateUI();
+                        this.render();
+                    } else if (action === 'increment') {
+                        item.quantity++;
+                        Cart.save();
+                        Cart.updateUI();
+                        this.render();
+                    } else if (action === 'decrement') {
+                        if (item.quantity <= 1) {
+                            Cart.items.splice(index, 1);
+                        } else {
+                            item.quantity--;
+                        }
+                        Cart.save();
+                        Cart.updateUI();
+                        this.render();
+                    }
+                };
             },
 
             renderUpsell() {
