@@ -1310,7 +1310,8 @@ const Products = {
                 selectedDrink: this.selectedDrink ? { ...this.selectedDrink } : null,
                 selectedSauce: this.selectedSauce ? { ...this.selectedSauce } : null,
                 selectedAccompagnement: this.selectedAccompagnement,
-                selectedVariant: this.selectedVariant ? { ...this.selectedVariant } : null
+                selectedVariant: this.selectedVariant ? { ...this.selectedVariant } : null,
+                variantPriceIsTotal: this.currentProduct?.variantPriceIsTotal || false
             }
         );
 

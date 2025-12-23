@@ -183,7 +183,12 @@ const Cart = {
 
         // Add variant price if any
         if (item.options?.selectedVariant?.price) {
-            total += item.options.selectedVariant.price;
+            // If variantPriceIsTotal is true, use variant price AS the total (not add to it)
+            if (item.options?.variantPriceIsTotal) {
+                total = item.options.selectedVariant.price;
+            } else {
+                total += item.options.selectedVariant.price;
+            }
         }
 
         // Add supplements prices
