@@ -573,43 +573,43 @@
         {
             "when": ["crepes-salees-signature"],
             "suggest": ["crepes-sucrees", "gaufres", "sodas-eaux", "boissons-chaudes"],
-            "message": "Un dessert ou une boisson ?",
+            "message": "Un petit plaisir en plus ?",
             "priority": 1
         },
         {
             "when": ["sucres-sales"],
             "suggest": ["crepes-sucrees", "sodas-eaux", "jus-cocktails", "boissons-chaudes"],
-            "message": "Une boisson pour accompagner ?",
+            "message": "Un petit plaisir en plus ?",
             "priority": 1
         },
         {
             "when": ["crepes-sucrees"],
             "suggest": ["gaufres", "bubble-waffle", "boissons-chaudes", "jus-cocktails"],
-            "message": "Une autre gourmandise ?",
+            "message": "Faites-vous plaisir jusqu'au bout.",
             "priority": 2
         },
         {
             "when": ["gaufres"],
             "suggest": ["crepes-sucrees", "bubble-waffle", "boissons-chaudes", "jus-cocktails"],
-            "message": "Encore une douceur ?",
+            "message": "Faites-vous plaisir jusqu'au bout.",
             "priority": 2
         },
         {
             "when": ["bubble-waffle"],
             "suggest": ["crepes-sucrees", "gaufres", "jus-cocktails", "boissons-chaudes"],
-            "message": "Un petit extra ?",
+            "message": "Faites-vous plaisir jusqu'au bout.",
             "priority": 2
         },
         {
             "when": ["boissons-chaudes"],
             "suggest": ["crepes-sucrees", "gaufres", "bubble-waffle"],
-            "message": "Une douceur avec votre café ?",
+            "message": "La gourmandise n'attend pas",
             "priority": 3
         },
         {
             "when": ["sodas-eaux", "jus-cocktails"],
             "suggest": ["crepes-sucrees", "gaufres"],
-            "message": "Un dessert avec votre boisson ?",
+            "message": "La gourmandise n'attend pas",
             "priority": 3
         }
     ],
