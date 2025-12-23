@@ -28,6 +28,29 @@ function readInput(): array {
     return is_array($decoded) ? $decoded : [];
 }
 
+/**
+ * Sauvegarde sécurisée du menu.json - vérifie que les données critiques existent
+ */
+function safeWriteMenuJson(string $menuPath, array $menuData): bool {
+    // Vérifier que les données critiques existent avant de sauvegarder
+    if (empty($menuData['supplements']['defaultForCategories'])) {
+        error_log('safeWriteMenuJson: ABORT - defaultForCategories manquant');
+        return false;
+    }
+    if (empty($menuData['upsellRules'])) {
+        error_log('safeWriteMenuJson: ABORT - upsellRules manquant');
+        return false;
+    }
+
+    $json = json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    if ($json === false) {
+        error_log('safeWriteMenuJson: ABORT - erreur encodage JSON');
+        return false;
+    }
+
+    return file_put_contents($menuPath, $json) !== false;
+}
+
 function handleImageUpload(string $baseId): ?string {
     $fileKey = null;
     if (!empty($_FILES['imageFile'])) $fileKey = 'imageFile';
@@ -408,7 +431,7 @@ switch ($action) {
                 }
                 $menuData['categoryIcons'][$id] = $icon;
                 $menuData['categoryEmojis'][$id] = $emoji;
-                file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                safeWriteMenuJson($menuPath, $menuData);
             }
         }
 
@@ -472,7 +495,7 @@ switch ($action) {
             if ($emoji !== '') {
                 $menuData['categoryEmojis'][$id] = $emoji;
             }
-            file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            safeWriteMenuJson($menuPath, $menuData);
         }
 
         jsonSuccess(['category' => ['id' => $id, 'name' => $name, 'icon' => $icon, 'emoji' => $emoji]]);
@@ -899,7 +922,7 @@ switch ($action) {
             jsonError('Variante introuvable');
         }
 
-        file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        safeWriteMenuJson($menuPath, $menuData);
         jsonSuccess(['message' => 'Variante mise à jour']);
         break;
 
@@ -989,7 +1012,7 @@ switch ($action) {
             }
         }
 
-        file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        safeWriteMenuJson($menuPath, $menuData);
         jsonSuccess(['image' => $imagePath, 'message' => 'Image variante mise à jour']);
         break;
 
@@ -1052,7 +1075,7 @@ switch ($action) {
             jsonError('Produit introuvable');
         }
 
-        file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        safeWriteMenuJson($menuPath, $menuData);
         jsonSuccess(['variant' => ['id' => $variantId, 'name' => $name, 'price' => $price]]);
         break;
 
@@ -1091,7 +1114,7 @@ switch ($action) {
             jsonError('Produit ou variante introuvable');
         }
 
-        file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        safeWriteMenuJson($menuPath, $menuData);
         jsonSuccess(['message' => 'Variante supprimée']);
         break;
 
@@ -1116,7 +1139,7 @@ switch ($action) {
             $menuData = json_decode(file_get_contents($menuPath), true);
             if ($menuData) {
                 $menuData['featured'] = $featured;
-                file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                safeWriteMenuJson($menuPath, $menuData);
             }
         }
 
@@ -1213,5 +1236,5 @@ function syncFormulesToMenu(array $runtime): void {
 
     $menuData['formules'] = $formules;
 
-    file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    safeWriteMenuJson($menuPath, $menuData);
 }
