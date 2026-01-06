@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
     }
 
-    // ✅ MODE JSON - Charger DIRECTEMENT depuis menu.json
+    // ✅ MODE JSON - Charger menu.json + appliquer runtime (filtre deletedCategories)
     $menuJsonPath = SNACK_ROOT . '/config/menu.json';
 
     if (!file_exists($menuJsonPath)) {
@@ -186,9 +186,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         jsonError('Erreur lecture menu.json');
     }
 
-    // Retourner TOUTES les données depuis menu.json
+    // ✅ FIX: Charger runtime et appliquer deletedCategories
+    $runtime = loadMenuRuntime();
+    $menuDataFiltered = applyRuntimeToConfig($menuData, $runtime);
+
+    // Retourner les données FILTRÉES (sans catégories/produits supprimés)
     jsonSuccess([
-        'menu' => $menuData['menu'] ?? [],
+        'menu' => $menuDataFiltered['menu'] ?? [],
         'supplements' => $menuData['supplements'] ?? [],
         'formules' => $menuData['formules'] ?? [],
         'featured' => $menuData['featured'] ?? [],
