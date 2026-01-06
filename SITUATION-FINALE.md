@@ -62,12 +62,17 @@ orderNotificationSystem.start(60); // 60 secondes au lieu de 10
 ```
 **Résultat :** 1 requête/min au lieu de 6 (réduction de 83%)
 
-#### 2. Ajout de timeout et meilleure gestion d'erreur
+#### 2. Ajout de timeout et meilleure gestion d'erreur (compatible tous navigateurs)
 ```javascript
-// notification-sound.js
+// notification-sound.js - Version compatible Chrome 66+, Firefox 57+
+const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 5000);
+
 const res = await fetch('api/orders.php?action=list&limit=1', {
-    signal: AbortSignal.timeout(5000) // Timeout 5s
+    signal: controller.signal
 });
+
+clearTimeout(timeoutId);
 
 if (!res.ok) {
     console.warn('Check commandes failed:', res.status);
@@ -78,6 +83,11 @@ if (!res.ok) {
 #### 3. Réduction du spam console
 - Erreurs loggées discrètement (`console.warn` au lieu de `console.error`)
 - AbortError (timeout) ignoré pour ne pas polluer la console
+
+#### 4. Fix HTTP 500 (commit 88a882d)
+- **Problème :** `AbortSignal.timeout()` API trop récente (2022)
+- **Solution :** Remplacé par `AbortController` manuel (supporté depuis 2018)
+- **Impact :** Compatible avec tous navigateurs modernes
 
 ### Impact
 - **Performance :** Requêtes réseau réduites de 83%
@@ -213,21 +223,26 @@ A: Les laisser pour l'instant (backup), ou nettoyer plus tard
 
 ## ✅ DÉPLOIEMENT FINAL
 
-### Dernier commit
+### Derniers commits
 ```
 bf0da74 - fix: Réduction polling notifications (83%) + timeout
+4d2964f - docs: Ajout section déploiement final + instructions vérification
+88a882d - fix: Compatibilité AbortSignal pour anciens navigateurs
 ```
 
 ### Fichiers modifiés
 1. **admin-panel-v2/notification-sound.js**
    - Polling 10s → 60s
-   - Timeout 5s sur fetch
+   - Timeout 5s sur fetch (méthode compatible tous navigateurs)
    - Gestion d'erreur améliorée
 
 2. **admin-panel-v2/index.php**
    - Appel `orderNotificationSystem.start(60)` au lieu de 10
 
-3. **SITUATION-FINALE.md**
+3. **admin-panel-v2/test-error.php** (NOUVEAU)
+   - Script de diagnostic pour débugger erreurs PHP
+
+4. **SITUATION-FINALE.md**
    - Documentation complète de la situation
 
 ### Instructions de déploiement sur le serveur
