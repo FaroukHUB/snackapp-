@@ -1,0 +1,565 @@
+/* ============================================
+   PAGES.CSS - Styles for Fidelite & Click-Collect
+   Matches the original template style
+   ============================================ */
+
+/* Page Content Container */
+.page-content {
+    padding-top: var(--header-height);
+    min-height: 100vh;
+    background: var(--gray-50);
+}
+
+/* Back Link in Header */
+.back-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-sm);
+    background: var(--gray-100);
+    color: var(--gray-700);
+    text-decoration: none;
+    transition: var(--transition);
+    margin-right: 10px;
+}
+
+.back-link:hover {
+    background: var(--gray-200);
+    color: var(--primary);
+}
+
+/* Page Hero Section */
+.page-hero {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.page-hero .hero-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+}
+
+.page-hero h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 10px;
+}
+
+.page-hero p {
+    font-size: 1rem;
+    opacity: 0.9;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Info Sections (reusing template styles) */
+.page-content .info-section {
+    padding: 40px 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.page-content .info-section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-content .info-section h2 i {
+    color: var(--primary);
+}
+
+.section-desc {
+    color: var(--gray-600);
+    margin-bottom: 20px;
+}
+
+/* Steps Grid */
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.step-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    position: relative;
+}
+
+.step-number {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.step-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+}
+
+.step-card p {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Points Visual */
+.highlight-section {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.points-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.points-item {
+    text-align: center;
+}
+
+.points-value {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--gray-800);
+}
+
+.points-item.accent .points-value {
+    color: var(--primary);
+}
+
+.points-label {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.points-equals {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-400);
+}
+
+.points-example {
+    text-align: center;
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    background: var(--gray-50);
+    padding: 15px;
+    border-radius: var(--border-radius-sm);
+}
+
+.points-example i {
+    color: var(--warning);
+    margin-right: 8px;
+}
+
+/* Rewards Grid */
+.rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+.reward-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 20px 15px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 2px solid transparent;
+    transition: var(--transition);
+    position: relative;
+}
+
+.reward-card.featured {
+    border-color: var(--primary);
+}
+
+.reward-badge {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: var(--primary);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.reward-icon {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 18px;
+    color: var(--primary);
+}
+
+.reward-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 5px;
+}
+
+.reward-card p {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin: 0;
+}
+
+/* Advantages Grid */
+.advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.advantage-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 20px 15px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.advantage-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.advantage-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 5px;
+}
+
+.advantage-card p {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Timeline Steps */
+.steps-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.timeline-step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.timeline-number {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.timeline-content {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.timeline-content h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+}
+
+.timeline-content p {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.info-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 25px 20px;
+    box-shadow: var(--shadow);
+}
+
+.info-icon {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: var(--primary);
+}
+
+.info-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 10px;
+}
+
+.info-card p {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+.info-card small {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--gray-400);
+}
+
+.hours-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.hours-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 0.9rem;
+    color: var(--gray-700);
+}
+
+.hours-list li:last-child {
+    border-bottom: none;
+}
+
+/* CTA Section */
+.cta-section .cta-card {
+    background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
+    border-radius: var(--border-radius-lg);
+    padding: 40px 30px;
+    text-align: center;
+    color: white;
+}
+
+.cta-card h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.cta-card p {
+    color: var(--gray-300);
+    margin-bottom: 25px;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--primary);
+    color: white;
+    padding: 14px 28px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* FAQ (reusing template styles) */
+.page-content .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.page-content .faq-item {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.page-content .faq-item summary {
+    padding: 18px 20px;
+    font-weight: 600;
+    color: var(--gray-800);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+}
+
+.page-content .faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.page-content .faq-item summary::after {
+    content: '+';
+    font-size: 1.2rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.page-content .faq-item[open] summary::after {
+    content: '−';
+}
+
+.page-content .faq-item p {
+    padding: 0 20px 18px;
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* Page Footer */
+.page-footer {
+    padding: 30px 20px 40px;
+    text-align: center;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-200);
+    color: var(--gray-700);
+    padding: 12px 24px;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.btn-back:hover {
+    background: var(--gray-300);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .page-hero {
+        padding: 50px 15px;
+    }
+
+    .page-hero h1 {
+        font-size: 1.6rem;
+    }
+
+    .page-content .info-section {
+        padding: 30px 15px;
+    }
+
+    .advantages-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rewards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .points-visual {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .points-equals {
+        transform: rotate(90deg);
+    }
+
+    .cta-card {
+        padding: 30px 20px;
+    }
+}

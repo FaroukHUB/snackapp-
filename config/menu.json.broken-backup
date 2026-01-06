@@ -1,0 +1,556 @@
+{
+    "version": 2,
+    "lastUpdated": "2026-01-05T08:05:44+01:00",
+    "menu": {
+        "categories": []
+    },
+    "supplements": {
+        "catalog": {
+            "sup-mix-fromages": {
+                "id": "sup-mix-fromages",
+                "name": "Mix Fromages",
+                "price": 150,
+                "status": "available",
+                "category": "fromage",
+                "flavor": "sale"
+            },
+            "sup-camembert": {
+                "id": "sup-camembert",
+                "name": "Camembert",
+                "price": 150,
+                "status": "available",
+                "category": "fromage",
+                "flavor": "sale"
+            },
+            "sup-chakchouka": {
+                "id": "sup-chakchouka",
+                "name": "Chakchouka",
+                "price": 100,
+                "status": "available",
+                "category": "legume",
+                "flavor": "sale"
+            },
+            "sup-cheddar": {
+                "id": "sup-cheddar",
+                "name": "Cheddar",
+                "price": 80,
+                "status": "available",
+                "category": "fromage",
+                "flavor": "sale"
+            },
+            "sup-pomme-terre": {
+                "id": "sup-pomme-terre",
+                "name": "Pomme de Terre",
+                "price": 80,
+                "status": "available",
+                "category": "legume",
+                "flavor": "sale"
+            },
+            "sup-oignons-confits": {
+                "id": "sup-oignons-confits",
+                "name": "Oignons Confits",
+                "price": 60,
+                "status": "available",
+                "category": "legume",
+                "flavor": "sale"
+            },
+            "sup-oeuf": {
+                "id": "sup-oeuf",
+                "name": "Oeuf",
+                "price": 60,
+                "status": "available",
+                "category": "autre",
+                "flavor": "sale"
+            },
+            "sup-viande-hachee": {
+                "id": "sup-viande-hachee",
+                "name": "Viande Hachée",
+                "price": 250,
+                "status": "available",
+                "category": "viande",
+                "flavor": "sale"
+            },
+            "sup-escalope-poulet": {
+                "id": "sup-escalope-poulet",
+                "name": "Escalope Poulet",
+                "price": 200,
+                "status": "available",
+                "category": "viande",
+                "flavor": "sale"
+            },
+            "sup-jambon": {
+                "id": "sup-jambon",
+                "name": "Jambon Fumé/Blanc",
+                "price": 150,
+                "status": "available",
+                "category": "viande",
+                "flavor": "sale"
+            },
+            "sup-nutella": {
+                "id": "sup-nutella",
+                "name": "Nutella",
+                "price": 200,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-chocolat": {
+                "id": "sup-chocolat",
+                "name": "Chocolat",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-confiture": {
+                "id": "sup-confiture",
+                "name": "Confiture",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-creme-noisette": {
+                "id": "sup-creme-noisette",
+                "name": "Crème de Noisette",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-miel": {
+                "id": "sup-miel",
+                "name": "Miel",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-beurre-cacahuete": {
+                "id": "sup-beurre-cacahuete",
+                "name": "Beurre de Cacahuète",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-sucre": {
+                "id": "sup-sucre",
+                "name": "Sucre",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-chantilly": {
+                "id": "sup-chantilly",
+                "name": "Chantilly",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-pistache": {
+                "id": "sup-coulis-pistache",
+                "name": "Coulis Pistache",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-noisettes": {
+                "id": "sup-coulis-noisettes",
+                "name": "Coulis Noisettes",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-chocolat": {
+                "id": "sup-coulis-chocolat",
+                "name": "Coulis Chocolat",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-caramel": {
+                "id": "sup-coulis-caramel",
+                "name": "Coulis Caramel",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-fruits": {
+                "id": "sup-coulis-fruits",
+                "name": "Coulis aux Fruits",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-cacahuetes": {
+                "id": "sup-cacahuetes",
+                "name": "Cacahuètes",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-amandes": {
+                "id": "sup-amandes",
+                "name": "Amandes",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-palet-breton": {
+                "id": "sup-palet-breton",
+                "name": "Palet Breton",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-cookies": {
+                "id": "sup-cookies",
+                "name": "Cookies",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-noix-coco": {
+                "id": "sup-noix-coco",
+                "name": "Noix de Coco",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-maxon-oreo": {
+                "id": "sup-maxon-oreo",
+                "name": "Maxon Oreo",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-fraise": {
+                "id": "sup-fraise",
+                "name": "Fraise",
+                "price": 200,
+                "status": "available",
+                "category": "fruit",
+                "flavor": "sucre"
+            },
+            "sup-ananas": {
+                "id": "sup-ananas",
+                "name": "Ananas",
+                "price": 200,
+                "status": "available",
+                "category": "fruit",
+                "flavor": "sucre"
+            },
+            "sup-banane": {
+                "id": "sup-banane",
+                "name": "Banane",
+                "price": 200,
+                "status": "available",
+                "category": "fruit",
+                "flavor": "sucre"
+            },
+            "sup-peche": {
+                "id": "sup-peche",
+                "name": "Pêche",
+                "price": 200,
+                "status": "available",
+                "category": "fruit",
+                "flavor": "sucre"
+            },
+            "sup-mms": {
+                "id": "sup-mms",
+                "name": "M&M's",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-snickers": {
+                "id": "sup-snickers",
+                "name": "Snickers",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-kitkat": {
+                "id": "sup-kitkat",
+                "name": "KitKat",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-kinder-bueno": {
+                "id": "sup-kinder-bueno",
+                "name": "Kinder Bueno",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-raffaello": {
+                "id": "sup-raffaello",
+                "name": "Raffaello",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-kinder-country": {
+                "id": "sup-kinder-country",
+                "name": "Kinder Country",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-ferrero": {
+                "id": "sup-ferrero",
+                "name": "Ferrero Rocher",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            }
+        },
+        "defaultForCategories": {
+            "crepes-salees-signature": [
+                "sup-mix-fromages",
+                "sup-cheddar",
+                "sup-camembert",
+                "sup-chakchouka",
+                "sup-pomme-terre",
+                "sup-oignons-confits",
+                "sup-oeuf",
+                "sup-viande-hachee",
+                "sup-escalope-poulet",
+                "sup-jambon"
+            ],
+            "sucres-sales": [],
+            "crepes-sucrees": [
+                "sup-nutella",
+                "sup-chocolat",
+                "sup-confiture",
+                "sup-creme-noisette",
+                "sup-miel",
+                "sup-beurre-cacahuete",
+                "sup-sucre",
+                "sup-chantilly",
+                "sup-coulis-pistache",
+                "sup-coulis-noisettes",
+                "sup-coulis-chocolat",
+                "sup-coulis-caramel",
+                "sup-coulis-fruits",
+                "sup-cacahuetes",
+                "sup-amandes",
+                "sup-palet-breton",
+                "sup-cookies",
+                "sup-noix-coco",
+                "sup-maxon-oreo",
+                "sup-fraise",
+                "sup-ananas",
+                "sup-banane",
+                "sup-peche",
+                "sup-mms",
+                "sup-snickers",
+                "sup-kitkat",
+                "sup-kinder-bueno",
+                "sup-raffaello",
+                "sup-kinder-country",
+                "sup-ferrero"
+            ],
+            "gaufres": [
+                "sup-nutella",
+                "sup-chocolat",
+                "sup-confiture",
+                "sup-creme-noisette",
+                "sup-miel",
+                "sup-beurre-cacahuete",
+                "sup-sucre",
+                "sup-chantilly",
+                "sup-coulis-pistache",
+                "sup-coulis-noisettes",
+                "sup-coulis-chocolat",
+                "sup-coulis-caramel",
+                "sup-coulis-fruits",
+                "sup-cacahuetes",
+                "sup-amandes",
+                "sup-palet-breton",
+                "sup-cookies",
+                "sup-noix-coco",
+                "sup-maxon-oreo",
+                "sup-fraise",
+                "sup-ananas",
+                "sup-banane",
+                "sup-peche",
+                "sup-mms",
+                "sup-snickers",
+                "sup-kitkat",
+                "sup-kinder-bueno",
+                "sup-raffaello",
+                "sup-kinder-country",
+                "sup-ferrero"
+            ],
+            "bubble-waffle": [
+                "sup-nutella",
+                "sup-chocolat",
+                "sup-confiture",
+                "sup-creme-noisette",
+                "sup-miel",
+                "sup-beurre-cacahuete",
+                "sup-sucre",
+                "sup-chantilly",
+                "sup-coulis-pistache",
+                "sup-coulis-noisettes",
+                "sup-coulis-chocolat",
+                "sup-coulis-caramel",
+                "sup-coulis-fruits",
+                "sup-cacahuetes",
+                "sup-amandes",
+                "sup-palet-breton",
+                "sup-cookies",
+                "sup-noix-coco",
+                "sup-maxon-oreo",
+                "sup-fraise",
+                "sup-ananas",
+                "sup-banane",
+                "sup-peche",
+                "sup-mms",
+                "sup-snickers",
+                "sup-kitkat",
+                "sup-kinder-bueno",
+                "sup-raffaello",
+                "sup-kinder-country",
+                "sup-ferrero"
+            ],
+            "boissons-chaudes": [],
+            "sodas-eaux": [],
+            "jus-cocktails": [],
+            "menu-enfant": []
+        }
+    },
+    "accompagnements": {
+        "salade": {
+            "id": "acc-salade",
+            "name": "Accompagnement Salade",
+            "price": 0,
+            "status": "available"
+        },
+        "riz": {
+            "id": "acc-riz",
+            "name": "Accompagnement Riz",
+            "price": 0,
+            "status": "available"
+        }
+    },
+    "formules": [
+        {
+            "id": "formule-formule-midi",
+            "name": "formule midi",
+            "description": "poulet frite boisson",
+            "price": 450,
+            "originalPrice": 700,
+            "savings": 250,
+            "badge": null,
+            "image": "images/formules/formule-formule-midi-2b7d9071.jpg",
+            "includes": [],
+            "status": "available"
+        },
+        {
+            "id": "formule-formule-walou",
+            "name": "formule walou",
+            "description": "walou + walou = walou",
+            "price": 250,
+            "originalPrice": null,
+            "savings": null,
+            "badge": null,
+            "image": "images/formules/formule-formule-walou-24fc4b39.webp",
+            "includes": [],
+            "status": "available"
+        }
+    ],
+    "upsellRules": [
+        {
+            "when": [
+                "crepes-salees-signature"
+            ],
+            "suggest": [
+                "patisserie",
+                "jus-frais",
+                "cocktail-maison",
+                "soda",
+                "croque-monsieur",
+                {
+                    "category": "sucres-sales",
+                    "max": 2
+                },
+                {
+                    "category": "boissons-chaudes",
+                    "max": 1
+                }
+            ],
+            "message": "Envie d'une petite douceur ou d'une boisson pour compléter ?",
+            "priority": 1
+        },
+        {
+            "when": [
+                "crepes-sucrees",
+                "gaufres",
+                "bubble-waffle"
+            ],
+            "suggest": [
+                "patisserie",
+                "jus-frais",
+                "cocktail-maison",
+                "soda",
+                "croque-monsieur",
+                {
+                    "category": "sucres-sales",
+                    "max": 2
+                }
+            ],
+            "message": "Envie d'une gourmandise ou d'une boisson pour accompagner ?",
+            "priority": 2
+        },
+        {
+            "when": [
+                "boissons-chaudes",
+                "sodas-eaux",
+                "jus-cocktails"
+            ],
+            "suggest": [
+                {
+                    "category": "sucres-sales",
+                    "max": 2
+                }
+            ],
+            "message": "Craquez pour une gourmandise sucrée !",
+            "priority": 3
+        }
+    ],
+    "categoryIcons": {
+        "crepes-salees-signature": "fa-star",
+        "sucres-sales": "fa-bread-slice",
+        "crepes-sucrees": "fa-cookie-bite",
+        "gaufres": "fa-stroopwafel",
+        "bubble-waffle": "fa-circle",
+        "boissons-chaudes": "fa-mug-hot",
+        "sodas-eaux": "fa-bottle-water",
+        "jus-cocktails": "fa-glass-water",
+        "menu-enfant": "fa-child"
+    }
+}

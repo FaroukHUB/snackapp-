@@ -1,0 +1,107 @@
+{
+    "products": {
+        "viennoiseries": {
+            "name": "Viennoiseries Pur Beurre",
+            "description": "Choisissez votre viennoiserie.",
+            "priceSolo": 150,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/viennoiseries-1a242d05.webp"
+        },
+        "croque-monsieur": {
+            "name": "Croque-Monsieur",
+            "description": "Pain de mie, jambon, fromage gratiné.",
+            "priceSolo": 300,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/croque-monsieur-82c66930.webp"
+        }
+    },
+    "categories": [],
+    "customCategories": {
+        "urgers": {
+            "id": "urgers",
+            "name": "Burgers",
+            "description": "",
+            "items": []
+        },
+        "test": {
+            "id": "test",
+            "name": "test",
+            "description": "",
+            "items": []
+        }
+    },
+    "customProducts": {
+        "urgers": {
+            "id": "urgers",
+            "categoryId": "sucres-sales",
+            "name": "Burgers",
+            "description": "Burgers frais ",
+            "priceSolo": 700,
+            "priceMenu": 900,
+            "badge": "hebla",
+            "image": "images/uploads/urgers-cfce7857.png",
+            "status": "available",
+            "supplements": []
+        },
+        "acos": {
+            "id": "acos",
+            "categoryId": "sucres-sales",
+            "name": "Tacos",
+            "description": "",
+            "priceSolo": 490,
+            "priceMenu": null,
+            "badge": null,
+            "image": "images/uploads/acos-628ae502.webp",
+            "status": "available",
+            "supplements": []
+        }
+    },
+    "deletedProducts": [],
+    "deletedCategories": [],
+    "formules": [],
+    "customFormules": {
+        "formule-formule-midi": {
+            "id": "formule-formule-midi",
+            "name": "formule midi",
+            "description": "poulet frite boisson",
+            "price": 450,
+            "originalPrice": 700,
+            "savings": 250,
+            "badge": null,
+            "image": "images/formules/formule-formule-midi-2b7d9071.jpg",
+            "includes": [],
+            "status": "available"
+        },
+        "formule-formule-walou": {
+            "id": "formule-formule-walou",
+            "name": "formule walou",
+            "description": "walou + walou = walou",
+            "price": 250,
+            "originalPrice": null,
+            "savings": null,
+            "badge": null,
+            "image": "images/formules/formule-formule-walou-24fc4b39.webp",
+            "includes": [],
+            "status": "available"
+        }
+    },
+    "deletedFormules": [
+        "formule-formule-midi-2"
+    ],
+    "supplements": {
+        "catalog": [],
+        "defaultForCategories": {
+            "crepes-salees-signature": [],
+            "crepes-sucrees": [],
+            "gaufres": [],
+            "bubble-waffle": []
+        }
+    },
+    "deletedSupplements": [
+        "sup--ozza",
+        "sup--ooza",
+        "sup--rea"
+    ]
+}

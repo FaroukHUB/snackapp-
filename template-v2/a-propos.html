@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À Propos - Le Marvelous | Notre Histoire, Valeurs & Ambiance</title>
+    <meta name="description" content="Découvrez l'histoire du Marvelous, notre passion pour la crêperie artisanale, nos valeurs d'authenticité et notre ambiance chaleureuse à Ouled Moussa.">
+    <meta name="keywords" content="le marvelous histoire, restaurant ouled moussa, creperie artisanale algerie, ambiance diner 50s, valeurs restaurant">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://marvelous.mon-agenceweb.fr/a-propos.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://marvelous.mon-agenceweb.fr/a-propos.html">
+    <meta property="og:title" content="À Propos - Le Marvelous | Notre Histoire & Valeurs">
+    <meta property="og:description" content="Découvrez l'histoire du Marvelous, notre passion pour la crêperie artisanale et notre ambiance chaleureuse à Ouled Moussa.">
+    <meta property="og:image" content="https://marvelous.mon-agenceweb.fr/images/hero.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        .about-hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 120px 24px 80px;
+            text-align: center;
+        }
+
+        .about-hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .about-hero p {
+            font-size: 18px;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .about-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        .about-section {
+            margin-bottom: 60px;
+        }
+
+        .about-section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .about-section h2 i {
+            color: var(--success);
+            font-size: 28px;
+        }
+
+        .about-section h3 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-top: 32px;
+            margin-bottom: 16px;
+        }
+
+        .about-section p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--gray-700);
+            margin-bottom: 16px;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .value-card {
+            background: var(--white);
+            padding: 32px 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .value-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 28px;
+            color: white;
+        }
+
+        .value-card h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 12px;
+        }
+
+        .value-card p {
+            font-size: 14px;
+            color: var(--gray-600);
+            margin: 0;
+        }
+
+        .highlight-box {
+            background: var(--gray-50);
+            border-left: 4px solid var(--success);
+            padding: 24px;
+            border-radius: 8px;
+            margin: 32px 0;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            font-size: 16px;
+            font-style: italic;
+            color: var(--gray-700);
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 60px 24px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            margin-bottom: 32px;
+            opacity: 0.95;
+            color: white;
+        }
+
+        .btn-cta {
+            display: inline-block;
+            background: white;
+            color: var(--success);
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .about-hero h1 {
+                font-size: 32px;
+            }
+
+            .about-section h2 {
+                font-size: 26px;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-utensils"></i>
+                <span>Le Marvelous</span>
+            </a>
+            
+            <nav class="nav">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Accueil
+                </a>
+                <a href="a-propos.html" class="nav-link active">
+                    <i class="fas fa-info-circle"></i> À Propos
+                </a>
+                <a href="cart.html" class="nav-link cart-link">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Panier</span>
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="about-hero">
+        <h1>Notre Histoire</h1>
+        <p>Une passion pour la crêperie artisanale, un engagement pour l'excellence</p>
+    </section>
+
+    <!-- Main Content -->
+    <div class="about-content">
+        <!-- Introduction -->
+        <section class="about-section">
+            <h2><i class="fas fa-heart"></i> Bienvenue au Marvelous</h2>
+            <p>
+                Au cœur d'Ouled Moussa, Le Marvelous est bien plus qu'une simple crêperie. C'est un lieu où se mêlent 
+                authenticité, passion et convivialité. Depuis notre ouverture, nous avons à cœur de créer un espace 
+                où chaque client se sent chez lui, dans une ambiance à la fois chaleureuse et discrète.
+            </p>
+            <p>
+                Notre établissement respire l'esprit des Diners américains des années 50, tout en conservant 
+                l'authenticité et les valeurs qui nous sont chères. Nous croyons fermement que la qualité d'un repas 
+                va au-delà des ingrédients : elle réside dans l'attention portée à chaque détail, dans le respect 
+                de nos clients et dans l'ambiance que nous créons.
+            </p>
+
+            <div class="highlight-box">
+                <p>
+                    "Au Marvelous, nous ne servons pas seulement des crêpes. Nous partageons une expérience, 
+                    un moment de plaisir dans un cadre respectueux et accueillant."
+                </p>
+            </div>
+        </section>
+
+        <!-- Notre Ambiance -->
+        <section class="about-section">
+            <h2><i class="fas fa-star"></i> Une Ambiance Unique</h2>
+            
+            <h3>Chaleureuse et Conviviale</h3>
+            <p>
+                Dès que vous franchissez nos portes, vous êtes accueilli dans une atmosphère chaleureuse qui invite 
+                à la détente. Notre décoration vintage années 50, nos banquettes confortables et notre éclairage 
+                soigné créent un cocon où il fait bon se retrouver en famille ou entre amis.
+            </p>
+
+            <h3>Discrète et Respectueuse</h3>
+            <p>
+                Nous comprenons l'importance de l'intimité et du confort pour nos clients. C'est pourquoi nous 
+                avons aménagé deux espaces distincts : une salle familles et une salle dédiée aux femmes. Cette 
+                organisation témoigne de notre engagement à respecter les valeurs et les besoins de chacun, tout 
+                en maintenant une atmosphère décontractée et accueillante pour tous.
+            </p>
+
+            <h3>Éthique et Inclusive</h3>
+            <p>
+                Au Marvelous, l'éthique n'est pas qu'un mot. C'est une pratique quotidienne. Nous veillons à ce que 
+                chaque membre de notre équipe incarne les valeurs de respect, d'intégrité et de professionnalisme. 
+                Notre établissement est un lieu où tout le monde est le bienvenu, quelle que soit son origine, 
+                ses croyances ou son mode de vie.
+            </p>
+        </section>
+
+        <!-- Nos Valeurs -->
+        <section class="about-section">
+            <h2><i class="fas fa-gem"></i> Nos Valeurs Fondamentales</h2>
+            <p>
+                Chez Le Marvelous, nos valeurs guident chaque décision que nous prenons. Elles sont le socle sur 
+                lequel repose notre engagement envers vous, nos clients.
+            </p>
+
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h4>Produits Frais</h4>
+                    <p>Nous sélectionnons rigoureusement nos ingrédients pour vous garantir fraîcheur et qualité dans chaque assiette.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                    <h4>Respect & Écoute</h4>
+                    <p>Chaque client est unique. Nous prenons le temps de vous écouter et de répondre à vos besoins spécifiques.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h4>Excellence Artisanale</h4>
+                    <p>Nos crêpes et gaufres sont préparées à la commande, avec savoir-faire et passion, pour une expérience inoubliable.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Intégrité & Transparence</h4>
+                    <p>Nous sommes transparents sur nos pratiques et nos ingrédients. Votre confiance est notre plus grande récompense.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Esprit Familial</h4>
+                    <p>Que vous veniez seul, en couple, en famille ou entre amis, vous êtes toujours chez vous au Marvelous.</p>
+                </div>
+
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h4>Responsabilité</h4>
+                    <p>Nous nous efforçons de minimiser notre impact environnemental et de contribuer positivement à notre communauté.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Notre Engagement Culinaire -->
+        <section class="about-section">
+            <h2><i class="fas fa-utensils"></i> Notre Passion Culinaire</h2>
+            
+            <h3>Des Crêpes Signature</h3>
+            <p>
+                Nos crêpes salées ne sont pas de simples galettes : ce sont des créations soigneusement élaborées. 
+                De La Marvelous, notre signature maison, à La DZ inspirée de nos racines algériennes, chaque recette 
+                raconte une histoire. Nous privilégions les ingrédients locaux et de saison pour vous offrir des 
+                saveurs authentiques et variées.
+            </p>
+
+            <h3>L'Art de la Gourmandise</h3>
+            <p>
+                Nos crêpes sucrées et nos gaufres sont un véritable voyage gustatif. Préparées minute, elles célèbrent 
+                la simplicité et l'authenticité : pâte à crêpe maison, garnitures généreuses, et cette touche de passion 
+                qui fait toute la différence. Que vous optiez pour un classique Nutella ou pour une création plus 
+                audacieuse, chaque bouchée est un moment de pur plaisir.
+            </p>
+
+            <h3>Un Menu pour Tous</h3>
+            <p>
+                Nous avons pensé à tout le monde : des options végétariennes aux menus enfants, en passant par des 
+                boissons chaudes et froides pour accompagner votre repas. Notre objectif est simple : que chacun 
+                trouve son bonheur au Marvelous, quels que soient ses goûts ou ses restrictions alimentaires.
+            </p>
+        </section>
+
+        <!-- Notre Équipe -->
+        <section class="about-section">
+            <h2><i class="fas fa-people-group"></i> L'Équipe qui Fait la Différence</h2>
+            <p>
+                Derrière Le Marvelous, il y a une équipe dévouée et passionnée. Chaque membre de notre personnel 
+                partage la même vision : créer une expérience mémorable pour nos clients. De la cuisine à la salle, 
+                nous travaillons main dans la main pour vous garantir un service impeccable et une nourriture 
+                exceptionnelle.
+            </p>
+            <p>
+                Nous investissons dans la formation continue de notre équipe car nous croyons que des collaborateurs 
+                heureux et compétents sont la clé d'un service de qualité. Notre ambiance de travail reflète nos 
+                valeurs : respect mutuel, entraide et fierté du travail bien fait.
+            </p>
+        </section>
+
+        <!-- Engagement Communautaire -->
+        <section class="about-section">
+            <h2><i class="fas fa-hands-helping"></i> Ancrés dans Notre Communauté</h2>
+            <p>
+                Le Marvelous est fier d'être un acteur de la vie locale à Ouled Moussa. Nous croyons qu'un restaurant 
+                a un rôle à jouer au-delà de la simple restauration. C'est pourquoi nous nous efforçons de :
+            </p>
+            <p>
+                <strong>Soutenir l'économie locale :</strong> Nous privilégions les fournisseurs locaux et contribuons 
+                à l'emploi dans la région.<br><br>
+                <strong>Créer un espace de rencontre :</strong> Notre établissement est un lieu où les gens se 
+                retrouvent, partagent des moments et tissent des liens.<br><br>
+                <strong>Respecter l'environnement :</strong> Nous adoptons des pratiques responsables pour réduire 
+                notre empreinte écologique (gestion des déchets, économies d'énergie, etc.).
+            </p>
+        </section>
+
+        <!-- Hygiène et Sécurité -->
+        <section class="about-section">
+            <h2><i class="fas fa-check-circle"></i> Hygiène et Sécurité : Notre Priorité</h2>
+            <p>
+                Votre santé et votre sécurité sont au cœur de nos préoccupations. Nous appliquons les normes 
+                d'hygiène les plus strictes :
+            </p>
+            <p>
+                • Cuisine entièrement équipée aux normes sanitaires<br>
+                • Formation régulière du personnel aux bonnes pratiques d'hygiène<br>
+                • Traçabilité complète de nos produits<br>
+                • Nettoyage et désinfection réguliers de tous les espaces<br>
+                • Respect scrupuleux de la chaîne du froid
+            </p>
+            <p>
+                Parce que votre confiance est précieuse, nous ne transigeons jamais sur ces questions.
+            </p>
+        </section>
+
+        <!-- Pourquoi Nous Choisir -->
+        <section class="about-section">
+            <h2><i class="fas fa-question-circle"></i> Pourquoi Choisir Le Marvelous ?</h2>
+            <p>
+                Dans un monde où tout va vite, Le Marvelous est un havre de paix où vous pouvez ralentir et savourer 
+                l'instant présent. Voici ce qui nous distingue :
+            </p>
+            <p>
+                <strong>Une expérience complète :</strong> De l'ambiance vintage à la qualité de nos plats, tout est 
+                pensé pour votre plaisir.<br><br>
+                <strong>Des valeurs authentiques :</strong> Nous ne faisons pas de compromis sur l'éthique, la qualité 
+                et le respect.<br><br>
+                <strong>Un accueil sincère :</strong> Vous n'êtes pas qu'un numéro chez nous. Vous êtes un invité que 
+                nous sommes ravis de recevoir.<br><br>
+                <strong>Des espaces adaptés :</strong> Salle familles et salle femmes pour le confort de tous.<br><br>
+                <strong>Un rapport qualité-prix imbattable :</strong> Parce que bien manger ne devrait pas être un luxe.
+            </p>
+        </section>
+
+        <!-- Vision d'Avenir -->
+        <section class="about-section">
+            <h2><i class="fas fa-rocket"></i> Notre Vision pour l'Avenir</h2>
+            <p>
+                Nous ne nous reposons jamais sur nos lauriers. Le Marvelous est en constante évolution pour mieux 
+                vous servir. Nos projets incluent :
+            </p>
+            <p>
+                • L'élargissement de notre menu avec de nouvelles créations saisonnières<br>
+                • L'amélioration continue de nos services et de notre accueil<br>
+                • Le renforcement de nos pratiques durables et responsables<br>
+                • La création d'événements et d'animations pour animer notre communauté
+            </p>
+            <p>
+                Notre ambition ? Devenir LA référence de la crêperie artisanale en Algérie, tout en restant fidèles 
+                à nos valeurs et à notre identité.
+            </p>
+        </section>
+    </div>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <h2>Venez Nous Rendre Visite</h2>
+        <p>Découvrez par vous-même ce qui fait du Marvelous un endroit si spécial</p>
+        <a href="index.html" class="btn-cta">
+            <i class="fas fa-utensils"></i> Voir Notre Menu
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: var(--gray-900); color: white; padding: 40px 24px; text-align: center;">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <h3 style="font-size: 24px; margin-bottom: 16px; color: white;">Le Marvelous</h3>
+            <p style="margin-bottom: 24px; color: rgba(255,255,255,0.8);">Diner 50's · Crêpes, Gaufres & Coffee</p>
+            
+            <div style="margin-bottom: 24px;">
+                <p style="color: rgba(255,255,255,0.9);"><i class="fas fa-map-marker-alt"></i> Riad City, Cité OMS 562 logements, Ouled Moussa</p>
+                <p style="color: rgba(255,255,255,0.9);"><i class="fas fa-phone"></i> +213 556 78 21 94</p>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 24px;">
+                <a href="index.html" style="color: rgba(255,255,255,0.8); text-decoration: none;">Accueil</a>
+                <a href="a-propos.html" style="color: white; text-decoration: none; font-weight: 600;">À Propos</a>
+                <a href="cart.html" style="color: rgba(255,255,255,0.8); text-decoration: none;">Panier</a>
+            </div>
+
+            <p style="font-size: 14px; color: rgba(255,255,255,0.6); margin: 0;">
+                © 2024 Le Marvelous. Tous droits réservés.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        // Update cart count
+        Cart.updateUI();
+    </script>
+</body>
+</html>

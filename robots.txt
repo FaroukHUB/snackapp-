@@ -1,0 +1,36 @@
+# robots.txt - Le Marvelous Crêperie
+# https://marvelous.mon-agenceweb.fr
+
+# Autoriser tous les robots d'indexation
+User-agent: *
+Allow: /
+
+# Bloquer l'accès aux dossiers admin et backend
+Disallow: /admin-panel-v2/
+Disallow: /database/
+Disallow: /config/
+Disallow: /*.json$
+Disallow: /*.php$
+
+# Autoriser les ressources importantes pour le rendu
+Allow: /template-v2/css/
+Allow: /template-v2/js/
+Allow: /images/
+
+# Crawler-delay pour éviter la surcharge serveur
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://marvelous.mon-agenceweb.fr/sitemap.xml
+
+# Robots spécifiques
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Googlebot-Image
+Allow: /images/
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1

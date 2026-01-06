@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+    <!-- Page d'accueil / Menu -->
+    <url>
+        <loc>https://marvelous.mon-agenceweb.fr/</loc>
+        <lastmod>2024-12-24</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://marvelous.mon-agenceweb.fr/images/hero.jpg</image:loc>
+            <image:title>Le Marvelous Diner 50's Ouled Moussa</image:title>
+        </image:image>
+    </url>
+
+    <!-- Page Panier -->
+    <url>
+        <loc>https://marvelous.mon-agenceweb.fr/cart.html</loc>
+        <lastmod>2024-12-24</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Page À Propos -->
+    <url>
+        <loc>https://marvelous.mon-agenceweb.fr/a-propos.html</loc>
+        <lastmod>2024-12-24</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+</urlset>

@@ -1,0 +1,8 @@
+# Protection des fichiers JSON uniquement
+# Généré le: 2024-12-26
+# Les fichiers JSON contiennent des données sensibles (commandes, clients)
+
+<FilesMatch "\.json$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>

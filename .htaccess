@@ -1,0 +1,132 @@
+# ============================================
+# 🚀 PERFORMANCE OPTIMIZATIONS - Le Marvelous
+# ============================================
+
+# 🔒 SÉCURITÉ: Headers de base
+<IfModule mod_headers.c>
+    # Déjà définis dans bootstrap.php pour admin, mais on les ajoute ici pour le frontend
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ⚡ COMPRESSION GZIP/DEFLATE
+<IfModule mod_deflate.c>
+    # Compresser HTML, CSS, JavaScript, Text, XML, JSON
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xml+rss
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE image/svg+xml
+
+    # Décompresser les fichiers déjà compressés
+    <IfModule mod_setenvif.c>
+        SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|webp|woff2?)$ no-gzip
+    </IfModule>
+</IfModule>
+
+# ⚡ COMPRESSION BROTLI (si disponible sur o2switch)
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# 📦 MISE EN CACHE NAVIGATEUR
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # Images - 1 an (jamais changées une fois uploadées)
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+
+    # Fonts - 1 an
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+
+    # CSS et JS - 1 semaine (mise à jour régulière)
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType text/javascript "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+
+    # HTML - 1 heure (contenu dynamique)
+    ExpiresByType text/html "access plus 1 hour"
+
+    # JSON - 1 heure
+    ExpiresByType application/json "access plus 1 hour"
+
+    # Default - 1 jour
+    ExpiresDefault "access plus 1 day"
+</IfModule>
+
+# 📦 CACHE-CONTROL Headers (alternative si mod_expires non disponible)
+<IfModule mod_headers.c>
+    # Images - cache 1 an
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Fonts - cache 1 an
+    <FilesMatch "\.(woff|woff2|ttf|otf)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # CSS/JS - cache 1 semaine
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+
+    # HTML - cache 1 heure
+    <FilesMatch "\.html$">
+        Header set Cache-Control "public, max-age=3600"
+    </FilesMatch>
+</IfModule>
+
+# 🚫 Désactiver ETags (Cache-Control suffit)
+<IfModule mod_headers.c>
+    Header unset ETag
+</IfModule>
+FileETag None
+
+# ⚡ HTTP/2 Server Push (si supporté par o2switch)
+<IfModule mod_http2.c>
+    H2Push on
+    H2PushPriority * after
+    H2PushPriority text/css before
+    H2PushPriority application/javascript after
+</IfModule>
+
+# 🔧 UTF-8 encoding par défaut
+AddDefaultCharset UTF-8
+<IfModule mod_mime.c>
+    AddCharset UTF-8 .html .css .js .xml .json .txt
+</IfModule>
+
+# 🚫 Bloquer l'accès aux fichiers sensibles
+<FilesMatch "(^\..*|\.bak$|\.config$|\.sql$|\.md$|composer\.(json|lock))">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# ✅ Activer le suivi des liens symboliques (si nécessaire)
+Options +FollowSymlinks
+
+# 🔧 Réduction erreurs serveur
+<IfModule mod_headers.c>
+    # Éviter les fuites d'info serveur
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>

@@ -1,0 +1,17 @@
+# Robots.txt - Le Marvelous
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://marvelous.mon-agenceweb.fr/sitemap.xml
+
+# Bloquer l'accès admin
+Disallow: /admin-panel-v2/
+Disallow: /config/
+
+# Autoriser crawl des images
+Allow: /images/
+
+# Bloquer fichiers sensibles
+Disallow: /*.json$
+Disallow: /manifest.json
