@@ -1,260 +1,327 @@
 <?php
 /**
- * SnackApp v1 - Menu Repository
- * Gestion des catégories, produits et suppléments
+ * MenuRepository - Gestion MySQL pour catégories, produits, suppléments
+ * Remplace le système de fichiers JSON
  */
 
-require_once __DIR__ . '/../Database.php';
+require_once __DIR__ . '/../database/Database.php';
 
 class MenuRepository {
+    private static $restaurantId = 2; // Le Marvelous
 
     /**
-     * Récupère le menu complet d'un restaurant (format compatible JSON actuel)
+     * Récupère toutes les catégories actives avec leurs produits
      */
-    public static function getFullMenu(int $restaurantId, bool $includeUnavailable = false): array {
-        // Catégories
-        $categories = Database::fetchAll(
-            "SELECT id, name, slug, description, image, sort_order
-             FROM categories
-             WHERE restaurant_id = ? AND is_active = 1
-             ORDER BY sort_order",
-            [$restaurantId]
-        );
+    public static function getAllCategories() {
+        $pdo = Database::getInstance();
 
-        // Produits par catégorie
-        foreach ($categories as &$category) {
-            $category['items'] = Database::fetchAll(
-                "SELECT p.id, p.name, p.slug, p.description, p.image,
-                        p.price_solo as priceSolo, p.price_menu as priceMenu, p.status
-                 FROM products p
-                 WHERE p.category_id = ?" . ($includeUnavailable ? "" : " AND p.status = 'available'") . "
-                 ORDER BY p.sort_order",
-                [$category['id']]
-            );
+        // Récupérer catégories actives (non supprimées)
+        $stmt = $pdo->prepare("
+            SELECT id, slug, name, description, icon, flavor, sort_order
+            FROM categories
+            WHERE restaurant_id = ? AND deleted_at IS NULL
+            ORDER BY sort_order ASC, id ASC
+        ");
+        $stmt->execute([self::$restaurantId]);
+        $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Suppléments pour chaque produit
-            foreach ($category['items'] as &$item) {
-                $supplements = Database::fetchAll(
-                    "SELECT s.id
-                     FROM supplements s
-                     JOIN product_supplements ps ON s.id = ps.supplement_id
-                     WHERE ps.product_id = ?",
-                    [$item['id']]
-                );
-                $item['supplements'] = array_column($supplements, 'id');
-            }
+        // Pour chaque catégorie, récupérer ses produits
+        foreach ($categories as &$cat) {
+            $cat['items'] = self::getProductsByCategory($cat['id']);
         }
 
-        // Catalogue des suppléments
-        $supplements = Database::fetchAll(
-            "SELECT id, name, price, status
-             FROM supplements
-             WHERE restaurant_id = ?
-             ORDER BY sort_order",
-            [$restaurantId]
-        );
-
-        $catalog = [];
-        foreach ($supplements as $sup) {
-            $catalog[$sup['id']] = [
-                'id' => (string) $sup['id'],
-                'name' => $sup['name'],
-                'price' => (float) $sup['price'],
-                'status' => $sup['status']
-            ];
-        }
-
-        return [
-            'menu' => ['categories' => $categories],
-            'supplements' => [
-                'catalog' => $catalog,
-                'defaultForCategories' => []
-            ]
-        ];
-    }
-
-    /**
-     * Récupère toutes les catégories
-     */
-    public static function getCategories(int $restaurantId): array {
-        return Database::fetchAll(
-            "SELECT c.*, COUNT(p.id) as products_count
-             FROM categories c
-             LEFT JOIN products p ON c.id = p.category_id
-             WHERE c.restaurant_id = ?
-             GROUP BY c.id
-             ORDER BY c.sort_order",
-            [$restaurantId]
-        );
-    }
-
-    /**
-     * Ajoute une catégorie
-     */
-    public static function addCategory(int $restaurantId, string $name, ?string $description = null): int {
-        $slug = self::slugify($name);
-        $maxOrder = Database::fetchOne(
-            "SELECT MAX(sort_order) as max_order FROM categories WHERE restaurant_id = ?",
-            [$restaurantId]
-        );
-
-        return Database::insert('categories', [
-            'restaurant_id' => $restaurantId,
-            'name' => $name,
-            'slug' => $slug,
-            'description' => $description,
-            'sort_order' => ($maxOrder['max_order'] ?? 0) + 1
-        ]);
+        return $categories;
     }
 
     /**
      * Récupère les produits d'une catégorie
      */
-    public static function getProducts(int $categoryId): array {
-        return Database::fetchAll(
-            "SELECT * FROM products WHERE category_id = ? ORDER BY sort_order",
-            [$categoryId]
-        );
-    }
+    public static function getProductsByCategory($categoryId) {
+        $pdo = Database::getInstance();
 
-    /**
-     * Récupère tous les produits d'un restaurant
-     */
-    public static function getAllProducts(int $restaurantId): array {
-        return Database::fetchAll(
-            "SELECT p.*, c.name as category_name
-             FROM products p
-             JOIN categories c ON p.category_id = c.id
-             WHERE p.restaurant_id = ?
-             ORDER BY c.sort_order, p.sort_order",
-            [$restaurantId]
-        );
-    }
+        $stmt = $pdo->prepare("
+            SELECT id, slug, name, description, image,
+                   price_solo as priceSolo, price_menu as priceMenu,
+                   status, sort_order
+            FROM products
+            WHERE category_id = ? AND deleted_at IS NULL
+            ORDER BY sort_order ASC, id ASC
+        ");
+        $stmt->execute([$categoryId]);
 
-    /**
-     * Ajoute un produit
-     */
-    public static function addProduct(int $restaurantId, array $data): int {
-        $slug = self::slugify($data['name']);
-        $maxOrder = Database::fetchOne(
-            "SELECT MAX(sort_order) as max_order FROM products WHERE category_id = ?",
-            [$data['category_id']]
-        );
-
-        $productId = Database::insert('products', [
-            'restaurant_id' => $restaurantId,
-            'category_id' => $data['category_id'],
-            'name' => $data['name'],
-            'slug' => $slug,
-            'description' => $data['description'] ?? null,
-            'image' => $data['image'] ?? null,
-            'price_solo' => $data['priceSolo'],
-            'price_menu' => $data['priceMenu'] ?? null,
-            'status' => 'available',
-            'sort_order' => ($maxOrder['max_order'] ?? 0) + 1
-        ]);
-
-        // Lier les suppléments
-        if (!empty($data['supplements'])) {
-            foreach ($data['supplements'] as $supId) {
-                Database::query(
-                    "INSERT IGNORE INTO product_supplements (product_id, supplement_id) VALUES (?, ?)",
-                    [$productId, $supId]
-                );
-            }
-        }
-
-        return $productId;
-    }
-
-    /**
-     * Met à jour un produit
-     */
-    public static function updateProduct(int $productId, array $data): bool {
-        $updateData = [];
-
-        if (isset($data['name'])) $updateData['name'] = $data['name'];
-        if (isset($data['description'])) $updateData['description'] = $data['description'];
-        if (isset($data['priceSolo'])) $updateData['price_solo'] = $data['priceSolo'];
-        if (isset($data['priceMenu'])) $updateData['price_menu'] = $data['priceMenu'];
-        if (isset($data['status'])) $updateData['status'] = $data['status'];
-        if (isset($data['image'])) $updateData['image'] = $data['image'];
-
-        if (!empty($updateData)) {
-            Database::update('products', $updateData, ['id' => $productId]);
-        }
-
-        // Mettre à jour les suppléments
-        if (isset($data['supplements'])) {
-            Database::query("DELETE FROM product_supplements WHERE product_id = ?", [$productId]);
-            foreach ($data['supplements'] as $supId) {
-                Database::query(
-                    "INSERT INTO product_supplements (product_id, supplement_id) VALUES (?, ?)",
-                    [$productId, $supId]
-                );
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Supprime un produit
-     */
-    public static function deleteProduct(int $productId): bool {
-        return Database::delete('products', ['id' => $productId]) > 0;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
      * Récupère tous les suppléments
      */
-    public static function getSupplements(int $restaurantId): array {
-        return Database::fetchAll(
-            "SELECT * FROM supplements WHERE restaurant_id = ? ORDER BY sort_order",
-            [$restaurantId]
-        );
+    public static function getAllSupplements() {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            SELECT id, slug, name, price, type, status
+            FROM supplements
+            WHERE restaurant_id = ?
+            ORDER BY sort_order ASC
+        ");
+        $stmt->execute([self::$restaurantId]);
+
+        $supplements = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $supp) {
+            $supplements[$supp['slug']] = [
+                'id' => $supp['slug'],
+                'name' => $supp['name'],
+                'price' => (int)$supp['price'],
+                'status' => $supp['status'],
+                'type' => $supp['type']
+            ];
+        }
+
+        return $supplements;
     }
 
     /**
-     * Ajoute un supplément
+     * Récupère les associations catégories -> suppléments
      */
-    public static function addSupplement(int $restaurantId, string $name, float $price): int {
-        return Database::insert('supplements', [
-            'restaurant_id' => $restaurantId,
-            'name' => $name,
-            'price' => $price,
-            'status' => 'available'
+    public static function getCategorySupplements() {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            SELECT c.slug as category_slug, s.slug as supplement_slug
+            FROM category_supplements cs
+            JOIN categories c ON cs.category_id = c.id
+            JOIN supplements s ON cs.supplement_id = s.id
+            WHERE c.restaurant_id = ?
+        ");
+        $stmt->execute([self::$restaurantId]);
+
+        $associations = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (!isset($associations[$row['category_slug']])) {
+                $associations[$row['category_slug']] = [];
+            }
+            $associations[$row['category_slug']][] = $row['supplement_slug'];
+        }
+
+        return $associations;
+    }
+
+    /**
+     * Ajoute une catégorie avec auto-assignment des suppléments
+     */
+    public static function addCategory($name, $description, $icon, $flavor) {
+        $pdo = Database::getInstance();
+
+        try {
+            $pdo->beginTransaction();
+
+            // Générer un slug unique
+            $slug = self::generateSlug($name);
+
+            // Déterminer sort_order (dernier + 1)
+            $stmt = $pdo->prepare("
+                SELECT MAX(sort_order) as max_order
+                FROM categories
+                WHERE restaurant_id = ?
+            ");
+            $stmt->execute([self::$restaurantId]);
+            $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
+
+            // Insérer la catégorie
+            $stmt = $pdo->prepare("
+                INSERT INTO categories
+                (restaurant_id, slug, name, description, icon, flavor, sort_order, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+            ");
+            $stmt->execute([
+                self::$restaurantId,
+                $slug,
+                $name,
+                $description,
+                $icon,
+                $flavor ?: null,
+                $sortOrder
+            ]);
+
+            $categoryId = $pdo->lastInsertId();
+
+            // Auto-assignment suppléments selon flavor
+            if ($flavor === 'sale' || $flavor === 'sucre') {
+                self::assignSupplementsByFlavor($categoryId, $flavor);
+            }
+
+            $pdo->commit();
+
+            return [
+                'id' => $categoryId,
+                'slug' => $slug,
+                'name' => $name,
+                'description' => $description,
+                'icon' => $icon,
+                'flavor' => $flavor
+            ];
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Assigne automatiquement les suppléments selon le flavor
+     */
+    private static function assignSupplementsByFlavor($categoryId, $flavor) {
+        $pdo = Database::getInstance();
+
+        // Récupérer les suppléments du type correspondant
+        $stmt = $pdo->prepare("
+            SELECT id FROM supplements
+            WHERE restaurant_id = ? AND (type = ? OR type = 'both')
+        ");
+        $stmt->execute([self::$restaurantId, $flavor]);
+        $supplements = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // Créer les associations
+        $stmt = $pdo->prepare("
+            INSERT INTO category_supplements (category_id, supplement_id)
+            VALUES (?, ?)
+        ");
+
+        foreach ($supplements as $suppId) {
+            $stmt->execute([$categoryId, $suppId]);
+        }
+    }
+
+    /**
+     * Modifie une catégorie
+     */
+    public static function editCategory($categoryId, $name, $description, $icon, $flavor) {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            UPDATE categories
+            SET name = ?, description = ?, icon = ?, flavor = ?
+            WHERE id = ? AND restaurant_id = ?
+        ");
+
+        return $stmt->execute([
+            $name,
+            $description,
+            $icon,
+            $flavor ?: null,
+            $categoryId,
+            self::$restaurantId
         ]);
     }
 
     /**
-     * Met à jour un supplément
+     * Supprime une catégorie (soft delete)
      */
-    public static function updateSupplement(int $supplementId, array $data): bool {
-        $updateData = [];
-        if (isset($data['name'])) $updateData['name'] = $data['name'];
-        if (isset($data['price'])) $updateData['price'] = $data['price'];
-        if (isset($data['status'])) $updateData['status'] = $data['status'];
+    public static function deleteCategory($categoryId) {
+        $pdo = Database::getInstance();
 
-        return Database::update('supplements', $updateData, ['id' => $supplementId]) > 0;
+        $stmt = $pdo->prepare("
+            UPDATE categories
+            SET deleted_at = NOW(), is_active = 0
+            WHERE id = ? AND restaurant_id = ?
+        ");
+
+        return $stmt->execute([$categoryId, self::$restaurantId]);
     }
 
     /**
-     * Supprime un supplément
+     * Ajoute un produit
      */
-    public static function deleteSupplement(int $supplementId): bool {
-        return Database::delete('supplements', ['id' => $supplementId]) > 0;
+    public static function addProduct($categoryId, $name, $description, $image, $priceSolo, $priceMenu = null) {
+        $pdo = Database::getInstance();
+
+        $slug = self::generateSlug($name);
+
+        // Déterminer sort_order
+        $stmt = $pdo->prepare("
+            SELECT MAX(sort_order) as max_order
+            FROM products
+            WHERE category_id = ?
+        ");
+        $stmt->execute([$categoryId]);
+        $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
+
+        $stmt = $pdo->prepare("
+            INSERT INTO products
+            (restaurant_id, category_id, slug, name, description, image, price_solo, price_menu, status, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+        ");
+
+        $stmt->execute([
+            self::$restaurantId,
+            $categoryId,
+            $slug,
+            $name,
+            $description,
+            $image,
+            $priceSolo,
+            $priceMenu,
+            $sortOrder
+        ]);
+
+        return [
+            'id' => $pdo->lastInsertId(),
+            'slug' => $slug,
+            'name' => $name
+        ];
     }
 
     /**
-     * Helper: générer un slug
+     * Modifie un produit
      */
-    private static function slugify(string $text): string {
-        $text = preg_replace('~[^\pL\d]+~u', '-', $text);
-        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-        $text = preg_replace('~[^-\w]+~', '', $text);
-        $text = trim($text, '-');
-        $text = preg_replace('~-+~', '-', $text);
-        return strtolower($text) ?: 'item-' . time();
+    public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status) {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            UPDATE products
+            SET name = ?, description = ?, image = ?,
+                price_solo = ?, price_menu = ?, status = ?
+            WHERE id = ? AND restaurant_id = ?
+        ");
+
+        return $stmt->execute([
+            $name,
+            $description,
+            $image,
+            $priceSolo,
+            $priceMenu,
+            $status,
+            $productId,
+            self::$restaurantId
+        ]);
+    }
+
+    /**
+     * Supprime un produit (soft delete)
+     */
+    public static function deleteProduct($productId) {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            UPDATE products
+            SET deleted_at = NOW()
+            WHERE id = ? AND restaurant_id = ?
+        ");
+
+        return $stmt->execute([$productId, self::$restaurantId]);
+    }
+
+    /**
+     * Génère un slug unique depuis un nom
+     */
+    private static function generateSlug($name) {
+        $slug = strtolower(trim($name));
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+        $slug = trim($slug, '-');
+
+        // Ajouter un suffix unique si nécessaire
+        $slug .= '-' . substr(md5(uniqid()), 0, 8);
+
+        return $slug;
     }
 }
