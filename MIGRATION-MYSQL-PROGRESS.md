@@ -185,6 +185,7 @@ API modifiée pour utiliser MySQL au lieu des fichiers JSON.
 ### Fichiers modifiés
 - ✅ `database/repositories/MenuRepository.php` - Classe CRUD MySQL (334 lignes)
 - ✅ `admin-panel-v2/api/products.php` - Endpoints MySQL activés
+- ✅ `database/generateMenuJson.php` - Script de synchronisation menu.json depuis MySQL
 
 ### Endpoints implémentés
 
@@ -221,8 +222,17 @@ $categorySupplements = MenuRepository::getCategorySupplements();
 - ✅ Transactions pour cohérence des données
 - ✅ Gestion d'erreurs complète (try-catch)
 - ✅ Mode MySQL activé ($useMySQL = true)
+- ✅ **Synchronisation menu.json depuis MySQL après chaque modification**
 
-**Commit:** `69ff8d4`
+### Synchronisation Frontend ✅
+**Problème résolu:** Frontend n'affichait plus les catégories après migration MySQL
+**Solution:** Script `database/generateMenuJson.php` + appels automatiques dans API
+- Fonction `regenerateMenuJson()` dans products.php (ligne 103)
+- Appelée automatiquement après chaque opération CRUD réussie
+- Génère menu.json depuis MySQL pour consommation par le frontend
+- Architecture: **Admin → MySQL → menu.json → Frontend**
+
+**Commits:** `69ff8d4`, `eeaf641`, `14e71ae`
 
 ---
 
@@ -247,12 +257,13 @@ $categorySupplements = MenuRepository::getCategorySupplements();
 - [x] **Modifier delete_product** → Soft delete MySQL ✅
 - [x] **Mode MySQL activé** - $useMySQL = true ✅
 
-### Phase 4 : Tests (~10k tokens)
-- [ ] Test création catégorie (admin)
-- [ ] Test suppression catégorie (admin)
+### Phase 4 : Tests (~10k tokens) - EN COURS
+- [ ] Générer menu.json initial depuis MySQL
+- [ ] Test affichage site public (catégories visibles?)
+- [ ] Test création catégorie (admin) + vérifier auto-assignment suppléments
+- [ ] Test suppression catégorie (soft delete)
 - [ ] Test ajout produit
-- [ ] Test affichage site public
-- [ ] Vérifier suppléments auto-assignés
+- [ ] Vérifier menu.json se régénère après chaque modification
 
 ### Phase 5 : Déploiement (~5k tokens)
 - [ ] Backup MySQL
@@ -286,12 +297,15 @@ cat MIGRATION-MYSQL-PROGRESS.md
 
 ---
 
-**Dernière mise à jour :** Phase 3 API MySQL TERMINÉE - Prêt pour tests (commit `69ff8d4`)
+**Dernière mise à jour :** Phase 3 COMPLÈTE + Sync menu.json (commit `14e71ae`)
 
 **Résumé session actuelle :**
 - ✅ Phase 2 : Migration données (50 suppléments, 100 associations, 70 produits, 14 catégories)
 - ✅ Phase 3 : API MySQL complète (GET + tous endpoints CRUD)
 - ✅ MenuRepository créé (334 lignes, CRUD complet)
 - ✅ Auto-assignment suppléments par flavor fonctionnel
-- 🎯 **Prochaine étape : Phase 4 - Tests sur serveur**
-- 🎯 Tokens restants : ~82k (suffisant pour Phase 4 + 5)
+- ✅ Fix HTTP 500 (require path MenuRepository)
+- ✅ Synchronisation menu.json depuis MySQL (generateMenuJson.php)
+- ✅ Appels automatiques regenerateMenuJson() après chaque opération
+- 🎯 **Prochaine étape : Phase 4 - Tests & génération initiale menu.json**
+- 🎯 Tokens restants : ~145k (suffisant pour Phase 4 + 5 + documentation)
