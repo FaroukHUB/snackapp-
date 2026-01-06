@@ -109,7 +109,7 @@ try {
         $supplementsFormatted[$slug] = $supp;
     }
 
-    // ✅ PRÉSERVER formules et featured depuis ancien menu.json
+    // ✅ PRÉSERVER formules, featured et upsellRules depuis ancien menu.json
     $formules = $oldMenuData['formules'] ?? [];
     $featured = $oldMenuData['featured'] ?? [
         'enabled' => true,
@@ -117,6 +117,7 @@ try {
         'subtitle' => 'Nos produits les plus appréciés',
         'items' => []
     ];
+    $upsellRules = $oldMenuData['upsellRules'] ?? [];
 
     // Formater pour le frontend
     $menuData = [
@@ -131,7 +132,8 @@ try {
         ],
         'categoryIcons' => $categoryIcons,
         'formules' => $formules,
-        'featured' => $featured
+        'featured' => $featured,
+        'upsellRules' => $upsellRules
     ];
 
     // Écrire menu.json
@@ -149,6 +151,7 @@ try {
     echo "   - " . count($categories) . " catégories\n";
     echo "   - " . count($supplementsFormatted) . " suppléments\n";
     echo "   - " . count($formules) . " formules préservées\n";
+    echo "   - " . count($upsellRules) . " règles upsell préservées\n";
 
 } catch (Exception $e) {
     echo "❌ Erreur: " . $e->getMessage() . "\n";
