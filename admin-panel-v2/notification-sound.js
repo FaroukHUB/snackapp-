@@ -91,9 +91,15 @@ class OrderNotificationSystem {
        ======================= */
     async checkNewOrders() {
         try {
+            // Timeout manuel compatible tous navigateurs
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
             const res = await fetch('api/orders.php?action=list&limit=1', {
-                signal: AbortSignal.timeout(5000) // Timeout 5s
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (!res.ok) {
                 console.warn('Check commandes failed:', res.status);
