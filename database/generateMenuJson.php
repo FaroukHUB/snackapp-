@@ -29,15 +29,15 @@ try {
     $supplements = MenuRepository::getAllSupplements();
     $categorySupplements = MenuRepository::getCategorySupplements();
 
-    // ✅ CONVERTIR LES PRIX (centimes → euros) et enrichir avec options spéciales
+    // ✅ PRÉSERVER options spéciales de l'ancien menu.json (sans toucher aux prix)
     foreach ($categories as &$cat) {
         foreach ($cat['items'] as &$item) {
-            // Convertir prix centimes → euros
+            // Convertir prix en nombres (ils sont déjà en DA, pas besoin de /100)
             if (isset($item['priceSolo'])) {
-                $item['priceSolo'] = floatval($item['priceSolo']) / 100;
+                $item['priceSolo'] = floatval($item['priceSolo']);
             }
             if (isset($item['priceMenu'])) {
-                $item['priceMenu'] = $item['priceMenu'] !== null ? floatval($item['priceMenu']) / 100 : null;
+                $item['priceMenu'] = $item['priceMenu'] !== null ? floatval($item['priceMenu']) : null;
             }
 
             // ✅ PRÉSERVER options spéciales de l'ancien menu.json
@@ -73,11 +73,11 @@ try {
         }
     }
 
-    // ✅ CONVERTIR LES PRIX DES SUPPLÉMENTS (centimes → euros)
+    // ✅ FORMATER prix suppléments (déjà en DA, pas de conversion)
     $supplementsFormatted = [];
     foreach ($supplements as $slug => $supp) {
         if (isset($supp['price'])) {
-            $supp['price'] = floatval($supp['price']) / 100;
+            $supp['price'] = floatval($supp['price']);
         }
         $supplementsFormatted[$slug] = $supp;
     }
