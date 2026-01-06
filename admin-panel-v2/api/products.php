@@ -173,8 +173,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
     }
 
-    // MODE JSON (désactivé)
-    jsonError('Mode JSON désactivé - Migration MySQL effectuée');
+    // ✅ MODE JSON - Charger depuis menu.json
+    require_once __DIR__ . '/../config.php';
+    $runtime = loadMenuRuntime();
+    $config = loadConfig();
+
+    // Fusionner config + runtime pour obtenir le menu complet
+    $menu = $config['menu'] ?? [];
+
+    // Récupérer supplements depuis menu.json
+    $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+    $supplements = [];
+    $formules = [];
+    $featured = [];
+    $categoryIcons = [];
+
+    if (file_exists($menuJsonPath)) {
+        $menuData = json_decode(file_get_contents($menuJsonPath), true);
+        if ($menuData) {
+            $supplements = $menuData['supplements'] ?? [];
+            $formules = $menuData['formules'] ?? [];
+            $featured = $menuData['featured'] ?? [];
+            $categoryIcons = $menuData['categoryIcons'] ?? [];
+        }
+    }
+
+    jsonSuccess([
+        'menu' => $menu,
+        'supplements' => $supplements,
+        'formules' => $formules,
+        'featured' => $featured,
+        'categoryIcons' => $categoryIcons
+    ]);
 }
 
 /* =========================
