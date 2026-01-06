@@ -111,9 +111,9 @@ function regenerateMenuJson(): void {
    MODE MySQL ou JSON
    ========================= */
 
-// ✅ MODE MYSQL ACTIVÉ - Migration terminée
-// Les données sont maintenant dans MySQL
-$useMySQL = true;
+// ⚠️ MODE MYSQL DÉSACTIVÉ - Retour au mode JSON
+// MySQL contient données incomplètes, on utilise menu.json
+$useMySQL = false;
 
 /* =========================
    GET: Retourner le menu complet
