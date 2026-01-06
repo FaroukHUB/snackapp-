@@ -235,7 +235,9 @@ if ($useMySQL) {
 
             try {
                 $result = MenuRepository::addCategory($name, $description, $icon, $flavor);
-                regenerateMenuJson();
+                // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
+                // TODO: Fusionner MySQL + ancien menu.json correctement
+                // regenerateMenuJson();
                 jsonSuccess(['category' => $result]);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -255,7 +257,8 @@ if ($useMySQL) {
 
             try {
                 MenuRepository::editCategory($categoryId, $name, $description, $icon, $flavor);
-                regenerateMenuJson();
+                // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
+                // regenerateMenuJson();
                 jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon, 'flavor' => $flavor]]);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -271,7 +274,8 @@ if ($useMySQL) {
 
             try {
                 MenuRepository::deleteCategory($categoryId);
-                regenerateMenuJson();
+                // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
+                // regenerateMenuJson();
                 jsonSuccess(['message' => 'Catégorie supprimée']);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -294,7 +298,8 @@ if ($useMySQL) {
 
             try {
                 $result = MenuRepository::addProduct($categoryId, $name, $description, $imagePath, $priceSolo, $priceMenu);
-                regenerateMenuJson();
+                // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
+                // regenerateMenuJson();
                 jsonSuccess(['product' => $result]);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -323,7 +328,8 @@ if ($useMySQL) {
 
             try {
                 MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status);
-                regenerateMenuJson();
+                // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
+                // regenerateMenuJson();
                 jsonSuccess(['product' => ['id' => $productId, 'name' => $name]]);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -344,7 +350,8 @@ if ($useMySQL) {
                 $pdo = Database::getInstance();
                 $stmt = $pdo->prepare("UPDATE products SET status = ? WHERE id = ?");
                 $stmt->execute([$status, $productId]);
-                regenerateMenuJson();
+                // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
+                // regenerateMenuJson();
                 jsonSuccess();
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -360,7 +367,8 @@ if ($useMySQL) {
 
             try {
                 MenuRepository::deleteProduct($productId);
-                regenerateMenuJson();
+                // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
+                // regenerateMenuJson();
                 jsonSuccess();
             } catch (Exception $e) {
                 jsonError($e->getMessage());
