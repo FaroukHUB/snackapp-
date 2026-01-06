@@ -333,6 +333,7 @@ function applyRuntimeToConfig($config, $runtime) {
                     'id' => $id,
                     'name' => $cat['name'] ?? $id,
                     'description' => $cat['description'] ?? '',
+                    'flavor' => $cat['flavor'] ?? null, // ✅ Copier le flavor
                     'items' => isset($cat['items']) && is_array($cat['items']) ? $cat['items'] : []
                 ];
                 $catsById[$id] = count($config['menu']['categories']) - 1;
