@@ -55,6 +55,30 @@ $merged = ['menu' => $menuData['menu'] ?? ['categories' => []]];
 echo "📊 Total catégories à migrer : " . count($merged['menu']['categories']) . "\n\n";
 
 // ========================================
+// PRÉPARATION : Fusionner les associations catégories-suppléments
+// ========================================
+$allAssociations = [];
+
+// 1. Charger les associations par défaut de menu.json
+if (isset($menuData['supplements']['defaultForCategories'])) {
+    $allAssociations = $menuData['supplements']['defaultForCategories'];
+}
+
+// 2. Fusionner avec les associations de runtime (ajouts/modifications de l'admin)
+if (isset($runtime['supplements']['defaultForCategories'])) {
+    foreach ($runtime['supplements']['defaultForCategories'] as $catSlug => $supps) {
+        if (!isset($allAssociations[$catSlug])) {
+            $allAssociations[$catSlug] = $supps;
+        } else {
+            // Fusionner et dédupliquer
+            $allAssociations[$catSlug] = array_unique(array_merge($allAssociations[$catSlug], $supps));
+        }
+    }
+}
+
+echo "✅ " . count($allAssociations) . " catégories avec suppléments assignés\n\n";
+
+// ========================================
 // MIGRATION CATÉGORIES
 // ========================================
 echo "🔄 Migration des catégories...\n";
@@ -82,10 +106,10 @@ foreach ($merged['menu']['categories'] as $index => $cat) {
     }
 
     try {
-        // Déterminer le flavor depuis les suppléments assignés
+        // Déterminer le flavor depuis les suppléments assignés (associations fusionnées)
         $flavor = null;
-        if (isset($runtime['supplements']['defaultForCategories'][$slug])) {
-            $supps = $runtime['supplements']['defaultForCategories'][$slug];
+        if (isset($allAssociations[$slug])) {
+            $supps = $allAssociations[$slug];
             // Si contient des supps salés (fromages, viandes) → sale
             if (in_array('sup-mix-fromages', $supps) || in_array('sup-viande-hachee', $supps)) {
                 $flavor = 'sale';
@@ -201,17 +225,16 @@ $stmt = $pdo->prepare("
 $supplementMapping = []; // slug → ID
 $supplementCount = 0;
 
-if (isset($runtime['supplements']['catalog'])) {
-    foreach ($runtime['supplements']['catalog'] as $slug => $supp) {
+// Charger les suppléments depuis menu.json (pas runtime)
+if (isset($menuData['supplements']['catalog'])) {
+    foreach ($menuData['supplements']['catalog'] as $slug => $supp) {
         try {
-            // Déterminer le type (sale/sucre)
-            $type = 'both';
-            if (strpos($slug, 'sup-nutella') !== false || strpos($slug, 'sup-chocolat') !== false
-                || strpos($slug, 'sup-fruit') !== false || strpos($slug, 'sup-confiture') !== false) {
-                $type = 'sucre';
-            } elseif (strpos($slug, 'sup-fromage') !== false || strpos($slug, 'sup-viande') !== false
-                || strpos($slug, 'sup-oeuf') !== false || strpos($slug, 'sup-jambon') !== false) {
-                $type = 'sale';
+            // Utiliser le flavor déjà présent dans les données JSON
+            $type = $supp['flavor'] ?? 'both';
+
+            // Fallback si pas de flavor défini
+            if (!in_array($type, ['sale', 'sucre', 'both'])) {
+                $type = 'both';
             }
 
             $stmt->execute([
@@ -221,7 +244,7 @@ if (isset($runtime['supplements']['catalog'])) {
                 ':price' => $supp['price'] ?? 0,
                 ':type' => $type,
                 ':sort_order' => $supplementCount,
-                ':status' => 'available'
+                ':status' => $supp['status'] ?? 'available'
             ]);
 
             $suppId = $pdo->lastInsertId();
@@ -252,24 +275,25 @@ $stmt = $pdo->prepare("
 ");
 
 $assocCount = 0;
-if (isset($runtime['supplements']['defaultForCategories'])) {
-    foreach ($runtime['supplements']['defaultForCategories'] as $categorySlug => $suppSlugs) {
-        if (!isset($categoryMapping[$categorySlug])) continue;
 
-        $categoryId = $categoryMapping[$categorySlug];
+// Utiliser les associations fusionnées calculées au début
+// (déjà fusionnées depuis menu.json + runtime)
+foreach ($allAssociations as $categorySlug => $suppSlugs) {
+    if (!isset($categoryMapping[$categorySlug])) continue;
 
-        foreach ($suppSlugs as $suppSlug) {
-            if (!isset($supplementMapping[$suppSlug])) continue;
+    $categoryId = $categoryMapping[$categorySlug];
 
-            try {
-                $stmt->execute([
-                    ':category_id' => $categoryId,
-                    ':supplement_id' => $supplementMapping[$suppSlug]
-                ]);
-                $assocCount++;
-            } catch (Exception $e) {
-                echo "  ⚠ Association ignorée ($categorySlug → $suppSlug): " . $e->getMessage() . "\n";
-            }
+    foreach ($suppSlugs as $suppSlug) {
+        if (!isset($supplementMapping[$suppSlug])) continue;
+
+        try {
+            $stmt->execute([
+                ':category_id' => $categoryId,
+                ':supplement_id' => $supplementMapping[$suppSlug]
+            ]);
+            $assocCount++;
+        } catch (Exception $e) {
+            echo "  ⚠ Association ignorée ($categorySlug → $suppSlug): " . $e->getMessage() . "\n";
         }
     }
 }
