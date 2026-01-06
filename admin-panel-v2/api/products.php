@@ -173,37 +173,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
     }
 
-    // ✅ MODE JSON - Charger depuis menu.json
-    require_once __DIR__ . '/../config.php';
-    $runtime = loadMenuRuntime();
-    $config = loadConfig();
-
-    // Fusionner config + runtime pour obtenir le menu complet
-    $menu = $config['menu'] ?? [];
-
-    // Récupérer supplements depuis menu.json
+    // ✅ MODE JSON - Charger DIRECTEMENT depuis menu.json
     $menuJsonPath = SNACK_ROOT . '/config/menu.json';
-    $supplements = [];
-    $formules = [];
-    $featured = [];
-    $categoryIcons = [];
 
-    if (file_exists($menuJsonPath)) {
-        $menuData = json_decode(file_get_contents($menuJsonPath), true);
-        if ($menuData) {
-            $supplements = $menuData['supplements'] ?? [];
-            $formules = $menuData['formules'] ?? [];
-            $featured = $menuData['featured'] ?? [];
-            $categoryIcons = $menuData['categoryIcons'] ?? [];
-        }
+    if (!file_exists($menuJsonPath)) {
+        jsonError('menu.json introuvable');
     }
 
+    $menuData = json_decode(file_get_contents($menuJsonPath), true);
+
+    if (!$menuData) {
+        jsonError('Erreur lecture menu.json');
+    }
+
+    // Retourner TOUTES les données depuis menu.json
     jsonSuccess([
-        'menu' => $menu,
-        'supplements' => $supplements,
-        'formules' => $formules,
-        'featured' => $featured,
-        'categoryIcons' => $categoryIcons
+        'menu' => $menuData['menu'] ?? [],
+        'supplements' => $menuData['supplements'] ?? [],
+        'formules' => $menuData['formules'] ?? [],
+        'featured' => $menuData['featured'] ?? [],
+        'categoryIcons' => $menuData['categoryIcons'] ?? []
     ]);
 }
 
