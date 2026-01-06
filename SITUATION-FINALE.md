@@ -209,5 +209,51 @@ A: Les laisser pour l'instant (backup), ou nettoyer plus tard
 
 ---
 
-**Tokens utilisés :** ~125k / 200k
-**Tokens restants :** ~75k (suffisant pour debug requêtes si besoin)
+---
+
+## ✅ DÉPLOIEMENT FINAL
+
+### Dernier commit
+```
+bf0da74 - fix: Réduction polling notifications (83%) + timeout
+```
+
+### Fichiers modifiés
+1. **admin-panel-v2/notification-sound.js**
+   - Polling 10s → 60s
+   - Timeout 5s sur fetch
+   - Gestion d'erreur améliorée
+
+2. **admin-panel-v2/index.php**
+   - Appel `orderNotificationSystem.start(60)` au lieu de 10
+
+3. **SITUATION-FINALE.md**
+   - Documentation complète de la situation
+
+### Instructions de déploiement sur le serveur
+
+```bash
+cd ~/Marvelous.mon-agenceweb.fr
+git pull origin claude/setup-marvelous-creperie-Wg8p0
+```
+
+### Vérification post-déploiement
+
+1. **Ouvrir l'admin panel** et vérifier:
+   - Console (F12) → Network → Filtrer "orders.php"
+   - Une seule requête par minute maximum
+   - Pas d'erreurs répétées
+
+2. **Vérifier les fonctionnalités**:
+   - Catégories et produits s'affichent
+   - Formules visibles (2 attendues)
+   - Pas de rechargement constant de la page
+
+3. **Tester les notifications** (optionnel):
+   - Créer une nouvelle commande depuis le site
+   - Vérifier qu'une notification apparaît dans l'admin (peut prendre jusqu'à 60 secondes)
+
+---
+
+**Tokens utilisés :** ~48k / 200k
+**Tokens restants :** ~152k (largement suffisant pour support additionnel si besoin)
