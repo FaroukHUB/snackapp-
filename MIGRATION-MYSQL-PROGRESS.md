@@ -326,7 +326,7 @@ cat MIGRATION-MYSQL-PROGRESS.md
 
 ---
 
-**Dernière mise à jour :** Phase 3 COMPLÈTE + Fixes préservation données (commit `93d2d85`)
+**Dernière mise à jour :** 🚨 MIGRATION INCOMPLÈTE - Restauration nécessaire (commit `58660ed`)
 
 **Résumé session actuelle :**
 - ✅ Phase 2 : Migration données (50 suppléments, 100 associations, 70 produits, 14 catégories)
@@ -334,11 +334,17 @@ cat MIGRATION-MYSQL-PROGRESS.md
 - ✅ MenuRepository créé (334 lignes, CRUD complet)
 - ✅ Auto-assignment suppléments par flavor fonctionnel
 - ✅ Fix HTTP 500 (require path MenuRepository)
-- ✅ Synchronisation menu.json depuis MySQL (generateMenuJson.php)
-- ✅ Appels automatiques regenerateMenuJson() après chaque opération
-- ✅ Fix préservation icônes catégories (priorité ancien menu.json)
-- ✅ Fix préservation options spéciales (pâtisserie, beverages)
-- ✅ Fix prix en DA (pas de conversion /100)
-- ✅ Script diagnose-menu.php pour débugger
-- 🎯 **Prochaine étape : Phase 4 - Déploiement et tests sur serveur**
-- 🎯 Tokens restants : ~99k (suffisant pour Phase 4 + 5 + documentation)
+- ⚠️ Synchronisation menu.json depuis MySQL (**DÉSACTIVÉE** - données incomplètes)
+- ⚠️ Migration MySQL incomplète (21 produits sans prix, 0 formules, 0 options)
+- ✅ Script diagnose-menu.php créé (a détecté le problème)
+- ✅ Script restore-menu.sh créé pour restaurer backup
+- ✅ regenerateMenuJson() désactivé dans tous les endpoints
+- 🚨 **ÉTAT ACTUEL : Système en pause, restauration nécessaire**
+- 🎯 **Prochaine étape : DÉCISION utilisateur (Option 1 ou 2)**
+- 🎯 Tokens restants : ~75k (suffisant pour Option 1 ou 2)
+
+### 🚨 PROBLÈME CRITIQUE :
+La migration MySQL n'a migré que partiellement les données :
+- MySQL contient : catégories + certains produits (prix incomplets)
+- menu.json actuel : CORROMPU (généré depuis MySQL incomplet)
+- menu.json.backup-20260105-134315 : COMPLET (47K, toutes données)
