@@ -3,7 +3,7 @@
 **Date de début :** 2026-01-06
 **Branche Git :** `claude/setup-marvelous-creperie-Wg8p0`
 **Remote :** https://github.com/FaroukHUB/snackapp-.git
-**Tokens restants :** ~104,000 / 200,000
+**Tokens restants :** ~77,000 / 200,000 ⚠️
 
 ---
 
@@ -105,13 +105,37 @@ SELECT * FROM categories WHERE deleted_at IS NULL;
 
 ---
 
-## ✅ COMPLETÉ (Session précédente)
+## ✅ COMPLETÉ
 
+### Session précédente
 1. ✅ Setup Git sur serveur o2switch
 2. ✅ Branche server-live créée (snapshot production)
 3. ✅ Feature : Assignment auto suppléments (Salé/Sucré)
 4. ✅ Fix : Suppression catégories custom
 5. ✅ Fix : Préservation categoryIcons
+
+### Migration MySQL (en cours)
+1. ✅ **Phase 1:** Migration SQL schéma
+   - Colonnes `icon`, `flavor`, `deleted_at` ajoutées à `categories`
+   - Colonne `deleted_at` ajoutée à `products`
+   - Colonnes `slug`, `type` ajoutées à `supplements`
+   - Table `category_supplements` créée
+   - Commit: `7816f41`
+
+2. ✅ **Phase 2:** Script migration données créé
+   - Script `database/migrate-json-to-mysql.php`
+   - Migre catégories, produits, suppléments, associations
+   - Commit: `a4269e1`, `82f2394`
+
+---
+
+## 🔄 EN COURS - Problème loadConfig()
+
+**Erreur actuelle:** `loadConfig()` échoue dans le script de migration
+
+**Cause:** `le-marvelous.config.js` ne peut pas être parsé correctement
+
+**Solution à implémenter:** Lire directement `menu.json` au lieu de `le-marvelous.config.js`
 
 ---
 
@@ -132,45 +156,32 @@ SELECT * FROM categories WHERE deleted_at IS NULL;
 
 ---
 
-## ⏳ À FAIRE - Migration MySQL Complète
+## ⏳ À FAIRE - Suite Migration
 
-### Phase 1 : Préparation (5k tokens)
-- [ ] Vérifier tables MySQL existantes
-- [ ] Analyser structure actuelle (MenuRepository)
-- [ ] Créer script de migration JSON → MySQL
+### IMMÉDIAT (~3k tokens)
+- [ ] **Fix script migration:** Lire menu.json directement
+- [ ] **Exécuter migration données** vers MySQL
+- [ ] **Vérifier données** dans MySQL
 
-### Phase 2 : Schéma base de données (10k tokens)
-- [ ] Table `categories` (id, name, description, icon, flavor, order)
-- [ ] Table `products` (id, category_id, name, description, price, image)
-- [ ] Table `supplements` (id, name, price, type)
-- [ ] Table `category_supplements` (category_id, supplement_id)
+### Phase 3 : Modification API (~30k tokens) **⚠️ CRITIQUE**
+- [ ] Modifier `add_category` → INSERT MySQL + assignment suppléments
+- [ ] Modifier `edit_category` → UPDATE MySQL
+- [ ] Modifier `delete_category` → Soft delete MySQL
+- [ ] Modifier `add_product` → INSERT MySQL
+- [ ] **Modifier GET endpoint** → SELECT depuis MySQL (pas fichiers)
+- [ ] Supprimer appels à loadConfig/generatePublicMenuJson
 
-### Phase 3 : Migration des données (15k tokens)
-- [ ] Migrer catégories de le-marvelous.config.js
-- [ ] Migrer customCategories de runtime
-- [ ] Migrer produits
-- [ ] Migrer suppléments + associations
-
-### Phase 4 : Modification API (30k tokens)
-- [ ] `add_category` → INSERT MySQL
-- [ ] `edit_category` → UPDATE MySQL
-- [ ] `delete_category` → DELETE MySQL (soft delete)
-- [ ] `add_product` → INSERT MySQL
-- [ ] GET endpoint → SELECT depuis MySQL
-- [ ] Supprimer dépendances aux fichiers JSON
-
-### Phase 5 : Tests (20k tokens)
-- [ ] Test création catégorie
-- [ ] Test suppression catégorie
+### Phase 4 : Tests (~10k tokens)
+- [ ] Test création catégorie (admin)
+- [ ] Test suppression catégorie (admin)
 - [ ] Test ajout produit
 - [ ] Test affichage site public
 - [ ] Vérifier suppléments auto-assignés
 
-### Phase 6 : Déploiement (10k tokens)
-- [ ] Backup complet base de données
-- [ ] Déploiement sur serveur
-- [ ] Tests en production
-- [ ] Rollback si problème
+### Phase 5 : Déploiement (~5k tokens)
+- [ ] Backup MySQL
+- [ ] Déploiement
+- [ ] Tests production
 
 ---
 
