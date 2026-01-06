@@ -175,6 +175,26 @@ SELECT * FROM categories WHERE deleted_at IS NULL;
 - Optimisation: icônes chargées une fois (pas dans boucle)
 **Commit:** `e18b22b`
 
+### 6. Icônes catégories et options spéciales disparues ✅
+**Erreur:** Après première génération menu.json depuis MySQL:
+- Icônes des catégories disparues
+- Options pâtisserie/beverages disparues
+- Modal "ajouter" ne s'ouvre plus
+- Certains prix disparus
+
+**Cause:** Script generateMenuJson.php ne préservait pas correctement les données de l'ancien menu.json
+- Icônes récupérées depuis MySQL mais pas depuis l'ancien JSON
+- Correspondance items défaillante (id vs slug)
+- Prix conversion incorrecte (/100 alors que déjà en DA)
+
+**Solution:**
+- Préserver categoryIcons de l'ancien menu.json EN PRIORITÉ
+- Améliorer correspondance items (4 combinaisons: oldSlug==newSlug, oldSlug==newId, oldId==newSlug, oldId==newId)
+- Prix gardés en DA (pas de division par 100)
+- Préserver badge, pâtisserieOptions, beverageOptions, customizationNote, requiresChoice
+- Script diagnose-menu.php créé pour débugger
+**Commits:** `b98c7c9`, `373e5c5`, `93d2d85`
+
 ---
 
 ## ✅ COMPLÉTÉ - Phase 3 : Modification API MySQL
@@ -232,7 +252,16 @@ $categorySupplements = MenuRepository::getCategorySupplements();
 - Génère menu.json depuis MySQL pour consommation par le frontend
 - Architecture: **Admin → MySQL → menu.json → Frontend**
 
-**Commits:** `69ff8d4`, `eeaf641`, `14e71ae`
+**Préservation données critiques:**
+- ✅ Icônes catégories (categoryIcons de l'ancien menu.json)
+- ✅ Options spéciales (pâtisserieOptions, beverageOptions)
+- ✅ Formules complètes
+- ✅ Featured products
+- ✅ Prix en DA (pas de conversion)
+- ✅ Badges produits
+- ✅ Correspondance items améliorée (id/slug flexible)
+
+**Commits:** `69ff8d4`, `eeaf641`, `14e71ae`, `b8e948d`, `c35eacc`, `b98c7c9`, `373e5c5`, `93d2d85`
 
 ---
 
@@ -297,7 +326,7 @@ cat MIGRATION-MYSQL-PROGRESS.md
 
 ---
 
-**Dernière mise à jour :** Phase 3 COMPLÈTE + Sync menu.json (commit `14e71ae`)
+**Dernière mise à jour :** Phase 3 COMPLÈTE + Fixes préservation données (commit `93d2d85`)
 
 **Résumé session actuelle :**
 - ✅ Phase 2 : Migration données (50 suppléments, 100 associations, 70 produits, 14 catégories)
@@ -307,5 +336,9 @@ cat MIGRATION-MYSQL-PROGRESS.md
 - ✅ Fix HTTP 500 (require path MenuRepository)
 - ✅ Synchronisation menu.json depuis MySQL (generateMenuJson.php)
 - ✅ Appels automatiques regenerateMenuJson() après chaque opération
-- 🎯 **Prochaine étape : Phase 4 - Tests & génération initiale menu.json**
-- 🎯 Tokens restants : ~145k (suffisant pour Phase 4 + 5 + documentation)
+- ✅ Fix préservation icônes catégories (priorité ancien menu.json)
+- ✅ Fix préservation options spéciales (pâtisserie, beverages)
+- ✅ Fix prix en DA (pas de conversion /100)
+- ✅ Script diagnose-menu.php pour débugger
+- 🎯 **Prochaine étape : Phase 4 - Déploiement et tests sur serveur**
+- 🎯 Tokens restants : ~99k (suffisant pour Phase 4 + 5 + documentation)
