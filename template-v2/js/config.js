@@ -180,13 +180,17 @@ const Config = {
      * Filtre UNIQUEMENT par flavor (sale/sucre) - ignore defaultForCategories
      */
     getSupplementsForCategory(categoryId) {
-        // ✅ Par défaut, toutes les catégories = salé (sauf si explicitement sucré)
-        const sucreProductCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
+        // ❌ Catégories SANS suppléments
+        const noSupplementsCategories = ['sucres-sales'];
+        if (noSupplementsCategories.includes(categoryId)) {
+            return [];
+        }
 
-        // Si c'est une catégorie sucrée connue → suppléments sucrés
+        // ✅ Catégories sucrées → suppléments sucrés
+        const sucreProductCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
         const isSucre = sucreProductCategories.includes(categoryId);
 
-        // Sinon → suppléments salés (défaut pour toutes nouvelles catégories)
+        // ✅ Toutes les autres → suppléments salés (défaut)
         const targetFlavor = isSucre ? 'sucre' : 'sale';
 
         // Filtrer TOUS les suppléments par flavor
