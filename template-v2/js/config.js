@@ -186,16 +186,25 @@ const Config = {
             return [];
         }
 
-        // ✅ Catégories sucrées → suppléments sucrés
-        const sucreProductCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
-        const isSucre = sucreProductCategories.includes(categoryId);
+        // ✅ Chercher la catégorie dans les données pour lire son flavor
+        let categoryFlavor = null;
 
-        // ✅ Toutes les autres → suppléments salés (défaut)
-        const targetFlavor = isSucre ? 'sucre' : 'sale';
+        if (this.menu && this.menu.categories) {
+            const category = this.menu.categories.find(cat => cat.id === categoryId);
+            if (category && category.flavor) {
+                categoryFlavor = category.flavor; // 'sale' ou 'sucre' défini dans l'admin
+            }
+        }
 
-        // Filtrer TOUS les suppléments par flavor
+        // Fallback : deviner selon l'ID si pas de flavor
+        if (!categoryFlavor) {
+            const sucreCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
+            categoryFlavor = sucreCategories.includes(categoryId) ? 'sucre' : 'sale';
+        }
+
+        // Filtrer les suppléments par flavor
         return Object.values(this.supplements.catalog || {})
-            .filter(sup => sup.flavor === targetFlavor && sup.status === 'available');
+            .filter(sup => sup.flavor === categoryFlavor && sup.status === 'available');
     },
 
     /**
