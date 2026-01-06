@@ -566,6 +566,11 @@ switch ($action) {
         $runtime['customCategories'][$categoryId]['name'] = $name;
         $runtime['customCategories'][$categoryId]['description'] = $description;
 
+        // ✅ Stocker le flavor pour le site
+        if ($flavor !== '') {
+            $runtime['customCategories'][$categoryId]['flavor'] = $flavor;
+        }
+
         // Réassigner les suppléments si le flavor est fourni
         if ($flavor !== '') {
             $supplementsSales = [
