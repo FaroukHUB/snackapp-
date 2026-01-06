@@ -736,7 +736,7 @@ switch ($action) {
 
         saveMenuRuntime($runtime);
 
-        // Supprimer l'icône du menu.json
+        // Supprimer l'icône du menu.json si elle existe
         $menuPath = SNACK_ROOT . '/config/menu.json';
         if (file_exists($menuPath)) {
             clearstatcache(true, $menuPath);
@@ -744,11 +744,12 @@ switch ($action) {
             if ($menuData && isset($menuData['categoryIcons'][$categoryId])) {
                 unset($menuData['categoryIcons'][$categoryId]);
                 file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
-                require_once __DIR__ . '/../config.php';
-                generatePublicMenuJson(loadMenuRuntime());
             }
         }
+
+        // Régénérer menu.json pour retirer la catégorie du site public
+        require_once __DIR__ . '/../config.php';
+        generatePublicMenuJson(loadMenuRuntime());
 
         jsonSuccess(['deleted' => true]);
         break;
