@@ -13,10 +13,13 @@ require_once __DIR__ . '/../admin-panel-v2/config.php';
 echo "🚀 Migration JSON → MySQL\n";
 echo "========================\n\n";
 
+// Chargement config MySQL
+$dbConfig = require __DIR__ . '/config.php';
+Database::init($dbConfig['database']);
+
 // Connexion MySQL
 try {
-    $db = Database::getInstance();
-    $pdo = $db->getConnection();
+    $pdo = Database::getInstance();
     echo "✅ Connexion MySQL OK\n\n";
 } catch (Exception $e) {
     die("❌ Erreur connexion MySQL: " . $e->getMessage() . "\n");
