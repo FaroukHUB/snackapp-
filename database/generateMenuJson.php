@@ -17,10 +17,70 @@ Database::init($dbConfig['database']);
 try {
     $pdo = Database::getInstance();
 
+    // Charger l'ancien menu.json pour récupérer formules et options spéciales
+    $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+    $oldMenuData = [];
+    if (file_exists($menuJsonPath)) {
+        $oldMenuData = json_decode(file_get_contents($menuJsonPath), true) ?: [];
+    }
+
     // Récupérer toutes les données depuis MySQL
     $categories = MenuRepository::getAllCategories();
     $supplements = MenuRepository::getAllSupplements();
     $categorySupplements = MenuRepository::getCategorySupplements();
+
+    // ✅ CONVERTIR LES PRIX (centimes → euros) et enrichir avec options spéciales
+    foreach ($categories as &$cat) {
+        foreach ($cat['items'] as &$item) {
+            // Convertir prix centimes → euros
+            if (isset($item['priceSolo'])) {
+                $item['priceSolo'] = floatval($item['priceSolo']) / 100;
+            }
+            if (isset($item['priceMenu'])) {
+                $item['priceMenu'] = $item['priceMenu'] !== null ? floatval($item['priceMenu']) / 100 : null;
+            }
+
+            // ✅ PRÉSERVER options spéciales de l'ancien menu.json
+            $itemSlug = $item['slug'] ?? '';
+
+            // Chercher dans l'ancien menu.json
+            if (!empty($oldMenuData['menu']['categories'])) {
+                foreach ($oldMenuData['menu']['categories'] as $oldCat) {
+                    if (!empty($oldCat['items'])) {
+                        foreach ($oldCat['items'] as $oldItem) {
+                            if (($oldItem['id'] ?? '') === $itemSlug || ($oldItem['slug'] ?? '') === $itemSlug) {
+                                // Préserver pâtisserieOptions
+                                if (isset($oldItem['pâtisserieOptions'])) {
+                                    $item['pâtisserieOptions'] = $oldItem['pâtisserieOptions'];
+                                }
+                                // Préserver beverageOptions
+                                if (isset($oldItem['beverageOptions'])) {
+                                    $item['beverageOptions'] = $oldItem['beverageOptions'];
+                                }
+                                // Préserver autres options spéciales
+                                if (isset($oldItem['customizationNote'])) {
+                                    $item['customizationNote'] = $oldItem['customizationNote'];
+                                }
+                                if (isset($oldItem['requiresChoice'])) {
+                                    $item['requiresChoice'] = $oldItem['requiresChoice'];
+                                }
+                                break 2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ✅ CONVERTIR LES PRIX DES SUPPLÉMENTS (centimes → euros)
+    $supplementsFormatted = [];
+    foreach ($supplements as $slug => $supp) {
+        if (isset($supp['price'])) {
+            $supp['price'] = floatval($supp['price']) / 100;
+        }
+        $supplementsFormatted[$slug] = $supp;
+    }
 
     // Récupérer les icônes des catégories
     $categoryIcons = [];
@@ -30,6 +90,15 @@ try {
         }
     }
 
+    // ✅ PRÉSERVER formules et featured depuis ancien menu.json
+    $formules = $oldMenuData['formules'] ?? [];
+    $featured = $oldMenuData['featured'] ?? [
+        'enabled' => true,
+        'title' => 'Sélection pour vous',
+        'subtitle' => 'Nos produits les plus appréciés',
+        'items' => []
+    ];
+
     // Formater pour le frontend
     $menuData = [
         'version' => 1,
@@ -38,21 +107,15 @@ try {
             'categories' => $categories
         ],
         'supplements' => [
-            'catalog' => $supplements,
+            'catalog' => $supplementsFormatted,
             'defaultForCategories' => $categorySupplements
         ],
         'categoryIcons' => $categoryIcons,
-        'formules' => [], // À implémenter si nécessaire
-        'featured' => [
-            'enabled' => true,
-            'title' => 'Sélection pour vous',
-            'subtitle' => 'Nos produits les plus appréciés',
-            'items' => []
-        ]
+        'formules' => $formules,
+        'featured' => $featured
     ];
 
     // Écrire menu.json
-    $menuJsonPath = SNACK_ROOT . '/config/menu.json';
     $json = json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
     if ($json === false) {
@@ -65,7 +128,8 @@ try {
 
     echo "✅ menu.json généré avec succès (" . strlen($json) . " octets)\n";
     echo "   - " . count($categories) . " catégories\n";
-    echo "   - " . count($supplements) . " suppléments\n";
+    echo "   - " . count($supplementsFormatted) . " suppléments\n";
+    echo "   - " . count($formules) . " formules préservées\n";
 
 } catch (Exception $e) {
     echo "❌ Erreur: " . $e->getMessage() . "\n";
