@@ -44,8 +44,12 @@ if ($useMySQL) {
         $o['id'] = $o['order_number'] ?? $o['id'];
     }
 
-    // Menu categories
-    $menuData = MenuRepository::getFullMenu(SNACK_RESTAURANT_ID);
+    // Menu categories (mode JSON - lecture depuis menu.json)
+    $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+    $menuData = [];
+    if (file_exists($menuJsonPath)) {
+        $menuData = json_decode(file_get_contents($menuJsonPath), true) ?: [];
+    }
     $products = $menuData['menu']['categories'] ?? [];
 
     // Settings pour les formulaires
