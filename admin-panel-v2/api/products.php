@@ -516,10 +516,19 @@ switch ($action) {
     case 'add_category':
         $name = trim((string)($input['name'] ?? ''));
         $description = trim((string)($input['description'] ?? ''));
+        $flavor = trim((string)($input['flavor'] ?? ''));
         $icon = trim((string)($input['icon'] ?? 'fa-utensils'));
 
         if ($name === '') {
             jsonError('Nom manquant');
+        }
+
+        if ($flavor === '') {
+            jsonError('Type de catégorie manquant (salé ou sucré)');
+        }
+
+        if (!in_array($flavor, ['sale', 'sucre'], true)) {
+            jsonError('Type de catégorie invalide (doit être "sale" ou "sucre")');
         }
 
         $baseId = $input['id'] ?? strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
@@ -545,6 +554,56 @@ switch ($action) {
             'description' => $description,
             'items' => []
         ];
+
+        // Assignment automatique des suppléments selon le type de catégorie
+        $supplementsSales = [
+            'sup-mix-fromages',
+            'sup-cheddar',
+            'sup-camembert',
+            'sup-chakchouka',
+            'sup-pomme-terre',
+            'sup-oignons-confits',
+            'sup-oeuf',
+            'sup-viande-hachee',
+            'sup-escalope-poulet',
+            'sup-jambon'
+        ];
+
+        $supplementsSucres = [
+            'sup-nutella',
+            'sup-chocolat',
+            'sup-confiture',
+            'sup-creme-noisette',
+            'sup-beurre-cacahuete',
+            'sup-miel',
+            'sup-caramel',
+            'sup-speculoos',
+            'sup-oursons',
+            'sup-smarties',
+            'sup-mnm',
+            'sup-kitkat',
+            'sup-maltesers',
+            'sup-kinder',
+            'sup-oreo',
+            'sup-banane',
+            'sup-fraise',
+            'sup-pomme',
+            'sup-kiwi',
+            'sup-ananas',
+            'sup-myrtilles',
+            'sup-framboises',
+            'sup-noix-coco',
+            'sup-amandes',
+            'sup-noisettes',
+            'sup-noix',
+            'sup-chantilly'
+        ];
+
+        if ($flavor === 'sale') {
+            $runtime['supplements']['defaultForCategories'][$id] = $supplementsSales;
+        } else {
+            $runtime['supplements']['defaultForCategories'][$id] = $supplementsSucres;
+        }
 
         saveMenuRuntime($runtime);
 
@@ -575,10 +634,16 @@ switch ($action) {
         $categoryId = trim((string)($input['category_id'] ?? ''));
         $name = trim((string)($input['name'] ?? ''));
         $description = trim((string)($input['description'] ?? ''));
+        $flavor = trim((string)($input['flavor'] ?? ''));
         $icon = trim((string)($input['icon'] ?? 'fa-utensils'));
 
         if ($categoryId === '' || $name === '') {
             jsonError('Paramètres manquants');
+        }
+
+        // Valider le flavor s'il est fourni
+        if ($flavor !== '' && !in_array($flavor, ['sale', 'sucre'], true)) {
+            jsonError('Type de catégorie invalide (doit être "sale" ou "sucre")');
         }
 
         $runtime = loadMenuRuntime();
@@ -588,6 +653,31 @@ switch ($action) {
 
         $runtime['customCategories'][$categoryId]['name'] = $name;
         $runtime['customCategories'][$categoryId]['description'] = $description;
+
+        // Réassigner les suppléments si le flavor est fourni
+        if ($flavor !== '') {
+            $supplementsSales = [
+                'sup-mix-fromages', 'sup-cheddar', 'sup-camembert',
+                'sup-chakchouka', 'sup-pomme-terre', 'sup-oignons-confits',
+                'sup-oeuf', 'sup-viande-hachee', 'sup-escalope-poulet', 'sup-jambon'
+            ];
+
+            $supplementsSucres = [
+                'sup-nutella', 'sup-chocolat', 'sup-confiture', 'sup-creme-noisette',
+                'sup-beurre-cacahuete', 'sup-miel', 'sup-caramel', 'sup-speculoos',
+                'sup-oursons', 'sup-smarties', 'sup-mnm', 'sup-kitkat',
+                'sup-maltesers', 'sup-kinder', 'sup-oreo', 'sup-banane',
+                'sup-fraise', 'sup-pomme', 'sup-kiwi', 'sup-ananas',
+                'sup-myrtilles', 'sup-framboises', 'sup-noix-coco', 'sup-amandes',
+                'sup-noisettes', 'sup-noix', 'sup-chantilly'
+            ];
+
+            if ($flavor === 'sale') {
+                $runtime['supplements']['defaultForCategories'][$categoryId] = $supplementsSales;
+            } else {
+                $runtime['supplements']['defaultForCategories'][$categoryId] = $supplementsSucres;
+            }
+        }
 
         saveMenuRuntime($runtime);
 

@@ -451,6 +451,14 @@ $csrfToken = getCsrfToken();
             <textarea id="catDesc" name="description" class="textarea" placeholder="Texte affiché sous la catégorie…"></textarea>
           </div>
           <div class="field">
+            <label for="catFlavor">Type de catégorie</label>
+            <select id="catFlavor" name="flavor" class="input" required>
+              <option value="">-- Choisir --</option>
+              <option value="sale">Salé</option>
+              <option value="sucre">Sucré</option>
+            </select>
+          </div>
+          <div class="field">
             <label for="catIcon">Icône</label>
             <div id="iconSelector" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:6px;">
               <label class="icon-option" data-icon="fa-burger" title="Burger">
@@ -1842,16 +1850,17 @@ $csrfToken = getCsrfToken();
       const fd = new FormData(e.target);
       const name = String(fd.get("name") ?? "").trim();
       const description = String(fd.get("description") ?? "").trim();
+      const flavor = String(fd.get("flavor") ?? "").trim();
       const icon = String(fd.get("icon") ?? "fa-utensils").trim();
 
       try{
         if (currentEditCategoryId) {
           // Mode édition
-          await apiPostJson({ action:"edit_category", category_id: currentEditCategoryId, name, description, icon });
+          await apiPostJson({ action:"edit_category", category_id: currentEditCategoryId, name, description, flavor, icon });
           toast("success","Catégorie modifiée", `"${name}" a été mise à jour.`);
         } else {
           // Mode ajout
-          await apiPostJson({ action:"add_category", name, description, icon });
+          await apiPostJson({ action:"add_category", name, description, flavor, icon });
           toast("success","Catégorie ajoutée", `"${name}" a été enregistrée.`);
         }
         closeModal($("#modalCategory"));
