@@ -20,6 +20,7 @@ Database::init($dbConfig['database']);
 // Connexion MySQL
 try {
     $pdo = Database::getInstance();
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     echo "✅ Connexion MySQL OK\n\n";
 } catch (Exception $e) {
     die("❌ Erreur connexion MySQL: " . $e->getMessage() . "\n");
@@ -44,6 +45,10 @@ echo "✅ menu.json chargé : " . count($menuData['menu']['categories'] ?? []) .
 $runtime = loadMenuRuntime();
 $deletedCategories = array_flip($runtime['deletedCategories'] ?? []);
 echo "✅ Catégories supprimées : " . count($runtime['deletedCategories'] ?? []) . "\n\n";
+
+// Charger les icônes depuis menu.json (une seule fois)
+$categoryIcons = $menuData['categoryIcons'] ?? [];
+echo "✅ Icônes chargées : " . count($categoryIcons) . "\n\n";
 
 // Utiliser directement les données de menu.json (déjà fusionnées)
 $merged = ['menu' => $menuData['menu'] ?? ['categories' => []]];
@@ -71,54 +76,58 @@ $stmt = $pdo->prepare("
 $categoryCount = 0;
 foreach ($merged['menu']['categories'] as $index => $cat) {
     $slug = $cat['id'] ?? null;
-    if (!$slug) continue;
+    if (!$slug) {
+        echo "  ⚠ Catégorie sans slug ignorée\n";
+        continue;
+    }
 
-    // Déterminer le flavor depuis les suppléments assignés
-    $flavor = null;
-    if (isset($runtime['supplements']['defaultForCategories'][$slug])) {
-        $supps = $runtime['supplements']['defaultForCategories'][$slug];
-        // Si contient des supps salés (fromages, viandes) → sale
-        if (in_array('sup-mix-fromages', $supps) || in_array('sup-viande-hachee', $supps)) {
-            $flavor = 'sale';
+    try {
+        // Déterminer le flavor depuis les suppléments assignés
+        $flavor = null;
+        if (isset($runtime['supplements']['defaultForCategories'][$slug])) {
+            $supps = $runtime['supplements']['defaultForCategories'][$slug];
+            // Si contient des supps salés (fromages, viandes) → sale
+            if (in_array('sup-mix-fromages', $supps) || in_array('sup-viande-hachee', $supps)) {
+                $flavor = 'sale';
+            }
+            // Si contient des supps sucrés (nutella, fruits) → sucre
+            elseif (in_array('sup-nutella', $supps) || in_array('sup-chocolat', $supps)) {
+                $flavor = 'sucre';
+            }
         }
-        // Si contient des supps sucrés (nutella, fruits) → sucre
-        elseif (in_array('sup-nutella', $supps) || in_array('sup-chocolat', $supps)) {
-            $flavor = 'sucre';
+
+        // Récupérer l'icône depuis les icônes pré-chargées
+        $icon = $categoryIcons[$slug] ?? 'fa-utensils';
+
+        $deletedAt = isset($deletedCategories[$slug]) ? date('Y-m-d H:i:s') : null;
+
+        $stmt->execute([
+            ':restaurant_id' => SNACK_RESTAURANT_ID,
+            ':name' => $cat['name'] ?? $slug,
+            ':slug' => $slug,
+            ':description' => $cat['description'] ?? null,
+            ':icon' => $icon,
+            ':flavor' => $flavor,
+            ':sort_order' => $cat['order'] ?? $index,
+            ':is_active' => $deletedAt ? 0 : 1,
+            ':deleted_at' => $deletedAt
+        ]);
+
+        $categoryId = $pdo->lastInsertId();
+        if (!$categoryId) {
+            // Catégorie existe déjà, récupérer son ID
+            $fetch = $pdo->prepare("SELECT id FROM categories WHERE restaurant_id = ? AND slug = ?");
+            $fetch->execute([SNACK_RESTAURANT_ID, $slug]);
+            $categoryId = $fetch->fetchColumn();
         }
+
+        $categoryMapping[$slug] = $categoryId;
+        $categoryCount++;
+        echo "  ✓ {$cat['name']} (flavor: " . ($flavor ?: 'none') . ", icon: $icon)\n";
+    } catch (Exception $e) {
+        echo "  ❌ ERREUR pour catégorie '$slug': " . $e->getMessage() . "\n";
+        die("Migration arrêtée\n");
     }
-
-    // Récupérer l'icône depuis menu.json
-    $icon = 'fa-utensils';
-    if (file_exists(SNACK_ROOT . '/config/menu.json')) {
-        $menuData = json_decode(file_get_contents(SNACK_ROOT . '/config/menu.json'), true);
-        $icon = $menuData['categoryIcons'][$slug] ?? 'fa-utensils';
-    }
-
-    $deletedAt = isset($deletedCategories[$slug]) ? date('Y-m-d H:i:s') : null;
-
-    $stmt->execute([
-        ':restaurant_id' => SNACK_RESTAURANT_ID,
-        ':name' => $cat['name'] ?? $slug,
-        ':slug' => $slug,
-        ':description' => $cat['description'] ?? null,
-        ':icon' => $icon,
-        ':flavor' => $flavor,
-        ':sort_order' => $cat['order'] ?? $index,
-        ':is_active' => $deletedAt ? 0 : 1,
-        ':deleted_at' => $deletedAt
-    ]);
-
-    $categoryId = $pdo->lastInsertId();
-    if (!$categoryId) {
-        // Catégorie existe déjà, récupérer son ID
-        $fetch = $pdo->prepare("SELECT id FROM categories WHERE restaurant_id = ? AND slug = ?");
-        $fetch->execute([SNACK_RESTAURANT_ID, $slug]);
-        $categoryId = $fetch->fetchColumn();
-    }
-
-    $categoryMapping[$slug] = $categoryId;
-    $categoryCount++;
-    echo "  ✓ {$cat['name']} (flavor: " . ($flavor ?: 'none') . ")\n";
 }
 
 echo "✅ $categoryCount catégories migrées\n\n";
@@ -151,20 +160,24 @@ foreach ($merged['menu']['categories'] as $cat) {
         $productSlug = $product['id'] ?? null;
         if (!$productSlug) continue;
 
-        $stmt->execute([
-            ':restaurant_id' => SNACK_RESTAURANT_ID,
-            ':category_id' => $categoryId,
-            ':name' => $product['name'] ?? $productSlug,
-            ':slug' => $productSlug,
-            ':description' => $product['description'] ?? null,
-            ':image' => $product['image'] ?? null,
-            ':price_solo' => $product['priceSolo'] ?? 0,
-            ':price_menu' => $product['priceMenu'] ?? null,
-            ':status' => ($product['status'] ?? 'available') === 'available' ? 'available' : 'unavailable',
-            ':sort_order' => $index
-        ]);
+        try {
+            $stmt->execute([
+                ':restaurant_id' => SNACK_RESTAURANT_ID,
+                ':category_id' => $categoryId,
+                ':name' => $product['name'] ?? $productSlug,
+                ':slug' => $productSlug,
+                ':description' => $product['description'] ?? null,
+                ':image' => $product['image'] ?? null,
+                ':price_solo' => $product['priceSolo'] ?? 0,
+                ':price_menu' => $product['priceMenu'] ?? null,
+                ':status' => ($product['status'] ?? 'available') === 'available' ? 'available' : 'unavailable',
+                ':sort_order' => $index
+            ]);
 
-        $productCount++;
+            $productCount++;
+        } catch (Exception $e) {
+            echo "  ❌ ERREUR produit '$productSlug': " . $e->getMessage() . "\n";
+        }
     }
 }
 
@@ -190,35 +203,39 @@ $supplementCount = 0;
 
 if (isset($runtime['supplements']['catalog'])) {
     foreach ($runtime['supplements']['catalog'] as $slug => $supp) {
-        // Déterminer le type (sale/sucre)
-        $type = 'both';
-        if (strpos($slug, 'sup-nutella') !== false || strpos($slug, 'sup-chocolat') !== false
-            || strpos($slug, 'sup-fruit') !== false || strpos($slug, 'sup-confiture') !== false) {
-            $type = 'sucre';
-        } elseif (strpos($slug, 'sup-fromage') !== false || strpos($slug, 'sup-viande') !== false
-            || strpos($slug, 'sup-oeuf') !== false || strpos($slug, 'sup-jambon') !== false) {
-            $type = 'sale';
+        try {
+            // Déterminer le type (sale/sucre)
+            $type = 'both';
+            if (strpos($slug, 'sup-nutella') !== false || strpos($slug, 'sup-chocolat') !== false
+                || strpos($slug, 'sup-fruit') !== false || strpos($slug, 'sup-confiture') !== false) {
+                $type = 'sucre';
+            } elseif (strpos($slug, 'sup-fromage') !== false || strpos($slug, 'sup-viande') !== false
+                || strpos($slug, 'sup-oeuf') !== false || strpos($slug, 'sup-jambon') !== false) {
+                $type = 'sale';
+            }
+
+            $stmt->execute([
+                ':restaurant_id' => SNACK_RESTAURANT_ID,
+                ':slug' => $slug,
+                ':name' => $supp['name'] ?? $slug,
+                ':price' => $supp['price'] ?? 0,
+                ':type' => $type,
+                ':sort_order' => $supplementCount,
+                ':status' => 'available'
+            ]);
+
+            $suppId = $pdo->lastInsertId();
+            if (!$suppId) {
+                $fetch = $pdo->prepare("SELECT id FROM supplements WHERE restaurant_id = ? AND slug = ?");
+                $fetch->execute([SNACK_RESTAURANT_ID, $slug]);
+                $suppId = $fetch->fetchColumn();
+            }
+
+            $supplementMapping[$slug] = $suppId;
+            $supplementCount++;
+        } catch (Exception $e) {
+            echo "  ❌ ERREUR supplément '$slug': " . $e->getMessage() . "\n";
         }
-
-        $stmt->execute([
-            ':restaurant_id' => SNACK_RESTAURANT_ID,
-            ':slug' => $slug,
-            ':name' => $supp['name'] ?? $slug,
-            ':price' => $supp['price'] ?? 0,
-            ':type' => $type,
-            ':sort_order' => $supplementCount,
-            ':status' => 'available'
-        ]);
-
-        $suppId = $pdo->lastInsertId();
-        if (!$suppId) {
-            $fetch = $pdo->prepare("SELECT id FROM supplements WHERE restaurant_id = ? AND slug = ?");
-            $fetch->execute([SNACK_RESTAURANT_ID, $slug]);
-            $suppId = $fetch->fetchColumn();
-        }
-
-        $supplementMapping[$slug] = $suppId;
-        $supplementCount++;
     }
 }
 
@@ -244,11 +261,15 @@ if (isset($runtime['supplements']['defaultForCategories'])) {
         foreach ($suppSlugs as $suppSlug) {
             if (!isset($supplementMapping[$suppSlug])) continue;
 
-            $stmt->execute([
-                ':category_id' => $categoryId,
-                ':supplement_id' => $supplementMapping[$suppSlug]
-            ]);
-            $assocCount++;
+            try {
+                $stmt->execute([
+                    ':category_id' => $categoryId,
+                    ':supplement_id' => $supplementMapping[$suppSlug]
+                ]);
+                $assocCount++;
+            } catch (Exception $e) {
+                echo "  ⚠ Association ignorée ($categorySlug → $suppSlug): " . $e->getMessage() . "\n";
+            }
         }
     }
 }
