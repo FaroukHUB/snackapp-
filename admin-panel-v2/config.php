@@ -227,6 +227,15 @@ function generatePublicMenuJson($runtime) {
 
     $merged = applyRuntimeToConfig($config, $runtime);
 
+    $menuJsonPath = __DIR__ . '/../config/menu.json';
+
+    // Lire le menu.json existant pour préserver categoryIcons
+    $existingData = [];
+    if (file_exists($menuJsonPath)) {
+        clearstatcache(true, $menuJsonPath);
+        $existingData = json_decode(file_get_contents($menuJsonPath), true) ?? [];
+    }
+
     // Construire le JSON public avec menu + supplements
     $publicData = [
         'version' => 1,
@@ -238,6 +247,11 @@ function generatePublicMenuJson($runtime) {
         ]
     ];
 
+    // Préserver categoryIcons du menu.json existant
+    if (isset($existingData['categoryIcons'])) {
+        $publicData['categoryIcons'] = $existingData['categoryIcons'];
+    }
+
     // Ajouter featured si présent dans config
     if (isset($config['featured'])) {
         $publicData['featured'] = $config['featured'];
@@ -247,8 +261,6 @@ function generatePublicMenuJson($runtime) {
     if (isset($config['formula'])) {
         $publicData['formula'] = $config['formula'];
     }
-
-    $menuJsonPath = __DIR__ . '/../config/menu.json';
     $json = json_encode($publicData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
     if ($json === false) {
