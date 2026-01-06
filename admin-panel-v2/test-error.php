@@ -32,21 +32,33 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     echo "⚠️ Session non active<br>\n";
 }
 
-// Test 4: Include index.php
-echo "<h3>4. Test chargement index.php</h3>\n";
-echo "Tentative de chargement...<br>\n";
-ob_start();
-try {
-    include __DIR__ . '/index.php';
-    echo "✅ index.php chargé<br>\n";
-} catch (Exception $e) {
-    ob_end_clean();
-    echo "❌ Erreur index.php: " . $e->getMessage() . "<br>\n";
-    echo "<pre>" . $e->getTraceAsString() . "</pre>\n";
-} catch (ParseError $e) {
-    ob_end_clean();
-    echo "❌ Erreur de syntaxe dans index.php:<br>\n";
-    echo "Fichier: " . $e->getFile() . "<br>\n";
-    echo "Ligne: " . $e->getLine() . "<br>\n";
-    echo "Message: " . $e->getMessage() . "<br>\n";
+// Test 4: Vérifier erreurs PHP
+echo "<h3>4. Dernières erreurs PHP</h3>\n";
+$errorLog = ini_get('error_log');
+if ($errorLog && file_exists($errorLog)) {
+    echo "Log: $errorLog<br>\n";
+    $lines = file($errorLog);
+    $recent = array_slice($lines, -20);
+    echo "<pre>" . htmlspecialchars(implode('', $recent)) . "</pre>\n";
+} else {
+    echo "Pas de fichier error_log configuré<br>\n";
 }
+
+// Test 5: Tester config.php directement
+echo "<h3>5. Test loadConfig()</h3>\n";
+try {
+    $config = loadConfig();
+    if ($config) {
+        echo "✅ loadConfig() OK<br>\n";
+        echo "Restaurant: " . ($config['name'] ?? 'N/A') . "<br>\n";
+    } else {
+        echo "❌ loadConfig() retourne NULL<br>\n";
+    }
+} catch (Exception $e) {
+    echo "❌ Erreur loadConfig: " . $e->getMessage() . "<br>\n";
+}
+
+// Test 6: Variables globales
+echo "<h3>6. Variables globales</h3>\n";
+echo "config: " . (isset($GLOBALS['config']) ? 'SET' : 'NON SET') . "<br>\n";
+echo "primaryColor: " . ($GLOBALS['primaryColor'] ?? 'NON SET') . "<br>\n";
