@@ -26,22 +26,28 @@ try {
 }
 
 // Chargement données JSON
-echo "📂 Chargement des données JSON...\n";
-$config = loadConfig();
-if (!$config) {
-    die("❌ Impossible de charger le-marvelous.config.js\n");
-}
-echo "✅ Config chargé : " . count($config['menu']['categories'] ?? []) . " catégories de base\n";
+echo "📂 Chargement des données depuis menu.json...\n";
 
+$menuJsonPath = SNACK_ROOT . '/config/menu.json';
+if (!file_exists($menuJsonPath)) {
+    die("❌ menu.json introuvable : $menuJsonPath\n");
+}
+
+$menuData = json_decode(file_get_contents($menuJsonPath), true);
+if (!$menuData) {
+    die("❌ Impossible de parser menu.json\n");
+}
+
+echo "✅ menu.json chargé : " . count($menuData['menu']['categories'] ?? []) . " catégories\n";
+
+// Charger aussi le runtime pour les deletedCategories
 $runtime = loadMenuRuntime();
-echo "✅ Runtime chargé : " . count($runtime['customCategories'] ?? []) . " catégories custom\n";
+$deletedCategories = array_flip($runtime['deletedCategories'] ?? []);
 echo "✅ Catégories supprimées : " . count($runtime['deletedCategories'] ?? []) . "\n\n";
 
-// Fusion
-$merged = applyRuntimeToConfig($config, $runtime);
-$deletedCategories = array_flip($runtime['deletedCategories'] ?? []);
-
-echo "📊 Catégories après fusion : " . count($merged['menu']['categories']) . "\n\n";
+// Utiliser directement les données de menu.json (déjà fusionnées)
+$merged = ['menu' => $menuData['menu'] ?? ['categories' => []]];
+echo "📊 Total catégories à migrer : " . count($merged['menu']['categories']) . "\n\n";
 
 // ========================================
 // MIGRATION CATÉGORIES
