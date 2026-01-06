@@ -123,12 +123,17 @@ SELECT * FROM categories WHERE deleted_at IS NULL;
    - Exécuté avec succès sur MySQL
    - Commit: `7816f41`
 
-2. ✅ **Phase 2:** Script migration données créé et corrigé
-   - Script `database/migrate-json-to-mysql.php`
-   - Scripts helper: `run-migration-on-server.sh`, `verify-migration.php`
-   - Migre catégories, produits, suppléments, associations
+2. ✅ **Phase 2:** Migration des données - **100% RÉUSSIE**
+   - Scripts: `migrate-json-to-mysql.php`, `run-migration-on-server.sh`, `verify-migration.php`
+   - **Résultats finaux confirmés (MySQL):**
+     - ✅ **14 catégories** (11 actives, 3 supprimées soft delete)
+     - ✅ **Flavors détectés:** 1 salée, 3 sucrées (auto-assignement fonctionnel)
+     - ✅ **70 produits** (tous disponibles)
+     - ✅ **50 suppléments** (10 salés, 30 sucrés, 10 both)
+     - ✅ **100 associations** catégories ↔ suppléments
    - **Tous problèmes résolus** (voir section Problèmes Résolus)
    - Commits: `a4269e1`, `82f2394`, `35aa38c`, `e18b22b`, `63b7796`, `0e04f1c`, `b173bb9`
+   - **Exécutée le:** 2026-01-06
 
 ---
 
@@ -172,58 +177,78 @@ SELECT * FROM categories WHERE deleted_at IS NULL;
 
 ---
 
-## 🔄 EN COURS - Exécution Migration Données
+## 🔄 EN COURS - Phase 3 : Modification API
 
-### ⏸️ EN ATTENTE D'EXÉCUTION SERVEUR
+### Objectif
+Modifier `admin-panel-v2/api/products.php` pour utiliser MySQL au lieu du système de fichiers JSON.
 
-**Scripts prêts et corrigés :**
-- ✅ `database/migrate-json-to-mysql.php` - Migration complète (tous bugs corrigés)
-- ✅ `database/run-migration-on-server.sh` - Script automatisé
-- ✅ `database/verify-migration.php` - Vérification post-migration
+### État actuel du système
+**⚠️ IMPORTANT:** Les données sont dans MySQL MAIS l'admin panel utilise encore les fichiers JSON !
 
-**ÉTAT ACTUEL (dernier commit: `b173bb9`):**
-- ✅ Script charge suppléments depuis `menu.json` (37+ suppléments)
-- ✅ Utilise `restaurant_id = 2` (ID correct)
-- ✅ Gestion d'erreurs complète
-- ✅ Fusionner associations menu.json + runtime
-- ✅ Ready pour migration complète
+**Fichiers à modifier:**
+- `admin-panel-v2/api/products.php` - Endpoints CRUD
+- Potentiellement `admin-panel-v2/config.php` - Fonctions helpers
 
-**À exécuter SUR LE SERVEUR o2switch:**
-```bash
-cd ~/Marvelous.mon-agenceweb.fr
-bash database/run-migration-on-server.sh
+### Endpoints à migrer vers MySQL
+
+#### 1. GET - Récupération données (CRITIQUE)
+```php
+// AVANT: Lit menu.json
+$config = loadConfig();
+$runtime = loadMenuRuntime();
+$merged = applyRuntimeToConfig($config, $runtime);
+
+// APRÈS: SELECT depuis MySQL
+$categories = MenuRepository::getAllCategories($restaurantId);
+$products = MenuRepository::getAllProducts($restaurantId);
+$supplements = MenuRepository::getAllSupplements($restaurantId);
 ```
 
-**Ce script va migrer:**
-- 12-14 catégories (avec icon, flavor, deleted_at)
-- 70+ produits
-- **37+ suppléments** (fromages, viandes, nutella, fruits, etc.)
-- Associations catégories ↔ suppléments
-
-**Vérification après migration:**
-```bash
-php database/verify-migration.php
+#### 2. add_category - Création catégorie
+```php
+// APRÈS: INSERT MySQL + auto-assignment suppléments
+INSERT INTO categories (restaurant_id, name, description, icon, flavor, ...)
+// Si flavor='sale' → INSERT INTO category_supplements (10 supps salés)
+// Si flavor='sucre' → INSERT INTO category_supplements (30 supps sucrés)
 ```
+
+#### 3. edit_category - Modification catégorie
+```php
+// APRÈS: UPDATE MySQL
+UPDATE categories SET name=?, description=?, icon=?, flavor=? WHERE id=?
+```
+
+#### 4. delete_category - Suppression catégorie
+```php
+// APRÈS: Soft delete MySQL
+UPDATE categories SET deleted_at = NOW() WHERE id = ?
+```
+
+#### 5. add_product, edit_product, delete_product
+Même logique : INSERT/UPDATE/Soft DELETE MySQL
 
 ---
 
 ## ⏳ À FAIRE - Suite Migration
 
-### IMMÉDIAT (~2k tokens)
+### Phase 2 : Migration données ✅ TERMINÉE
 - [x] **Fix loadConfig()** - Lecture directe menu.json ✅
 - [x] **Fix foreign key** - restaurant_id=2 ✅
 - [x] **Fix suppléments** - Chargement depuis menu.json ✅
 - [x] **Fix vérification** - Utilise restaurant_id=2 ✅
-- [ ] **⏸️ ATTENTE:** Exécuter migration sur serveur
-- [ ] **Vérifier données** - Confirmer 37+ suppléments migrés
+- [x] **Exécuter migration** - 50 suppléments, 100 associations ✅
+- [x] **Vérifier données MySQL** - Tout confirmé ✅
 
-### Phase 3 : Modification API (~30k tokens) **⚠️ CRITIQUE**
-- [ ] Modifier `add_category` → INSERT MySQL + assignment suppléments
-- [ ] Modifier `edit_category` → UPDATE MySQL
-- [ ] Modifier `delete_category` → Soft delete MySQL
-- [ ] Modifier `add_product` → INSERT MySQL
-- [ ] **Modifier GET endpoint** → SELECT depuis MySQL (pas fichiers)
-- [ ] Supprimer appels à loadConfig/generatePublicMenuJson
+### Phase 3 : Modification API (~30k tokens) **⚠️ EN COURS**
+- [ ] **Créer MenuRepository** - Classe pour requêtes MySQL
+- [ ] **Modifier GET endpoint** → SELECT depuis MySQL (CRITIQUE - admin panel)
+- [ ] **Modifier add_category** → INSERT MySQL + auto-assignment suppléments
+- [ ] **Modifier edit_category** → UPDATE MySQL
+- [ ] **Modifier delete_category** → Soft delete MySQL (UPDATE deleted_at)
+- [ ] **Modifier add_product** → INSERT MySQL
+- [ ] **Modifier edit_product** → UPDATE MySQL
+- [ ] **Modifier delete_product** → Soft delete MySQL
+- [ ] **Nettoyer** - Supprimer appels loadConfig/generatePublicMenuJson
 
 ### Phase 4 : Tests (~10k tokens)
 - [ ] Test création catégorie (admin)
@@ -264,10 +289,11 @@ cat MIGRATION-MYSQL-PROGRESS.md
 
 ---
 
-**Dernière mise à jour :** Tous problèmes migration résolus - Scripts prêts pour exécution (commit `b173bb9`)
+**Dernière mise à jour :** Phase 2 migration TERMINÉE avec succès - Démarrage Phase 3 (commit `53d0a9b`)
 
 **Résumé session actuelle :**
-- ✅ 5 problèmes critiques identifiés et résolus
-- ✅ Script migration 100% fonctionnel
-- ⏸️ En attente : Exécution finale sur serveur
-- 🎯 Prochaine étape : Phase 3 - Modification API (30k tokens estimés)
+- ✅ Phase 2 : 5 problèmes critiques résolus
+- ✅ Migration données : 50 suppléments, 100 associations, 70 produits, 14 catégories
+- ✅ Vérification MySQL : Tout confirmé en base de données
+- 🔄 Phase 3 EN COURS : Modification API pour utiliser MySQL
+- 🎯 Tokens restants : ~120k (largement suffisant pour Phases 3, 4, 5)
