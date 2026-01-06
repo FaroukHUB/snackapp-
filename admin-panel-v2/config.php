@@ -141,8 +141,28 @@ function sendWhatsAppMessage($phone, $message) {
     return $url;
 }
 
-// Charger le config global
+// Charger le config global avec fallback
 $GLOBALS['config'] = loadConfig();
+
+// Si loadConfig() échoue, utiliser config minimal
+if (!$GLOBALS['config'] || !is_array($GLOBALS['config'])) {
+    error_log('⚠️ [CONFIG] loadConfig() a échoué - utilisation config minimal');
+    $GLOBALS['config'] = [
+        'id' => 'le-marvelous',
+        'name' => 'Le Marvelous',
+        'branding' => [
+            'primaryColor' => '#f97316',
+            'logo' => 'images/logo.png'
+        ],
+        'menu' => ['categories' => []],
+        'contact' => [
+            'phone' => '',
+            'address' => '',
+            'hours' => []
+        ]
+    ];
+}
+
 $GLOBALS['primaryColor'] = $GLOBALS['config']['branding']['primaryColor'] ?? '#f97316';
 
 
