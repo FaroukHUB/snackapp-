@@ -463,6 +463,7 @@ switch ($action) {
             'id' => $id,
             'name' => $name,
             'description' => $description,
+            'flavor' => $flavor, // ✅ Stocker le flavor pour le site
             'items' => []
         ];
 
