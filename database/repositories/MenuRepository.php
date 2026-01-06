@@ -4,7 +4,7 @@
  * Remplace le système de fichiers JSON
  */
 
-require_once __DIR__ . '/../database/Database.php';
+require_once __DIR__ . '/../Database.php';
 
 class MenuRepository {
     private static $restaurantId = 2; // Le Marvelous
