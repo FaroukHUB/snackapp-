@@ -5,7 +5,7 @@
  */
 
 define('SNACK_ROOT', __DIR__ . '/..');
-define('SNACK_RESTAURANT_ID', 1); // ID du restaurant Le Marvelous
+define('SNACK_RESTAURANT_ID', 2); // ID du restaurant Le Marvelous (table restaurants)
 
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/../admin-panel-v2/config.php';
