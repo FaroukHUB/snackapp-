@@ -337,21 +337,6 @@ if ($useMySQL) {
             }
             break;
 
-        case 'delete_category':
-            $categoryId = (string)($input['category_id'] ?? '');
-
-            if ($categoryId === '') {
-                jsonError('ID manquant');
-            }
-
-            try {
-                MenuRepository::deleteCategory(SNACK_RESTAURANT_ID, $categoryId);
-                jsonSuccess(['deleted' => true]);
-            } catch (Exception $e) {
-                jsonError($e->getMessage());
-            }
-            break;
-
         case 'add_product':
             $categoryId = (int)($input['category_id'] ?? 0);
             $name = trim((string)($input['name'] ?? ''));
