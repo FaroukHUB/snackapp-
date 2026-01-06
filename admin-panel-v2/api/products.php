@@ -97,6 +97,16 @@ function handleImageUpload(string $baseId): ?string {
     return 'images/uploads/' . $filename;
 }
 
+/**
+ * Génère menu.json depuis MySQL après modification
+ */
+function regenerateMenuJson(): void {
+    exec('cd ' . escapeshellarg(SNACK_DB_PATH) . ' && php generateMenuJson.php 2>&1', $output, $returnCode);
+    if ($returnCode !== 0) {
+        error_log('[PRODUCTS API] ⚠️ Erreur génération menu.json: ' . implode("\n", $output));
+    }
+}
+
 /* =========================
    MODE MySQL ou JSON
    ========================= */
@@ -225,6 +235,7 @@ if ($useMySQL) {
 
             try {
                 $result = MenuRepository::addCategory($name, $description, $icon, $flavor);
+                regenerateMenuJson();
                 jsonSuccess(['category' => $result]);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -244,6 +255,7 @@ if ($useMySQL) {
 
             try {
                 MenuRepository::editCategory($categoryId, $name, $description, $icon, $flavor);
+                regenerateMenuJson();
                 jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon, 'flavor' => $flavor]]);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -259,6 +271,7 @@ if ($useMySQL) {
 
             try {
                 MenuRepository::deleteCategory($categoryId);
+                regenerateMenuJson();
                 jsonSuccess(['message' => 'Catégorie supprimée']);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -281,6 +294,7 @@ if ($useMySQL) {
 
             try {
                 $result = MenuRepository::addProduct($categoryId, $name, $description, $imagePath, $priceSolo, $priceMenu);
+                regenerateMenuJson();
                 jsonSuccess(['product' => $result]);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -309,6 +323,7 @@ if ($useMySQL) {
 
             try {
                 MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status);
+                regenerateMenuJson();
                 jsonSuccess(['product' => ['id' => $productId, 'name' => $name]]);
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -329,6 +344,7 @@ if ($useMySQL) {
                 $pdo = Database::getInstance();
                 $stmt = $pdo->prepare("UPDATE products SET status = ? WHERE id = ?");
                 $stmt->execute([$status, $productId]);
+                regenerateMenuJson();
                 jsonSuccess();
             } catch (Exception $e) {
                 jsonError($e->getMessage());
@@ -344,6 +360,7 @@ if ($useMySQL) {
 
             try {
                 MenuRepository::deleteProduct($productId);
+                regenerateMenuJson();
                 jsonSuccess();
             } catch (Exception $e) {
                 jsonError($e->getMessage());
