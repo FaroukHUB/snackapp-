@@ -91,7 +91,15 @@ class OrderNotificationSystem {
        ======================= */
     async checkNewOrders() {
         try {
-            const res = await fetch('api/orders.php?action=list&limit=1');
+            const res = await fetch('api/orders.php?action=list&limit=1', {
+                signal: AbortSignal.timeout(5000) // Timeout 5s
+            });
+
+            if (!res.ok) {
+                console.warn('Check commandes failed:', res.status);
+                return;
+            }
+
             const data = await res.json();
 
             if (!data.success || !data.orders || !data.orders.length) return;
@@ -108,7 +116,10 @@ class OrderNotificationSystem {
                 this.onNewOrder(latest);
             }
         } catch (e) {
-            console.error('Erreur check commandes', e);
+            // Ne pas logger en boucle pour éviter spam console
+            if (e.name !== 'AbortError') {
+                console.warn('Check commandes silencieux:', e.message);
+            }
         }
     }
 
@@ -186,7 +197,7 @@ class OrderNotificationSystem {
     /* =======================
        DÉMARRAGE
        ======================= */
-    async start(intervalSeconds = 10) {
+    async start(intervalSeconds = 30) {
         await this.requestAudioPermission();
         this.checkNewOrders();
         this.checkInterval = setInterval(
