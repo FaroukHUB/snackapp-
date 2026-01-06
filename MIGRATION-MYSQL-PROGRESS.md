@@ -129,38 +129,51 @@ SELECT * FROM categories WHERE deleted_at IS NULL;
 
 ---
 
-## 🔄 EN COURS - Problème loadConfig()
+## ✅ RÉSOLU - Problème loadConfig()
 
-**Erreur actuelle:** `loadConfig()` échoue dans le script de migration
+**Erreur:** `loadConfig()` échouait dans le script de migration
 
 **Cause:** `le-marvelous.config.js` ne peut pas être parsé correctement
 
-**Solution à implémenter:** Lire directement `menu.json` au lieu de `le-marvelous.config.js`
+**Solution appliquée:** Script modifié pour lire directement `menu.json` + `menu.runtime.json`
+
+**Commit:** `35aa38c` - fix: Lecture directe menu.json au lieu de loadConfig()
 
 ---
 
-## 🔄 EN COURS
+## 🔄 EN COURS - Exécution Migration Données
 
-### Problème actuel : Catégories ne se suppriment pas
+### Prêt pour exécution sur serveur
 
-**Diagnostic :**
-- Backend fonctionne (catégories ajoutées à `deletedCategories`)
-- `generatePublicMenuJson()` échoue → `loadConfig()` retourne null
-- Le menu est actuellement en **fichiers JSON**, pas MySQL
-- Migration MySQL **incomplète** ou **non faite**
+**Scripts créés:**
+- ✅ `database/migrate-json-to-mysql.php` - Migration des données
+- ✅ `database/run-migration-on-server.sh` - Script automatisé pour serveur
+- ✅ `database/verify-migration.php` - Vérification post-migration
 
-**Fichiers impliqués :**
-- `config/le-marvelous.config.js` (16K) - menu de base
-- `config/menu.runtime.json` - modifications admin
-- `config/menu.json` (47K) - menu public fusionné
+**À exécuter SUR LE SERVEUR o2switch:**
+```bash
+cd ~/Marvelous.mon-agenceweb.fr
+bash database/run-migration-on-server.sh
+```
+
+Ce script va:
+1. Pull les derniers changements GitHub
+2. Exécuter la migration JSON → MySQL
+3. Afficher les statistiques
+
+**Vérification après migration:**
+```bash
+php database/verify-migration.php
+```
 
 ---
 
 ## ⏳ À FAIRE - Suite Migration
 
 ### IMMÉDIAT (~3k tokens)
-- [ ] **Fix script migration:** Lire menu.json directement
-- [ ] **Exécuter migration données** vers MySQL
+- [x] **Fix script migration:** Lire menu.json directement ✅
+- [x] **Scripts helper créés** (run-migration, verify) ✅
+- [ ] **⏸️ ATTENTE:** Exécuter migration sur serveur (voir section EN COURS)
 - [ ] **Vérifier données** dans MySQL
 
 ### Phase 3 : Modification API (~30k tokens) **⚠️ CRITIQUE**
@@ -210,4 +223,4 @@ cat MIGRATION-MYSQL-PROGRESS.md
 
 ---
 
-**Dernière mise à jour :** En attente de décision utilisateur (fix rapide ou migration complète)
+**Dernière mise à jour :** Scripts migration prêts - En attente exécution sur serveur (commit `50973f0`)
