@@ -29,10 +29,20 @@ try {
     $supplements = MenuRepository::getAllSupplements();
     $categorySupplements = MenuRepository::getCategorySupplements();
 
-    // ✅ PRÉSERVER options spéciales de l'ancien menu.json (sans toucher aux prix)
+    // ✅ PRÉSERVER les icônes de l'ancien menu.json EN PRIORITÉ
+    $categoryIcons = $oldMenuData['categoryIcons'] ?? [];
+
+    // ✅ ENRICHIR avec options spéciales de l'ancien menu.json
     foreach ($categories as &$cat) {
+        $catSlug = $cat['slug'] ?? '';
+
+        // Ajouter icône depuis MySQL si pas dans categoryIcons
+        if (isset($cat['icon']) && !empty($catSlug) && !isset($categoryIcons[$catSlug])) {
+            $categoryIcons[$catSlug] = $cat['icon'];
+        }
+
         foreach ($cat['items'] as &$item) {
-            // Convertir prix en nombres (ils sont déjà en DA, pas besoin de /100)
+            // Convertir prix en nombres (déjà en DA, pas besoin de /100)
             if (isset($item['priceSolo'])) {
                 $item['priceSolo'] = floatval($item['priceSolo']);
             }
@@ -42,13 +52,25 @@ try {
 
             // ✅ PRÉSERVER options spéciales de l'ancien menu.json
             $itemSlug = $item['slug'] ?? '';
+            $itemId = $item['id'] ?? '';
 
-            // Chercher dans l'ancien menu.json
+            // Chercher dans l'ancien menu.json (essayer plusieurs correspondances)
             if (!empty($oldMenuData['menu']['categories'])) {
                 foreach ($oldMenuData['menu']['categories'] as $oldCat) {
                     if (!empty($oldCat['items'])) {
                         foreach ($oldCat['items'] as $oldItem) {
-                            if (($oldItem['id'] ?? '') === $itemSlug || ($oldItem['slug'] ?? '') === $itemSlug) {
+                            $oldItemId = $oldItem['id'] ?? '';
+                            $oldItemSlug = $oldItem['slug'] ?? '';
+
+                            // Essayer plusieurs correspondances
+                            $match = false;
+                            if ($oldItemSlug && ($oldItemSlug === $itemSlug || $oldItemSlug === $itemId)) {
+                                $match = true;
+                            } elseif ($oldItemId && ($oldItemId === $itemSlug || $oldItemId === $itemId)) {
+                                $match = true;
+                            }
+
+                            if ($match) {
                                 // Préserver pâtisserieOptions
                                 if (isset($oldItem['pâtisserieOptions'])) {
                                     $item['pâtisserieOptions'] = $oldItem['pâtisserieOptions'];
@@ -57,12 +79,17 @@ try {
                                 if (isset($oldItem['beverageOptions'])) {
                                     $item['beverageOptions'] = $oldItem['beverageOptions'];
                                 }
-                                // Préserver autres options spéciales
+                                // Préserver customizationNote
                                 if (isset($oldItem['customizationNote'])) {
                                     $item['customizationNote'] = $oldItem['customizationNote'];
                                 }
+                                // Préserver requiresChoice
                                 if (isset($oldItem['requiresChoice'])) {
                                     $item['requiresChoice'] = $oldItem['requiresChoice'];
+                                }
+                                // Préserver badge
+                                if (isset($oldItem['badge'])) {
+                                    $item['badge'] = $oldItem['badge'];
                                 }
                                 break 2;
                             }
@@ -80,14 +107,6 @@ try {
             $supp['price'] = floatval($supp['price']);
         }
         $supplementsFormatted[$slug] = $supp;
-    }
-
-    // Récupérer les icônes des catégories
-    $categoryIcons = [];
-    foreach ($categories as $cat) {
-        if (isset($cat['icon']) && isset($cat['slug'])) {
-            $categoryIcons[$cat['slug']] = $cat['icon'];
-        }
     }
 
     // ✅ PRÉSERVER formules et featured depuis ancien menu.json
