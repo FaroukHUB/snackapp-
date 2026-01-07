@@ -928,6 +928,28 @@
                                 <option value="30">Villa 30</option>
                             </select>
                         </div>
+
+                        <!-- Option de monnaie pour livraison -->
+                        <div class="form-row">
+                            <label>💵 Paiement et monnaie *</label>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px; border: 2px solid var(--gray-200); border-radius: 8px; transition: all 0.2s;">
+                                    <input type="radio" name="changeOption" value="exact" onchange="CartPage.setChangeOption('exact')" checked>
+                                    <span style="flex: 1;">✅ J'ai l'appoint (montant exact)</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px; border: 2px solid var(--gray-200); border-radius: 8px; transition: all 0.2s;">
+                                    <input type="radio" name="changeOption" value="change" onchange="CartPage.setChangeOption('change')">
+                                    <span style="flex: 1;">💵 Prévoir monnaie sur:</span>
+                                    <input type="number" id="changeForAmount" placeholder="Ex: 5000" min="0" step="100"
+                                           style="width: 120px; padding: 8px; border: 1px solid var(--gray-300); border-radius: 6px; font-size: 14px;"
+                                           disabled>
+                                    <span style="white-space: nowrap;">DA</span>
+                                </label>
+                            </div>
+                            <small style="color: var(--gray-500); font-size: 12px; margin-top: 4px; display: block;">
+                                💡 Facilitez la livraison en indiquant si vous avez l'appoint
+                            </small>
+                        </div>
                     </div>
 
                     <div class="form-row">
@@ -1533,6 +1555,19 @@
                 }
             },
 
+            setChangeOption(option) {
+                this.changeOption = option;
+                const changeInput = document.getElementById('changeForAmount');
+
+                if (option === 'change') {
+                    changeInput.disabled = false;
+                    changeInput.focus();
+                } else {
+                    changeInput.disabled = true;
+                    changeInput.value = '';
+                }
+            },
+
             async applyPromo() {
                 const code = document.getElementById('promoCode').value.trim().toUpperCase();
 
@@ -1826,6 +1861,21 @@
                             return;
                         }
                     }
+
+                    // Validation option de monnaie
+                    const changeOption = this.changeOption || 'exact';
+                    if (changeOption === 'change') {
+                        const changeForAmount = parseFloat(document.getElementById('changeForAmount').value);
+                        if (!changeForAmount || changeForAmount <= 0) {
+                            this.showToast('Veuillez indiquer le montant pour la monnaie', 'error');
+                            return;
+                        }
+                        const total = Cart.getSubtotal() - this.discount;
+                        if (changeForAmount < total) {
+                            this.showToast('Le montant pour la monnaie doit être supérieur au total', 'error');
+                            return;
+                        }
+                    }
                 }
 
                 // Disable button during submission
@@ -1896,6 +1946,20 @@
                     }
                 }
 
+                // Prepare payment/change info for delivery
+                let paymentInfo = {};
+                if (this.mode === 'delivery') {
+                    const changeOption = this.changeOption || 'exact';
+                    if (changeOption === 'exact') {
+                        paymentInfo.has_exact_change = true;
+                    } else if (changeOption === 'change') {
+                        const changeForAmount = parseFloat(document.getElementById('changeForAmount').value);
+                        if (changeForAmount > 0) {
+                            paymentInfo.change_for = changeForAmount;
+                        }
+                    }
+                }
+
                 // Prepare order data for admin API
                 const orderData = {
                     action: 'add',
@@ -1906,7 +1970,8 @@
                     total: totalAmount,
                     loyalty_reward_id: this.selectedReward || null,
                     loyalty_customer_id: this.loyaltyCustomer?.id || null,
-                    notes: [modeNotes, note].filter(Boolean).join(' | ')
+                    notes: [modeNotes, note].filter(Boolean).join(' | '),
+                    ...paymentInfo
                 };
 
                 console.log('Order data being sent:', orderData);

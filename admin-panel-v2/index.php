@@ -1039,6 +1039,49 @@ if (isset($_GET['export'])) {
                 </div>
             </div>
 
+            <!-- MODAL SÉLECTION LIVREUR -->
+            <div id="delivery-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target === this) closeDeliveryModal()">
+                <div style="max-width: 500px; width: 100%; background: #1a1f2e; border-radius: 20px; padding: 25px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation()">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="color: white; margin: 0; font-size: 20px;">
+                            <i class="fas fa-motorcycle" style="color: #f59e0b;"></i> Sélectionner un livreur
+                        </h3>
+                        <button onclick="closeDeliveryModal()" style="background: #374151; border: none; color: white; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 18px;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <p style="color: #9ca3af; font-size: 14px; margin-bottom: 20px;">
+                        Choisissez un livreur pour lui envoyer les détails de la commande sur WhatsApp
+                    </p>
+
+                    <div style="background: #0f1419; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead style="background: #1e293b;">
+                                <tr>
+                                    <th style="padding: 12px; text-align: left; color: #9ca3af; font-size: 11px; text-transform: uppercase;">Livreur</th>
+                                    <th style="padding: 12px; text-align: left; color: #9ca3af; font-size: 11px; text-transform: uppercase;">WhatsApp</th>
+                                    <th style="padding: 12px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="livreurs-list">
+                                <tr>
+                                    <td colspan="3" style="text-align: center; padding: 30px; color: #9ca3af;">
+                                        <i class="fas fa-spinner fa-spin"></i> Chargement...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: center;">
+                        <a href="livreurs-manager.php" style="color: #60a5fa; text-decoration: none; font-size: 13px;">
+                            <i class="fas fa-cog"></i> Gérer les livreurs
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <script>
             // Stocker les données des commandes pour le modal
             const ordersData = <?php echo json_encode($orders); ?>;
@@ -1197,6 +1240,16 @@ if (isset($_GET['export'])) {
                     `;
                 }
 
+                // Bouton "Envoyer au livreur" (seulement pour livraisons)
+                const isDelivery = order.notes && order.notes.includes('LIVRAISON');
+                if (isDelivery) {
+                    html += `
+                        <button onclick="openSendToDeliveryModal('${order.id}')" style="padding: 14px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i class="fas fa-motorcycle"></i> Envoyer au livreur
+                        </button>
+                    `;
+                }
+
                 html += `
                     <a href="https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Salam alaykoum c\'est le Marvellous 🧇 votre commande #' + order.id + ' est prête vous pouvez venir la récupérer marhabaa 🌟')}" target="_blank" style="width: 60px; height: 60px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); font-size: 24px;">
                         <i class="fab fa-whatsapp"></i>
@@ -1218,6 +1271,106 @@ if (isset($_GET['export'])) {
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeOrderDetails();
             });
+
+            // ========================================
+            // GESTION ENVOI AU LIVREUR
+            // ========================================
+            let currentOrderIdForDelivery = null;
+            let livreurs = [];
+
+            // Charger les livreurs
+            async function loadLivreurs() {
+                try {
+                    const res = await fetch('api/livreurs.php?action=list');
+                    const data = await res.json();
+                    if (data.success && data.livreurs) {
+                        livreurs = Object.values(data.livreurs).filter(l => l.actif);
+                    }
+                } catch (err) {
+                    console.error('Erreur chargement livreurs:', err);
+                }
+            }
+
+            // Ouvrir modal sélection livreur
+            function openSendToDeliveryModal(orderId) {
+                currentOrderIdForDelivery = orderId;
+                const modal = document.getElementById('delivery-modal');
+                if (!modal) return;
+
+                const tbody = document.getElementById('livreurs-list');
+                if (livreurs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:30px;color:#9ca3af">Aucun livreur actif. <a href="livreurs-manager.php" style="color:#60a5fa">Ajouter un livreur</a></td></tr>';
+                } else {
+                    tbody.innerHTML = livreurs.map(l => `
+                        <tr style="cursor:pointer" onclick="sendToDelivery('${orderId}', '${l.id}')">
+                            <td style="padding:12px;border-bottom:1px solid #374151">
+                                <i class="fas fa-user" style="color:#f59e0b"></i> <strong>${escapeHtml(l.prenom)}</strong>
+                            </td>
+                            <td style="padding:12px;border-bottom:1px solid #374151;color:#9ca3af">
+                                <i class="fab fa-whatsapp"></i> ${escapeHtml(l.whatsapp)}
+                            </td>
+                            <td style="padding:12px;border-bottom:1px solid #374151;text-align:right">
+                                <i class="fas fa-chevron-right" style="color:#60a5fa"></i>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeDeliveryModal() {
+                document.getElementById('delivery-modal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+                currentOrderIdForDelivery = null;
+            }
+
+            // Envoyer la commande au livreur
+            async function sendToDelivery(orderId, livreurId) {
+                try {
+                    const formData = new FormData();
+                    formData.append('action', 'send_to_delivery');
+                    formData.append('order_id', orderId);
+                    formData.append('livreur_id', livreurId);
+                    formData.append('csrf_token', '<?= $csrfToken ?>');
+
+                    const res = await fetch('api/livreurs.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await res.json();
+
+                    if (data.success && data.whatsapp_url) {
+                        // Ouvrir WhatsApp
+                        window.open(data.whatsapp_url, '_blank');
+                        closeDeliveryModal();
+                        closeOrderDetails();
+
+                        // Toast de succès
+                        const toast = document.createElement('div');
+                        toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#10b981;color:white;padding:16px 20px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.3);z-index:99999;animation:slideIn .3s ease';
+                        toast.innerHTML = '<i class="fas fa-check-circle"></i> Envoyé au livreur !';
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+                    } else {
+                        alert('Erreur: ' + (data.error || 'Impossible d\'envoyer'));
+                    }
+                } catch (err) {
+                    console.error('Erreur envoi:', err);
+                    alert('Erreur réseau');
+                }
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Charger les livreurs au démarrage
+            loadLivreurs();
             </script>
 
         </div>
