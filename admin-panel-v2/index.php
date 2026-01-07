@@ -1355,11 +1355,11 @@ if (isset($_GET['export'])) {
                         document.body.appendChild(toast);
                         setTimeout(() => toast.remove(), 3000);
                     } else {
-                        alert('Erreur: ' + (data.error || 'Impossible d\'envoyer'));
+                        alert('Erreur: ' + (data.message || data.error || 'Impossible d\'envoyer'));
                     }
                 } catch (err) {
                     console.error('Erreur envoi:', err);
-                    alert('Erreur réseau');
+                    alert('Erreur réseau: ' + err.message);
                 }
             }
 

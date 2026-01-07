@@ -132,26 +132,31 @@ switch ($action) {
         }
 
         // Charger la commande
-        $orders = loadData('orders.json');
-        $order = null;
-        foreach ($orders as $o) {
-            if ($o['order_number'] === $orderId || $o['id'] === $orderId) {
-                $order = $o;
-                break;
+        try {
+            $orders = loadData('orders.json') ?? [];
+            $order = null;
+            foreach ($orders as $o) {
+                if (($o['order_number'] ?? '') === $orderId || ($o['id'] ?? '') === $orderId) {
+                    $order = $o;
+                    break;
+                }
             }
-        }
 
-        if (!$order) {
-            jsonError('Commande introuvable');
-        }
+            if (!$order) {
+                jsonError('Commande introuvable (ID: ' . $orderId . ')');
+            }
 
-        // Charger le livreur
-        $livreurs = loadLivreurs();
-        if (!isset($livreurs[$livreurId])) {
-            jsonError('Livreur introuvable');
-        }
+            // Charger le livreur
+            $livreurs = loadLivreurs();
+            if (!isset($livreurs[$livreurId])) {
+                jsonError('Livreur introuvable (ID: ' . $livreurId . ')');
+            }
 
-        $livreur = $livreurs[$livreurId];
+            $livreur = $livreurs[$livreurId];
+        } catch (Exception $e) {
+            error_log('Erreur send_to_delivery: ' . $e->getMessage());
+            jsonError('Erreur lors du chargement des données: ' . $e->getMessage());
+        }
 
         // Générer le message WhatsApp
         $message = "🍽️ *NOUVELLE LIVRAISON - Le Marvelous*\n\n";
