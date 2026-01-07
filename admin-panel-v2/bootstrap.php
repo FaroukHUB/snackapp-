@@ -6,9 +6,14 @@
 
 // 🔒 SÉCURITÉ: Configuration session sécurisée
 if (session_status() === PHP_SESSION_NONE) {
+    // Détecter si HTTPS est actif
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+            || (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
     // Cookies de session sécurisés
     ini_set('session.cookie_httponly', '1');  // Protection XSS
-    ini_set('session.cookie_secure', '1');    // HTTPS uniquement
+    ini_set('session.cookie_secure', $isHttps ? '1' : '0');    // HTTPS uniquement si disponible
     ini_set('session.cookie_samesite', 'Strict');  // Protection CSRF
     ini_set('session.use_strict_mode', '1');  // Rejeter sessions non initialisées
     session_start();
@@ -17,7 +22,10 @@ if (session_status() === PHP_SESSION_NONE) {
 // 🔒 SÉCURITÉ: Headers de sécurité HTTP (appliqués globalement)
 header('X-Frame-Options: DENY');  // Protection clickjacking
 header('X-Content-Type-Options: nosniff');  // Protection MIME sniffing
-header('Strict-Transport-Security: max-age=31536000; includeSubDomains');  // Force HTTPS
+// HSTS uniquement en HTTPS
+if ($isHttps) {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');  // Force HTTPS
+}
 header('Referrer-Policy: strict-origin-when-cross-origin');  // Limite fuite d'infos
 header('Permissions-Policy: geolocation=(), microphone=(), camera=()');  // Permissions strictes
 

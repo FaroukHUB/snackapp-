@@ -180,23 +180,48 @@ class OrderNotificationSystem {
     }
 
     /* =======================
-       PERMISSION AUDIO - Activé automatiquement
+       PERMISSION AUDIO - Activé au premier clic
        ======================= */
     requestAudioPermission() {
         return new Promise(resolve => {
-            try {
-                // Active le contexte audio automatiquement
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                const ctx = new AudioCtx();
-                ctx.resume();
+            const enableAudio = () => {
+                try {
+                    // Active le contexte audio
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    const ctx = new AudioCtx();
+                    ctx.resume();
 
-                this.audioEnabled = true;
-                resolve(true);
-            } catch (e) {
-                console.warn('Audio context non disponible:', e);
-                this.audioEnabled = true; // Activé quand même
-                resolve(true);
-            }
+                    // Preload audio
+                    this.audioFile.play().then(() => {
+                        this.audioFile.pause();
+                        this.audioFile.currentTime = 0;
+                    }).catch(() => {});
+
+                    this.audioEnabled = true;
+                    console.log('[Audio] ✅ Activé');
+                    resolve(true);
+                } catch (e) {
+                    console.warn('[Audio] Context non disponible:', e);
+                    this.audioEnabled = true;
+                    resolve(true);
+                }
+
+                // Retirer le listener après activation
+                document.removeEventListener('click', enableAudio);
+                document.removeEventListener('keydown', enableAudio);
+            };
+
+            // Activer au premier clic ou touche
+            document.addEventListener('click', enableAudio, { once: true });
+            document.addEventListener('keydown', enableAudio, { once: true });
+
+            // Timeout de 10s pour activer quand même
+            setTimeout(() => {
+                if (!this.audioEnabled) {
+                    console.log('[Audio] Activation par timeout');
+                    enableAudio();
+                }
+            }, 10000);
         });
     }
 
