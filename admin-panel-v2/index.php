@@ -2206,6 +2206,13 @@ if (isset($_GET['export'])) {
                 <a href="promo-manager.php" class="btn" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);"><i class="fas fa-tag"></i> Gérer les codes promo</a>
             </div>
 
+            <!-- Gestion des Livreurs -->
+            <div class="card" style="border-left: 4px solid #3b82f6;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-motorcycle" style="color: #3b82f6;"></i> Gestion des livreurs</h3>
+                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Gérez vos livreurs, ajoutez leurs contacts WhatsApp et envoyez-leur des notifications de commandes.</p>
+                <a href="livreurs-manager.php" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);"><i class="fas fa-users-cog"></i> Gérer les livreurs</a>
+            </div>
+
             <!-- Sécurité PIN -->
             <div class="card" style="border-left: 4px solid #ef4444;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-lock" style="color: #ef4444;"></i> Code PIN (Stats & Archives)</h3>

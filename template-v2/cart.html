@@ -929,27 +929,318 @@
                             </select>
                         </div>
 
-                        <!-- Option de monnaie pour livraison -->
-                        <div class="form-row">
-                            <label>💵 Paiement et monnaie *</label>
-                            <div style="display: flex; flex-direction: column; gap: 12px;">
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px; border: 2px solid var(--gray-200); border-radius: 8px; transition: all 0.2s;">
+                        <!-- Option de monnaie pour livraison - Design Moderne -->
+                        <div class="form-row payment-modern-section">
+                            <label class="payment-modern-title">
+                                <i class="fas fa-wallet" style="color: #10b981; margin-right: 8px;"></i>
+                                Paiement et monnaie *
+                            </label>
+                            <div class="payment-options-container">
+                                <label class="payment-option-card exact-payment">
                                     <input type="radio" name="changeOption" value="exact" onchange="CartPage.setChangeOption('exact')" checked>
-                                    <span style="flex: 1;">✅ J'ai l'appoint (montant exact)</span>
+                                    <div class="payment-card-content">
+                                        <div class="payment-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="payment-info">
+                                            <div class="payment-label">J'ai l'appoint</div>
+                                            <div class="payment-desc">Montant exact</div>
+                                        </div>
+                                        <div class="payment-checkmark">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                    </div>
+                                    <div class="payment-card-shine"></div>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px; border: 2px solid var(--gray-200); border-radius: 8px; transition: all 0.2s;">
+
+                                <label class="payment-option-card change-payment">
                                     <input type="radio" name="changeOption" value="change" onchange="CartPage.setChangeOption('change')">
-                                    <span style="flex: 1;">💵 Prévoir monnaie sur:</span>
-                                    <input type="number" id="changeForAmount" placeholder="Ex: 5000" min="0" step="100"
-                                           style="width: 120px; padding: 8px; border: 1px solid var(--gray-300); border-radius: 6px; font-size: 14px;"
-                                           disabled>
-                                    <span style="white-space: nowrap;">DA</span>
+                                    <div class="payment-card-content">
+                                        <div class="payment-icon">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                        <div class="payment-info">
+                                            <div class="payment-label">Prévoir la monnaie</div>
+                                            <div class="payment-desc">Je paie avec:</div>
+                                        </div>
+                                        <div class="payment-amount-input">
+                                            <input type="number" id="changeForAmount" placeholder="5000" min="0" step="100" disabled>
+                                            <span class="currency-badge">DA</span>
+                                        </div>
+                                        <div class="payment-checkmark">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                    </div>
+                                    <div class="payment-card-shine"></div>
                                 </label>
                             </div>
-                            <small style="color: var(--gray-500); font-size: 12px; margin-top: 4px; display: block;">
-                                💡 Facilitez la livraison en indiquant si vous avez l'appoint
-                            </small>
+                            <div class="payment-tip">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Facilitez la livraison en indiquant si vous avez l'appoint</span>
+                            </div>
                         </div>
+
+                        <style>
+                        /* Design Ultramoderne pour le paiement */
+                        .payment-modern-section {
+                            margin: 24px 0;
+                        }
+
+                        .payment-modern-title {
+                            font-size: 16px;
+                            font-weight: 700;
+                            color: #1f2937;
+                            margin-bottom: 16px;
+                            display: flex;
+                            align-items: center;
+                        }
+
+                        .payment-options-container {
+                            display: grid;
+                            gap: 16px;
+                            margin-bottom: 12px;
+                        }
+
+                        .payment-option-card {
+                            position: relative;
+                            cursor: pointer;
+                            border-radius: 16px;
+                            overflow: hidden;
+                            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+                            border: 2px solid #e5e7eb;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                        }
+
+                        .payment-option-card:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+                            border-color: #d1d5db;
+                        }
+
+                        .payment-option-card input[type="radio"] {
+                            position: absolute;
+                            opacity: 0;
+                            pointer-events: none;
+                        }
+
+                        .payment-card-content {
+                            display: flex;
+                            align-items: center;
+                            gap: 16px;
+                            padding: 20px;
+                            position: relative;
+                            z-index: 1;
+                        }
+
+                        .payment-icon {
+                            width: 48px;
+                            height: 48px;
+                            border-radius: 12px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 22px;
+                            flex-shrink: 0;
+                            transition: all 0.3s ease;
+                        }
+
+                        .exact-payment .payment-icon {
+                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                            color: white;
+                            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                        }
+
+                        .change-payment .payment-icon {
+                            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                            color: white;
+                            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+                        }
+
+                        .payment-info {
+                            flex: 1;
+                        }
+
+                        .payment-label {
+                            font-size: 16px;
+                            font-weight: 700;
+                            color: #111827;
+                            margin-bottom: 4px;
+                        }
+
+                        .payment-desc {
+                            font-size: 13px;
+                            color: #6b7280;
+                            font-weight: 500;
+                        }
+
+                        .payment-amount-input {
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            background: white;
+                            border: 2px solid #e5e7eb;
+                            border-radius: 12px;
+                            padding: 8px 12px;
+                            transition: all 0.3s ease;
+                        }
+
+                        .payment-amount-input input {
+                            width: 100px;
+                            border: none;
+                            outline: none;
+                            font-size: 16px;
+                            font-weight: 600;
+                            color: #111827;
+                            background: transparent;
+                        }
+
+                        .payment-amount-input input::placeholder {
+                            color: #9ca3af;
+                        }
+
+                        .currency-badge {
+                            font-size: 13px;
+                            font-weight: 700;
+                            color: #6b7280;
+                            background: #f3f4f6;
+                            padding: 4px 10px;
+                            border-radius: 6px;
+                        }
+
+                        .payment-checkmark {
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            background: #f3f4f6;
+                            color: #9ca3af;
+                            font-size: 14px;
+                            transition: all 0.3s ease;
+                            flex-shrink: 0;
+                        }
+
+                        /* État sélectionné */
+                        .payment-option-card input[type="radio"]:checked ~ .payment-card-content .payment-checkmark {
+                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                            color: white;
+                            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+                            transform: scale(1.1);
+                        }
+
+                        .payment-option-card input[type="radio"]:checked ~ .payment-card-content {
+                            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+                        }
+
+                        .exact-payment input[type="radio"]:checked ~ .payment-card-content {
+                            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.03) 100%);
+                        }
+
+                        .change-payment input[type="radio"]:checked ~ .payment-card-content {
+                            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.03) 100%);
+                        }
+
+                        .payment-option-card input[type="radio"]:checked {
+                            border-color: #10b981;
+                            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1), 0 8px 24px rgba(16, 185, 129, 0.15);
+                        }
+
+                        .exact-payment input[type="radio"]:checked {
+                            border-color: #10b981;
+                        }
+
+                        .change-payment input[type="radio"]:checked {
+                            border-color: #3b82f6;
+                            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 8px 24px rgba(59, 130, 246, 0.15);
+                        }
+
+                        .payment-option-card input[type="radio"]:checked ~ .payment-card-content .payment-icon {
+                            transform: scale(1.05);
+                        }
+
+                        /* Effet brillant */
+                        .payment-card-shine {
+                            position: absolute;
+                            top: 0;
+                            left: -100%;
+                            width: 100%;
+                            height: 100%;
+                            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+                            transition: left 0.5s ease;
+                        }
+
+                        .payment-option-card:hover .payment-card-shine {
+                            left: 100%;
+                        }
+
+                        /* Tip moderne */
+                        .payment-tip {
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                            padding: 14px 18px;
+                            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                            border-radius: 12px;
+                            font-size: 13px;
+                            color: #92400e;
+                            font-weight: 500;
+                            border: 1px solid #fbbf24;
+                        }
+
+                        .payment-tip i {
+                            color: #f59e0b;
+                            font-size: 16px;
+                        }
+
+                        /* Input activé pour l'option monnaie */
+                        .change-payment input[type="radio"]:checked ~ .payment-card-content .payment-amount-input {
+                            border-color: #3b82f6;
+                            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                        }
+
+                        .change-payment input[type="radio"]:checked ~ .payment-card-content .payment-amount-input input:not(:disabled) {
+                            color: #1e40af;
+                        }
+
+                        /* Animation pour l'input amount */
+                        @keyframes pulse-border {
+                            0%, 100% { border-color: #3b82f6; }
+                            50% { border-color: #60a5fa; }
+                        }
+
+                        .change-payment input[type="radio"]:checked ~ .payment-card-content .payment-amount-input input:focus {
+                            animation: pulse-border 2s ease-in-out infinite;
+                        }
+
+                        /* Responsive */
+                        @media (max-width: 640px) {
+                            .payment-card-content {
+                                padding: 16px;
+                                gap: 12px;
+                            }
+
+                            .payment-icon {
+                                width: 42px;
+                                height: 42px;
+                                font-size: 20px;
+                            }
+
+                            .payment-label {
+                                font-size: 15px;
+                            }
+
+                            .payment-desc {
+                                font-size: 12px;
+                            }
+
+                            .payment-amount-input input {
+                                width: 80px;
+                                font-size: 14px;
+                            }
+                        }
+                        </style>
                     </div>
 
                     <div class="form-row">
