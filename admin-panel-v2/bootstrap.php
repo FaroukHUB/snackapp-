@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
     // Cookies de session sécurisés
     ini_set('session.cookie_httponly', '1');  // Protection XSS
     ini_set('session.cookie_secure', $isHttps ? '1' : '0');    // HTTPS uniquement si disponible
-    ini_set('session.cookie_samesite', 'Strict');  // Protection CSRF
+    ini_set('session.cookie_samesite', 'Lax');  // Lax au lieu de Strict pour permettre navigation
     ini_set('session.use_strict_mode', '1');  // Rejeter sessions non initialisées
     session_start();
 }
