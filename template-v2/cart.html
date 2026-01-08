@@ -2318,7 +2318,18 @@
 
                 // Format items for API (don't send product_id - it's a string, DB expects int)
                 const formattedItems = savedItems.map(item => {
-                    const itemPrice = item.basePrice || 0;
+                    // Si pâtisserie/viennoiserie/beverage sélectionnée avec prix, utiliser SON prix (REMPLACE le basePrice!)
+                    let itemPrice = 0;
+                    if (item.options?.selectedPatisserie && item.options.selectedPatisserie.price) {
+                        itemPrice = item.options.selectedPatisserie.price;
+                    } else if (item.options?.selectedViennoiserie && item.options.selectedViennoiserie.price) {
+                        itemPrice = item.options.selectedViennoiserie.price;
+                    } else if (item.options?.selectedBeverage && item.options.selectedBeverage.price) {
+                        itemPrice = item.options.selectedBeverage.price;
+                    } else {
+                        itemPrice = item.basePrice || 0;
+                    }
+
                     const supplementsTotal = (item.supplements || []).reduce((sum, s) => sum + (s.price || 0), 0);
 
                     // Collecter TOUTES les options du produit
