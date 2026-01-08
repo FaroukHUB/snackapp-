@@ -1,6 +1,6 @@
 # ✅ PROBLÈMES RÉSOLUS
 
-## 📅 Session 2026-01-08 - Fix CSRF "Token invalide is not valid JSON"
+## 📅 Session 2026-01-08 - Fix CSRF + Envoi Livreur WhatsApp
 
 ### 1. ✅ Erreur CSRF renvoie texte au lieu de JSON
 **Problème :** `Erreur réseau: Unexpected token 'T', "Token CSRF invalide" is not valid JSON`
@@ -30,6 +30,54 @@
 ```bash
 cd ~/Marvelous.mon-agenceweb.fr
 git pull origin claude/setup-marvelous-creperie-Wg8p0
+```
+
+---
+
+### 2. ✅ Envoi commande au livreur - Cascade d'erreurs
+**Problème :** Fonctionnalité "Envoyer au livreur" ne fonctionnait pas (erreurs 403, 400)
+
+**Causes racines multiples identifiées et corrigées :**
+
+#### A. Token CSRF vide (commit `2caaf77`)
+- **Problème:** Token CSRF arrivait vide dans la requête
+- **Cause:** Variable `$csrfToken` jamais définie dans `index.php`
+- **Solution:** Ajout de `$csrfToken = getCsrfToken();` ligne 18 de index.php
+- **Symptôme:** Erreur 403 "Token CSRF invalide"
+
+#### B. Fonction loadData() manquante (commit `f1b68ce`)
+- **Problème:** `loadData()` appelée mais non disponible
+- **Cause:** `config.php` non inclus dans `livreurs.php`
+- **Solution:** Ajout de `require_once __DIR__ . '/../config.php';`
+- **Symptôme:** Erreur PHP fatale (réponse vide)
+
+#### C. orders.json inexistant sur o2switch (commit `c9fc860`)
+- **Problème:** Script cherchait `database/orders.json` mais fichier n'existe pas
+- **Cause:** o2switch utilise MySQL, pas JSON pour les commandes
+- **Solution:** Ajout détection MySQL avec fallback JSON
+- **Symptôme:** "Commande introuvable (ID: CMD-xxx)"
+
+#### D. Mauvais nom de méthode OrderRepository (commit `7e62d9b`)
+- **Problème:** Appel à `OrderRepository::getByOrderNumber()` inexistante
+- **Cause:** La méthode s'appelle `getByNumber($restaurantId, $orderNumber)`
+- **Solution:** Correction vers `getByNumber(SNACK_RESTAURANT_ID, $orderId)`
+- **Symptôme:** "Unexpected end of JSON input" (PHP crash)
+
+**Logs de diagnostic ajoutés:**
+- Fichier `debug-csrf.log` pour tracer les tokens CSRF
+- Logs session_id, cookies, tokens dans livreurs.php
+
+**Commits:**
+- `2caaf77` - fix: Ajout génération token CSRF dans index.php
+- `f1b68ce` - fix: Ajout require config.php dans livreurs.php
+- `c9fc860` - fix: Utiliser MySQL pour charger commandes dans livreurs.php
+- `7e62d9b` - fix: Utiliser OrderRepository::getByNumber() au lieu de getByOrderNumber()
+
+**Test final:**
+```bash
+cd ~/Marvelous.mon-agenceweb.fr
+git pull origin claude/setup-marvelous-creperie-Wg8p0
+# Recharger admin, envoyer commande au livreur → devrait ouvrir WhatsApp
 ```
 
 ---
