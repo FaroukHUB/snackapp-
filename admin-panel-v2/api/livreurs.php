@@ -146,17 +146,26 @@ switch ($action) {
 
         // Charger la commande
         try {
-            $orders = loadData('orders.json') ?? [];
-            $order = null;
-            foreach ($orders as $o) {
-                if (($o['order_number'] ?? '') === $orderId || ($o['id'] ?? '') === $orderId) {
-                    $order = $o;
-                    break;
+            // Essayer MySQL d'abord
+            if (!SNACK_USE_JSON && !defined('SNACK_DB_ERROR')) {
+                $order = OrderRepository::getByOrderNumber($orderId);
+                if (!$order) {
+                    jsonError('Commande introuvable dans MySQL (ID: ' . $orderId . ')');
                 }
-            }
+            } else {
+                // Fallback JSON
+                $orders = loadData('orders.json') ?? [];
+                $order = null;
+                foreach ($orders as $o) {
+                    if (($o['order_number'] ?? '') === $orderId || ($o['id'] ?? '') === $orderId) {
+                        $order = $o;
+                        break;
+                    }
+                }
 
-            if (!$order) {
-                jsonError('Commande introuvable (ID: ' . $orderId . ')');
+                if (!$order) {
+                    jsonError('Commande introuvable (ID: ' . $orderId . ')');
+                }
             }
 
             // Charger le livreur
