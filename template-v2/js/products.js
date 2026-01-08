@@ -1109,10 +1109,17 @@ const Products = {
             beverageTitle.textContent = `Choisissez votre ${product.name.toLowerCase()}`;
             beverageOptions.innerHTML = product.beverageOptions.map((beverage, index) => `
                 <div class="beverage-item ${index === 0 ? 'selected' : ''}" data-id="${beverage.id}" onclick="Products.selectBeverage('${beverage.id}')">
-                    <div class="beverage-radio">
-                        <i class="fas fa-check"></i>
-                    </div>
-                    <span class="beverage-name">${beverage.name}</span>
+                    ${beverage.image ? `
+                        <div class="beverage-image-container">
+                            <img src="../${beverage.image}" alt="${beverage.name}" class="beverage-image" onerror="this.style.display='none'">
+                        </div>
+                    ` : ''}
+                    <div class="beverage-divider"></div>
+                    <div class="beverage-name">${beverage.name}</div>
+                    ${beverage.price ? `
+                        <div class="beverage-divider"></div>
+                        <div class="beverage-price">${Config.formatPrice(beverage.price)}</div>
+                    ` : ''}
                 </div>
             `).join('');
             // Select first beverage by default
