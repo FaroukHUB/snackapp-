@@ -14,6 +14,9 @@ require_once __DIR__ . '/../database/repositories/LoyaltyRepository.php';
 require_once __DIR__ . '/bootstrap.php';
 requireAdmin();
 
+// 🔒 SÉCURITÉ: Générer token CSRF pour la page
+$csrfToken = getCsrfToken();
+
 $useMySQL = !SNACK_USE_JSON && !defined('SNACK_DB_ERROR');
 
 // ============================================
