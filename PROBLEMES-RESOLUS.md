@@ -82,6 +82,74 @@ git pull origin claude/setup-marvelous-creperie-Wg8p0
 
 ---
 
+### 3. ✅ Amélioration message WhatsApp livreur (commit `013650d`)
+**Problème :** Message incomplet, manque d'infos critiques pour le livreur
+
+**Éléments manquants identifiés:**
+- Adresse de livraison pas affichée
+- Lien Google Maps manquant
+- Options produits (Ifri, Croissant, etc.) absentes
+- Info monnaie rendue manquante
+- Organisation du message peu claire
+
+**Solution implémentée:**
+
+#### A. Extraction données depuis champ notes
+- Parse `notes` pour extraire adresse (regex: `/Adresse:\s*(.+?)/i`)
+- Parse monnaie (regex: `/Prévoir monnaie sur:\s*(\d+)\s*DA/i`)
+- Parse appoint (regex: `/l'appoint/i`)
+
+#### B. Affichage complet des items
+- **Options sélectionnées** (`selected_options`): Ifri, Croissant, etc.
+- **Suppléments** avec prix
+- **Ingrédients retirés** (SANS: oignons, fromage, etc.)
+
+#### C. Organisation claire du message
+```
+🍽️ NOUVELLE LIVRAISON - Le Marvelous
+
+========== CLIENT ==========
+👤 Client: Nom
+📞 Tel: +33...
+
+========== ADRESSE ==========
+📍 Adresse de livraison:
+[Adresse complète]
+🗺️ [Lien Google Maps cliquable]
+
+========== COMMANDE ==========
+━━━━━━━━━━━━━━━━
+*1x Jus*
+   100 DA
+   → Option: Ifri
+
+*1x Crêpe Chocolat*
+   500 DA
+   + Maxon Oreo (+200 DA)
+   ⚠️ SANS: chantilly
+
+━━━━━━━━━━━━━━━━
+💰 TOTAL: 800 DA
+
+========== PAIEMENT ==========
+💵 À PRÉPARER:
+   • Client donne: 1 000 DA
+   • *À rendre: 200 DA*
+
+⏰ Commande reçue: 14:58
+```
+
+**Avantages pour le livreur:**
+- ✅ Adresse cliquable (ouvre directement Maps)
+- ✅ Voit toutes les options/variantes
+- ✅ Sait exactement la monnaie à préparer
+- ✅ Voit les ingrédients à retirer
+- ✅ Organisation claire et lisible sur mobile
+
+**Commit:** `013650d`
+
+---
+
 ## 📅 Session 2026-01-07 - Système Livreurs & Suppléments
 
 ### 1. ✅ Suppléments salés manquants pour nouvelles catégories
