@@ -323,6 +323,175 @@ git pull origin claude/setup-marvelous-creperie-Wg8p0
 
 ---
 
+### 8. ✅ Système Jus/Cocktails identique à Pâtisserie (commits `72d366a`, `06ce6e8`)
+**Problème :** Les produits Jus/Smoothies/Cocktails ne fonctionnaient pas comme Pâtisserie
+
+**Problèmes identifiés:**
+1. Cocktail Maison n'a pas de système d'options (pas de `hasBeverageOptions`)
+2. Options jus/smoothie existent MAIS sans prix ni image
+3. Options ajoutées dans admin (Mojito, Pastèque) ne s'affichent pas
+4. Prix des options ignoré (toujours 200 DA au lieu du prix custom)
+5. Interface admin beverage n'a pas de champ photo
+6. Frontend n'affiche pas les images des options beverage
+
+**Solutions implémentées:**
+
+#### A. Ajout beverageOptions à Cocktail Maison (`menu.json`)
+```json
+{
+  "id": "cocktail-maison",
+  "name": "Cocktail Maison",
+  "hasBeverageOptions": true,  // ← Ajouté
+  "beverageOptions": [],       // ← Ajouté
+  "priceSolo": 0
+}
+```
+
+#### B. Support images dans API beverageOptions (`products.php:1345-1366`)
+```php
+// Upload d'image optionnel
+$imagePath = null;
+if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+    // Validation format JPG/PNG/WebP, max 2MB
+    // Upload vers assets/images/beverages/
+    $imagePath = 'assets/images/beverages/' . $newName;
+}
+
+$newOption = [
+    'id' => $newId,
+    'name' => $name,
+    'price' => $price
+];
+if ($imagePath) {
+    $newOption['image'] = $imagePath;  // ← Image ajoutée
+}
+$item['beverageOptions'][] = $newOption;
+```
+
+#### C. Interface admin beverage avec upload image (`products-manager.php:793-797`)
+```html
+<div class="field">
+  <label for="bevOptionImage">Photo</label>
+  <input type="file" id="bevOptionImage" accept="image/jpeg,image/png,image/webp" class="input" />
+  <small>Formats: JPG, PNG, WebP (max 2MB)</small>
+</div>
+```
+
+#### D. JavaScript FormData avec image (`products-manager.php:1554-1563`)
+```javascript
+const formData = new FormData();
+formData.append('beverage_type', currentBeverageProductId);
+formData.append('name', name);
+formData.append('price', price);
+if (imageFile) {
+  formData.append('image', imageFile);  // ← Image envoyée
+}
+await apiPostMultipart(formData, 'add_beverage_option');
+```
+
+#### E. Affichage images dans liste admin (`products-manager.php:1499-1508`)
+```javascript
+let imgHtml = '';
+if (opt.image) {
+  imgSrc = opt.image.startsWith('../') ? opt.image : '../' + opt.image;
+  imgHtml = `<img src="${imgSrc}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;">`;
+} else {
+  imgHtml = `<div style="width:50px;height:50px;background:var(--stroke);border-radius:8px;"></div>`;
+}
+```
+
+#### F. Frontend affiche images et prix (`products.js:1110-1124`)
+```javascript
+beverageOptions.innerHTML = product.beverageOptions.map((beverage, index) => `
+  <div class="beverage-item ${index === 0 ? 'selected' : ''}" data-id="${beverage.id}">
+    ${beverage.image ? `
+      <div class="beverage-image-container">
+        <img src="../${beverage.image}" alt="${beverage.name}" class="beverage-image">
+      </div>
+    ` : ''}
+    <div class="beverage-divider"></div>
+    <div class="beverage-name">${beverage.name}</div>
+    ${beverage.price ? `
+      <div class="beverage-divider"></div>
+      <div class="beverage-price">${Config.formatPrice(beverage.price)}</div>
+    ` : ''}
+  </div>
+`).join('');
+```
+
+#### G. CSS pour affichage images beverage (`style.css:1863-1894`)
+```css
+.beverage-image-container {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    background: var(--gray-200);
+}
+
+.beverage-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.beverage-divider {
+    width: 2px;
+    height: 40px;
+    background: var(--gray-300);
+    flex-shrink: 0;
+}
+
+.beverage-price {
+    flex-shrink: 0;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 14px;
+}
+```
+
+**Note importante - Prix pâtisserie/beverage:**
+Le fix du prix pâtisserie (commit `0a03b7d`) s'applique AUSSI automatiquement aux beverageOptions car ils utilisent la même logique dans `cart.html:2321-2331`:
+```javascript
+if (item.options?.selectedPatisserie && item.options.selectedPatisserie.price) {
+    itemPrice = item.options.selectedPatisserie.price;
+} else if (item.options?.selectedBeverage && item.options.selectedBeverage.price) {
+    itemPrice = item.options.selectedBeverage.price;  // ← Déjà géré!
+}
+```
+
+**Photos produits principaux:**
+Le système pour uploader des photos aux produits principaux (Pâtisserie, Jus Frais, Smoothies, Cocktails) existe **DÉJÀ**:
+- Formulaire admin a champ image (`products-manager.php:710`)
+- JavaScript envoie le fichier (`products-manager.php:1641`)
+- API gère l'upload (`products.php:768`)
+
+Il suffit d'éditer le produit dans l'admin et uploader une image!
+
+**Résultat:**
+- ✅ Cocktail Maison accepte maintenant des options (Mojito, Citron, etc.)
+- ✅ Options jus/cocktails ont un prix custom configurable
+- ✅ Options jus/cocktails peuvent avoir une photo
+- ✅ Frontend affiche images + prix comme pâtisserie
+- ✅ Admin affiche images dans la liste des options
+- ✅ Prix correctement pris en compte dans panier et ticket livreur
+
+**Commits:**
+- `72d366a` - feat: Support images pour options jus/cocktails + ajout beverageOptions à Cocktail Maison
+- `06ce6e8` - feat: Affichage images et prix pour options jus/cocktails frontend
+
+**Test:**
+```bash
+cd ~/Marvelous.mon-agenceweb.fr
+git pull origin claude/setup-marvelous-creperie-Wg8p0
+# Admin: Ajouter option "Mojito 400 DA" avec photo à Cocktail Maison
+# Site: Ouvrir Cocktail Maison → voir Mojito avec photo et prix
+# Commander → prix correct dans panier et ticket livreur
+```
+
+---
+
 ## 📅 Session 2026-01-07 - Système Livreurs & Suppléments
 
 ### 1. ✅ Suppléments salés manquants pour nouvelles catégories
