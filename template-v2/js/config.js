@@ -181,7 +181,13 @@ const Config = {
      */
     getSupplementsForCategory(categoryId) {
         // ❌ Catégories SANS suppléments
-        const noSupplementsCategories = ['sucres-sales'];
+        const noSupplementsCategories = [
+            'sucres-sales',
+            'boissons-chaudes',
+            'sodas-eaux',
+            'jus-cocktails',
+            'menu-enfant'
+        ];
         if (noSupplementsCategories.includes(categoryId)) {
             return [];
         }
