@@ -310,6 +310,17 @@ function addOrder(bool $useMySQL) {
             $loyaltyRewardId = $requestData['loyalty_reward_id'] ?? null;
             $loyaltyCustomerId = $requestData['loyalty_customer_id'] ?? null;
 
+            // Préparer les notes avec infos de monnaie pour livraison
+            $notes = $requestData['notes'] ?? '';
+
+            // Ajouter les infos de monnaie dans les notes
+            if (!empty($requestData['has_exact_change'])) {
+                $notes .= "\nJ'ai l'appoint";
+            } elseif (!empty($requestData['change_for'])) {
+                $changeFor = (int)$requestData['change_for'];
+                $notes .= "\nPrévoir monnaie sur: {$changeFor} DA";
+            }
+
             // Créer la commande
             $orderId = OrderRepository::createOrder(SNACK_RESTAURANT_ID, [
                 'customer_name' => $requestData['customer_name'] ?? 'Client',
@@ -318,7 +329,7 @@ function addOrder(bool $useMySQL) {
                 'subtotal' => $requestData['subtotal'] ?? $requestData['total'],
                 'total' => (float)$requestData['total'],
                 'loyalty_reward_id' => $loyaltyRewardId,
-                'notes' => $requestData['notes'] ?? null,
+                'notes' => trim($notes),
                 'pickup_time' => $requestData['pickup_time'] ?? null
             ]);
 
@@ -377,6 +388,15 @@ function addOrder(bool $useMySQL) {
 
         $orderId = 'FB-' . date('Ymd') . '-' . str_pad((string)(count($orders) + 1), 3, '0', STR_PAD_LEFT);
 
+        // Préparer les notes avec infos de monnaie
+        $notes = $requestData['notes'] ?? '';
+        if (!empty($requestData['has_exact_change'])) {
+            $notes .= "\nJ'ai l'appoint";
+        } elseif (!empty($requestData['change_for'])) {
+            $changeFor = (int)$requestData['change_for'];
+            $notes .= "\nPrévoir monnaie sur: {$changeFor} DA";
+        }
+
         $newOrder = [
             'id' => $orderId,
             'customer_name' => $requestData['customer_name'] ?? 'Client',
@@ -387,7 +407,7 @@ function addOrder(bool $useMySQL) {
             'loyalty_reward_id' => $requestData['loyalty_reward_id'] ?? null,
             'status' => 'pending',
             'created_at' => date('Y-m-d H:i:s'),
-            'notes' => $requestData['notes'] ?? ''
+            'notes' => trim($notes)
         ];
 
         $orders[] = $newOrder;
