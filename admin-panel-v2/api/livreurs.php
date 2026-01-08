@@ -122,6 +122,18 @@ switch ($action) {
         break;
 
     case 'send_to_delivery':
+        // 🔍 DIAGNOSTIC CSRF
+        $debugLog = __DIR__ . '/../debug-csrf.log';
+        $debugInfo = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'session_id' => session_id(),
+            'token_recu' => substr($_POST['csrf_token'] ?? 'AUCUN', 0, 10),
+            'token_session' => substr($_SESSION['csrf_token'] ?? 'AUCUN', 0, 10),
+            'cookies' => $_COOKIE,
+            'post_keys' => array_keys($_POST)
+        ];
+        file_put_contents($debugLog, json_encode($debugInfo, JSON_PRETTY_PRINT) . "\n---\n", FILE_APPEND);
+
         requireCsrf();
 
         $orderId = $_POST['order_id'] ?? '';
