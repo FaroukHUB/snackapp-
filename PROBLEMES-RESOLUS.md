@@ -1,5 +1,39 @@
 # ✅ PROBLÈMES RÉSOLUS
 
+## 📅 Session 2026-01-08 - Fix CSRF "Token invalide is not valid JSON"
+
+### 1. ✅ Erreur CSRF renvoie texte au lieu de JSON
+**Problème :** `Erreur réseau: Unexpected token 'T', "Token CSRF invalide" is not valid JSON`
+
+**Cause racine :**
+- `bootstrap.php:180` renvoyait `die('Token CSRF invalide')` en texte brut
+- Fonction `requireCsrf()` détectait mal les requêtes API
+- Client attendait JSON et échouait au parsing
+
+**Solution implémentée :**
+1. **Détection intelligente requêtes API** (`bootstrap.php:173-187`)
+   - Vérifie si URI contient `/api/`
+   - Vérifie header `Accept: application/json`
+   - Vérifie `Content-Type` contient `json`
+   - Renvoie JSON pour requêtes API : `jsonError('Token CSRF invalide', 403)`
+
+2. **Logs de diagnostic CSRF** (`products.php:219-233`)
+   - Log token manquant avec method/content-type
+   - Log token invalide avec premiers caractères
+   - Log état session ID
+   - Messages utilisateur plus explicites
+
+**Commit :**
+- `103ed22` - fix: Correction erreur CSRF 'Token invalide is not valid JSON'
+
+**Déploiement :**
+```bash
+cd ~/Marvelous.mon-agenceweb.fr
+git pull origin claude/setup-marvelous-creperie-Wg8p0
+```
+
+---
+
 ## 📅 Session 2026-01-07 - Système Livreurs & Suppléments
 
 ### 1. ✅ Suppléments salés manquants pour nouvelles catégories
