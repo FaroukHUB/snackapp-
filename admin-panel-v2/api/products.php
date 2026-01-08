@@ -216,14 +216,20 @@ if (!$csrfToken) {
     $csrfToken = $input['csrf_token'] ?? null;
 }
 
-// 🔒 SÉCURITÉ: Validation CSRF sans logs sensibles
+// 🔒 SÉCURITÉ: Validation CSRF avec logs de diagnostic
 if (!$csrfToken) {
-    jsonError('Token CSRF manquant', 403);
+    error_log('[CSRF DEBUG] Token manquant - Method: ' . $_SERVER['REQUEST_METHOD'] . ', Content-Type: ' . ($_SERVER['CONTENT_TYPE'] ?? 'none'));
+    error_log('[CSRF DEBUG] Session ID: ' . (session_id() ?: 'NO SESSION'));
+    error_log('[CSRF DEBUG] Session token présent: ' . (isset($_SESSION['csrf_token']) ? 'OUI' : 'NON'));
+    jsonError('Token CSRF manquant - Veuillez recharger la page', 403);
 }
 
 if (!validateCsrfToken($csrfToken)) {
-    error_log('[SÉCURITÉ] Tentative CSRF bloquée - IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-    jsonError('Token CSRF invalide - Veuillez recharger la page', 403);
+    error_log('[CSRF DEBUG] Token invalide - IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    error_log('[CSRF DEBUG] Token reçu (5 premiers caractères): ' . substr($csrfToken, 0, 5) . '...');
+    error_log('[CSRF DEBUG] Token session (5 premiers caractères): ' . (isset($_SESSION['csrf_token']) ? substr($_SESSION['csrf_token'], 0, 5) . '...' : 'AUCUN'));
+    error_log('[CSRF DEBUG] Session ID: ' . session_id());
+    jsonError('Token CSRF invalide - Veuillez recharger la page et vous reconnecter', 403);
 }
 
 $input = readInput();

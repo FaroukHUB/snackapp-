@@ -173,7 +173,12 @@ function regenerateCsrfToken(): string {
 function requireCsrf(): void {
     $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
     if (!validateCsrfToken($token)) {
-        if (str_contains($_SERVER['CONTENT_TYPE'] ?? '', 'json')) {
+        // Détecter si c'est une requête API (path commence par /api/ ou Accept contient json)
+        $isApiRequest = str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/')
+                     || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')
+                     || str_contains($_SERVER['CONTENT_TYPE'] ?? '', 'json');
+
+        if ($isApiRequest) {
             jsonError('Token CSRF invalide', 403);
         }
         http_response_code(403);
