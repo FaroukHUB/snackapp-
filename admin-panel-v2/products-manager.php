@@ -606,7 +606,7 @@ $csrfToken = getCsrfToken();
             <span class="muted">Apparaît sur la photo du produit (max 30 caractères)</span>
           </div>
 
-          <div class="field">
+          <div class="field" id="prodPricePrefixField" style="display:none;">
             <label for="prodPricePrefix">Texte avant le prix (optionnel)</label>
             <input id="prodPricePrefix" name="pricePrefix" class="input" type="text" placeholder="Ex: À partir de" maxlength="20" />
             <span class="muted">Pour produits avec options (Pâtisserie, Jus Frais, etc.)</span>
@@ -710,7 +710,7 @@ $csrfToken = getCsrfToken();
             <input id="editProdBadge" name="badge" class="input" type="text" placeholder="Ex: Nouveau, Best-seller, Épicé 🌶️" maxlength="30" />
             <span class="muted">Apparaît sur la photo du produit</span>
           </div>
-          <div class="field">
+          <div class="field" id="editPricePrefixField" style="display:none;">
             <label for="editPricePrefix">Texte avant le prix (optionnel)</label>
             <input id="editPricePrefix" name="pricePrefix" class="input" type="text" placeholder="Ex: À partir de" maxlength="20" />
             <span class="muted">Pour produits avec options (Pâtisserie, Jus Frais, etc.)</span>
@@ -1617,6 +1617,15 @@ $csrfToken = getCsrfToken();
       }
       // Reset le champ fichier
       $("#editProductImage").value = "";
+
+      // Afficher le champ pricePrefix uniquement pour les produits avec options
+      const hasOptions = product.hasPâtisserieOptions || product.hasBeverageOptions;
+      const pricePrefixField = $("#editPricePrefixField");
+      if (hasOptions) {
+        pricePrefixField.style.display = "";
+      } else {
+        pricePrefixField.style.display = "none";
+      }
 
       // Suppléments : Affichage automatique selon le flavor (plus de checkboxes)
       // Les suppléments s'affichent automatiquement côté frontend
