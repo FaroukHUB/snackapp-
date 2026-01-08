@@ -182,64 +182,92 @@ switch ($action) {
 
         // Générer le message WhatsApp
         $message = "🍽️ *NOUVELLE LIVRAISON - Le Marvelous*\n\n";
+
+        // ========== CLIENT ==========
         $message .= "👤 *Client:* " . ($order['customer_name'] ?? 'N/A') . "\n";
         $message .= "📞 *Tel:* " . ($order['customer_phone'] ?? 'N/A') . "\n\n";
 
-        // Adresse
-        if (!empty($order['delivery_address'])) {
-            $message .= "📍 *Adresse:*\n" . $order['delivery_address'] . "\n";
-            // Lien Google Maps si coordonnées disponibles
-            if (!empty($order['delivery_coords'])) {
-                $coords = explode(',', $order['delivery_coords']);
-                if (count($coords) === 2) {
-                    $message .= "🗺️ https://www.google.com/maps?q=" . trim($coords[0]) . "," . trim($coords[1]) . "\n";
-                }
+        // ========== ADRESSE ==========
+        $notes = $order['notes'] ?? '';
+        $isDelivery = str_contains($notes, 'LIVRAISON');
+
+        if ($isDelivery) {
+            // Extraire l'adresse depuis les notes
+            if (preg_match('/Adresse:\s*(.+?)(?:\n|$)/i', $notes, $matches)) {
+                $address = trim($matches[1]);
+                $message .= "📍 *Adresse de livraison:*\n";
+                $message .= $address . "\n";
+
+                // Lien Google Maps (utiliser l'adresse pour recherche)
+                $addressEncoded = urlencode($address . ', Algérie');
+                $message .= "🗺️ https://www.google.com/maps/search/?api=1&query=" . $addressEncoded . "\n\n";
+            } else {
+                // Fallback: afficher toutes les notes si adresse pas trouvée
+                $message .= "📍 *Adresse:*\n" . $notes . "\n\n";
             }
-            $message .= "\n";
         }
 
-        // Détail commande
-        $message .= "🛍️ *Commande:*\n";
+        // ========== COMMANDE ==========
+        $message .= "🛍️ *COMMANDE:*\n";
+        $message .= "━━━━━━━━━━━━━━━━\n";
+
         if (!empty($order['items']) && is_array($order['items'])) {
             foreach ($order['items'] as $item) {
                 $qty = $item['quantity'] ?? 1;
                 $name = $item['name'] ?? 'Produit';
                 $price = $item['price'] ?? 0;
-                $message .= "• {$qty}x {$name} (" . number_format($price, 0, '', ' ') . " DA)\n";
+
+                $message .= "*{$qty}x {$name}*\n";
+                $message .= "   " . number_format($price * $qty, 0, '', ' ') . " DA\n";
+
+                // Options sélectionnées (Ifri, Croissant, etc.)
+                if (!empty($item['selected_options']) && is_array($item['selected_options'])) {
+                    foreach ($item['selected_options'] as $optKey => $optValue) {
+                        if ($optValue) {
+                            $message .= "   → " . ucfirst(str_replace('_', ' ', $optKey)) . ": " . $optValue . "\n";
+                        }
+                    }
+                }
 
                 // Suppléments
                 if (!empty($item['supplements']) && is_array($item['supplements'])) {
                     foreach ($item['supplements'] as $sup) {
                         $supName = $sup['name'] ?? '';
                         $supPrice = $sup['price'] ?? 0;
-                        $message .= "  + {$supName} (+" . number_format($supPrice, 0, '', ' ') . " DA)\n";
+                        $message .= "   + {$supName} (+" . number_format($supPrice, 0, '', ' ') . " DA)\n";
                     }
                 }
+
+                // Ingrédients retirés
+                if (!empty($item['removed_ingredients']) && is_array($item['removed_ingredients'])) {
+                    $message .= "   ⚠️ SANS: " . implode(', ', $item['removed_ingredients']) . "\n";
+                }
+
+                $message .= "\n";
             }
         }
 
         $total = $order['total'] ?? 0;
-        $message .= "\n💰 *TOTAL: " . number_format($total, 0, '', ' ') . " DA*\n\n";
+        $message .= "━━━━━━━━━━━━━━━━\n";
+        $message .= "💰 *TOTAL: " . number_format($total, 0, '', ' ') . " DA*\n\n";
 
-        // Paiement
-        $paymentMethod = $order['payment_method'] ?? 'cash';
-        if ($paymentMethod === 'cash') {
-            $message .= "💵 *Paiement:* ESPÈCES\n";
+        // ========== PAIEMENT ==========
+        $message .= "💳 *PAIEMENT:*\n";
 
-            // Info monnaie
-            if (!empty($order['has_exact_change'])) {
-                $message .= "✅ Client a l'appoint\n";
-            } elseif (!empty($order['change_for'])) {
-                $changeFor = (float)$order['change_for'];
-                $toReturn = $changeFor - $total;
-                $message .= "💵 À rendre: " . number_format($toReturn, 0, '', ' ') . " DA\n";
-                $message .= "   (client donne " . number_format($changeFor, 0, '', ' ') . " DA)\n";
-            }
+        // Extraire infos de monnaie depuis notes
+        if (preg_match('/l\'appoint/i', $notes)) {
+            $message .= "✅ Client a l'appoint (montant exact)\n";
+        } elseif (preg_match('/Prévoir monnaie sur:\s*(\d+)\s*DA/i', $notes, $matches)) {
+            $changeFor = (int)$matches[1];
+            $toReturn = $changeFor - $total;
+            $message .= "💵 *À PRÉPARER:*\n";
+            $message .= "   • Client donne: " . number_format($changeFor, 0, '', ' ') . " DA\n";
+            $message .= "   • *À rendre: " . number_format($toReturn, 0, '', ' ') . " DA*\n";
         } else {
-            $message .= "💳 *Paiement:* CARTE BANCAIRE\n";
+            $message .= "💵 Espèces (montant exact non précisé)\n";
         }
 
-        $message .= "\n⏰ Commande reçue: " . date('H:i', strtotime($order['created_at'] ?? 'now'));
+        $message .= "\n⏰ *Commande reçue:* " . date('H:i', strtotime($order['created_at'] ?? 'now')) . "\n";
 
         // Générer le lien WhatsApp
         $whatsappUrl = sendWhatsAppMessage($livreur['whatsapp'], $message);
