@@ -267,6 +267,62 @@ git pull origin claude/setup-marvelous-creperie-Wg8p0
 
 ---
 
+### 7. ✅ Suppléments s'affichent sur boissons et menu enfant (commit `35ddea2`)
+**Problème :** Les catégories boissons et menu enfant affichaient les suppléments (fromages, viandes, etc.) alors qu'ils ne doivent pas en avoir.
+
+**Catégories concernées:**
+1. Nos boissons chaudes
+2. Sodas & Eaux
+3. Jus frais et cocktails
+4. Menu Enfant
+
+**Cause racine :**
+- Dans `config.js:184`, le tableau `noSupplementsCategories` contenait uniquement `'sucres-sales'`
+- Les 4 catégories de boissons + menu enfant n'étaient pas exclues
+- `getSupplementsForCategory()` retournait donc des suppléments pour ces produits
+
+**Solution implémentée:**
+Ajout des IDs de catégories dans le tableau d'exclusion:
+
+```javascript
+// config.js:184-190
+const noSupplementsCategories = [
+    'sucres-sales',
+    'boissons-chaudes',   // ← Ajouté
+    'sodas-eaux',         // ← Ajouté
+    'jus-cocktails',      // ← Ajouté
+    'menu-enfant'         // ← Ajouté
+];
+```
+
+**⚠️ Important - Options menu enfant PRÉSERVÉES:**
+Les options du menu enfant (choix crêpe + sauce) sont gérées de manière **complètement indépendante** via:
+- `modalKidsOptions` (section séparée du modal)
+- `hasKidsOptions` et `kidsOptions` dans le produit
+- `selectedKidsCrepe` et `selectedKidsSauce`
+
+Ce changement désactive uniquement les **suppléments** (fromages, viandes, légumes), mais **NE TOUCHE PAS** aux options du menu enfant.
+
+**Résultat:**
+- ✅ Boissons chaudes : pas de suppléments
+- ✅ Sodas & Eaux : pas de suppléments
+- ✅ Jus frais et cocktails : pas de suppléments
+- ✅ Menu enfant : pas de suppléments (fromages, etc.)
+- ✅ Menu enfant : options crêpe + sauce **fonctionnent toujours** 🎯
+
+**Commit:**
+- `35ddea2` - fix: Désactiver suppléments pour boissons chaudes, sodas, jus et menu enfant
+
+**Test:**
+```bash
+cd ~/Marvelous.mon-agenceweb.fr
+git pull origin claude/setup-marvelous-creperie-Wg8p0
+# Ouvrir modal produit boisson → pas de section suppléments
+# Ouvrir modal menu enfant → choix crêpe/sauce visible, pas de suppléments
+```
+
+---
+
 ## 📅 Session 2026-01-07 - Système Livreurs & Suppléments
 
 ### 1. ✅ Suppléments salés manquants pour nouvelles catégories
