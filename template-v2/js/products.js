@@ -191,9 +191,6 @@ const Products = {
         grid.innerHTML = featuredProducts.map(product => {
             let price = product.priceSolo || product.price || 0;
 
-            // Liste des produits qui doivent afficher "À partir de" (UNIQUEMENT ceux-là!)
-            const showApartirDe = ['patisserie', 'jus-frais', 'cocktail-maison'].includes(product.id);
-
             // Si price = 0 et produit a des options, calculer le prix minimum
             if (price === 0 && product.pâtisserieOptions && product.pâtisserieOptions.length > 0) {
                 price = Math.min(...product.pâtisserieOptions.map(opt => opt.price || 0));
@@ -201,7 +198,8 @@ const Products = {
                 price = Math.min(...product.beverageOptions.map(opt => opt.price || 0));
             }
 
-            const priceText = showApartirDe ? `À partir de ${Config.formatPrice(price)}` : Config.formatPrice(price);
+            // Utiliser pricePrefix du produit si défini, sinon afficher le prix normalement
+            const priceText = product.pricePrefix ? `${product.pricePrefix} ${Config.formatPrice(price)}` : Config.formatPrice(price);
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
             return `
                 <div class="featured-card">
@@ -522,9 +520,6 @@ const Products = {
             const isUnavailable = product.status === 'unavailable';
             let price = product.price || product.priceSolo || 0;
 
-            // Liste des produits qui doivent afficher "À partir de" (UNIQUEMENT ceux-là!)
-            const showApartirDe = ['patisserie', 'jus-frais', 'cocktail-maison'].includes(product.id);
-
             // Si price = 0 et produit a des options, calculer le prix minimum
             if (price === 0 && product.pâtisserieOptions && product.pâtisserieOptions.length > 0) {
                 price = Math.min(...product.pâtisserieOptions.map(opt => opt.price || 0));
@@ -532,7 +527,8 @@ const Products = {
                 price = Math.min(...product.beverageOptions.map(opt => opt.price || 0));
             }
 
-            const priceText = showApartirDe ? `À partir de ${Config.formatPrice(price)}` : Config.formatPrice(price);
+            // Utiliser pricePrefix du produit si défini, sinon afficher le prix normalement
+            const priceText = product.pricePrefix ? `${product.pricePrefix} ${Config.formatPrice(price)}` : Config.formatPrice(price);
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
 
             return `

@@ -197,6 +197,7 @@
             "name": "Pâtisserie",
             "description": "Choisissez votre pâtisserie.",
             "image": "",
+            "pricePrefix": "À partir de",
             "status": "available",
             "hasPâtisserieOptions": true,
             "pâtisserieOptions": [
@@ -618,7 +619,9 @@
             "id": "jus-frais",
             "name": "Jus Frais",
             "description": "Choisissez votre jus frais.",
+            "image": "",
             "price": 200,
+            "pricePrefix": "À partir de",
             "status": "available",
             "hasBeverageOptions": true,
             "beverageOptions": [
@@ -641,7 +644,9 @@
             "id": "smoothie",
             "name": "Smoothie",
             "description": "Choisissez votre smoothie.",
+            "image": "",
             "price": 300,
+            "pricePrefix": "À partir de",
             "status": "available",
             "hasBeverageOptions": true,
             "beverageOptions": [
@@ -664,9 +669,10 @@
             "id": "cocktail-maison",
             "name": "Cocktail Maison",
             "description": "Citron ou Mojito (sans alcool).",
+            "image": "",
             "price": 350,
             "status": "available",
-            "note": "À partir de",
+            "pricePrefix": "À partir de",
             "hasBeverageOptions": true,
             "beverageOptions": [],
             "priceSolo": 0

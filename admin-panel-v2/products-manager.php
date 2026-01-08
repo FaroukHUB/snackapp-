@@ -607,6 +607,12 @@ $csrfToken = getCsrfToken();
           </div>
 
           <div class="field">
+            <label for="prodPricePrefix">Texte avant le prix (optionnel)</label>
+            <input id="prodPricePrefix" name="pricePrefix" class="input" type="text" placeholder="Ex: À partir de" maxlength="20" />
+            <span class="muted">Pour produits avec options (Pâtisserie, Jus Frais, etc.)</span>
+          </div>
+
+          <div class="field">
             <label>Photo</label>
             <div class="upload">
               <img id="imgPreview" class="preview" alt="Aperçu" />
@@ -703,6 +709,11 @@ $csrfToken = getCsrfToken();
             <label for="editProdBadge">Badge (optionnel)</label>
             <input id="editProdBadge" name="badge" class="input" type="text" placeholder="Ex: Nouveau, Best-seller, Épicé 🌶️" maxlength="30" />
             <span class="muted">Apparaît sur la photo du produit</span>
+          </div>
+          <div class="field">
+            <label for="editPricePrefix">Texte avant le prix (optionnel)</label>
+            <input id="editPricePrefix" name="pricePrefix" class="input" type="text" placeholder="Ex: À partir de" maxlength="20" />
+            <span class="muted">Pour produits avec options (Pâtisserie, Jus Frais, etc.)</span>
           </div>
           <div class="field">
             <label>Photo du produit</label>
@@ -1594,6 +1605,7 @@ $csrfToken = getCsrfToken();
       $("#editPriceSolo").value = product.priceSolo ?? "";
       $("#editPriceMenu").value = product.priceMenu ?? "";
       $("#editProdBadge").value = product.badge ?? "";
+      $("#editPricePrefix").value = product.pricePrefix ?? "";
       $("#editStatus").value = product.status ?? "available";
 
       // Afficher l'image actuelle
@@ -1620,6 +1632,7 @@ $csrfToken = getCsrfToken();
       const priceSolo = parseFloat($("#editPriceSolo").value) || 0;
       const priceMenu = $("#editPriceMenu").value ? parseFloat($("#editPriceMenu").value) : null;
       const badge = $("#editProdBadge").value.trim() || null;
+      const pricePrefix = $("#editPricePrefix").value.trim() || null;
       const status = $("#editStatus").value;
       const imageFile = $("#editProductImage").files[0];
 
@@ -1636,6 +1649,7 @@ $csrfToken = getCsrfToken();
           formData.set("priceSolo", priceSolo);
           if (priceMenu !== null) formData.set("priceMenu", priceMenu);
           if (badge) formData.set("badge", badge);
+          if (pricePrefix) formData.set("pricePrefix", pricePrefix);
           formData.set("status", status);
           formData.set("supplements", JSON.stringify(supplements));
           formData.set("image", imageFile);
@@ -1650,6 +1664,7 @@ $csrfToken = getCsrfToken();
             priceSolo,
             priceMenu,
             badge,
+            pricePrefix,
             status,
             supplements
           });
