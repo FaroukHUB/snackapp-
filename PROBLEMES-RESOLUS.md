@@ -209,6 +209,64 @@ Ex: Boumerdès          35000 (optionnel)
 
 ---
 
+### 6. ✅ Prix pâtisserie affiche 0 DA dans ticket livreur (commit `0a03b7d`)
+**Problème :** Pâtisserie montre "1x Pâtisserie 0 DA → Patisserie: Tarte aux Fraises" dans le message WhatsApp au livreur, alors que le prix s'affiche correctement dans le panier client.
+
+**Cause racine :**
+- Dans `cart.html:2321`, le prix envoyé à l'API utilisait uniquement `item.basePrice` (= 0 pour pâtisserie)
+- Les produits avec options (pâtisserie, viennoiserie, beverage) ont un `basePrice` à 0
+- Le prix réel est stocké dans l'option sélectionnée (ex: `selectedPatisserie.price = 300`)
+- Le calcul dans `cart.js:getItemTotal()` était correct (ligne 191-192) et utilisait le prix de l'option
+- MAIS le code de soumission de commande ne reproduisait PAS cette logique
+
+**Code problématique:**
+```javascript
+// cart.html:2321 (AVANT)
+const itemPrice = item.basePrice || 0;  // ← toujours 0 pour pâtisserie!
+const supplementsTotal = (item.supplements || []).reduce(...);
+return {
+    price: itemPrice + supplementsTotal,  // ← 0 + suppléments
+    ...
+};
+```
+
+**Solution implémentée:**
+Reproduire la logique de `Cart.getItemTotal()` dans le formatage des items pour l'API:
+
+```javascript
+// cart.html:2321-2331 (APRÈS)
+let itemPrice = 0;
+if (item.options?.selectedPatisserie && item.options.selectedPatisserie.price) {
+    itemPrice = item.options.selectedPatisserie.price;  // ← Utiliser prix de l'option!
+} else if (item.options?.selectedViennoiserie && item.options.selectedViennoiserie.price) {
+    itemPrice = item.options.selectedViennoiserie.price;
+} else if (item.options?.selectedBeverage && item.options.selectedBeverage.price) {
+    itemPrice = item.options.selectedBeverage.price;
+} else {
+    itemPrice = item.basePrice || 0;  // ← Fallback
+}
+
+const supplementsTotal = (item.supplements || []).reduce(...);
+```
+
+**Résultat:**
+- ✅ Le prix de la pâtisserie sélectionnée (ex: 300 DA) est maintenant envoyé à l'API
+- ✅ Le message WhatsApp affiche: "1x Pâtisserie 300 DA → Patisserie: Tarte aux Fraises"
+- ✅ Cohérence entre affichage panier et ticket livreur
+- ✅ Support étendu à viennoiserie et beverage (au cas où)
+
+**Commit:**
+- `0a03b7d` - fix: Afficher prix correct pâtisserie dans ticket livreur
+
+**Test:**
+```bash
+cd ~/Marvelous.mon-agenceweb.fr
+git pull origin claude/setup-marvelous-creperie-Wg8p0
+# Commander une pâtisserie, envoyer au livreur → prix correct affiché
+```
+
+---
+
 ## 📅 Session 2026-01-07 - Système Livreurs & Suppléments
 
 ### 1. ✅ Suppléments salés manquants pour nouvelles catégories
