@@ -148,7 +148,7 @@ switch ($action) {
         try {
             // Essayer MySQL d'abord
             if (!SNACK_USE_JSON && !defined('SNACK_DB_ERROR')) {
-                $order = OrderRepository::getByOrderNumber($orderId);
+                $order = OrderRepository::getByNumber(SNACK_RESTAURANT_ID, $orderId);
                 if (!$order) {
                     jsonError('Commande introuvable dans MySQL (ID: ' . $orderId . ')');
                 }
