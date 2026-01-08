@@ -6,7 +6,7 @@
             "priceSolo": 150,
             "status": "available",
             "supplements": [],
-            "image": "images\/uploads\/viennoiseries-1a242d05.webp"
+            "image": "images/uploads/viennoiseries-1a242d05.webp"
         },
         "croque-monsieur": {
             "name": "Croque-Monsieur",
@@ -14,33 +14,22 @@
             "priceSolo": 300,
             "status": "available",
             "supplements": [],
-            "image": "images\/uploads\/croque-monsieur-82c66930.webp"
+            "image": "images/uploads/croque-monsieur-82c66930.webp"
         }
     },
     "categories": [],
     "customCategories": {
-        "lat-maison": {
-            "id": "lat-maison",
-            "name": "Plat maison",
-            "description": "",
-            "items": []
-        },
-        "lats-pic-s": {
-            "id": "lats-pic-s",
-            "name": "Plats épicés",
-            "description": "",
-            "items": []
-        },
         "urgers": {
             "id": "urgers",
             "name": "Burgers",
             "description": "",
             "items": []
         },
-        "iz": {
-            "id": "iz",
-            "name": "Riz",
+        "ouscous": {
+            "id": "ouscous",
+            "name": "Couscous",
             "description": "",
+            "flavor": "sale",
             "items": []
         }
     },
@@ -53,7 +42,7 @@
             "priceSolo": 700,
             "priceMenu": 900,
             "badge": "hebla",
-            "image": "images\/uploads\/urgers-cfce7857.png",
+            "image": "images/uploads/urgers-cfce7857.png",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -66,7 +55,7 @@
             "priceSolo": 490,
             "priceMenu": null,
             "badge": null,
-            "image": "images\/uploads\/acos-628ae502.webp",
+            "image": "images/uploads/acos-628ae502.webp",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -79,7 +68,7 @@
             "priceSolo": 233,
             "priceMenu": null,
             "badge": null,
-            "image": "images\/uploads\/ptit-dej-f6a3e393.jpg",
+            "image": "images/uploads/ptit-dej-f6a3e393.jpg",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -92,7 +81,7 @@
             "priceSolo": 500,
             "priceMenu": null,
             "badge": null,
-            "image": "images\/uploads\/arguerita-2b799090.png",
+            "image": "images/uploads/arguerita-2b799090.png",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -105,7 +94,7 @@
             "priceSolo": 344,
             "priceMenu": null,
             "badge": null,
-            "image": "images\/uploads\/poiu-93020e44.jpg",
+            "image": "images/uploads/poiu-93020e44.jpg",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -118,7 +107,7 @@
             "priceSolo": 450,
             "priceMenu": null,
             "badge": null,
-            "image": "images\/uploads\/saumon-188ad6b4.webp",
+            "image": "images/uploads/saumon-188ad6b4.webp",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -131,7 +120,7 @@
             "priceSolo": 1200,
             "priceMenu": null,
             "badge": "harra 🔥",
-            "image": "images\/uploads\/hakhchoukha-1c5ca555.png",
+            "image": "images/uploads/hakhchoukha-1c5ca555.png",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -144,7 +133,7 @@
             "priceSolo": 800,
             "priceMenu": null,
             "badge": null,
-            "image": "images\/uploads\/g-ahal-5f82693a.png",
+            "image": "images/uploads/g-ahal-5f82693a.png",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -157,7 +146,7 @@
             "priceSolo": 450,
             "priceMenu": null,
             "badge": null,
-            "image": "images\/uploads\/e-fabrik-a229a7c4.png",
+            "image": "images/uploads/e-fabrik-a229a7c4.png",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -170,7 +159,7 @@
             "priceSolo": 560,
             "priceMenu": null,
             "badge": null,
-            "image": "images\/uploads\/ain-epice-259f2e72.png",
+            "image": "images/uploads/ain-epice-259f2e72.png",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
@@ -183,10 +172,22 @@
             "priceSolo": 700,
             "priceMenu": null,
             "badge": null,
-            "image": "images\/uploads\/rousty-7406eb2b.jpg",
+            "image": "images/uploads/rousty-7406eb2b.jpg",
             "status": "available",
             "supplements": [],
             "baseIngredients": []
+        },
+        "oyal": {
+            "id": "oyal",
+            "categoryId": "ouscous",
+            "name": "Royal",
+            "description": "Semoule, legumes, boeuf etc",
+            "priceSolo": 750,
+            "priceMenu": null,
+            "badge": null,
+            "image": "images/uploads/oyal-6a3e9e99.png",
+            "status": "available",
+            "supplements": []
         }
     },
     "deletedProducts": [],
@@ -195,7 +196,10 @@
         "izza",
         "asta",
         "urgers",
-        "ateau"
+        "ateau",
+        "iz",
+        "lats-pic-s",
+        "lat-maison"
     ],
     "formules": [],
     "customFormules": {
@@ -207,7 +211,7 @@
             "originalPrice": 700,
             "savings": 250,
             "badge": null,
-            "image": "images\/formules\/formule-formule-midi-2b7d9071.jpg",
+            "image": "images/formules/formule-formule-midi-2b7d9071.jpg",
             "includes": [],
             "status": "available"
         },
@@ -219,7 +223,7 @@
             "originalPrice": null,
             "savings": null,
             "badge": null,
-            "image": "images\/formules\/formule-formule-walou-24fc4b39.webp",
+            "image": "images/formules/formule-formule-walou-24fc4b39.webp",
             "includes": [],
             "status": "available"
         }
@@ -233,7 +237,19 @@
             "crepes-salees-signature": [],
             "crepes-sucrees": [],
             "gaufres": [],
-            "bubble-waffle": []
+            "bubble-waffle": [],
+            "ouscous": [
+                "sup-mix-fromages",
+                "sup-cheddar",
+                "sup-camembert",
+                "sup-chakchouka",
+                "sup-pomme-terre",
+                "sup-oignons-confits",
+                "sup-oeuf",
+                "sup-viande-hachee",
+                "sup-escalope-poulet",
+                "sup-jambon"
+            ]
         }
     },
     "deletedSupplements": [
