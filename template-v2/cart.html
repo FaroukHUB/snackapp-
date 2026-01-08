@@ -843,27 +843,156 @@
                     <!-- Champs Livraison -->
                     <div id="deliveryFields" style="display: none;">
                         <div class="form-row">
-                            <label>Type de livraison *</label>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <label class="delivery-type-label">
+                                <i class="fas fa-map-marker-alt" style="color: #ef4444; margin-right: 8px;"></i>
+                                Type de livraison *
+                            </label>
+                            <div class="delivery-type-container">
+                                <label class="delivery-type-card">
                                     <input type="radio" name="deliveryType" value="libre" onchange="CartPage.setDeliveryType('libre')" checked>
-                                    <span>Adresse libre</span>
+                                    <div class="delivery-card-content">
+                                        <i class="fas fa-map"></i>
+                                        <span>Adresse libre</span>
+                                        <i class="fas fa-check delivery-check"></i>
+                                    </div>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <label class="delivery-type-card">
                                     <input type="radio" name="deliveryType" value="riad-city" onchange="CartPage.setDeliveryType('riad-city')">
-                                    <span>Riad City</span>
+                                    <div class="delivery-card-content">
+                                        <i class="fas fa-building"></i>
+                                        <span>Riad City</span>
+                                        <i class="fas fa-check delivery-check"></i>
+                                    </div>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <label class="delivery-type-card">
                                     <input type="radio" name="deliveryType" value="riad-prestige" onchange="CartPage.setDeliveryType('riad-prestige')">
-                                    <span>Riad Prestige</span>
+                                    <div class="delivery-card-content">
+                                        <i class="fas fa-home"></i>
+                                        <span>Riad Prestige</span>
+                                        <i class="fas fa-check delivery-check"></i>
+                                    </div>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Adresse libre -->
+                        <style>
+                        .delivery-type-label {
+                            font-size: 16px;
+                            font-weight: 700;
+                            color: #1f2937;
+                            margin-bottom: 12px;
+                            display: flex;
+                            align-items: center;
+                        }
+
+                        .delivery-type-container {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                            gap: 12px;
+                            margin-bottom: 16px;
+                        }
+
+                        .delivery-type-card {
+                            position: relative;
+                            cursor: pointer;
+                            border-radius: 12px;
+                            overflow: hidden;
+                            transition: all 0.3s ease;
+                        }
+
+                        .delivery-type-card input[type="radio"] {
+                            position: absolute;
+                            opacity: 0;
+                            pointer-events: none;
+                        }
+
+                        .delivery-card-content {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            gap: 8px;
+                            padding: 16px 12px;
+                            background: #f9fafb;
+                            border: 2px solid #e5e7eb;
+                            border-radius: 12px;
+                            transition: all 0.3s ease;
+                        }
+
+                        .delivery-card-content i:first-child {
+                            font-size: 24px;
+                            color: #6b7280;
+                            transition: all 0.3s ease;
+                        }
+
+                        .delivery-card-content span {
+                            font-size: 14px;
+                            font-weight: 600;
+                            color: #374151;
+                            text-align: center;
+                        }
+
+                        .delivery-check {
+                            font-size: 18px !important;
+                            color: #10b981 !important;
+                            opacity: 0;
+                            transition: all 0.3s ease;
+                        }
+
+                        .delivery-type-card input[type="radio"]:checked ~ .delivery-card-content {
+                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                            border-color: #10b981;
+                            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                            transform: translateY(-2px);
+                        }
+
+                        .delivery-type-card input[type="radio"]:checked ~ .delivery-card-content i:first-child {
+                            color: white;
+                        }
+
+                        .delivery-type-card input[type="radio"]:checked ~ .delivery-card-content span {
+                            color: white;
+                        }
+
+                        .delivery-type-card input[type="radio"]:checked ~ .delivery-card-content .delivery-check {
+                            opacity: 1;
+                        }
+
+                        .delivery-type-card:hover .delivery-card-content {
+                            border-color: #10b981;
+                            transform: translateY(-1px);
+                        }
+
+                        @media (max-width: 640px) {
+                            .delivery-type-container {
+                                grid-template-columns: 1fr;
+                            }
+                        }
+                        </style>
+
+                        <!-- Adresse libre avec ville et code postal -->
                         <div id="deliveryLibre" class="form-row">
-                            <label for="customerAddress">Adresse *</label>
-                            <input type="text" id="customerAddress" placeholder="Votre adresse complète">
+                            <label for="customerAddress">
+                                <i class="fas fa-map-pin" style="margin-right: 6px;"></i>
+                                Adresse complète *
+                            </label>
+                            <input type="text" id="customerAddress" placeholder="Ex: 123 Rue de la République, Bâtiment A, Appt 12">
+
+                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-top: 12px;">
+                                <div>
+                                    <label for="customerCity" style="font-size: 13px; color: #6b7280; margin-bottom: 6px; display: block;">
+                                        <i class="fas fa-city" style="margin-right: 4px;"></i>
+                                        Ville *
+                                    </label>
+                                    <input type="text" id="customerCity" placeholder="Ex: Boumerdès" style="width: 100%;">
+                                </div>
+                                <div>
+                                    <label for="customerPostalCode" style="font-size: 13px; color: #6b7280; margin-bottom: 6px; display: block;">
+                                        <i class="fas fa-envelope" style="margin-right: 4px;"></i>
+                                        Code postal
+                                    </label>
+                                    <input type="text" id="customerPostalCode" placeholder="35000" style="width: 100%;">
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Riad City -->
@@ -2135,8 +2264,13 @@
 
                     if (deliveryType === 'libre') {
                         const address = document.getElementById('customerAddress').value.trim();
+                        const city = document.getElementById('customerCity').value.trim();
                         if (!address) {
                             this.showToast('Veuillez entrer votre adresse', 'error');
+                            return;
+                        }
+                        if (!city) {
+                            this.showToast('Veuillez entrer la ville', 'error');
                             return;
                         }
                     } else if (deliveryType === 'riad-city') {
@@ -2226,7 +2360,19 @@
 
                     if (deliveryType === 'libre') {
                         const address = document.getElementById('customerAddress').value.trim();
-                        modeNotes = `🚗 LIVRAISON: ${address}`;
+                        const city = document.getElementById('customerCity').value.trim();
+                        const postalCode = document.getElementById('customerPostalCode').value.trim();
+
+                        // Construire l'adresse complète avec ville et code postal
+                        let fullAddress = address;
+                        if (city) {
+                            fullAddress += `, ${city}`;
+                        }
+                        if (postalCode) {
+                            fullAddress += ` ${postalCode}`;
+                        }
+
+                        modeNotes = `🚗 LIVRAISON\nAdresse: ${fullAddress}`;
                     } else if (deliveryType === 'riad-city') {
                         const bat = document.getElementById('riadCityBat').value;
                         const appt = document.getElementById('riadCityAppt').value.trim();
