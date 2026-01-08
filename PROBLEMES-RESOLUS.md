@@ -150,6 +150,65 @@ git pull origin claude/setup-marvelous-creperie-Wg8p0
 
 ---
 
+### 4. ✅ Fix info monnaie + Amélioration formulaire livraison (commits `589ab6c`, `6110bca`)
+
+#### A. Info monnaie non transmise au livreur (commit `589ab6c`)
+**Problème :** Message WhatsApp affichait "Espèces (montant exact non précisé)" alors que client avait rempli l'info
+
+**Cause:** Champs `has_exact_change` et `change_for` envoyés par le front mais ignorés par `orders.php`
+
+**Solution:**
+- Ajout des infos dans le champ `notes` lors de création commande (MySQL + JSON)
+- Format: `"J'ai l'appoint"` ou `"Prévoir monnaie sur: 5000 DA"`
+- Parsing dans `livreurs.php` détecte maintenant correctement ces phrases
+
+**Résultat:** Livreur voit maintenant la monnaie à préparer dans le message WhatsApp
+
+#### B. Formulaire livraison amélioré (commit `6110bca`)
+**Problème :** Design type de livraison moche + adresse imprécise pour GPS
+
+**Améliorations apportées:**
+
+**1. Design moderne type de livraison**
+- Cartes cliquables avec icônes (au lieu de radio buttons simples)
+- 3 options : Adresse libre (carte), Riad City (immeuble), Riad Prestige (maison)
+- Animation hover + sélection avec gradient vert
+- Checkmark visible sur option sélectionnée
+- Style cohérent avec section paiement
+- Responsive mobile (cartes empilées)
+
+**2. Ajout ville et code postal**
+```html
+[Adresse complète] *
+Ex: 123 Rue de la République, Bâtiment A, Appt 12
+
+[Ville *]               [Code postal]
+Ex: Boumerdès          35000 (optionnel)
+```
+
+- **Ville obligatoire** avec validation
+- **Code postal optionnel** (pas obligatoire en Algérie)
+- Format envoyé: `"adresse, ville code_postal"`
+- Facilite recherche GPS précise pour le livreur
+
+**3. Conservation fonctionnalités**
+- Riad City : sélection bâtiment + appt (inchangé)
+- Riad Prestige : sélection villa (inchangé)
+- Toute la logique existante préservée
+
+**Avantages:**
+- ✅ Design moderne et professionnel
+- ✅ Adresse plus précise (ville facilite GPS)
+- ✅ Code postal optionnel (flexible)
+- ✅ Rien n'est cassé (backward compatible)
+- ✅ UX cohérente sur toute la page
+
+**Commits:**
+- `589ab6c` - fix: Stockage info monnaie dans notes
+- `6110bca` - feat: Amélioration formulaire livraison
+
+---
+
 ## 📅 Session 2026-01-07 - Système Livreurs & Suppléments
 
 ### 1. ✅ Suppléments salés manquants pour nouvelles catégories
