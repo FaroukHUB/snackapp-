@@ -790,6 +790,11 @@ $csrfToken = getCsrfToken();
             <label for="bevOptionPrice">Prix (DA)</label>
             <input id="bevOptionPrice" class="input" type="number" step="1" min="0" placeholder="100" required />
           </div>
+          <div class="field">
+            <label for="bevOptionImage">Photo</label>
+            <input type="file" id="bevOptionImage" accept="image/jpeg,image/png,image/webp" class="input" style="padding:8px;" />
+            <small style="color:#9ca3af;display:block;margin-top:4px;">Formats: JPG, PNG, WebP (max 2MB)</small>
+          </div>
           <button class="btn btn-good" type="submit" style="width:100%;margin-top:8px;">+ Ajouter</button>
         </form>
 
@@ -1489,11 +1494,24 @@ $csrfToken = getCsrfToken();
         const div = document.createElement("div");
         const status = opt.status ?? 'available';
         const isAvailable = status === 'available';
-        div.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--stroke);border-radius:8px;background:rgba(255,255,255,.02);";
+        div.style.cssText = "display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--stroke);border-radius:10px;background:rgba(255,255,255,.02);";
+
+        let imgHtml = '';
+        if (opt.image) {
+          let imgSrc = opt.image;
+          if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../')) {
+            imgSrc = '../' + imgSrc;
+          }
+          imgHtml = `<img src="${escapeHtml(imgSrc)}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;opacity:${isAvailable ? '1' : '0.4'}">`;
+        } else {
+          imgHtml = `<div style="width:50px;height:50px;background:var(--stroke);border-radius:8px;opacity:${isAvailable ? '1' : '0.4'}"></div>`;
+        }
+
         div.innerHTML = `
+          ${imgHtml}
           <div style="flex:1;opacity:${isAvailable ? '1' : '0.6'}">
             <strong style="font-size:13px;">${escapeHtml(opt.name)}</strong>
-            ${opt.price ? `<span style="color:var(--muted);margin-left:10px;font-size:12px;">${opt.price} DA</span>` : ''}
+            <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} DA</div>
           </div>
           <button class="btn btn-sm ${isAvailable ? 'btn-good' : 'btn-ghost'}" data-toggle-status-bev="${idx}" type="button" title="${isAvailable ? 'Mettre indisponible' : 'Mettre disponible'}">${isAvailable ? '✓' : '✕'}</button>
           <button class="btn btn-error btn-sm" data-delete-bev="${idx}" type="button">🗑️</button>
@@ -1539,6 +1557,7 @@ $csrfToken = getCsrfToken();
       e.preventDefault();
       const name = $("#bevOptionName").value.trim();
       const price = parseFloat($("#bevOptionPrice").value);
+      const imageFile = $("#bevOptionImage").files[0];
 
       if (!name || isNaN(price)) {
         toast("error", "Erreur", "Nom et prix sont requis.");
@@ -1546,12 +1565,15 @@ $csrfToken = getCsrfToken();
       }
 
       try {
-        await apiPostJson({
-          action: "add_beverage_option",
-          beverage_type: currentBeverageProductId,
-          name,
-          price
-        });
+        const formData = new FormData();
+        formData.append('beverage_type', currentBeverageProductId);
+        formData.append('name', name);
+        formData.append('price', price);
+        if (imageFile) {
+          formData.append('image', imageFile);
+        }
+
+        await apiPostMultipart(formData, 'add_beverage_option');
         toast("success", "Ajouté", `${name} ajouté avec succès.`);
         $("#formAddBeverageOption").reset();
         state.menu = await apiGet();

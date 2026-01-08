@@ -667,6 +667,8 @@
             "price": 350,
             "status": "available",
             "note": "À partir de",
+            "hasBeverageOptions": true,
+            "beverageOptions": [],
             "priceSolo": 0
           }
         ]

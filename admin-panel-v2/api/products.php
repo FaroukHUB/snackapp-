@@ -1342,6 +1342,29 @@ switch ($action) {
         $price = intval($input['price'] ?? 0);
         if (!$name || !$bevType || $price <= 0) jsonError('Type, nom et prix requis');
 
+        // Upload d'image optionnel
+        $imagePath = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $tmpName = $_FILES['image']['tmp_name'];
+            $origName = basename($_FILES['image']['name']);
+            $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                jsonError('Format image invalide. Utilisez JPG, PNG ou WebP.');
+            }
+            if ($_FILES['image']['size'] > 2 * 1024 * 1024) {
+                jsonError('Image trop volumineuse (max 2MB).');
+            }
+            $safeName = preg_replace('/[^a-z0-9_-]/i', '', pathinfo($origName, PATHINFO_FILENAME));
+            $newName = $safeName . '_' . time() . '.' . $ext;
+            $uploadDir = SNACK_ROOT . '/assets/images/beverages/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+            $targetPath = $uploadDir . $newName;
+            if (!move_uploaded_file($tmpName, $targetPath)) {
+                jsonError('Échec upload image.');
+            }
+            $imagePath = 'assets/images/beverages/' . $newName;
+        }
+
         $menuJsonPath = SNACK_ROOT . '/config/menu.json';
         $menuData = json_decode(file_get_contents($menuJsonPath), true);
 
@@ -1353,11 +1376,15 @@ switch ($action) {
                         $item['beverageOptions'] = [];
                     }
                     $newId = $bevType . '-' . strtolower(str_replace([' ', 'é', 'è', 'ê'], ['', 'e', 'e', 'e'], $name));
-                    $item['beverageOptions'][] = [
+                    $newOption = [
                         'id' => $newId,
                         'name' => $name,
                         'price' => $price
                     ];
+                    if ($imagePath) {
+                        $newOption['image'] = $imagePath;
+                    }
+                    $item['beverageOptions'][] = $newOption;
                     $found = true;
                     break 2;
                 }
