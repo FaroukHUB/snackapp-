@@ -1406,6 +1406,9 @@ if (isset($_GET['export'])) {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <h2><i class="fas fa-users"></i> Clients (<?= $totalCustomers ?>)</h2>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="clients.php" target="_blank" class="btn btn-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 2px solid #fbbf24;">
+                        <i class="fas fa-sparkles"></i> Nouvelle Interface CRM
+                    </a>
                     <a href="?export=customers" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> CSV</a>
                     <button onclick="toggleBroadcastPanel()" class="btn btn-sm btn-whatsapp"><i class="fab fa-whatsapp"></i> Diffusion</button>
                     <button onclick="openAddCustomerModal()" class="btn btn-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"><i class="fas fa-plus"></i> Ajouter</button>
