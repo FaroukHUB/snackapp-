@@ -274,15 +274,19 @@ Créer des fiches clients complètes avec:
 - [x] Filtre par tag (list?filter_tag=VIP)
 - **Commit**: b41c233 (+488 lignes)
 
-#### Phase 3: Interface Frontend ⏳ EN COURS
-- [ ] Redesign carte client
-- [ ] Formulaire adresses
-- [ ] Section préférences/notes
-- [ ] Gestion tags
-- [ ] Historique avec "Recommander"
-- [ ] Templates WhatsApp UI
+#### Phase 3: Interface Frontend ✅ COMPLÉTÉ
+- [x] Redesign cartes clients (tags, badges, adresse aperçu)
+- [x] Modal détaillé complet (toutes sections)
+- [x] Formulaires adresses (ajout/suppression/par défaut)
+- [x] Section préférences/notes (allergies, favoris auto, instructions)
+- [x] Gestion tags (ajout/suppression avec couleurs)
+- [x] Historique enrichi avec bouton "Recommander"
+- [x] Templates WhatsApp (3 modèles pré-remplis)
+- [x] Notes admin auto-save
+- [x] UX moderne (modals, toasts, glass effect)
+- **Commit**: 8a0c5df (+1266 lignes, -136 lignes)
 
-#### Phase 4: Features avancées ⏸️ EN ATTENTE
+#### Phase 4: Features avancées ⏳ EN COURS
 - [ ] Filtres par tags
 - [ ] Stats graphiques
 - [ ] Alertes clients inactifs
