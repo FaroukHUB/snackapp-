@@ -49,6 +49,43 @@ switch ($action) {
     case 'get_by_phone':
         getByPhone($useMySQL);
         break;
+    // ===== ADRESSES =====
+    case 'add_address':
+        addAddress($useMySQL);
+        break;
+    case 'update_address':
+        updateAddress($useMySQL);
+        break;
+    case 'delete_address':
+        deleteAddress($useMySQL);
+        break;
+    case 'set_default_address':
+        setDefaultAddress($useMySQL);
+        break;
+    // ===== PRÉFÉRENCES =====
+    case 'update_preferences':
+        updatePreferences($useMySQL);
+        break;
+    case 'update_admin_notes':
+        updateAdminNotes($useMySQL);
+        break;
+    // ===== TAGS =====
+    case 'add_tag':
+        addTag($useMySQL);
+        break;
+    case 'remove_tag':
+        removeTag($useMySQL);
+        break;
+    case 'get_available_tags':
+        getAvailableTags();
+        break;
+    // ===== HISTORIQUE & STATS =====
+    case 'get_detailed_history':
+        getDetailedHistory($useMySQL);
+        break;
+    case 'get_favorite_products':
+        getFavoriteProducts($useMySQL);
+        break;
     default:
         jsonError('Action invalide');
 }
@@ -59,9 +96,31 @@ switch ($action) {
 
 function listCustomers(bool $useMySQL) {
     $orderBy = $_GET['order_by'] ?? 'orders_count DESC';
+    $filterTag = $_GET['filter_tag'] ?? null;
 
     if ($useMySQL) {
         $customers = CustomerRepository::getAll(SNACK_RESTAURANT_ID, $orderBy);
+
+        // Enrichir avec tags
+        foreach ($customers as &$customer) {
+            // Récupérer les tags du client
+            $tags = Database::fetchAll(
+                "SELECT tag FROM customer_tags WHERE customer_id = ?",
+                [$customer['id']]
+            );
+            $customer['tags'] = array_column($tags, 'tag');
+
+            // Parser JSON addresses et preferences
+            $customer['addresses'] = json_decode($customer['addresses'] ?? '[]', true) ?: [];
+            $customer['preferences'] = json_decode($customer['preferences'] ?? '{}', true) ?: [];
+        }
+
+        // Filtrer par tag si demandé
+        if ($filterTag) {
+            $customers = array_filter($customers, fn($c) => in_array($filterTag, $c['tags'] ?? []));
+            $customers = array_values($customers);
+        }
+
         $stats = CustomerRepository::getStats(SNACK_RESTAURANT_ID);
 
         jsonSuccess([
@@ -104,6 +163,34 @@ function getCustomer(bool $useMySQL) {
             // Récupérer l'historique des commandes
             $orderHistory = CustomerRepository::getOrderHistory((int)$customerId);
             $customer['order_history'] = $orderHistory;
+
+            // Récupérer les tags
+            $tags = Database::fetchAll(
+                "SELECT tag FROM customer_tags WHERE customer_id = ?",
+                [$customer['id']]
+            );
+            $customer['tags'] = array_column($tags, 'tag');
+
+            // Parser JSON
+            $customer['addresses'] = json_decode($customer['addresses'] ?? '[]', true) ?: [];
+            $customer['preferences'] = json_decode($customer['preferences'] ?? '{}', true) ?: [];
+
+            // Récupérer produits favoris
+            $favorites = Database::fetchAll(
+                "SELECT
+                    oi.product_name as name,
+                    COUNT(*) as count,
+                    SUM(oi.quantity) as total_quantity
+                 FROM order_items oi
+                 JOIN orders o ON oi.order_id = o.id
+                 WHERE o.customer_id = ?
+                 GROUP BY oi.product_name
+                 ORDER BY count DESC
+                 LIMIT 3",
+                [$customer['id']]
+            );
+            $customer['favorite_products'] = $favorites;
+
             jsonSuccess(['customer' => $customer]);
         } else {
             jsonError('Client introuvable');
@@ -444,5 +531,406 @@ function sendPromotion(bool $useMySQL) {
         }
 
         jsonSuccess(['recipients' => $recipients]);
+    }
+}
+
+// ============================================
+// NOUVELLES FONCTIONS - AMÉLIORATION CLIENTS
+// ============================================
+
+/* =========================
+   GESTION ADRESSES
+   ========================= */
+
+function addAddress(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? null;
+    $type = $requestData['type'] ?? 'home'; // home ou work
+    $label = $requestData['label'] ?? '';
+    $address = trim($requestData['address'] ?? '');
+    $notes = trim($requestData['notes'] ?? '');
+
+    if (!$customerId || empty($address)) {
+        jsonError('Paramètres manquants');
+    }
+
+    if ($useMySQL) {
+        $customer = CustomerRepository::getById((int)$customerId);
+        if (!$customer || $customer['restaurant_id'] !== SNACK_RESTAURANT_ID) {
+            jsonError('Client introuvable');
+        }
+
+        $addresses = json_decode($customer['addresses'] ?? '[]', true) ?: [];
+
+        // Limite: 2 adresses maximum
+        if (count($addresses) >= 2) {
+            jsonError('Maximum 2 adresses autorisées');
+        }
+
+        // Nouvelle adresse
+        $newAddress = [
+            'id' => uniqid('addr_'),
+            'type' => $type,
+            'label' => $label ?: ($type === 'home' ? 'Maison' : 'Bureau'),
+            'address' => $address,
+            'notes' => $notes,
+            'is_default' => count($addresses) === 0 // Première adresse = défaut
+        ];
+
+        $addresses[] = $newAddress;
+
+        Database::update('customers', [
+            'addresses' => json_encode($addresses, JSON_UNESCAPED_UNICODE)
+        ], [
+            'id' => (int)$customerId,
+            'restaurant_id' => SNACK_RESTAURANT_ID
+        ]);
+
+        jsonSuccess(['address' => $newAddress]);
+    } else {
+        jsonError('Mode JSON non supporté pour les adresses');
+    }
+}
+
+function updateAddress(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? null;
+    $addressId = $requestData['address_id'] ?? null;
+    $address = trim($requestData['address'] ?? '');
+    $notes = trim($requestData['notes'] ?? '');
+
+    if (!$customerId || !$addressId) {
+        jsonError('Paramètres manquants');
+    }
+
+    if ($useMySQL) {
+        $customer = CustomerRepository::getById((int)$customerId);
+        if (!$customer) {
+            jsonError('Client introuvable');
+        }
+
+        $addresses = json_decode($customer['addresses'] ?? '[]', true) ?: [];
+        $found = false;
+
+        foreach ($addresses as &$addr) {
+            if ($addr['id'] === $addressId) {
+                if (!empty($address)) $addr['address'] = $address;
+                if (isset($requestData['notes'])) $addr['notes'] = $notes;
+                if (isset($requestData['label'])) $addr['label'] = $requestData['label'];
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            jsonError('Adresse introuvable');
+        }
+
+        Database::update('customers', [
+            'addresses' => json_encode($addresses, JSON_UNESCAPED_UNICODE)
+        ], [
+            'id' => (int)$customerId
+        ]);
+
+        jsonSuccess();
+    } else {
+        jsonError('Mode JSON non supporté');
+    }
+}
+
+function deleteAddress(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? null;
+    $addressId = $requestData['address_id'] ?? null;
+
+    if (!$customerId || !$addressId) {
+        jsonError('Paramètres manquants');
+    }
+
+    if ($useMySQL) {
+        $customer = CustomerRepository::getById((int)$customerId);
+        if (!$customer) {
+            jsonError('Client introuvable');
+        }
+
+        $addresses = json_decode($customer['addresses'] ?? '[]', true) ?: [];
+        $addresses = array_filter($addresses, fn($addr) => $addr['id'] !== $addressId);
+        $addresses = array_values($addresses);
+
+        // Si on supprime l'adresse par défaut, mettre la première comme défaut
+        $hasDefault = false;
+        foreach ($addresses as $addr) {
+            if ($addr['is_default'] ?? false) {
+                $hasDefault = true;
+                break;
+            }
+        }
+
+        if (!$hasDefault && count($addresses) > 0) {
+            $addresses[0]['is_default'] = true;
+        }
+
+        Database::update('customers', [
+            'addresses' => json_encode($addresses, JSON_UNESCAPED_UNICODE)
+        ], [
+            'id' => (int)$customerId
+        ]);
+
+        jsonSuccess();
+    } else {
+        jsonError('Mode JSON non supporté');
+    }
+}
+
+function setDefaultAddress(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? null;
+    $addressId = $requestData['address_id'] ?? null;
+
+    if (!$customerId || !$addressId) {
+        jsonError('Paramètres manquants');
+    }
+
+    if ($useMySQL) {
+        $customer = CustomerRepository::getById((int)$customerId);
+        if (!$customer) {
+            jsonError('Client introuvable');
+        }
+
+        $addresses = json_decode($customer['addresses'] ?? '[]', true) ?: [];
+
+        foreach ($addresses as &$addr) {
+            $addr['is_default'] = ($addr['id'] === $addressId);
+        }
+
+        Database::update('customers', [
+            'addresses' => json_encode($addresses, JSON_UNESCAPED_UNICODE)
+        ], [
+            'id' => (int)$customerId
+        ]);
+
+        jsonSuccess();
+    } else {
+        jsonError('Mode JSON non supporté');
+    }
+}
+
+/* =========================
+   GESTION PRÉFÉRENCES
+   ========================= */
+
+function updatePreferences(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? null;
+
+    if (!$customerId) {
+        jsonError('ID client manquant');
+    }
+
+    if ($useMySQL) {
+        $customer = CustomerRepository::getById((int)$customerId);
+        if (!$customer || $customer['restaurant_id'] !== SNACK_RESTAURANT_ID) {
+            jsonError('Client introuvable');
+        }
+
+        $preferences = json_decode($customer['preferences'] ?? '{}', true) ?: [];
+
+        // Mettre à jour les champs fournis
+        if (isset($requestData['allergies'])) {
+            $preferences['allergies'] = is_array($requestData['allergies'])
+                ? $requestData['allergies']
+                : explode(',', trim($requestData['allergies']));
+        }
+
+        if (isset($requestData['favorites'])) {
+            $preferences['favorites'] = is_array($requestData['favorites'])
+                ? $requestData['favorites']
+                : [];
+        }
+
+        if (isset($requestData['notes'])) {
+            $preferences['notes'] = trim($requestData['notes']);
+        }
+
+        if (isset($requestData['delivery_instructions'])) {
+            $preferences['delivery_instructions'] = trim($requestData['delivery_instructions']);
+        }
+
+        if (isset($requestData['preferred_time'])) {
+            $preferences['preferred_time'] = trim($requestData['preferred_time']);
+        }
+
+        Database::update('customers', [
+            'preferences' => json_encode($preferences, JSON_UNESCAPED_UNICODE)
+        ], [
+            'id' => (int)$customerId,
+            'restaurant_id' => SNACK_RESTAURANT_ID
+        ]);
+
+        jsonSuccess(['preferences' => $preferences]);
+    } else {
+        jsonError('Mode JSON non supporté');
+    }
+}
+
+function updateAdminNotes(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? null;
+    $notes = trim($requestData['notes'] ?? '');
+
+    if (!$customerId) {
+        jsonError('ID client manquant');
+    }
+
+    if ($useMySQL) {
+        $rowsAffected = Database::update('customers', [
+            'admin_notes' => $notes
+        ], [
+            'id' => (int)$customerId,
+            'restaurant_id' => SNACK_RESTAURANT_ID
+        ]);
+
+        if ($rowsAffected > 0 || $rowsAffected === 0) {
+            jsonSuccess();
+        } else {
+            jsonError('Client introuvable');
+        }
+    } else {
+        jsonError('Mode JSON non supporté');
+    }
+}
+
+/* =========================
+   GESTION TAGS
+   ========================= */
+
+function addTag(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? null;
+    $tag = trim($requestData['tag'] ?? '');
+
+    if (!$customerId || empty($tag)) {
+        jsonError('Paramètres manquants');
+    }
+
+    if ($useMySQL) {
+        try {
+            Database::insert('customer_tags', [
+                'customer_id' => (int)$customerId,
+                'tag' => $tag
+            ]);
+
+            jsonSuccess();
+        } catch (Exception $e) {
+            // Dupliquer = déjà existant
+            if (strpos($e->getMessage(), 'Duplicate') !== false) {
+                jsonSuccess(); // Pas d'erreur si déjà existant
+            } else {
+                jsonError($e->getMessage());
+            }
+        }
+    } else {
+        jsonError('Mode JSON non supporté');
+    }
+}
+
+function removeTag(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? null;
+    $tag = trim($requestData['tag'] ?? '');
+
+    if (!$customerId || empty($tag)) {
+        jsonError('Paramètres manquants');
+    }
+
+    if ($useMySQL) {
+        Database::query(
+            "DELETE FROM customer_tags WHERE customer_id = ? AND tag = ?",
+            [(int)$customerId, $tag]
+        );
+
+        jsonSuccess();
+    } else {
+        jsonError('Mode JSON non supporté');
+    }
+}
+
+function getAvailableTags() {
+    // Tags disponibles (statiques)
+    $tags = [
+        ['value' => 'VIP', 'label' => 'VIP', 'color' => '#fbbf24'],
+        ['value' => 'Régulier', 'label' => 'Régulier', 'color' => '#60a5fa'],
+        ['value' => 'Nouveau', 'label' => 'Nouveau', 'color' => '#34d399'],
+        ['value' => 'Zone Centre', 'label' => 'Zone Centre', 'color' => '#a78bfa'],
+        ['value' => 'Zone Est', 'label' => 'Zone Est', 'color' => '#f472b6'],
+        ['value' => 'Zone Ouest', 'label' => 'Zone Ouest', 'color' => '#fb923c'],
+        ['value' => 'Livraison', 'label' => 'Livraison', 'color' => '#22d3ee'],
+        ['value' => 'Sur place', 'label' => 'Sur place', 'color' => '#4ade80'],
+        ['value' => 'Entreprise', 'label' => 'Entreprise', 'color' => '#818cf8'],
+    ];
+
+    jsonSuccess(['tags' => $tags]);
+}
+
+/* =========================
+   HISTORIQUE & STATS
+   ========================= */
+
+function getDetailedHistory(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? $_GET['customer_id'] ?? null;
+    $limit = isset($requestData['limit']) ? (int)$requestData['limit'] : 10;
+
+    if (!$customerId) {
+        jsonError('ID client manquant');
+    }
+
+    if ($useMySQL) {
+        $orders = CustomerRepository::getOrderHistory((int)$customerId, $limit);
+
+        jsonSuccess(['orders' => $orders]);
+    } else {
+        jsonError('Mode JSON non supporté');
+    }
+}
+
+function getFavoriteProducts(bool $useMySQL) {
+    global $requestData;
+
+    $customerId = $requestData['customer_id'] ?? $_GET['customer_id'] ?? null;
+
+    if (!$customerId) {
+        jsonError('ID client manquant');
+    }
+
+    if ($useMySQL) {
+        // Récupérer les produits les plus commandés
+        $favorites = Database::fetchAll(
+            "SELECT
+                oi.product_name as name,
+                COUNT(*) as count,
+                SUM(oi.quantity) as total_quantity,
+                MAX(o.created_at) as last_ordered
+             FROM order_items oi
+             JOIN orders o ON oi.order_id = o.id
+             WHERE o.customer_id = ?
+             GROUP BY oi.product_name
+             ORDER BY count DESC, total_quantity DESC
+             LIMIT 5",
+            [(int)$customerId]
+        );
+
+        jsonSuccess(['favorites' => $favorites]);
+    } else {
+        jsonError('Mode JSON non supporté');
     }
 }
