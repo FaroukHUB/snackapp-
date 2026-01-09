@@ -198,8 +198,8 @@ const Products = {
                 price = Math.min(...product.beverageOptions.map(opt => opt.price || 0));
             }
 
-            // Utiliser pricePrefix du produit si défini, sinon afficher le prix normalement
-            const priceText = product.pricePrefix ? `${product.pricePrefix} ${Config.formatPrice(price)}` : Config.formatPrice(price);
+            // Utiliser pricePrefix du produit si défini (sans ajouter le prix), sinon afficher le prix normalement
+            const priceText = product.pricePrefix ? product.pricePrefix : Config.formatPrice(price);
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
             return `
                 <div class="featured-card">
@@ -527,8 +527,8 @@ const Products = {
                 price = Math.min(...product.beverageOptions.map(opt => opt.price || 0));
             }
 
-            // Utiliser pricePrefix du produit si défini, sinon afficher le prix normalement
-            const priceText = product.pricePrefix ? `${product.pricePrefix} ${Config.formatPrice(price)}` : Config.formatPrice(price);
+            // Utiliser pricePrefix du produit si défini (sans ajouter le prix), sinon afficher le prix normalement
+            const priceText = product.pricePrefix ? product.pricePrefix : Config.formatPrice(price);
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
 
             return `
