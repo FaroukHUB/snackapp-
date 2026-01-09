@@ -28,7 +28,7 @@ DB_CONFIG=$(php -r "
 
 DB_HOST=$(echo $DB_CONFIG | php -r "echo json_decode(file_get_contents('php://stdin'), true)['host'];")
 DB_NAME=$(echo $DB_CONFIG | php -r "echo json_decode(file_get_contents('php://stdin'), true)['dbname'];")
-DB_USER=$(echo $DB_CONFIG | php -r "echo json_decode(file_get_contents('php://stdin'), true)['user'];")
+DB_USER=$(echo $DB_CONFIG | php -r "echo json_decode(file_get_contents('php://stdin'), true)['username'];")
 DB_PASS=$(echo $DB_CONFIG | php -r "echo json_decode(file_get_contents('php://stdin'), true)['password'];")
 
 if [ -z "$DB_HOST" ] || [ -z "$DB_NAME" ]; then
