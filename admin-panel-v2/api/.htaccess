@@ -1,4 +1,0 @@
-# Fix erreur 503 - Désactiver ModSecurity pour API
-<IfModule mod_security2.c>
-    SecRuleEngine Off
-</IfModule>
