@@ -3,21 +3,66 @@
 let productsData = [];
 let tgtgOffers = [];
 
+// Afficher erreur API visuelle
+function showApiError(message, statusCode) {
+    const productsList = document.getElementById('products-list');
+    if (!productsList) return;
+
+    productsList.innerHTML = `
+        <div class="glass-strong rounded-2xl p-8 text-center">
+            <div class="text-6xl mb-4">⚠️</div>
+            <h3 class="text-white font-bold text-xl mb-2">Erreur de chargement</h3>
+            <p class="text-gray-400 mb-4">${message}</p>
+            ${statusCode ? `<p class="text-gray-500 text-sm mb-4">Code: ${statusCode}</p>` : ''}
+            <button onclick="loadProducts()" class="px-6 py-3 rounded-xl primary-gradient text-white font-semibold btn">
+                <i class="fas fa-sync-alt mr-2"></i>Réessayer
+            </button>
+            <div class="mt-6 p-4 bg-blue-500/10 rounded-lg text-left">
+                <p class="text-blue-400 text-sm font-semibold mb-2">🔍 Diagnostic:</p>
+                <ul class="text-gray-400 text-sm space-y-1">
+                    <li>• Vérifiez que le serveur MySQL est actif</li>
+                    <li>• Ouvrez <a href="test-api-status.php" target="_blank" class="text-blue-400 underline">test-api-status.php</a> pour diagnostiquer</li>
+                    <li>• Consultez les logs PHP du serveur</li>
+                </ul>
+            </div>
+        </div>
+    `;
+}
+
 // Charger les produits
 async function loadProducts() {
     try {
         const response = await fetch('api/products.php?action=list');
+
+        // Vérifier si la réponse est OK (status 200-299)
+        if (!response.ok) {
+            console.error(`API Error: ${response.status} ${response.statusText}`);
+            showApiError('Impossible de charger les produits', response.status);
+            return;
+        }
+
+        // Vérifier que c'est bien du JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.error('API returned non-JSON response:', contentType);
+            showApiError('Réponse API invalide (non-JSON)', response.status);
+            return;
+        }
+
         const data = await response.json();
 
         if (data.success) {
             productsData = data.products;
             renderProducts(data.products);
+        } else {
+            showApiError(data.message || 'Erreur inconnue', response.status);
         }
 
         // Charger aussi les offres Too Good To Go
         loadTooGoodToGo();
     } catch (error) {
         console.error('Erreur chargement produits:', error);
+        showApiError('Erreur réseau: ' + error.message, 0);
     }
 }
 
@@ -119,12 +164,21 @@ async function toggleProductAvailability(productId) {
             })
         });
 
+        if (!response.ok) {
+            console.error(`API Error: ${response.status} ${response.statusText}`);
+            alert(`Erreur ${response.status}: Impossible de modifier la disponibilité`);
+            return;
+        }
+
         const data = await response.json();
         if (data.success) {
             loadProducts();
+        } else {
+            alert(data.message || 'Erreur inconnue');
         }
     } catch (error) {
         console.error('Erreur mise à jour disponibilité:', error);
+        alert('Erreur réseau: ' + error.message);
     }
 }
 
@@ -134,6 +188,12 @@ async function toggleProductAvailability(productId) {
 async function loadTooGoodToGo() {
     try {
         const response = await fetch('api/products.php?action=tgtg_list');
+
+        if (!response.ok) {
+            console.error(`API Error: ${response.status} ${response.statusText}`);
+            return;
+        }
+
         const data = await response.json();
 
         if (data.success) {
