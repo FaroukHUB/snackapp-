@@ -1852,7 +1852,18 @@ $csrfToken = getCsrfToken();
               <span class="dot"></span>${(it.status ?? "available")==="available" ? "Disponible" : "Indisponible"}
             </span>
           </td>
+          <td style="width:60px;text-align:center;">
+            <button class="btn btn-ghost" style="padding:4px 8px;font-size:16px;" data-edit-product title="Éditer le produit">✏️</button>
+          </td>
         `;
+
+        // Bouton d'édition pour tous les produits (même ceux avec options)
+        const editBtn = tr.querySelector('[data-edit-product]');
+        editBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openEditProductModal(it, cat.id);
+        });
+
         tr.addEventListener("click", () => {
           // Detect special products that need options management instead of regular edit
           if (it.id === 'patisserie') {
