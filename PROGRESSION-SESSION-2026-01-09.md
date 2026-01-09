@@ -240,5 +240,53 @@ Après `git pull`:
 
 ---
 
+## 🎯 MISSION EN COURS: Amélioration onglet Clients
+
+**Démarrage**: 2026-01-09 19:30
+**Status**: 🔄 EN COURS
+**Tokens au démarrage**: ~98,000
+
+### Objectif
+Créer des fiches clients complètes avec:
+- Adresses multiples (max 2: Maison, Bureau)
+- Historique détaillé commandes
+- Notes & préférences (allergies, favoris)
+- Tags de segmentation
+- Templates WhatsApp
+- Stats avancées par client
+
+### Plan d'implémentation
+
+#### Phase 1: Base de données ⏳ EN COURS
+- [ ] ALTER TABLE customers (addresses, preferences)
+- [ ] CREATE TABLE customer_tags
+- [ ] Tester migrations
+
+#### Phase 2: API Backend ⏸️ EN ATTENTE
+- [ ] Endpoints addresses (add/update/delete)
+- [ ] Endpoints preferences
+- [ ] Endpoints tags
+- [ ] Endpoint order history enrichi
+- [ ] Templates WhatsApp
+
+#### Phase 3: Interface Frontend ⏸️ EN ATTENTE
+- [ ] Redesign carte client
+- [ ] Formulaire adresses
+- [ ] Section préférences/notes
+- [ ] Gestion tags
+- [ ] Historique avec "Recommander"
+- [ ] Templates WhatsApp UI
+
+#### Phase 4: Features avancées ⏸️ EN ATTENTE
+- [ ] Filtres par tags
+- [ ] Stats graphiques
+- [ ] Alertes clients inactifs
+- [ ] Export Excel (bonus)
+
+### Progression détaillée
+*(Sera mise à jour après chaque étape)*
+
+---
+
 **Prêt pour nouvelle mission! 💪**
-**Tokens restants: ~113,000** ✅
+**Tokens restants: ~98,000** ✅
