@@ -53,9 +53,9 @@ if [[ ! $REPLY =~ ^(oui|OUI|o|O)$ ]]; then
 fi
 
 # Backup avant migration
-echo "💾 Backup table customers..."
-BACKUP_FILE="backup_customers_$(date +%Y%m%d_%H%M%S).sql"
-MYSQL_PWD="$DB_PASS" mysqldump -h"$DB_HOST" -u"$DB_USER" "$DB_NAME" customers > "$BACKUP_FILE"
+echo "💾 Backup complet base de données..."
+BACKUP_FILE="backup_database_$(date +%Y%m%d_%H%M%S).sql"
+MYSQL_PWD="$DB_PASS" mysqldump -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" > "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
     echo "✅ Backup créé: $BACKUP_FILE"
