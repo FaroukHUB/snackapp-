@@ -1,0 +1,46 @@
+========================================
+COMMANDES À EXÉCUTER SUR O2SWITCH
+========================================
+
+Copiez-collez ces commandes une par une dans votre terminal o2switch:
+
+# 1. Aller dans le répertoire
+cd ~/Marvelous.mon-agenceweb.fr
+
+# 2. FIX PRINCIPAL - Désactiver affichage erreurs PHP (cause du problème)
+sed -i '7a\
+\
+// 🔒 PRODUCTION: Ne jamais afficher les erreurs (masquer warnings avant JSON)\
+ini_set("display_errors", "0");\
+ini_set("log_errors", "1");\
+error_reporting(E_ALL);' admin-panel-v2/bootstrap.php
+
+# 3. Vérifier le fix
+head -20 admin-panel-v2/bootstrap.php
+
+# 4. Tester l'API
+curl -s "https://marvelous.mon-agenceweb.fr/admin-panel-v2/api/products.php?action=list" | head -c 100
+
+# 5. Si ça commence par "{", c'est OK ! Sinon:
+curl -s "https://marvelous.mon-agenceweb.fr/admin-panel-v2/api/products.php?action=list" 2>&1 | head -20
+
+========================================
+RÉSULTAT ATTENDU À L'ÉTAPE 4:
+========================================
+
+{"success":true,"message":"OK","menu":{"categories":[...
+
+Si vous voyez ça, c'est RÉGLÉ ! ✅
+
+Si vous voyez autre chose (erreurs, warnings, HTML), envoyez-moi la sortie.
+
+========================================
+TEST FINAL DANS LE NAVIGATEUR:
+========================================
+
+1. Ouvrir: https://marvelous.mon-agenceweb.fr/admin-panel-v2/
+2. Se connecter
+3. Aller dans "Produits"
+4. La liste doit s'afficher sans erreur
+
+========================================
