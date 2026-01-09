@@ -2867,8 +2867,8 @@ if (isset($_GET['export'])) {
 
 
 
-        // Notifications (polling toutes les 60 secondes au lieu de 10)
-        if (window.orderNotificationSystem) orderNotificationSystem.start(60);
+        // Notifications (polling toutes les 10 secondes pour être réactif)
+        if (window.orderNotificationSystem) orderNotificationSystem.start(10);
 
 // === GESTION CLIENTS ===
 function openAddCustomerModal() {
