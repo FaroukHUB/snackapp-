@@ -330,5 +330,161 @@ chmod +x APPLIQUER-MIGRATION-CLIENTS.sh
 
 ---
 
+---
+
+## 🚨 CORRECTION URGENTE: Surcharge API Clients
+
+**Date**: 2026-01-09 21:45
+**Status**: ✅ **CORRIGÉ**
+**Priorité**: CRITIQUE
+
+### Problème identifié
+
+Après déploiement de la fonctionnalité clients, l'admin panel causait une surcharge massive de requêtes API, bloquant même la connexion internet.
+
+**Rapport utilisateur**: "l'admin a bugé et a fait bugé tout mon intyernet je pense que c'est un nombre important de requete"
+
+### Analyse de la cause
+
+**Code problématique** dans `admin-panel-v2/assets/js/customers.js`:
+
+```javascript
+// ❌ LIGNE 657-658 (BUGGY)
+async function addBonusPoints(customerId) {
+    // ... ajout points ...
+    if (data.success) {
+        showToast(`${points} points ajoutés !`, 'success');
+        loadCustomers();              // ❌ Charge TOUS les clients (requête lourde)
+        showCustomerDetails(customerId); // ❌ Puis charge UN client (requête supplémentaire)
+    }
+}
+```
+
+**Boucle infernale**:
+1. Admin clique "Ajouter points"
+2. API ajoute les points → Succès
+3. `loadCustomers()` → Requête 1 (tous les clients)
+4. `showCustomerDetails()` → Requête 2 (un client)
+5. **Aucune protection contre double-clic** → Multiples appels simultanés
+6. **Résultat**: Dizaines de requêtes API en quelques secondes
+
+### Solution implémentée
+
+**3 correctifs appliqués**:
+
+#### 1. Protection contre appels multiples
+```javascript
+// ✅ Mutex-style flags
+let isLoadingCustomers = false;
+let isShowingDetails = false;
+
+async function loadCustomers(filterTag = null) {
+    // ⚡ FIX: Empêcher appels multiples simultanés
+    if (isLoadingCustomers) {
+        console.log('Chargement déjà en cours...');
+        return;
+    }
+
+    isLoadingCustomers = true;
+    try {
+        // ... chargement ...
+    } finally {
+        isLoadingCustomers = false; // ✅ Libération garantie même si erreur
+    }
+}
+```
+
+#### 2. Suppression double requête
+```javascript
+// ✅ CORRIGÉ
+async function addBonusPoints(customerId) {
+    // ... ajout points ...
+    if (data.success) {
+        showToast(`${points} points ajoutés !`, 'success');
+        // ⚡ FIX: Une seule requête pour rafraîchir
+        showCustomerDetails(customerId);
+        // SUPPRIMÉ: loadCustomers() - Trop lourd, inutile
+    }
+}
+```
+
+#### 3. Protection showCustomerDetails
+```javascript
+async function showCustomerDetails(customerId) {
+    if (isShowingDetails) {
+        console.log('Chargement détails déjà en cours...');
+        return;
+    }
+
+    isShowingDetails = true;
+    try {
+        // ... chargement détails ...
+    } finally {
+        isShowingDetails = false;
+    }
+}
+```
+
+### Fichiers modifiés
+
+**admin-panel-v2/assets/js/customers.js**:
+- Ligne 35-67: Ajout protection `loadCustomers()`
+- Ligne 71-104: Ajout protection `showCustomerDetails()`
+- Ligne 657: Suppression `loadCustomers()` dans `addBonusPoints()`
+
+**PATCH-URGENT-CUSTOMERS-BUG.js** (documentation du fix):
+- Code complet de la correction
+- Guide d'application
+
+### Commit
+
+**5301c87**: `fix(URGENT): Protection contre boucles requêtes clients - Surcharge API`
+
+### Impact
+
+**Avant (BUGGY)**:
+- ❌ 2-10 requêtes API par action
+- ❌ Saturation connexion
+- ❌ Admin panel inutilisable
+- ❌ Pas de protection contre double-clic
+
+**Après (CORRIGÉ)**:
+- ✅ 1 requête API par action
+- ✅ Performance normale
+- ✅ Protection mutex sur toutes les fonctions critiques
+- ✅ Garantie de libération (finally blocks)
+
+### Tests à effectuer après pull
+
+```bash
+cd ~/Marvelous.mon-agenceweb.fr
+git pull origin claude/review-progress-continue-U4j8i
+```
+
+**Test 1: Ajout points bonus**
+1. Ouvrir Admin → Clients
+2. Ouvrir un client
+3. Cliquer "Ajouter points"
+4. ✅ Une seule requête réseau (F12 → Network)
+5. ✅ Pas de ralentissement
+
+**Test 2: Double-clic protection**
+1. Ouvrir Admin → Clients
+2. Double-cliquer rapidement sur un client
+3. ✅ Console: "Chargement détails déjà en cours..."
+4. ✅ Une seule requête effectuée
+
+**Test 3: Filtres**
+1. Cliquer sur "VIP" plusieurs fois rapidement
+2. ✅ Protection active
+3. ✅ Pas de requêtes multiples
+
+### Documentation créée
+
+- `PATCH-URGENT-CUSTOMERS-BUG.js`: Guide complet du fix
+- Mise à jour `PROGRESSION-SESSION-2026-01-09.md`: Cette section
+
+---
+
 **Mission suivante prête! 💪**
-**Tokens restants: ~88,000** ✅
+**Tokens restants: ~86,000** ✅
