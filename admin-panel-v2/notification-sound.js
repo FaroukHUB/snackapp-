@@ -1,8 +1,6 @@
 /**
  * Notification sonore et visuelle pour nouvelles commandes
- * - Popup "Commande reçue"
- * - Bip harmonieux + MP3 en boucle
- * - Option C : aucun son au clic d’activation
+ * Version 2 - Activation automatique UNE SEULE FOIS
  */
 
 class OrderNotificationSystem {
@@ -10,16 +8,13 @@ class OrderNotificationSystem {
         this.isPlaying = false;
         this.lastOrderId = null;
         this.checkInterval = null;
+        this.audioEnabled = false;
+        this.activationShown = localStorage.getItem('audio_activated') === 'true';
 
-        // Son activé par défaut
-        this.audioEnabled = true;
-
-        // MP3 notification - use relative path for admin panel
+        // MP3 notification
         this.audioFile = new Audio('assets/sounds/commande.mp3');
         this.audioFile.loop = true;
         this.audioFile.volume = 0.9;
-
-        // Preload the audio file
         this.audioFile.load();
     }
 
@@ -27,33 +22,37 @@ class OrderNotificationSystem {
        BIP HARMONIEUX (WebAudio)
        ======================= */
     generateBeep() {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const ctx = new AudioCtx();
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
 
-        const now = ctx.currentTime;
-        const gain = ctx.createGain();
-        gain.connect(ctx.destination);
+            const now = ctx.currentTime;
+            const gain = ctx.createGain();
+            gain.connect(ctx.destination);
 
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(0.9, now + 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.linearRampToValueAtTime(0.9, now + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
 
-        const osc1 = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
 
-        osc1.type = 'triangle';
-        osc2.type = 'triangle';
+            osc1.type = 'triangle';
+            osc2.type = 'triangle';
 
-        osc1.frequency.value = 659.25; // E5
-        osc2.frequency.value = 880.0;  // A5
+            osc1.frequency.value = 659.25; // E5
+            osc2.frequency.value = 880.0;  // A5
 
-        osc1.connect(gain);
-        osc2.connect(gain);
+            osc1.connect(gain);
+            osc2.connect(gain);
 
-        osc1.start(now);
-        osc2.start(now);
-        osc1.stop(now + 0.45);
-        osc2.stop(now + 0.45);
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 0.45);
+            osc2.stop(now + 0.45);
+        } catch(e) {
+            console.warn('[Audio] Beep non disponible:', e);
+        }
     }
 
     /* =======================
@@ -91,7 +90,6 @@ class OrderNotificationSystem {
        ======================= */
     async checkNewOrders() {
         try {
-            // Timeout manuel compatible tous navigateurs
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -101,10 +99,7 @@ class OrderNotificationSystem {
 
             clearTimeout(timeoutId);
 
-            if (!res.ok) {
-                console.warn('Check commandes failed:', res.status);
-                return;
-            }
+            if (!res.ok) return;
 
             const data = await res.json();
 
@@ -122,9 +117,8 @@ class OrderNotificationSystem {
                 this.onNewOrder(latest);
             }
         } catch (e) {
-            // Ne pas logger en boucle pour éviter spam console
             if (e.name !== 'AbortError') {
-                console.warn('Check commandes silencieux:', e.message);
+                console.warn('[Notifications] Erreur silencieuse:', e.message);
             }
         }
     }
@@ -167,7 +161,6 @@ class OrderNotificationSystem {
             </div>
         `;
 
-        // Clic n'importe où sur le fond arrête le son
         modal.addEventListener('click', () => this.acceptOrder());
 
         document.body.appendChild(modal);
@@ -180,56 +173,125 @@ class OrderNotificationSystem {
     }
 
     /* =======================
-       PERMISSION AUDIO - Activé au premier clic
+       BANNER ACTIVATION AUDIO - AFFICHAGE UNE SEULE FOIS
        ======================= */
-    requestAudioPermission() {
-        return new Promise(resolve => {
-            const enableAudio = () => {
-                try {
-                    // Active le contexte audio
-                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    const ctx = new AudioCtx();
-                    ctx.resume();
+    showActivationBanner() {
+        // Si déjà activé, ne rien afficher
+        if (this.activationShown) {
+            this.tryActivateAudio();
+            return;
+        }
 
-                    // Preload audio
-                    this.audioFile.play().then(() => {
-                        this.audioFile.pause();
-                        this.audioFile.currentTime = 0;
-                    }).catch(() => {});
+        const banner = document.createElement('div');
+        banner.id = 'audio-activation-banner';
+        banner.style.cssText = `
+            position:fixed;
+            top:20px;
+            left:50%;
+            transform:translateX(-50%);
+            background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color:#fff;
+            padding:20px 30px;
+            border-radius:16px;
+            box-shadow:0 8px 24px rgba(102,126,234,0.4);
+            z-index:99999;
+            display:flex;
+            align-items:center;
+            gap:20px;
+            font-weight:600;
+            font-size:16px;
+            animation:slideDown 0.5s ease;
+        `;
 
-                    this.audioEnabled = true;
-                    console.log('[Audio] ✅ Activé');
-                    resolve(true);
-                } catch (e) {
-                    console.warn('[Audio] Context non disponible:', e);
-                    this.audioEnabled = true;
-                    resolve(true);
-                }
+        banner.innerHTML = `
+            <div style="font-size:32px;">🔔</div>
+            <div style="flex:1;">
+                <div style="font-size:18px;margin-bottom:5px;">Activer les notifications sonores</div>
+                <div style="font-size:13px;opacity:0.9;">Pour être alerté des nouvelles commandes</div>
+            </div>
+            <button id="activate-audio-btn" style="padding:12px 24px;background:#fff;color:#667eea;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:15px;">
+                ✓ Activer
+            </button>
+        `;
 
-                // Retirer le listener après activation
-                document.removeEventListener('click', enableAudio);
-                document.removeEventListener('keydown', enableAudio);
-            };
+        // Ajouter animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from { transform:translateX(-50%) translateY(-100px); opacity:0; }
+                to { transform:translateX(-50%) translateY(0); opacity:1; }
+            }
+        `;
+        document.head.appendChild(style);
 
-            // Activer au premier clic ou touche
-            document.addEventListener('click', enableAudio, { once: true });
-            document.addEventListener('keydown', enableAudio, { once: true });
+        document.body.appendChild(banner);
 
-            // Timeout de 10s pour activer quand même
-            setTimeout(() => {
-                if (!this.audioEnabled) {
-                    console.log('[Audio] Activation par timeout');
-                    enableAudio();
-                }
-            }, 10000);
-        });
+        // Clic sur le bouton
+        document.getElementById('activate-audio-btn').onclick = async () => {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+                await ctx.resume();
+
+                // Preload audio
+                this.audioFile.play().then(() => {
+                    this.audioFile.pause();
+                    this.audioFile.currentTime = 0;
+                }).catch(() => {});
+
+                this.audioEnabled = true;
+                localStorage.setItem('audio_activated', 'true');
+                this.activationShown = true;
+
+                // Feedback visuel
+                banner.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                banner.innerHTML = `
+                    <div style="font-size:32px;">✅</div>
+                    <div style="font-size:18px;">Notifications activées !</div>
+                `;
+
+                setTimeout(() => banner.remove(), 2000);
+
+                console.log('[Audio] ✅ Activé et mémorisé');
+            } catch (e) {
+                console.error('[Audio] Erreur activation:', e);
+            }
+        };
+    }
+
+    /* =======================
+       ACTIVATION AUTO SI DÉJÀ MÉMORISÉ
+       ======================= */
+    async tryActivateAudio() {
+        if (!this.activationShown) return;
+
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            await ctx.resume();
+
+            this.audioFile.play().then(() => {
+                this.audioFile.pause();
+                this.audioFile.currentTime = 0;
+            }).catch(() => {});
+
+            this.audioEnabled = true;
+            console.log('[Audio] ✅ Réactivé automatiquement');
+        } catch (e) {
+            console.warn('[Audio] Auto-activation échouée, attente interaction:', e);
+            // Fallback: attendre premier clic
+            document.addEventListener('click', () => this.tryActivateAudio(), { once: true });
+        }
     }
 
     /* =======================
        DÉMARRAGE
        ======================= */
-    async start(intervalSeconds = 30) {
-        await this.requestAudioPermission();
+    async start(intervalSeconds = 10) {
+        // Afficher banner si première fois, sinon activer auto
+        this.showActivationBanner();
+
+        // Démarrer le polling
         this.checkNewOrders();
         this.checkInterval = setInterval(
             () => this.checkNewOrders(),
