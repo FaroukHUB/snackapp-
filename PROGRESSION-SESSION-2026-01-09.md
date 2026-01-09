@@ -257,12 +257,14 @@ Créer des fiches clients complètes avec:
 
 ### Plan d'implémentation
 
-#### Phase 1: Base de données ⏳ EN COURS
-- [ ] ALTER TABLE customers (addresses, preferences)
-- [ ] CREATE TABLE customer_tags
-- [ ] Tester migrations
+#### Phase 1: Base de données ✅ COMPLÉTÉ
+- [x] ALTER TABLE customers (addresses, preferences, admin_notes)
+- [x] CREATE TABLE customer_tags avec auto-assignment
+- [x] Indexes performance (orders_count, total_spent, last_order_at)
+- [x] Script déploiement avec backup automatique
+- **Commit**: f3177d6
 
-#### Phase 2: API Backend ⏸️ EN ATTENTE
+#### Phase 2: API Backend ⏳ EN COURS
 - [ ] Endpoints addresses (add/update/delete)
 - [ ] Endpoints preferences
 - [ ] Endpoints tags
