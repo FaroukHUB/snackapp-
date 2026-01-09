@@ -35,8 +35,19 @@ async function loadAvailableTags() {
     }
 }
 
+// Protection contre appels multiples
+let isLoadingCustomers = false;
+
 // Charger les clients
 async function loadCustomers(filterTag = null) {
+    // ⚡ Protection contre surcharge
+    if (isLoadingCustomers) {
+        console.log('Chargement déjà en cours...');
+        return;
+    }
+
+    isLoadingCustomers = true;
+
     try {
         let url = 'api/customers.php?action=list';
         if (filterTag) {
@@ -56,6 +67,8 @@ async function loadCustomers(filterTag = null) {
         console.error('Erreur chargement clients:', error);
         document.getElementById('customers-list').innerHTML =
             '<p class="text-red-400 text-center py-8">Erreur de chargement</p>';
+    } finally {
+        isLoadingCustomers = false;
     }
 }
 
@@ -142,8 +155,19 @@ function renderCustomers(customers) {
     }).join('');
 }
 
+// Protection contre double-clic
+let isShowingDetails = false;
+
 // Afficher détails client (modal enrichi)
 async function showCustomerDetails(customerId) {
+    // ⚡ Protection contre surcharge
+    if (isShowingDetails) {
+        console.log('Chargement détails déjà en cours...');
+        return;
+    }
+
+    isShowingDetails = true;
+
     try {
         // Charger les détails complets
         const response = await fetch(`api/customers.php?action=get&customer_id=${customerId}`);
@@ -151,6 +175,7 @@ async function showCustomerDetails(customerId) {
 
         if (!data.success) {
             alert('Erreur chargement client');
+            isShowingDetails = false;
             return;
         }
 
@@ -283,6 +308,8 @@ async function showCustomerDetails(customerId) {
     } catch (error) {
         console.error('Erreur détails client:', error);
         alert('Erreur lors du chargement des détails');
+    } finally {
+        isShowingDetails = false;
     }
 }
 
@@ -654,7 +681,7 @@ async function addBonusPoints(customerId) {
         const data = await response.json();
         if (data.success) {
             showToast(`${points} points ajoutés !`, 'success');
-            loadCustomers();
+            // ⚡ FIX: Une seule requête au lieu de 2
             showCustomerDetails(customerId);
         }
     } catch (error) {
