@@ -523,12 +523,9 @@ switch ($action) {
             $runtime['supplements']['defaultForCategories'][$id] = $supplementsSucres;
         }
 
-        saveMenuRuntime($runtime);
-
         // Sauvegarder l'icône dans menu.json
         $menuPath = SNACK_ROOT . '/config/menu.json';
         if (file_exists($menuPath)) {
-            // 🔒 IMPORTANT: Vider le cache de stat pour lire le fichier FRAIS généré par saveMenuRuntime
             clearstatcache(true, $menuPath);
             $menuData = json_decode(file_get_contents($menuPath), true);
             if ($menuData) {
@@ -536,14 +533,12 @@ switch ($action) {
                     $menuData['categoryIcons'] = [];
                 }
                 $menuData['categoryIcons'][$id] = $icon;
-                // ⚠️ IMPORTANT: Utiliser les MÊMES flags que generatePublicMenuJson()
                 file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
-                // 🔄 REGÉNÉRER pour être 100% sûr que tout est sync
-                require_once __DIR__ . '/../config.php';
-                generatePublicMenuJson(loadMenuRuntime());
             }
         }
+
+        // ⚡ OPTIMISATION: Une seule synchronisation à la fin
+        saveMenuRuntime($runtime, true);
 
         jsonSuccess(['category' => ['id' => $id, 'name' => $name, 'icon' => $icon]]);
         break;
@@ -602,8 +597,6 @@ switch ($action) {
             }
         }
 
-        saveMenuRuntime($runtime);
-
         // Mettre à jour l'icône dans menu.json
         $menuPath = SNACK_ROOT . '/config/menu.json';
         if (file_exists($menuPath)) {
@@ -615,11 +608,11 @@ switch ($action) {
                 }
                 $menuData['categoryIcons'][$categoryId] = $icon;
                 file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
-                require_once __DIR__ . '/../config.php';
-                generatePublicMenuJson(loadMenuRuntime());
             }
         }
+
+        // ⚡ OPTIMISATION: Une seule synchronisation à la fin
+        saveMenuRuntime($runtime, true);
 
         jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon]]);
         break;
@@ -672,8 +665,6 @@ switch ($action) {
             $runtime['deletedCategories'][] = $categoryId;
         }
 
-        saveMenuRuntime($runtime);
-
         // Supprimer l'icône du menu.json si elle existe
         $menuPath = SNACK_ROOT . '/config/menu.json';
         if (file_exists($menuPath)) {
@@ -685,9 +676,8 @@ switch ($action) {
             }
         }
 
-        // Régénérer menu.json pour retirer la catégorie du site public
-        require_once __DIR__ . '/../config.php';
-        generatePublicMenuJson(loadMenuRuntime());
+        // ⚡ OPTIMISATION: Une seule synchronisation à la fin
+        saveMenuRuntime($runtime, true);
 
         jsonSuccess(['deleted' => true]);
         break;
@@ -737,7 +727,8 @@ switch ($action) {
             'supplements' => $supplements
         ];
 
-        saveMenuRuntime($runtime);
+        // ⚡ OPTIMISATION: Une seule synchronisation à la fin
+        saveMenuRuntime($runtime, true);
         jsonSuccess(['product' => ['id' => $productId, 'category_id' => $categoryId]]);
         break;
 
@@ -780,9 +771,8 @@ switch ($action) {
             $runtime['products'][$productId] = array_merge($runtime['products'][$productId], $patch);
         }
 
+        // ⚡ OPTIMISATION: Synchronisation groupée
         saveMenuRuntime($runtime);
-
-        // Sync vers menu.json pour le site public
         require_once __DIR__ . '/../sync-menu.php';
         syncMenuStatuses();
 
@@ -863,9 +853,8 @@ switch ($action) {
             $runtime['deletedProducts'][] = $productId;
         }
 
+        // ⚡ OPTIMISATION: Synchronisation groupée
         saveMenuRuntime($runtime);
-
-        // Sync vers menu.json pour le site public
         require_once __DIR__ . '/../sync-menu.php';
         syncMenuStatuses();
 
@@ -933,9 +922,8 @@ switch ($action) {
             }
         }
 
+        // ⚡ OPTIMISATION: Synchronisation groupée
         saveMenuRuntime($runtime);
-
-        // Sync vers menu.json pour le site public
         require_once __DIR__ . '/../sync-menu.php';
         syncMenuStatuses();
 
@@ -971,9 +959,8 @@ switch ($action) {
             $runtime['supplements']['catalog'][$id]['flavor'] = in_array($input['category'], $saledCategories) ? 'sale' : 'sucre';
         }
 
+        // ⚡ OPTIMISATION: Synchronisation groupée
         saveMenuRuntime($runtime);
-
-        // Sync vers menu.json pour le site public
         require_once __DIR__ . '/../sync-menu.php';
         syncMenuStatuses();
 
@@ -1017,9 +1004,8 @@ switch ($action) {
             }
         }
 
+        // ⚡ OPTIMISATION: Synchronisation groupée
         saveMenuRuntime($runtime);
-
-        // Sync vers menu.json pour supprimer le supplément du site public
         require_once __DIR__ . '/../sync-menu.php';
         syncMenuStatuses();
 
@@ -1109,10 +1095,9 @@ switch ($action) {
 
         error_log("[PRODUCTS API] ✅ Formule ajoutée au runtime: " . json_encode($formule));
 
+        // ⚡ OPTIMISATION: Synchronisation groupée
         $saved = saveMenuRuntime($runtime);
         error_log("[PRODUCTS API] Runtime sauvegardé: " . ($saved ? 'OUI' : 'NON'));
-
-        // Sync vers menu.json
         syncFormulesToMenu($runtime);
         error_log("[PRODUCTS API] ✅ Formule synchronisée vers menu.json");
 
@@ -1170,9 +1155,8 @@ switch ($action) {
             $runtime['formules'][$formuleId] = array_merge($runtime['formules'][$formuleId], $patch);
         }
 
+        // ⚡ OPTIMISATION: Synchronisation groupée
         saveMenuRuntime($runtime);
-
-        // Sync vers menu.json
         syncFormulesToMenu($runtime);
 
         jsonSuccess(['formule' => $patch]);
@@ -1198,9 +1182,8 @@ switch ($action) {
             $runtime['deletedFormules'][] = $formuleId;
         }
 
+        // ⚡ OPTIMISATION: Synchronisation groupée
         saveMenuRuntime($runtime);
-
-        // Sync vers menu.json
         syncFormulesToMenu($runtime);
 
         jsonSuccess();

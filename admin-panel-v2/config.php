@@ -197,7 +197,7 @@ function loadMenuRuntime() {
     return $data;
 }
 
-function saveMenuRuntime($runtime) {
+function saveMenuRuntime($runtime, $autoSync = false) {
     $runtime = is_array($runtime) ? $runtime : [];
     $runtime['products'] = isset($runtime['products']) && is_array($runtime['products']) ? $runtime['products'] : [];
     $runtime['categories'] = isset($runtime['categories']) && is_array($runtime['categories']) ? $runtime['categories'] : [];
@@ -231,8 +231,11 @@ function saveMenuRuntime($runtime) {
 
     rename($tmp, MENU_RUNTIME_FILE);
 
-    // ===== SYNC : Générer menu.json pour le site public =====
-    generatePublicMenuJson($runtime);
+    // ⚡ OPTIMISATION: Sync seulement si explicitement demandé
+    // Par défaut désactivé pour éviter double synchronisation
+    if ($autoSync) {
+        generatePublicMenuJson($runtime);
+    }
 
     return true;
 }
