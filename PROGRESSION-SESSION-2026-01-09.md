@@ -264,14 +264,17 @@ Créer des fiches clients complètes avec:
 - [x] Script déploiement avec backup automatique
 - **Commit**: f3177d6
 
-#### Phase 2: API Backend ⏳ EN COURS
-- [ ] Endpoints addresses (add/update/delete)
-- [ ] Endpoints preferences
-- [ ] Endpoints tags
-- [ ] Endpoint order history enrichi
-- [ ] Templates WhatsApp
+#### Phase 2: API Backend ✅ COMPLÉTÉ
+- [x] Endpoints addresses (add/update/delete/set_default)
+- [x] Endpoints preferences (update_preferences, admin_notes)
+- [x] Endpoints tags (add/remove/get_available)
+- [x] Endpoint order history enrichi (detailed_history)
+- [x] Endpoint produits favoris (top 3)
+- [x] Enrichissement list/get avec tags, addresses, preferences
+- [x] Filtre par tag (list?filter_tag=VIP)
+- **Commit**: b41c233 (+488 lignes)
 
-#### Phase 3: Interface Frontend ⏸️ EN ATTENTE
+#### Phase 3: Interface Frontend ⏳ EN COURS
 - [ ] Redesign carte client
 - [ ] Formulaire adresses
 - [ ] Section préférences/notes
