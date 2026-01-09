@@ -54,10 +54,11 @@ fi
 
 # Backup avant migration
 echo "💾 Backup table customers..."
-mysqldump -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" customers > "backup_customers_$(date +%Y%m%d_%H%M%S).sql"
+BACKUP_FILE="backup_customers_$(date +%Y%m%d_%H%M%S).sql"
+mysqldump -h"$DB_HOST" -u"$DB_USER" --password="$DB_PASS" "$DB_NAME" customers > "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
-    echo "✅ Backup créé: backup_customers_$(date +%Y%m%d_%H%M%S).sql"
+    echo "✅ Backup créé: $BACKUP_FILE"
 else
     echo "❌ Erreur lors du backup"
     exit 1
@@ -68,7 +69,7 @@ echo "🚀 Application de la migration..."
 echo ""
 
 # Exécuter la migration
-mysql -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" < database/migrations/2026-01-09-customer-improvements.sql
+mysql -h"$DB_HOST" -u"$DB_USER" --password="$DB_PASS" "$DB_NAME" < database/migrations/2026-01-09-customer-improvements.sql
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -79,7 +80,7 @@ if [ $? -eq 0 ]; then
 
     # Vérifier colonnes ajoutées
     echo "1. Colonnes customers:"
-    mysql -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "
+    mysql -h"$DB_HOST" -u"$DB_USER" --password="$DB_PASS" "$DB_NAME" -e "
         SELECT COLUMN_NAME, COLUMN_TYPE
         FROM INFORMATION_SCHEMA.COLUMNS
         WHERE TABLE_SCHEMA = '$DB_NAME'
@@ -89,13 +90,13 @@ if [ $? -eq 0 ]; then
 
     echo ""
     echo "2. Table customer_tags créée:"
-    mysql -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "
+    mysql -h"$DB_HOST" -u"$DB_USER" --password="$DB_PASS" "$DB_NAME" -e "
         SELECT COUNT(*) as total_tags FROM customer_tags;
     "
 
     echo ""
     echo "3. Distribution des tags:"
-    mysql -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "
+    mysql -h"$DB_HOST" -u"$DB_USER" --password="$DB_PASS" "$DB_NAME" -e "
         SELECT tag, COUNT(*) as count
         FROM customer_tags
         GROUP BY tag
@@ -117,7 +118,7 @@ else
     echo "❌ ❌ ❌ ERREUR LORS DE LA MIGRATION! ❌ ❌ ❌"
     echo ""
     echo "Pour restaurer le backup:"
-    echo "  mysql -h'$DB_HOST' -u'$DB_USER' -p'$DB_PASS' '$DB_NAME' < backup_customers_*.sql"
+    echo "  mysql -h'$DB_HOST' -u'$DB_USER' --password='$DB_PASS' '$DB_NAME' < $BACKUP_FILE"
     echo ""
     exit 1
 fi
