@@ -1,23 +1,4 @@
-# 🔒 SÉCURITÉ: Désactiver ModSecurity pour les API
-# Nécessaire car ModSecurity bloque les POST de commandes avec faux positifs
-
-<IfModule mod_security.c>
-    SecRuleEngine Off
-</IfModule>
-
+# Fix erreur 503 - Désactiver ModSecurity pour API
 <IfModule mod_security2.c>
     SecRuleEngine Off
-</IfModule>
-
-# Alternative: Désactiver seulement certaines règles ModSecurity
-# Si SecRuleEngine Off ne fonctionne pas, essayez:
-# <IfModule mod_security2.c>
-#     SecRuleRemoveById 981173 950907 950005 950006
-# </IfModule>
-
-# CORS: Permettre les requêtes depuis le site
-<IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type"
 </IfModule>
