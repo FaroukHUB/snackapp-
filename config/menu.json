@@ -17,7 +17,7 @@
                         "name": "La Lyonnaise",
                         "description": "Oignons, lardons, crème fraîche, fromage.",
                         "priceSolo": 550,
-                        "image": "images/uploads/lyonnaise-b5db6249.webp",
+                        "image": "",
                         "baseIngredients": [
                             "oignons",
                             "lardons",
@@ -31,7 +31,7 @@
                         "name": "La Parisienne",
                         "description": "Jambon, champignons, fromage, crème.",
                         "priceSolo": 550,
-                        "image": "images/uploads/parisienne-f822547f.webp",
+                        "image": "",
                         "baseIngredients": [
                             "jambon",
                             "champignons",
@@ -45,7 +45,7 @@
                         "name": "La Fromagère",
                         "description": "Mix de fromages fondants.",
                         "priceSolo": 650,
-                        "image": "images/uploads/fromagere-443e8930.webp",
+                        "image": "",
                         "baseIngredients": [
                             "mix fromages"
                         ],
