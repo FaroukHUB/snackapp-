@@ -28,6 +28,75 @@ function readInput(): array {
     return is_array($decoded) ? $decoded : [];
 }
 
+/**
+ * ⚡ OPTIMISATION: Convertir et optimiser une image en WebP
+ *
+ * @param string $sourcePath Chemin du fichier source (JPG/PNG/WebP)
+ * @param int $quality Qualité WebP (0-100, défaut 85)
+ * @param int $maxWidth Largeur max en pixels (défaut 800)
+ * @return string Chemin du fichier WebP temporaire créé
+ * @throws Exception Si la conversion échoue
+ */
+function convertToOptimizedWebP(string $sourcePath, int $quality = 85, int $maxWidth = 800): string {
+    // Charger l'image source selon son type
+    $imageInfo = getimagesize($sourcePath);
+    if ($imageInfo === false) {
+        throw new Exception('Impossible de lire l\'image source');
+    }
+
+    $sourceWidth = $imageInfo[0];
+    $sourceHeight = $imageInfo[1];
+    $mime = $imageInfo['mime'];
+
+    // Créer la ressource image selon le type
+    switch ($mime) {
+        case 'image/jpeg':
+            $sourceImage = imagecreatefromjpeg($sourcePath);
+            break;
+        case 'image/png':
+            $sourceImage = imagecreatefrompng($sourcePath);
+            break;
+        case 'image/webp':
+            $sourceImage = imagecreatefromwebp($sourcePath);
+            break;
+        default:
+            throw new Exception('Type MIME non supporté pour conversion: ' . $mime);
+    }
+
+    if ($sourceImage === false) {
+        throw new Exception('Échec création ressource image');
+    }
+
+    // Redimensionner si nécessaire (préserve le ratio)
+    if ($sourceWidth > $maxWidth) {
+        $ratio = $maxWidth / $sourceWidth;
+        $newWidth = $maxWidth;
+        $newHeight = (int)($sourceHeight * $ratio);
+
+        $resizedImage = imagescale($sourceImage, $newWidth, $newHeight, IMG_BICUBIC);
+        imagedestroy($sourceImage);
+
+        if ($resizedImage === false) {
+            throw new Exception('Échec redimensionnement image');
+        }
+
+        $sourceImage = $resizedImage;
+    }
+
+    // Créer fichier WebP temporaire
+    $tempWebP = tempnam(sys_get_temp_dir(), 'webp_') . '.webp';
+
+    // Convertir en WebP avec compression
+    $success = imagewebp($sourceImage, $tempWebP, $quality);
+    imagedestroy($sourceImage);
+
+    if (!$success || !file_exists($tempWebP)) {
+        throw new Exception('Échec création fichier WebP');
+    }
+
+    return $tempWebP;
+}
+
 function handleImageUpload(string $baseId): ?string {
     $fileKey = null;
     if (!empty($_FILES['imageFile'])) $fileKey = 'imageFile';
@@ -77,24 +146,37 @@ function handleImageUpload(string $baseId): ?string {
         mkdir($uploadsDir, 0755, true);
     }
 
-    // ✅ SÉCURITÉ: Nom de fichier sécurisé avec vérification d'extension
-    $filename = $baseId . '-' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
+    // ⚡ OPTIMISATION: Convertir en WebP optimisé avant sauvegarde
+    $webpTempFile = null;
+    try {
+        $webpTempFile = convertToOptimizedWebP($file['tmp_name'], 85, 800);
 
-    // Vérifier qu'il n'y a pas d'extensions dangereuses cachées
-    if (preg_match('/\.(php|phtml|php3|php4|php5|phps|phar|htaccess|exe|sh|bat|cmd)/i', $filename)) {
-        jsonError('Extension de fichier non autorisée détectée');
+        // ✅ SÉCURITÉ: Nom de fichier sécurisé - toujours .webp maintenant
+        $filename = $baseId . '-' . bin2hex(random_bytes(4)) . '.webp';
+
+        // Vérifier qu'il n'y a pas d'extensions dangereuses cachées
+        if (preg_match('/\.(php|phtml|php3|php4|php5|phps|phar|htaccess|exe|sh|bat|cmd)/i', $filename)) {
+            jsonError('Extension de fichier non autorisée détectée');
+        }
+
+        $dest = $uploadsDir . '/' . $filename;
+
+        if (!rename($webpTempFile, $dest)) {
+            jsonError('Échec sauvegarde image WebP');
+        }
+
+        // ✅ SÉCURITÉ: Permissions strictes sur le fichier uploadé
+        chmod($dest, 0644);
+
+        return 'images/uploads/' . $filename;
+
+    } catch (Exception $e) {
+        // Nettoyer le fichier temporaire en cas d'erreur
+        if ($webpTempFile && file_exists($webpTempFile)) {
+            @unlink($webpTempFile);
+        }
+        jsonError('Échec conversion WebP: ' . $e->getMessage());
     }
-
-    $dest = $uploadsDir . '/' . $filename;
-
-    if (!move_uploaded_file($file['tmp_name'], $dest)) {
-        jsonError('Échec sauvegarde image');
-    }
-
-    // ✅ SÉCURITÉ: Permissions strictes sur le fichier uploadé
-    chmod($dest, 0644);
-
-    return 'images/uploads/' . $filename;
 }
 
 /**
