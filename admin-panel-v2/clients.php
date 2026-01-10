@@ -16,7 +16,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #1f2937;
@@ -405,10 +405,63 @@
     <!-- Load JavaScript -->
     <script src="assets/js/customers.js"></script>
     <script>
+        // Close customer modal
+        function closeCustomerModal() {
+            const modal = document.getElementById('customer-modal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.innerHTML = '';
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.background = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+            toast.style.color = 'white';
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}-circle mr-2"></i>${message}`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) return "Aujourd'hui";
+            if (diffDays === 1) return "Hier";
+            if (diffDays < 7) return `Il y a ${diffDays} jours`;
+            if (diffDays < 30) return `Il y a ${Math.floor(diffDays / 7)} semaines`;
+            if (diffDays < 365) return `Il y a ${Math.floor(diffDays / 30)} mois`;
+            return `Il y a ${Math.floor(diffDays / 365)} ans`;
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async () => {
             await loadAvailableTags();
             await loadCustomers();
+        });
+
+        // Close modal on click outside
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('customer-modal');
+            if (modal && e.target === modal) {
+                closeCustomerModal();
+            }
         });
     </script>
 </body>

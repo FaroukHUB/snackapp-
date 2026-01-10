@@ -174,42 +174,46 @@ async function showCustomerDetails(customerId) {
         const data = await response.json();
 
         if (!data.success) {
-            alert('Erreur chargement client');
-            isShowingDetails = false;
+            showToast('Erreur lors du chargement des détails', 'error');
             return;
         }
 
         currentCustomer = data.customer;
         const customer = data.customer;
 
-        const modal = document.getElementById('order-modal');
-        const content = document.getElementById('modal-content');
+        const modal = document.getElementById('customer-modal');
+        if (!modal) {
+            console.error('Modal element not found');
+            showToast('Erreur: Modal introuvable', 'error');
+            return;
+        }
 
-        content.innerHTML = `
-            <div class="space-y-6 max-h-[80vh] overflow-y-auto pr-2">
-                <!-- Header -->
-                <div class="flex items-center justify-between sticky top-0 bg-gray-900/95 backdrop-blur-sm pb-4 -mt-2 pt-2 z-10">
-                    <div class="flex-1">
-                        <h3 class="text-2xl font-bold text-white mb-1">${escapeHtml(customer.name)}</h3>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <p class="text-gray-400">${escapeHtml(customer.phone)}</p>
-                            ${customer.email ? `<span class="text-gray-500">•</span><p class="text-gray-400">${escapeHtml(customer.email)}</p>` : ''}
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div style="max-height: 85vh; overflow-y: auto; padding: 24px;">
+                    <!-- Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e5e7eb;">
+                        <div>
+                            <h3 style="font-size: 1.75rem; font-weight: 700; color: #1f2937; margin-bottom: 8px;">
+                                ${escapeHtml(customer.name)}
+                            </h3>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap; color: #6b7280;">
+                                <span><i class="fas fa-phone mr-1"></i>${escapeHtml(customer.phone)}</span>
+                                ${customer.email ? `<span><i class="fas fa-envelope mr-1"></i>${escapeHtml(customer.email)}</span>` : ''}
+                            </div>
                         </div>
+                        <button onclick="closeCustomerModal()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-weight: 600;">
+                            <i class="fas fa-times"></i> Fermer
+                        </button>
                     </div>
-                    ${customer.orders_count >= 10 ? `
-                        <div class="px-4 py-2 rounded-xl bg-yellow-500/20 text-yellow-400 font-semibold">
-                            <i class="fas fa-crown mr-2"></i>Client VIP
-                        </div>
-                    ` : ''}
-                </div>
 
-                <!-- Stats principales -->
-                <div class="grid grid-cols-4 gap-4">
-                    <div class="glass rounded-xl p-4 text-center">
-                        <div class="text-3xl font-bold text-white">${customer.orders_count}</div>
-                        <div class="text-sm text-gray-400 mt-1">Commandes</div>
-                    </div>
-                    <div class="glass rounded-xl p-4 text-center">
+                    <!-- Stats principales -->
+                    <div class="grid grid-cols-2" style="gap: 16px; margin-bottom: 24px;">
+                        <div style="background: #f3f4f6; border-radius: 12px; padding: 20px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #1f2937;">${customer.orders_count}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Commandes</div>
+                        </div>
+                        <div style="background: #f3f4f6; border-radius: 12px; padding: 20px; text-align: center;">
                         <div class="text-3xl font-bold text-white">${Math.round(customer.total_spent)} DA</div>
                         <div class="text-sm text-gray-400 mt-1">Dépensé</div>
                     </div>
@@ -304,7 +308,7 @@ async function showCustomerDetails(customerId) {
             </div>
         `;
 
-        modal.classList.remove('hidden');
+        modal.classList.add('active');
     } catch (error) {
         console.error('Erreur détails client:', error);
         alert('Erreur lors du chargement des détails');
