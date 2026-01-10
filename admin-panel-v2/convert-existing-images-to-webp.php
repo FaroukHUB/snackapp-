@@ -184,7 +184,7 @@ foreach ($images as $imagePath) {
         $oldRelativePath = 'images/uploads/' . $basename;
         $newRelativePath = 'images/uploads/' . $filenameWithoutExt . '.webp';
 
-        $updated = Database::execute(
+        $updated = Database::query(
             "UPDATE products SET image = ? WHERE restaurant_id = ? AND image = ?",
             [$newRelativePath, SNACK_RESTAURANT_ID, $oldRelativePath]
         );

@@ -72,7 +72,7 @@ foreach ($backups as $backupPath) {
         $webpRelativePath = 'images/uploads/' . $pathinfo['filename'] . '.webp';
         $originalRelativePath = 'images/uploads/' . $basename;
 
-        Database::execute(
+        Database::query(
             "UPDATE products SET image = ? WHERE restaurant_id = ? AND image = ?",
             [$originalRelativePath, SNACK_RESTAURANT_ID, $webpRelativePath]
         );
