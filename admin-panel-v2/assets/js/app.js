@@ -230,6 +230,9 @@ function renderOrders(orders) {
 function renderOrdersPagination(pagination) {
     const ordersList = document.getElementById('orders-list');
 
+    // 🐛 DEBUG: Voir les données de pagination
+    console.log('📄 Pagination commandes:', pagination);
+
     // Retirer ancienne pagination si existe
     const oldPagination = document.getElementById('orders-pagination');
     if (oldPagination) {
@@ -237,7 +240,7 @@ function renderOrdersPagination(pagination) {
     }
 
     if (!pagination || pagination.total_pages <= 1) {
-        // Pas besoin de pagination si 1 seule page
+        console.log('⚠️ Pas de pagination nécessaire:', pagination?.total || 0, 'commandes au total');
         return;
     }
 
