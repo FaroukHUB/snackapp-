@@ -330,7 +330,10 @@ function addOrder(bool $useMySQL) {
                 'total' => (float)$requestData['total'],
                 'loyalty_reward_id' => $loyaltyRewardId,
                 'notes' => trim($notes),
-                'pickup_time' => $requestData['pickup_time'] ?? null
+                'pickup_time' => $requestData['pickup_time'] ?? null,
+                // ⚡ NOUVEAU: Transmettre l'adresse de livraison
+                'delivery_address' => $requestData['delivery_address'] ?? null,
+                'delivery_instructions' => $requestData['delivery_instructions'] ?? null
             ]);
 
             // ✅ Ajouter les points gagnés (100 DA = 1 point)
