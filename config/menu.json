@@ -1226,7 +1226,19 @@
             "boissons-chaudes": [],
             "sodas-eaux": [],
             "jus-cocktails": [],
-            "menu-enfant": []
+            "menu-enfant": [],
+            "ouscous": [
+                "sup-mix-fromages",
+                "sup-cheddar",
+                "sup-camembert",
+                "sup-chakchouka",
+                "sup-pomme-terre",
+                "sup-oignons-confits",
+                "sup-oeuf",
+                "sup-viande-hachee",
+                "sup-escalope-poulet",
+                "sup-jambon"
+            ]
         }
     },
     "featured": {
