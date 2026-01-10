@@ -309,6 +309,8 @@ async function showCustomerDetails(customerId) {
                                     <span style="font-weight: 700; color: #f59e0b;">${Math.round(order.total)} DA</span>
                                 </div>
                                 ${order.items ? `<div style="color: #6b7280; font-size: 0.75rem;">${order.items.split(',').slice(0, 2).join(', ')}${order.items.split(',').length > 2 ? '...' : ''}</div>` : ''}
+                                ${order.delivery_address ? `<div style="color: #3b82f6; font-size: 0.75rem; margin-top: 4px;"><i class="fas fa-map-marker-alt" style="margin-right: 4px;"></i>${escapeHtml(order.delivery_address)}</div>` : ''}
+                                ${order.delivery_instructions ? `<div style="color: #6b7280; font-size: 0.70rem; margin-top: 2px; font-style: italic;"><i class="fas fa-info-circle" style="margin-right: 4px;"></i>${escapeHtml(order.delivery_instructions)}</div>` : ''}
                             </div>
                         `).join('') : '<span style="color: #9ca3af; font-size: 0.875rem;">Aucune commande</span>'}
                     </div>
