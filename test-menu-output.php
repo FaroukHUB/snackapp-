@@ -7,8 +7,10 @@ header('Content-Type: text/plain; charset=utf-8');
 
 echo "=== TEST SORTIE MENU.PHP ===\n\n";
 
-// 1. Lire la sortie de menu.php
-$menuPhpOutput = file_get_contents(__DIR__ . '/config/menu.php');
+// 1. Lire la sortie de menu.php (exécuté)
+ob_start();
+include(__DIR__ . '/config/menu.php');
+$menuPhpOutput = ob_get_clean();
 $menuData = json_decode($menuPhpOutput, true);
 
 if (!$menuData) {
