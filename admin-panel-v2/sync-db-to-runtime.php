@@ -23,12 +23,14 @@ try {
         $runtime['products'] = [];
     }
 
-    // Récupérer TOUS les produits de la base
+    // Récupérer TOUS les produits de la base avec leurs catégories
     $products = Database::fetchAll(
-        "SELECT id, name, description, category, price, price_menu, image, status, supplements
-         FROM products
-         WHERE restaurant_id = ?
-         ORDER BY id",
+        "SELECT p.id, p.slug, p.name, p.description, p.price_solo, p.price_menu, p.image, p.status,
+                c.slug as category_slug
+         FROM products p
+         JOIN categories c ON p.category_id = c.id
+         WHERE p.restaurant_id = ?
+         ORDER BY p.id",
         [SNACK_RESTAURANT_ID]
     );
 
@@ -38,7 +40,7 @@ try {
     $withImages = 0;
 
     foreach ($products as $product) {
-        $productId = $product['id'];
+        $productId = $product['slug']; // Utiliser le slug comme ID
         $image = $product['image'] ?? '';
 
         // Créer ou mettre à jour l'entrée dans le runtime
@@ -65,20 +67,12 @@ try {
             echo "⚠️  {$productId}: {$product['name']} (pas d'image)\n";
         }
 
-        if (!empty($product['price'])) {
-            $productData['priceSolo'] = (int)$product['price'];
+        if (!empty($product['price_solo'])) {
+            $productData['priceSolo'] = (int)$product['price_solo'];
         }
 
         if (!empty($product['price_menu'])) {
             $productData['priceMenu'] = (int)$product['price_menu'];
-        }
-
-        // Suppléments (décodé depuis JSON)
-        if (!empty($product['supplements'])) {
-            $supplements = json_decode($product['supplements'], true);
-            if (is_array($supplements)) {
-                $productData['supplements'] = $supplements;
-            }
         }
 
         // Merger avec les données existantes du runtime
