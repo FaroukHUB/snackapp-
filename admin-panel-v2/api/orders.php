@@ -543,9 +543,15 @@ function getStats(bool $useMySQL) {
 function deleteMultipleOrders(bool $useMySQL) {
     global $requestData;
 
+    // 🐛 DEBUG: Afficher l'état de la session
+    error_log('[DELETE] 🔍 Session ID: ' . session_id());
+    error_log('[DELETE] 🔍 pin_unlocked: ' . var_export($_SESSION['pin_unlocked'] ?? 'NOT_SET', true));
+    error_log('[DELETE] 🔍 pin_unlocked_at: ' . var_export($_SESSION['pin_unlocked_at'] ?? 'NOT_SET', true));
+
     // 🔒 SÉCURITÉ: Vérifier le PIN admin avant suppression
     if (empty($_SESSION['pin_unlocked']) || empty($_SESSION['pin_unlocked_at'])) {
         error_log('[DELETE] ⛔ Tentative sans PIN - IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        error_log('[DELETE] ⛔ Session complète: ' . print_r($_SESSION, true));
         jsonError('PIN requis pour supprimer des commandes', 403);
     }
 
