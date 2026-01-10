@@ -1031,3 +1031,396 @@ Erreurs: 0
 
 **Session continuée - Capture adresses complétée** ✅
 **Tokens restants: ~79,000** ✅
+
+---
+
+## ☕ Système de variants et capsules pour cafés
+
+**Date**: 2026-01-10 (Continuation session)
+**Status**: ✅ **COMPLÉTÉ ET TESTÉ**
+
+### Contexte
+
+L'utilisateur souhaite ajouter un système de variants (tailles) pour les produits café, avec:
+- **Variants de tailles**: Court, Long, etc. avec prix différents
+- **Numéros de capsules**: Sélection de 1 à 15 pour les cafés Nespresso
+- **Gestion admin complète**: Le restaurateur doit pouvoir gérer via l'interface (pas de code)
+- **Prix de remplacement**: Le prix du variant **REMPLACE** le prix de base (pas d'addition)
+
+**Citation utilisateur**:
+> "si le prix du café est fixé a 100 et que le client chosit un long a 200 il ne faut pas qu'il paye 300 mais 200"
+
+### Solution implémentée
+
+#### Phase 1: Interface Admin ✅
+
+**Fichier**: `admin-panel-v2/products-manager.php`
+
+**Ajouts** (lignes 725-1820):
+1. **Section Variants** (ligne 725-742):
+   - Affichée seulement pour café-caps et café-lor
+   - Liste dynamique des variants avec nom et prix
+   - Bouton "+ Ajouter un variant"
+   - Édition inline (nom, prix)
+   - Suppression individuelle
+
+2. **Section Capsules** (ligne 754-762):
+   - Grille 5 colonnes pour numéros 1-15
+   - Checkbox visuelles avec fond coloré si sélectionné
+   - Toggle simple par clic
+
+3. **Fonctions JavaScript**:
+   - `renderVariantsList(variants)`: Affichage liste variants
+   - `renderCapsulesList(selectedCapsules)`: Grille capsules
+   - Event listeners add/remove/modify
+   - Sauvegarde dans `currentEditProduct`
+
+4. **Intégration formulaire** (lignes 1782-1820):
+   - Ajout variants/capsuleNumbers au payload API
+   - Support multipart/form-data (avec images)
+   - Support JSON pur (sans images)
+
+**Fichier**: `admin-panel-v2/api/products.php`
+
+**Ajouts** (lignes 854-870):
+```php
+// Gérer les variants (Court/Long pour cafés)
+if (isset($input['variants'])) {
+    $variants = $input['variants'];
+    if (is_string($variants)) {
+        $variants = json_decode($variants, true) ?? [];
+    }
+    $patch['variants'] = is_array($variants) ? $variants : [];
+}
+
+// Gérer les numéros de capsules
+if (isset($input['capsuleNumbers'])) {
+    $capsuleNumbers = $input['capsuleNumbers'];
+    if (is_string($capsuleNumbers)) {
+        $capsuleNumbers = json_decode($capsuleNumbers, true) ?? [];
+    }
+    $patch['capsuleNumbers'] = is_array($capsuleNumbers) ? $capsuleNumbers : [];
+}
+```
+
+#### Phase 2: Frontend Client ✅
+
+**Fichier**: `config/menu.json`
+
+**Exemple de structure** (café-caps):
+```json
+{
+    "id": "cafe-caps",
+    "name": "Café Caps",
+    "description": "Café capsule.",
+    "price": 100,
+    "priceSolo": 0,
+    "variants": [
+        {"id": "court", "name": "Court", "price": 100},
+        {"id": "long", "name": "Long", "price": 150}
+    ],
+    "capsuleNumbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+}
+```
+
+**Fichier**: `template-v2/index.html`
+
+**Ajouts** (lignes 446-459):
+```html
+<!-- Variants (tailles pour cafés) -->
+<div class="modal-variants hidden" id="modalVariants">
+    <h4><i class="fas fa-coffee"></i> Taille</h4>
+    <div class="variant-options" id="variantOptions">
+        <!-- Variant options will be injected -->
+    </div>
+</div>
+
+<!-- Capsule Numbers (for cafe-caps and cafe-lor) -->
+<div class="modal-capsules hidden" id="modalCapsules">
+    <h4><i class="fas fa-hashtag"></i> Numéro de capsule</h4>
+    <div class="capsule-options" id="capsuleOptions">
+        <!-- Capsule options will be injected -->
+    </div>
+</div>
+```
+
+**Fichier**: `template-v2/js/products.js`
+
+**Ajouts clés** (lignes 1054-1097):
+1. **État produit** (ligne 813-814):
+   ```javascript
+   this.selectedVariant = null;
+   this.selectedCapsule = null;
+   ```
+
+2. **Render variants** (lignes 1054-1075):
+   ```javascript
+   if (product.variants && product.variants.length > 0) {
+       variantsContainer.classList.remove('hidden');
+       variantsContainer.style.display = '';
+       variantOptions.innerHTML = product.variants.map((variant, index) => `
+           <div class="variant-item ${index === 0 ? 'selected' : ''}"
+                data-id="${variant.id}"
+                onclick="Products.selectVariant('${escapeHtml(variant.id)}')">
+               <div class="variant-radio"><i class="fas fa-check"></i></div>
+               <span class="variant-name">${escapeHtml(variant.name)}</span>
+               <span class="variant-price">${Config.formatPrice(variant.price)}</span>
+           </div>
+       `).join('');
+       this.selectedVariant = product.variants[0]; // Sélection par défaut
+   }
+   ```
+
+3. **Render capsules** (lignes 1077-1097):
+   - Grille responsive
+   - Sélection par défaut du premier numéro
+   - Style visuel avec checkbox cachée
+
+4. **Fonctions de sélection**:
+   ```javascript
+   selectVariant(variantId) {
+       const variant = this.currentProduct.variants.find(v => v.id === variantId);
+       if (variant) {
+           this.selectedVariant = variant;
+           // Update UI...
+           this.updateModalUI();
+       }
+   }
+
+   selectCapsule(capsuleNumber) {
+       this.selectedCapsule = capsuleNumber;
+       // Update UI...
+   }
+   ```
+
+5. **Calcul prix avec variant** (ligne 1391):
+   ```javascript
+   getItemTotal(item) {
+       let basePrice = 0;
+
+       // ⚡ Prix du variant (remplace le prix de base!)
+       if (item.variant && item.variant.price) {
+           basePrice = item.variant.price;
+       } else if (item.menuType === 'menu') {
+           basePrice = item.product.priceMenu || 0;
+       } else {
+           basePrice = item.product.priceSolo || item.product.price || 0;
+       }
+
+       // Ajouter suppléments
+       const supplementsTotal = (item.supplements || [])
+           .reduce((sum, sup) => sum + (sup.price || 0), 0);
+
+       return (basePrice + supplementsTotal) * item.quantity;
+   }
+   ```
+
+**Fichier**: `template-v2/js/cart.js`
+
+**Ajouts** (lignes 154-160):
+```javascript
+// Afficher variant et capsule si présents
+if (item.variant) {
+    itemHtml += `<div class="item-variant">${item.variant.name}</div>`;
+}
+if (item.capsule) {
+    itemHtml += `<div class="item-capsule">Capsule n°${item.capsule}</div>`;
+}
+```
+
+**Fichier**: `template-v2/css/style.css`
+
+**Ajouts** (lignes 1726-1800):
+- Styles `.variant-item` avec hover/selected
+- Styles `.capsule-item` avec grille responsive
+- Animations transitions (0.2s)
+- States visuels (checkbox colorée si sélectionné)
+
+### Problèmes rencontrés et résolus
+
+#### Problème 1: Bug clignotement navigateur ❌→✅
+
+**Description**: Première implémentation causait un clignotement infini et crash du navigateur
+
+**Solution**:
+- Revert complet des fichiers frontend
+- Vérification logique de rendu
+- Test unitaire de chaque fonction
+- Réapplication soigneuse
+
+**Commit revert**: `0a952af` (annulé ensuite)
+
+#### Problème 2: Variants pas visibles au premier chargement ❌→✅
+
+**Cause**: Cache navigateur
+
+**Solution**: Simple refresh (F5)
+
+**Confirmation utilisateur**: "en fait c'est bon il fallait juste rafraichir"
+
+#### Problème 3: Logique de prix ✅
+
+**Vérification**: Le prix du variant REMPLACE bien le prix de base (pas d'addition)
+
+**Test effectué**:
+- Café de base: 100 DA
+- Variant Long: 200 DA
+- **Résultat**: Client paie 200 DA (pas 300 DA) ✅
+
+**Confirmation utilisateur**: "oui c'est bon"
+
+### Structure de données
+
+**Format variants**:
+```json
+{
+    "variants": [
+        {
+            "id": "court",
+            "name": "Court",
+            "price": 100
+        },
+        {
+            "id": "long",
+            "name": "Long",
+            "price": 150
+        }
+    ]
+}
+```
+
+**Format capsules**:
+```json
+{
+    "capsuleNumbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+}
+```
+
+**Format item panier avec variant**:
+```javascript
+{
+    product: {...},
+    quantity: 1,
+    variant: {id: "long", name: "Long", price: 150},
+    capsule: 5,
+    supplements: []
+}
+```
+
+### Commits
+
+**Commit 1** (720d653): Interface admin
+```bash
+feat: Interface admin pour variants cafés et numéros capsules
+
+Ajout d'une interface complète dans l'admin pour gérer:
+- Variants de tailles (Court/Long) avec prix personnalisés
+- Sélection des numéros de capsules (1-15) via grille checkbox
+- Affichage dynamique seulement pour café-caps et café-lor
+- Boutons ajouter/supprimer variants
+- Édition inline des noms et prix de variants
+- Sauvegarde via API products.php
+
+Permet au restaurateur de gérer variants sans toucher au code.
+```
+
+**Fichiers modifiés**:
+- `admin-panel-v2/products-manager.php`: +161 lignes
+- `admin-panel-v2/api/products.php`: +18 lignes
+- `config/menu.json`: Ajout variants pour café-caps/café-lor
+- `template-v2/index.html`: +16 lignes (HTML sections)
+- `template-v2/js/products.js`: +91 lignes (logique variants)
+- `template-v2/js/cart.js`: +18 lignes (affichage panier)
+- `template-v2/css/style.css`: +151 lignes (styles)
+
+### Tests effectués ✅
+
+**Test 1: Interface admin**
+- ✅ Section variants visible seulement pour café-caps/café-lor
+- ✅ Ajout de variants avec nom et prix
+- ✅ Suppression de variants
+- ✅ Modification inline
+- ✅ Grille capsules 1-15 fonctionnelle
+- ✅ Sauvegarde dans menu.json
+
+**Test 2: Affichage frontend**
+- ✅ Modal produit affiche les variants
+- ✅ Modal produit affiche les capsules
+- ✅ Sélection variant change le prix affiché
+- ✅ Sélection capsule fonctionne
+- ✅ Pas de clignotement
+- ✅ Pas de crash navigateur
+
+**Test 3: Logique prix**
+- ✅ Prix variant REMPLACE le prix de base (100 DA → 150 DA = 150 DA)
+- ✅ Suppléments s'ajoutent au prix du variant
+- ✅ Panier affiche le bon total
+- ✅ Mini-cart affiche variant et capsule
+
+**Test 4: Persistance données**
+- ✅ Variants sauvegardés dans menu.json
+- ✅ Capsules sauvegardées dans menu.json
+- ✅ Rechargement page = données présentes
+
+### Impact
+
+**Avant**:
+- ❌ Impossible de proposer tailles différentes pour cafés
+- ❌ Pas de gestion des numéros de capsules
+- ❌ Un seul prix par café
+
+**Après**:
+- ✅ Variants multiples avec prix différents
+- ✅ Capsules numérotées 1-15
+- ✅ Gestion complète via admin
+- ✅ Expérience client améliorée
+- ✅ Prix de remplacement (pas d'addition)
+
+### Documentation
+
+**Guide d'utilisation admin**:
+
+1. **Ajouter des variants**:
+   - Ouvrir admin → Produits
+   - Éditer café-caps ou café-lor
+   - Scroll jusqu'à "☕ Variants (tailles)"
+   - Cliquer "+ Ajouter un variant"
+   - Saisir nom (Court) et prix (100)
+   - Répéter pour Long (150)
+   - Enregistrer
+
+2. **Sélectionner capsules**:
+   - Dans le même modal
+   - Section "#️⃣ Numéros de capsules disponibles"
+   - Cliquer sur les numéros souhaités (1-15)
+   - Cases colorées = sélectionnées
+   - Enregistrer
+
+3. **Tester sur le site**:
+   - Ouvrir template-v2/
+   - Cliquer sur un café
+   - Voir section "Taille" avec variants
+   - Voir section "Numéro de capsule"
+   - Sélectionner → Prix se met à jour
+   - Ajouter au panier → Vérifier total
+
+### Prochaines étapes possibles
+
+**Améliorations optionnelles**:
+- [ ] Ajouter variants pour d'autres produits (pizzas, burgers)
+- [ ] Images différentes par variant
+- [ ] Stock par variant
+- [ ] Statistiques ventes par variant
+- [ ] Export variants vers Excel
+
+### Statistiques
+
+**Tokens utilisés pour cette feature**: ~20,000
+**Tokens restants**: ~145,000 ✅
+**Temps développement**: ~2 heures
+**Lignes code ajoutées**: ~455 lignes
+**Fichiers modifiés**: 7
+
+---
+
+**Session 2026-01-10 - Système variants cafés complété** ✅
