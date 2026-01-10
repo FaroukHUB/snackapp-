@@ -721,6 +721,26 @@ $csrfToken = getCsrfToken();
             <input type="file" id="editProductImage" name="image" accept="image/jpeg,image/png,image/webp" class="input" style="padding:8px;" />
             <small style="color:#9ca3af;display:block;margin-top:4px;">Formats: JPG, PNG, WebP (max 2MB)</small>
           </div>
+
+          <!-- Variants (tailles pour cafés) -->
+          <div class="field" id="editVariantsField" style="display:none;">
+            <label>☕ Variants (tailles)</label>
+            <p class="muted" style="margin-top:6px;font-size:13px;margin-bottom:12px;">
+              Pour les cafés avec différentes tailles (Court, Long, etc.)
+            </p>
+            <div id="editVariantsList" style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;"></div>
+            <button type="button" class="btn btn-good btn-sm" id="btnAddVariant" style="width:100%;">+ Ajouter un variant</button>
+          </div>
+
+          <!-- Numéros de capsules -->
+          <div class="field" id="editCapsulesField" style="display:none;">
+            <label>#️⃣ Numéros de capsules disponibles</label>
+            <p class="muted" style="margin-top:6px;font-size:13px;margin-bottom:12px;">
+              Sélectionnez les numéros de capsules disponibles (1-15)
+            </p>
+            <div id="editCapsulesList" style="display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;"></div>
+          </div>
+
           <div class="field">
             <label for="editStatus">Statut</label>
             <select id="editStatus" name="status" class="select">
@@ -1630,8 +1650,119 @@ $csrfToken = getCsrfToken();
       // Suppléments : Affichage automatique selon le flavor (plus de checkboxes)
       // Les suppléments s'affichent automatiquement côté frontend
 
+      // Variants et capsules pour cafés
+      const hasVariants = product.id === 'cafe-caps' || product.id === 'cafe-lor';
+      const variantsField = $("#editVariantsField");
+      const capsulesField = $("#editCapsulesField");
+
+      if (hasVariants) {
+        variantsField.style.display = "";
+        capsulesField.style.display = "";
+
+        // Charger les variants existants
+        renderVariantsList(product.variants || []);
+
+        // Charger les capsules existantes
+        renderCapsulesList(product.capsuleNumbers || []);
+      } else {
+        variantsField.style.display = "none";
+        capsulesField.style.display = "none";
+      }
+
       openModal("#modalEditProduct");
     }
+
+    // Fonction pour afficher la liste des variants
+    function renderVariantsList(variants) {
+      const container = $("#editVariantsList");
+      if (!variants || variants.length === 0) {
+        container.innerHTML = '<p class="muted" style="font-size:13px;">Aucun variant. Cliquez sur "+ Ajouter un variant"</p>';
+        return;
+      }
+
+      container.innerHTML = variants.map((variant, index) => `
+        <div style="display:flex;gap:8px;align-items:center;padding:8px;background:rgba(0,0,0,0.05);border-radius:8px;">
+          <input type="text" value="${variant.name}" data-variant-index="${index}" data-variant-field="name" class="input" placeholder="Nom (ex: Court)" style="flex:1;" />
+          <input type="number" value="${variant.price}" data-variant-index="${index}" data-variant-field="price" class="input" placeholder="Prix" style="width:100px;" />
+          <button type="button" class="btn btn-danger btn-sm" data-remove-variant="${index}">×</button>
+        </div>
+      `).join('');
+
+      // Event listeners pour suppression
+      container.querySelectorAll('[data-remove-variant]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const index = parseInt(btn.dataset.removeVariant);
+          const newVariants = currentEditProduct.variants.filter((_, i) => i !== index);
+          currentEditProduct.variants = newVariants;
+          renderVariantsList(newVariants);
+        });
+      });
+
+      // Event listeners pour modification
+      container.querySelectorAll('[data-variant-index]').forEach(input => {
+        input.addEventListener('change', () => {
+          const index = parseInt(input.dataset.variantIndex);
+          const field = input.dataset.variantField;
+          if (!currentEditProduct.variants) currentEditProduct.variants = [];
+          if (!currentEditProduct.variants[index]) currentEditProduct.variants[index] = {id: '', name: '', price: 0};
+
+          if (field === 'name') {
+            currentEditProduct.variants[index].name = input.value;
+            currentEditProduct.variants[index].id = input.value.toLowerCase().replace(/\s+/g, '-');
+          } else if (field === 'price') {
+            currentEditProduct.variants[index].price = parseFloat(input.value) || 0;
+          }
+        });
+      });
+    }
+
+    // Fonction pour afficher la liste des capsules
+    function renderCapsulesList(selectedCapsules) {
+      const container = $("#editCapsulesList");
+      const allNumbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+
+      container.innerHTML = allNumbers.map(num => {
+        const isSelected = selectedCapsules && selectedCapsules.includes(num);
+        return `
+          <label style="display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;background:${isSelected ? '#3b82f6' : 'rgba(0,0,0,0.05)'};color:${isSelected ? 'white' : 'inherit'};border-radius:6px;cursor:pointer;user-select:none;">
+            <input type="checkbox" data-capsule-number="${num}" ${isSelected ? 'checked' : ''} style="display:none;">
+            <span style="font-weight:600;">${num}</span>
+          </label>
+        `;
+      }).join('');
+
+      // Event listeners pour toggle capsules
+      container.querySelectorAll('[data-capsule-number]').forEach(checkbox => {
+        checkbox.parentElement.addEventListener('click', () => {
+          checkbox.checked = !checkbox.checked;
+
+          const num = parseInt(checkbox.dataset.capsuleNumber);
+          if (!currentEditProduct.capsuleNumbers) currentEditProduct.capsuleNumbers = [];
+
+          if (checkbox.checked) {
+            if (!currentEditProduct.capsuleNumbers.includes(num)) {
+              currentEditProduct.capsuleNumbers.push(num);
+            }
+          } else {
+            currentEditProduct.capsuleNumbers = currentEditProduct.capsuleNumbers.filter(n => n !== num);
+          }
+
+          // Re-render pour mettre à jour les couleurs
+          renderCapsulesList(currentEditProduct.capsuleNumbers);
+        });
+      });
+    }
+
+    // Bouton ajouter variant
+    $("#btnAddVariant").addEventListener('click', () => {
+      if (!currentEditProduct.variants) currentEditProduct.variants = [];
+      currentEditProduct.variants.push({
+        id: 'nouveau',
+        name: 'Nouveau',
+        price: 0
+      });
+      renderVariantsList(currentEditProduct.variants);
+    });
 
     $("#formEditProduct").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1648,6 +1779,10 @@ $csrfToken = getCsrfToken();
       // Suppléments : Affichage automatique selon le flavor (pas de sélection manuelle)
       const supplements = []; // Vide car géré automatiquement côté frontend
 
+      // Variants et capsules (seulement pour cafés)
+      const variants = currentEditProduct?.variants || null;
+      const capsuleNumbers = currentEditProduct?.capsuleNumbers || null;
+
       try {
         // Si une image est sélectionnée, utiliser FormData
         if (imageFile) {
@@ -1661,11 +1796,13 @@ $csrfToken = getCsrfToken();
           if (pricePrefix) formData.set("pricePrefix", pricePrefix);
           formData.set("status", status);
           formData.set("supplements", JSON.stringify(supplements));
+          if (variants) formData.set("variants", JSON.stringify(variants));
+          if (capsuleNumbers) formData.set("capsuleNumbers", JSON.stringify(capsuleNumbers));
           formData.set("image", imageFile);
 
           await apiPostMultipart(formData, "update_product");
         } else {
-          await apiPostJson({
+          const payload = {
             action: "update_product",
             product_id: productId,
             name,
@@ -1676,7 +1813,11 @@ $csrfToken = getCsrfToken();
             pricePrefix,
             status,
             supplements
-          });
+          };
+          if (variants) payload.variants = variants;
+          if (capsuleNumbers) payload.capsuleNumbers = capsuleNumbers;
+
+          await apiPostJson(payload);
         }
         toast("success", "Produit modifié", `"${name}" a été mis à jour.`);
         closeModal($("#modalEditProduct"));

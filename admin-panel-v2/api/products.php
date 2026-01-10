@@ -851,6 +851,24 @@ switch ($action) {
             $patch['supplements'] = is_array($sups) ? $sups : [];
         }
 
+        // Gérer les variants (Court/Long pour cafés)
+        if (isset($input['variants'])) {
+            $variants = $input['variants'];
+            if (is_string($variants)) {
+                $variants = json_decode($variants, true) ?? [];
+            }
+            $patch['variants'] = is_array($variants) ? $variants : [];
+        }
+
+        // Gérer les numéros de capsules
+        if (isset($input['capsuleNumbers'])) {
+            $capsuleNumbers = $input['capsuleNumbers'];
+            if (is_string($capsuleNumbers)) {
+                $capsuleNumbers = json_decode($capsuleNumbers, true) ?? [];
+            }
+            $patch['capsuleNumbers'] = is_array($capsuleNumbers) ? $capsuleNumbers : [];
+        }
+
         // Gérer l'upload d'image
         $imagePath = handleImageUpload($productId);
         if ($imagePath) {
