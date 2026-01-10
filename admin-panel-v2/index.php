@@ -2613,9 +2613,11 @@ if (isset($_GET['export'])) {
         // PIN Protection - demande le PIN à chaque accès
         const PROTECTED_SECTIONS = ['stats', 'archives'];
         let pendingSection = null;
+        let pendingDeleteAction = null; // Pour stocker l'action de suppression
 
         function showPinModal(section) {
             pendingSection = section;
+            pendingDeleteAction = null; // Reset
             document.getElementById('pinModal').style.display = 'flex';
             document.getElementById('pinError').style.display = 'none';
 
@@ -2635,6 +2637,24 @@ if (isset($_GET['export'])) {
         function closePinModal() {
             document.getElementById('pinModal').style.display = 'none';
             pendingSection = null;
+            pendingDeleteAction = null;
+        }
+
+        // 🔒 Afficher le modal PIN spécifiquement pour la suppression
+        function showPinModalForDeletion(deleteCallback) {
+            pendingDeleteAction = deleteCallback;
+            pendingSection = null; // Pas de navigation
+            document.getElementById('pinModal').style.display = 'flex';
+            document.getElementById('pinError').style.display = 'none';
+
+            // Réinitialiser les inputs
+            ['pinDigit1','pinDigit2','pinDigit3','pinDigit4'].forEach(id => {
+                const input = document.getElementById(id);
+                input.value = '';
+                input.style.borderColor = '#444';
+            });
+
+            setTimeout(() => document.getElementById('pinDigit1').focus(), 100);
         }
 
         function pinInputHandler(input, index) {
@@ -2700,18 +2720,27 @@ if (isset($_GET['export'])) {
                 console.log('[PIN] Données:', data);
                 if (data.success) {
                     console.log('[PIN] ✅ Accès autorisé');
-                    console.log('[PIN] Section en attente:', pendingSection);
 
-                    // Sauvegarder la section AVANT de fermer le modal (qui met pendingSection à null)
-                    const sectionToOpen = pendingSection;
-                    closePinModal();
-
-                    if (sectionToOpen) {
-                        console.log('[PIN] Appel actuallyNavigate avec:', sectionToOpen);
-                        actuallyNavigate(sectionToOpen);
-                    } else {
-                        console.warn('[PIN] Aucune section sauvegardée !');
+                    // Cas 1: Action de suppression
+                    if (pendingDeleteAction) {
+                        console.log('[PIN] Exécution action de suppression');
+                        const actionToExecute = pendingDeleteAction;
+                        closePinModal();
+                        actionToExecute(); // Appeler la fonction de suppression
+                        return;
                     }
+
+                    // Cas 2: Navigation vers section
+                    if (pendingSection) {
+                        console.log('[PIN] Navigation vers section:', pendingSection);
+                        const sectionToOpen = pendingSection;
+                        closePinModal();
+                        actuallyNavigate(sectionToOpen);
+                        return;
+                    }
+
+                    console.warn('[PIN] Aucune action ou section en attente !');
+                    closePinModal();
                 } else {
                     console.error('[PIN] ❌ PIN refusé:', data.message);
                     document.getElementById('pinError').textContent = data.message || 'PIN incorrect';
@@ -3581,43 +3610,20 @@ function updateOrdersSelection() {
     selectAllCheckbox.checked = (count === total && total > 0);
 }
 
-async function deleteSelectedOrders() {
+function deleteSelectedOrders() {
     const checked = document.querySelectorAll('.order-checkbox:checked');
     const count = checked.length;
 
     if (count === 0) return;
 
-    // 🔒 ÉTAPE 1: Demander le PIN admin
-    const pin = prompt(
-        "🔒 SÉCURITÉ: PIN Admin requis\n\n" +
-        "Cette action nécessite le code PIN administrateur.\n" +
-        "Après 3 tentatives incorrectes, vous serez bloqué pendant 1 heure.\n\n" +
-        "Entrez le PIN:"
-    );
+    // 🔒 ÉTAPE 1: Demander le PIN admin via modal
+    showPinModalForDeletion(() => {
+        // Cette fonction sera appelée après validation du PIN
+        performDeleteOrders(checked, count);
+    });
+}
 
-    if (!pin) return; // Annulé
-
-    // Vérifier le PIN
-    try {
-        const pinResponse = await fetch('api/admin-pin.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'verify', pin: pin })
-        });
-
-        const pinData = await pinResponse.json();
-
-        if (!pinData.success) {
-            alert("❌ " + (pinData.error || 'PIN incorrect'));
-            return;
-        }
-
-        // PIN correct, continuer
-    } catch (error) {
-        alert("❌ Erreur de vérification du PIN: " + error.message);
-        return;
-    }
-
+async function performDeleteOrders(checked, count) {
     // 🔒 ÉTAPE 2: Double confirmation
     const confirmation = confirm(
         "⚠️ ATTENTION: Action irréversible!\n\n" +
