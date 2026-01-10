@@ -293,6 +293,23 @@ async function showCustomerDetails(customerId) {
                     ` : '<span style="color: #9ca3af; font-size: 0.875rem;">Aucune préférence enregistrée</span>'}
                 </div>
 
+                <!-- Notes Admin (privées) -->
+                <div style="background: #fef3c7; border: 2px dashed #f59e0b; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <h4 style="font-weight: 600; color: #92400e; display: flex; align-items: center; margin-bottom: 12px;">
+                        <i class="fas fa-sticky-note" style="color: #f59e0b; margin-right: 8px;"></i>Notes Admin (privées)
+                        <span style="background: #92400e; color: #fef3c7; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 8px;">Confidentielles</span>
+                    </h4>
+                    <textarea
+                        id="admin-notes-textarea"
+                        placeholder="Ajoutez vos notes privées sur ce client (allergies, préférences, historique d'incidents, etc.)..."
+                        style="width: 100%; min-height: 100px; padding: 12px; background: white; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem; color: #1f2937; resize: vertical;"
+                        onblur="saveAdminNotes('${customer.id}')"
+                    >${customer.admin_notes || ''}</textarea>
+                    <p style="color: #92400e; font-size: 0.7rem; margin-top: 6px; font-style: italic;">
+                        <i class="fas fa-lock" style="margin-right: 4px;"></i>Ces notes sont privées et visibles uniquement par les administrateurs. Sauvegarde automatique.
+                    </p>
+                </div>
+
                 <!-- Historique commandes -->
                 <div style="background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
                     <h4 style="font-weight: 600; color: #1f2937; display: flex; align-items: center; margin-bottom: 12px;">
@@ -309,8 +326,6 @@ async function showCustomerDetails(customerId) {
                                     <span style="font-weight: 700; color: #f59e0b;">${Math.round(order.total)} DA</span>
                                 </div>
                                 ${order.items ? `<div style="color: #6b7280; font-size: 0.75rem;">${order.items.split(',').slice(0, 2).join(', ')}${order.items.split(',').length > 2 ? '...' : ''}</div>` : ''}
-                                ${order.delivery_address ? `<div style="color: #3b82f6; font-size: 0.75rem; margin-top: 4px;"><i class="fas fa-map-marker-alt" style="margin-right: 4px;"></i>${escapeHtml(order.delivery_address)}</div>` : ''}
-                                ${order.delivery_instructions ? `<div style="color: #6b7280; font-size: 0.70rem; margin-top: 2px; font-style: italic;"><i class="fas fa-info-circle" style="margin-right: 4px;"></i>${escapeHtml(order.delivery_instructions)}</div>` : ''}
                             </div>
                         `).join('') : '<span style="color: #9ca3af; font-size: 0.875rem;">Aucune commande</span>'}
                     </div>
