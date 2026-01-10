@@ -1826,8 +1826,8 @@ if (isset($_GET['export'])) {
                         <i class="fas fa-trash"></i> Supprimer (<span id="selectedArchivesCount">0</span>)
                     </button>
                     <?php endif; ?>
-                    <select id="exportMonth" class="select" style="width: auto; padding: 8px 12px; font-size: 13px;">
-                        <option value="">Tout l'historique</option>
+                    <select id="archiveMonthFilter" class="select" style="width: auto; padding: 8px 12px; font-size: 13px;">
+                        <option value="">Tous les mois</option>
                         <?php
                         // Générer les 12 derniers mois
                         for ($i = 0; $i < 12; $i++) {
@@ -1838,6 +1838,7 @@ if (isset($_GET['export'])) {
                         }
                         ?>
                     </select>
+                    <button onclick="filterArchivesByMonth()" class="btn btn-sm" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);"><i class="fas fa-filter"></i> Filtrer</button>
                     <button onclick="exportArchives()" class="btn btn-sm btn-gray"><i class="fas fa-download"></i> Export CSV</button>
                 </div>
             </div>
@@ -1902,7 +1903,7 @@ if (isset($_GET['export'])) {
                         $dateLabel = $dayName . ' ' . date('d/m', strtotime($date));
                     }
                 ?>
-                <div class="card" style="margin-bottom: 15px; border-left: 4px solid #8b5cf6;">
+                <div class="card archive-date-card" data-date="<?php echo $date; ?>" data-month="<?php echo date('Y-m', strtotime($date)); ?>" style="margin-bottom: 15px; border-left: 4px solid #8b5cf6;">
                     <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid #374151; margin-bottom: 12px;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <div style="width: 40px; height: 40px; background: #8b5cf622; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
@@ -3567,9 +3568,57 @@ function deletePlatform(platformId) {
     .catch(() => showToast('Erreur réseau', 'error'));
 }
 
+// ===== Filtrer archives par mois (affichage) =====
+function filterArchivesByMonth() {
+    const selectedMonth = document.getElementById('archiveMonthFilter').value;
+    const dateCards = document.querySelectorAll('.archive-date-card');
+
+    let visibleCount = 0;
+
+    dateCards.forEach(card => {
+        const cardMonth = card.dataset.month;
+
+        // Si "Tous les mois" ou si le mois correspond
+        if (selectedMonth === '' || cardMonth === selectedMonth) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Message si aucun résultat
+    const archivesSection = document.getElementById('section-archives');
+    let noResultMsg = archivesSection.querySelector('.no-archive-result');
+
+    if (visibleCount === 0 && selectedMonth !== '') {
+        if (!noResultMsg) {
+            noResultMsg = document.createElement('div');
+            noResultMsg.className = 'no-archive-result';
+            noResultMsg.style.cssText = 'text-align: center; padding: 40px; color: #9ca3af;';
+            noResultMsg.innerHTML = `
+                <i class="fas fa-calendar-times" style="font-size: 48px; color: #555; margin-bottom: 15px; display: block;"></i>
+                <p style="font-size: 16px;">Aucune commande pour ce mois</p>
+                <button onclick="document.getElementById('archiveMonthFilter').value = ''; filterArchivesByMonth();"
+                        class="btn btn-sm" style="margin-top: 15px; background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
+                    <i class="fas fa-redo"></i> Afficher tout
+                </button>
+            `;
+            // Insérer après les stats
+            const statsDiv = archivesSection.querySelector('.stats');
+            if (statsDiv) {
+                statsDiv.parentNode.insertBefore(noResultMsg, statsDiv.nextSibling);
+            }
+        }
+        noResultMsg.style.display = 'block';
+    } else if (noResultMsg) {
+        noResultMsg.style.display = 'none';
+    }
+}
+
 // ===== Export CSV par mois =====
 function exportArchives() {
-    const month = document.getElementById('exportMonth').value;
+    const month = document.getElementById('archiveMonthFilter').value;
     let url = '?export=archives';
     if (month) {
         url += '&month=' + encodeURIComponent(month);
