@@ -779,19 +779,29 @@ Erreurs: 0
 
 ### Commits
 
-**À venir**:
+**Commit 1** (bb67d41): Système d'enrichissement initial
 ```bash
-git add admin-panel-v2/enrich-customers-auto.php ENRICHIR-CLIENTS-AUTO.sh ENRICHISSEMENT-AUTO-CLIENTS.md PROGRESSION-SESSION-2026-01-09.md
-git commit -m "feat: Système d'enrichissement automatique profils clients
+feat: Système d'enrichissement automatique profils clients
 
 - Extraction automatique adresses depuis historique commandes
 - Déduplication intelligente (max 2 adresses/client)
 - Préservation données manuelles (tags, notes, allergies)
 - Script bash wrapper avec confirmation
 - Documentation complète (224 lignes)
+```
 
-Permet séparation claire données auto (stats, adresses) vs manuelles (tags, notes)"
-git push -u origin claude/review-progress-continue-U4j8i
+**Commit 2** (e6958ba): Correctifs détection erreurs
+```bash
+fix: Corriger script enrichissement (require bootstrap + gestion erreurs)
+
+PROBLÈMES RÉSOLUS:
+1. Mauvais chemin require '../config/config.php' → bootstrap.php
+2. Script bash n'affichait pas les erreurs PHP
+3. Pas de codes de sortie pour détecter échecs
+
+CORRECTIFS:
+- enrich-customers-auto.php: bootstrap.php + exit codes (1-4)
+- ENRICHIR-CLIENTS-AUTO.sh: détection erreurs + messages appropriés
 ```
 
 ### Tests à effectuer après déploiement
