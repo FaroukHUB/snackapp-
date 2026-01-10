@@ -5,6 +5,21 @@
  * Support MySQL avec fallback JSON
  */
 
+// 🐛 DEBUG: Activer les erreurs temporairement
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+ini_set('log_errors', 1);
+
+// 🐛 DEBUG: Capturer toutes les erreurs fatales
+register_shutdown_function(function() {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        error_log('[FATAL] ' . json_encode($error));
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Erreur serveur: ' . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']]);
+    }
+});
+
 require_once __DIR__ . '/../bootstrap.php';
 
 header('Content-Type: application/json');
@@ -61,10 +76,13 @@ switch ($action) {
         break;
 
     case 'delete_multiple':
+        error_log('[ROUTER] Action: delete_multiple - Appel de la fonction');
         deleteMultipleOrders($useMySQL);
+        error_log('[ROUTER] Fonction deleteMultipleOrders terminée');
         break;
 
     default:
+        error_log('[ROUTER] Action invalide: ' . ($action ?? 'NULL'));
         jsonError('Action invalide');
 }
 
@@ -541,7 +559,11 @@ function getStats(bool $useMySQL) {
 }
 
 function deleteMultipleOrders(bool $useMySQL) {
+    error_log('[DELETE] ========== DÉBUT FONCTION ==========');
+
     global $requestData;
+    error_log('[DELETE] $requestData type: ' . gettype($requestData));
+    error_log('[DELETE] $requestData contenu: ' . json_encode($requestData));
 
     // 🐛 DEBUG: Afficher l'état de la session
     error_log('[DELETE] 🔍 Session ID: ' . session_id());
