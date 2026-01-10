@@ -27,6 +27,8 @@ const Products = {
     selectedViennoiserie: null, // For viennoiserie selection (Croissant/Pain au Chocolat)
     selectedPatisserie: null, // For pâtisserie selection (with photo and price)
     selectedBeverage: null, // For beverage selection (Soda/Jus/Jus Frais/Smoothie)
+    selectedVariant: null, // For variant selection (Court/Long)
+    selectedCapsule: null, // For capsule number selection
 
     /**
      * Capitalize first letter of a string
@@ -808,6 +810,8 @@ const Products = {
         this.selectedBeverage = null;
         this.selectedKidsCrepe = null;
         this.selectedKidsSauce = null;
+        this.selectedVariant = null;
+        this.selectedCapsule = null;
 
         const modal = document.getElementById('productModal');
 
@@ -1045,6 +1049,51 @@ const Products = {
         } else {
             kidsContainer.classList.add('hidden');
             kidsContainer.style.display = 'none';
+        }
+
+        // Render variants (Court/Long for cafe)
+        const variantsContainer = document.getElementById('modalVariants');
+        const variantOptions = document.getElementById('variantOptions');
+
+        if (product.variants && product.variants.length > 0) {
+            variantsContainer.classList.remove('hidden');
+            variantsContainer.style.display = '';
+            variantOptions.innerHTML = product.variants.map((variant, index) => `
+                <div class="variant-item ${index === 0 ? 'selected' : ''}" data-id="${variant.id}" onclick="Products.selectVariant('${escapeHtml(variant.id)}')">
+                    <div class="variant-radio">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span class="variant-name">${escapeHtml(variant.name)}</span>
+                    <span class="variant-price">${Config.formatPrice(variant.price)}</span>
+                </div>
+            `).join('');
+            // Select first variant by default
+            this.selectedVariant = product.variants[0];
+        } else {
+            variantsContainer.classList.add('hidden');
+            variantsContainer.style.display = 'none';
+        }
+
+        // Render capsule numbers
+        const capsulesContainer = document.getElementById('modalCapsules');
+        const capsuleOptions = document.getElementById('capsuleOptions');
+
+        if (product.capsuleNumbers && product.capsuleNumbers.length > 0) {
+            capsulesContainer.classList.remove('hidden');
+            capsulesContainer.style.display = '';
+            capsuleOptions.innerHTML = product.capsuleNumbers.map((num, index) => `
+                <div class="capsule-item ${index === 0 ? 'selected' : ''}" data-number="${num}" onclick="Products.selectCapsule(${num})">
+                    <div class="capsule-radio">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span class="capsule-number">${num}</span>
+                </div>
+            `).join('');
+            // Select first capsule by default
+            this.selectedCapsule = product.capsuleNumbers[0];
+        } else {
+            capsulesContainer.classList.add('hidden');
+            capsulesContainer.style.display = 'none';
         }
 
         // Render viennoiserie options
@@ -1319,6 +1368,38 @@ const Products = {
     },
 
     /**
+     * Select variant (Court/Long for cafe)
+     */
+    selectVariant(variantId) {
+        if (!this.currentProduct?.variants) return;
+
+        const variant = this.currentProduct.variants.find(v => v.id === variantId);
+        this.selectedVariant = variant || null;
+
+        // Update UI - radio button style (only one selected)
+        document.querySelectorAll('.variant-item').forEach(item => {
+            item.classList.toggle('selected', item.dataset.id === variantId);
+        });
+
+        // Update price since variant changes the base price
+        this.updateModalUI();
+    },
+
+    /**
+     * Select capsule number (for cafe-caps and cafe-lor)
+     */
+    selectCapsule(capsuleNumber) {
+        if (!this.currentProduct?.capsuleNumbers) return;
+
+        this.selectedCapsule = capsuleNumber;
+
+        // Update UI - radio button style (only one selected)
+        document.querySelectorAll('.capsule-item').forEach(item => {
+            item.classList.toggle('selected', parseInt(item.dataset.number) === capsuleNumber);
+        });
+    },
+
+    /**
      * Toggle accompaniment selection
      */
     toggleAccompagnement(accId) {
@@ -1438,8 +1519,12 @@ const Products = {
         // Calculate total based on menu type or special product type
         let basePrice = 0;
 
+        // If variant is selected (for cafe-caps, cafe-lor), use variant price
+        if (this.selectedVariant) {
+            basePrice = this.selectedVariant.price || 0;
+        }
         // If pâtisserie is selected, use its price (pâtisserie products have individual pricing)
-        if (this.selectedPatisserie) {
+        else if (this.selectedPatisserie) {
             basePrice = this.selectedPatisserie.price || 0;
         } else if (this.menuType === 'menu' && this.currentProduct?.priceMenu) {
             basePrice = this.currentProduct.priceMenu;
@@ -1489,7 +1574,9 @@ const Products = {
                 selectedPatisserie: this.selectedPatisserie ? { ...this.selectedPatisserie } : null,
                 selectedBeverage: this.selectedBeverage ? { ...this.selectedBeverage } : null,
                 selectedKidsCrepe: this.selectedKidsCrepe ? { ...this.selectedKidsCrepe } : null,
-                selectedKidsSauce: this.selectedKidsSauce ? { ...this.selectedKidsSauce } : null
+                selectedKidsSauce: this.selectedKidsSauce ? { ...this.selectedKidsSauce } : null,
+                selectedVariant: this.selectedVariant ? { ...this.selectedVariant } : null,
+                selectedCapsule: this.selectedCapsule
             }
         );
 

@@ -187,8 +187,12 @@ const Cart = {
     getItemTotal(item) {
         let total = 0;
 
+        // Si variant sélectionné (cafe-caps, cafe-lor), utiliser SON prix
+        if (item.options && item.options.selectedVariant && item.options.selectedVariant.price) {
+            total = item.options.selectedVariant.price;
+        }
         // Si pâtisserie sélectionnée, utiliser SON prix (REMPLACE le basePrice, ne s'additionne pas!)
-        if (item.options && item.options.selectedPatisserie && item.options.selectedPatisserie.price) {
+        else if (item.options && item.options.selectedPatisserie && item.options.selectedPatisserie.price) {
             total = item.options.selectedPatisserie.price;
         } else {
             // Sinon, utiliser le prix de base
@@ -289,6 +293,8 @@ const Cart = {
             const selectedViennoiserie = item.options?.selectedViennoiserie;
             const selectedPatisserie = item.options?.selectedPatisserie;
             const selectedBeverage = item.options?.selectedBeverage;
+            const selectedVariant = item.options?.selectedVariant;
+            const selectedCapsule = item.options?.selectedCapsule;
 
             return `
             <div class="mini-cart-item" data-index="${index}">
@@ -302,6 +308,16 @@ const Cart = {
                     ${selectedSauce ? `
                         <div class="mini-cart-item-sauce" style="font-size: 11px; color: var(--warning);">
                             🌶️ ${escapeHtml(selectedSauce.name)}
+                        </div>
+                    ` : ''}
+                    ${selectedVariant ? `
+                        <div class="mini-cart-item-variant" style="font-size: 11px; color: var(--primary);">
+                            ☕ ${escapeHtml(selectedVariant.name)} (${Config.formatPrice(selectedVariant.price)})
+                        </div>
+                    ` : ''}
+                    ${selectedCapsule ? `
+                        <div class="mini-cart-item-capsule" style="font-size: 11px; color: var(--info);">
+                            #️⃣ Capsule n°${selectedCapsule}
                         </div>
                     ` : ''}
                     ${selectedViennoiserie ? `

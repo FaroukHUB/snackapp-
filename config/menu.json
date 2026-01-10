@@ -501,7 +501,12 @@
                         "description": "Café capsule.",
                         "price": 100,
                         "status": "available",
-                        "priceSolo": 0
+                        "priceSolo": 0,
+                        "variants": [
+                            {"id": "court", "name": "Court", "price": 100},
+                            {"id": "long", "name": "Long", "price": 150}
+                        ],
+                        "capsuleNumbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
                     },
                     {
                         "id": "the-infusion",
@@ -525,7 +530,12 @@
                         "description": "Café premium L'Or.",
                         "price": 200,
                         "status": "available",
-                        "priceSolo": 0
+                        "priceSolo": 0,
+                        "variants": [
+                            {"id": "court", "name": "Court", "price": 200},
+                            {"id": "long", "name": "Long", "price": 250}
+                        ],
+                        "capsuleNumbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
                     },
                     {
                         "id": "cappuccino",
