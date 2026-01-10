@@ -853,5 +853,181 @@ WHERE addresses IS NOT NULL
 
 ---
 
-**Session continuée - Enrichissement automatique complété** ✅
-**Tokens restants: ~160,000** ✅
+## 📍 Capture automatique des adresses de livraison
+
+**Date**: 2026-01-10 (Suite)
+**Status**: ✅ **COMPLÉTÉ**
+
+### Contexte
+
+Après avoir appliqué la migration `delivery_address`, il fallait modifier le code pour capturer et sauvegarder les adresses dans les FUTURES commandes.
+
+### Modifications apportées
+
+#### 1. Frontend (template-v2/cart.html)
+
+**Lignes 2375-2429**: Ajout extraction de l'adresse selon le type de livraison
+
+```javascript
+// Variables pour stocker l'adresse séparément
+let deliveryAddress = null;
+let deliveryInstructions = null;
+
+if (deliveryType === 'libre') {
+    // Adresse libre: rue + ville + code postal
+    const address = document.getElementById('customerAddress').value.trim();
+    const city = document.getElementById('customerCity').value.trim();
+    const postalCode = document.getElementById('customerPostalCode').value.trim();
+
+    let fullAddress = address;
+    if (city) fullAddress += `, ${city}`;
+    if (postalCode) fullAddress += ` ${postalCode}`;
+
+    deliveryAddress = fullAddress;
+}
+else if (deliveryType === 'riad-city') {
+    // Riad City: Bâtiment + Appartement
+    const bat = document.getElementById('riadCityBat').value;
+    const appt = document.getElementById('riadCityAppt').value.trim();
+    deliveryAddress = `Riad City Bât ${bat}${appt ? ' - Appt ' + appt : ''}`;
+}
+else if (deliveryType === 'riad-prestige') {
+    // Riad Prestige: Villa
+    const villa = document.getElementById('riadPrestigeVilla').value;
+    deliveryAddress = `Riad Prestige Villa ${villa}`;
+}
+
+// Instructions de livraison (monnaie)
+if (paymentInfo.change_for) {
+    deliveryInstructions = `Monnaie pour ${paymentInfo.change_for} DA`;
+} else if (paymentInfo.has_exact_change) {
+    deliveryInstructions = 'Client a la monnaie exacte';
+}
+```
+
+**Lignes 2443-2444**: Ajout des champs dans l'objet envoyé à l'API
+
+```javascript
+const orderData = {
+    // ... autres champs ...
+    delivery_address: deliveryAddress,           // ⚡ NOUVEAU
+    delivery_instructions: deliveryInstructions, // ⚡ NOUVEAU
+    ...paymentInfo
+};
+```
+
+#### 2. Backend (database/repositories/OrderRepository.php)
+
+**Lignes 143-144**: Sauvegarde des champs dans la base de données
+
+```php
+$orderId = Database::insert('orders', [
+    // ... autres champs ...
+    // ⚡ NOUVEAU: Sauvegarder l'adresse de livraison
+    'delivery_address' => $data['delivery_address'] ?? null,
+    'delivery_instructions' => $data['delivery_instructions'] ?? null,
+    // ...
+]);
+```
+
+### Impact
+
+**Avant (migration appliquée mais code pas modifié)**:
+- ❌ Adresse mise uniquement dans `notes` (texte non structuré)
+- ❌ Impossible d'extraire l'adresse proprement
+- ❌ Script d'enrichissement ne trouve aucune adresse
+
+**Après (code modifié)**:
+- ✅ Adresse sauvegardée dans `delivery_address` (champ dédié)
+- ✅ Instructions dans `delivery_instructions` (info monnaie)
+- ✅ Script d'enrichissement pourra extraire les adresses des FUTURES commandes
+- ✅ Historique structuré et exploitable
+
+### Exemple de données capturées
+
+**Commande avec adresse libre**:
+```json
+{
+  "customer_name": "Farouk Etsaalbi",
+  "customer_phone": "+213555123456",
+  "delivery_address": "123 Rue de la République, Boumerdès 35000",
+  "delivery_instructions": "Monnaie pour 2000 DA",
+  "notes": "🚗 LIVRAISON\nAdresse: 123 Rue de la République, Boumerdès 35000"
+}
+```
+
+**Commande Riad City**:
+```json
+{
+  "delivery_address": "Riad City Bât C - Appt 15",
+  "delivery_instructions": "Client a la monnaie exacte"
+}
+```
+
+### Tests à effectuer
+
+**Test 1: Passer une commande avec livraison**
+```bash
+# 1. Aller sur https://marvelous.mon-agenceweb.fr/template-v2/
+# 2. Ajouter des produits au panier
+# 3. Choisir mode "Livraison"
+# 4. Remplir l'adresse
+# 5. Valider la commande
+```
+
+**Test 2: Vérifier dans la base de données**
+```sql
+-- Voir les dernières commandes avec adresse
+SELECT
+    order_number,
+    customer_name,
+    delivery_address,
+    delivery_instructions,
+    created_at
+FROM orders
+WHERE delivery_address IS NOT NULL
+ORDER BY created_at DESC
+LIMIT 10;
+```
+
+**Test 3: Lancer le script d'enrichissement**
+```bash
+cd ~/Marvelous.mon-agenceweb.fr
+./ENRICHIR-CLIENTS-AUTO.sh
+```
+
+**Résultat attendu**:
+```
+✅ 20 clients trouvés
+
+---
+Client: Farouk Etsaalbi (#15)
+  ✅ 1 adresse(s) ajoutée(s)
+---
+
+📊 RÉSUMÉ
+Clients traités: 20
+Adresses ajoutées: 1
+Erreurs: 0
+```
+
+### Commit
+
+**b820932**: `feat: Capturer et sauvegarder adresse de livraison dans commandes`
+
+### Fichiers modifiés
+
+1. `template-v2/cart.html`: Extraction et envoi de l'adresse (+41 lignes, -15 lignes)
+2. `database/repositories/OrderRepository.php`: Sauvegarde dans BDD
+
+### Prochaines étapes recommandées
+
+1. ✅ Tester passage commande avec livraison sur production
+2. ✅ Vérifier que l'adresse est bien sauvegardée en BDD
+3. ✅ Attendre quelques commandes puis lancer enrichissement
+4. 🔄 Optionnel: Migrer les anciennes adresses depuis `notes` (script de parsing)
+
+---
+
+**Session continuée - Capture adresses complétée** ✅
+**Tokens restants: ~79,000** ✅
