@@ -1808,8 +1808,24 @@ if (isset($_GET['export'])) {
         <div id="section-archives" class="section">
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2><i class="fas fa-archive" style="color: #8b5cf6;"></i> Archives</h2>
-                <div style="display: flex; gap: 10px; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <h2><i class="fas fa-archive" style="color: #8b5cf6;"></i> Archives</h2>
+                    <?php if (!empty($archivedOrders)): ?>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #9ca3af; font-size: 14px;">
+                            <input type="checkbox" id="selectAllArchives" onclick="toggleAllArchives(this)" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span>Tout sélectionner</span>
+                        </label>
+                    <?php endif; ?>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <?php if (!empty($archivedOrders)): ?>
+                    <!-- Bouton supprimer sélection (caché par défaut) -->
+                    <button id="deleteSelectedArchives" onclick="deleteSelectedArchives()"
+                            style="display: none; padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s;"
+                            onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                        <i class="fas fa-trash"></i> Supprimer (<span id="selectedArchivesCount">0</span>)
+                    </button>
+                    <?php endif; ?>
                     <select id="exportMonth" class="select" style="width: auto; padding: 8px 12px; font-size: 13px;">
                         <option value="">Tout l'historique</option>
                         <?php
@@ -1906,6 +1922,8 @@ if (isset($_GET['export'])) {
                     <?php foreach (array_slice($dateOrders, 0, 10) as $idx => $order): ?>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; <?php echo $idx > 0 ? 'border-top: 1px solid #374151;' : ''; ?>">
                         <div style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;">
+                            <!-- Checkbox pour sélection -->
+                            <input type="checkbox" class="archive-checkbox" data-order-id="<?php echo htmlspecialchars($order['id'], ENT_QUOTES); ?>" onclick="updateArchivesSelection();" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
                             <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, <?php echo $primaryColor; ?>, #d97706); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white;">
                                 <?php echo strtoupper(substr($order['customer_name'] ?? 'C', 0, 1)); ?>
                             </div>
@@ -3793,6 +3811,108 @@ async function performDeleteClients(checked, count) {
             location.reload();
         } else {
             alert("❌ Erreur: " + (data.error || 'Impossible de supprimer les clients'));
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
+        }
+    })
+    .catch(error => {
+        alert("❌ Erreur de connexion: " + error.message);
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
+    });
+}
+
+// ========== SÉLECTION MULTIPLE ARCHIVES ==========
+
+function toggleAllArchives(checkbox) {
+    const archiveCheckboxes = document.querySelectorAll('.archive-checkbox');
+    archiveCheckboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    updateArchivesSelection();
+}
+
+function updateArchivesSelection() {
+    const checked = document.querySelectorAll('.archive-checkbox:checked');
+    const count = checked.length;
+    const deleteBtn = document.getElementById('deleteSelectedArchives');
+    const countSpan = document.getElementById('selectedArchivesCount');
+    const selectAllCheckbox = document.getElementById('selectAllArchives');
+
+    // Vérifier que les éléments existent
+    if (!deleteBtn || !countSpan || !selectAllCheckbox) {
+        return;
+    }
+
+    if (count > 0) {
+        deleteBtn.style.display = 'inline-block';
+        countSpan.textContent = count;
+    } else {
+        deleteBtn.style.display = 'none';
+    }
+
+    // Mettre à jour "tout sélectionner"
+    const total = document.querySelectorAll('.archive-checkbox').length;
+    selectAllCheckbox.checked = (count === total && total > 0);
+}
+
+function deleteSelectedArchives() {
+    const checked = document.querySelectorAll('.archive-checkbox:checked');
+    const count = checked.length;
+
+    if (count === 0) return;
+
+    // 🔒 ÉTAPE 1: Demander le PIN admin via modal
+    showPinModalForDeletion(() => {
+        // Cette fonction sera appelée après validation du PIN
+        performDeleteArchives(checked, count);
+    });
+}
+
+async function performDeleteArchives(checked, count) {
+    // 🔒 ÉTAPE 2: Double confirmation
+    const confirmation = confirm(
+        "⚠️ ATTENTION: Action irréversible!\n\n" +
+        "Vous êtes sur le point de SUPPRIMER DÉFINITIVEMENT " + count + " commande(s) archivée(s).\n\n" +
+        "Cette action est IRRÉVERSIBLE et les données seront perdues à jamais.\n\n" +
+        "Voulez-vous vraiment continuer?"
+    );
+
+    if (!confirmation) return;
+
+    const doubleCheck = confirm(
+        "Dernière confirmation:\n\n" +
+        "Êtes-vous ABSOLUMENT SÛR de vouloir supprimer " + count + " commande(s) archivée(s)?"
+    );
+
+    if (!doubleCheck) return;
+
+    // Récupérer les IDs
+    const orderIds = Array.from(checked).map(cb => cb.dataset.orderId);
+
+    // Désactiver le bouton pendant la suppression
+    const deleteBtn = document.getElementById('deleteSelectedArchives');
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
+
+    // Envoyer la requête de suppression (utilise le même endpoint que les commandes)
+    fetch('api/orders.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            action: 'delete_multiple',
+            order_ids: orderIds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("✅ " + count + " commande(s) archivée(s) supprimée(s) avec succès");
+            location.reload();
+        } else {
+            alert("❌ Erreur: " + (data.error || 'Impossible de supprimer les commandes archivées'));
             deleteBtn.disabled = false;
             deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
         }
