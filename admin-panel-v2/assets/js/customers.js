@@ -37,9 +37,12 @@ async function loadAvailableTags() {
 
 // Protection contre appels multiples
 let isLoadingCustomers = false;
+// ⚡ PAGINATION: Variable pour suivre la page actuelle
+let currentPage = 1;
+let paginationData = null;
 
 // Charger les clients
-async function loadCustomers(filterTag = null) {
+async function loadCustomers(filterTag = null, page = 1) {
     // ⚡ Protection contre surcharge
     if (isLoadingCustomers) {
         console.log('Chargement déjà en cours...');
@@ -49,7 +52,7 @@ async function loadCustomers(filterTag = null) {
     isLoadingCustomers = true;
 
     try {
-        let url = 'api/customers.php?action=list';
+        let url = `api/customers.php?action=list&page=${page}`;
         if (filterTag) {
             url += '&filter_tag=' + encodeURIComponent(filterTag);
         }
@@ -59,8 +62,12 @@ async function loadCustomers(filterTag = null) {
 
         if (data.success) {
             customersData = data.customers;
+            currentPage = page;
+            paginationData = data.pagination;
             renderCustomers(data.customers);
             updateCustomerStats(data.stats);
+            // ⚡ PAGINATION: Afficher les boutons
+            renderPagination(data.pagination, filterTag);
             currentFilter = filterTag;
         }
     } catch (error) {
@@ -912,6 +919,41 @@ function showToast(message, type = 'success') {
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
+}
+
+// ⚡ PAGINATION: Afficher les boutons de pagination
+function renderPagination(pagination, filterTag = null) {
+    const customersList = document.getElementById('customers-list');
+
+    if (!pagination || pagination.total_pages <= 1) {
+        // Pas besoin de pagination si 1 seule page
+        return;
+    }
+
+    const paginationHtml = `
+        <div class="col-span-full flex justify-center items-center gap-2 mt-6">
+            ${pagination.page > 1 ? `
+                <button onclick="loadCustomers(${filterTag ? `'${filterTag}'` : 'null'}, ${pagination.page - 1})"
+                        class="btn bg-gray-200 text-gray-800 px-4 py-2">
+                    <i class="fas fa-chevron-left"></i> Précédent
+                </button>
+            ` : ''}
+
+            <span class="text-white font-semibold px-4">
+                Page ${pagination.page} / ${pagination.total_pages}
+                <span class="text-gray-400 text-sm">(${pagination.total} clients)</span>
+            </span>
+
+            ${pagination.page < pagination.total_pages ? `
+                <button onclick="loadCustomers(${filterTag ? `'${filterTag}'` : 'null'}, ${pagination.page + 1})"
+                        class="btn bg-gray-200 text-gray-800 px-4 py-2">
+                    Suivant <i class="fas fa-chevron-right"></i>
+                </button>
+            ` : ''}
+        </div>
+    `;
+
+    customersList.insertAdjacentHTML('beforeend', paginationHtml);
 }
 
 function updateCustomerStats(stats) {

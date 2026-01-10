@@ -97,6 +97,10 @@ switch ($action) {
 function listCustomers(bool $useMySQL) {
     $orderBy = $_GET['order_by'] ?? 'orders_count DESC';
     $filterTag = $_GET['filter_tag'] ?? null;
+    // ⚡ PAGINATION: 20 clients par page
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $perPage = 20;
+    $offset = ($page - 1) * $perPage;
 
     if ($useMySQL) {
         $customers = CustomerRepository::getAll(SNACK_RESTAURANT_ID, $orderBy);
@@ -121,11 +125,24 @@ function listCustomers(bool $useMySQL) {
             $customers = array_values($customers);
         }
 
+        // ⚡ PAGINATION: Calculer totaux avant de paginer
+        $totalCustomers = count($customers);
+        $totalPages = ceil($totalCustomers / $perPage);
+
+        // ⚡ PAGINATION: Slicer les résultats
+        $customers = array_slice($customers, $offset, $perPage);
+
         $stats = CustomerRepository::getStats(SNACK_RESTAURANT_ID);
 
         jsonSuccess([
             'customers' => $customers,
-            'stats' => $stats
+            'stats' => $stats,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $totalCustomers,
+                'total_pages' => $totalPages
+            ]
         ]);
     } else {
         // Fallback JSON
@@ -160,8 +177,8 @@ function getCustomer(bool $useMySQL) {
         $customer = CustomerRepository::getById((int)$customerId);
 
         if ($customer) {
-            // Récupérer l'historique des commandes
-            $orderHistory = CustomerRepository::getOrderHistory((int)$customerId);
+            // ⚡ OPTIMISATION: Réduire historique de 20 à 5 commandes
+            $orderHistory = CustomerRepository::getOrderHistory((int)$customerId, 5);
             $customer['order_history'] = $orderHistory;
 
             // Récupérer les tags
@@ -175,15 +192,16 @@ function getCustomer(bool $useMySQL) {
             $customer['addresses'] = json_decode($customer['addresses'] ?? '[]', true) ?: [];
             $customer['preferences'] = json_decode($customer['preferences'] ?? '{}', true) ?: [];
 
-            // Récupérer produits favoris
+            // ⚡ OPTIMISATION: Produits favoris limités aux 6 derniers mois
             $favorites = Database::fetchAll(
                 "SELECT
                     oi.product_name as name,
-                    COUNT(*) as count,
+                    COUNT(DISTINCT o.id) as count,
                     SUM(oi.quantity) as total_quantity
                  FROM order_items oi
                  JOIN orders o ON oi.order_id = o.id
                  WHERE o.customer_id = ?
+                   AND o.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
                  GROUP BY oi.product_name
                  ORDER BY count DESC
                  LIMIT 3",
