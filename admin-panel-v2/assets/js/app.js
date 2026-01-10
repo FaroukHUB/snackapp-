@@ -75,23 +75,31 @@ function initNotifications() {
 }
 
 // Charger les commandes
-async function loadOrders() {
+// ⚡ PAGINATION: Variables pour suivre la page actuelle
+let currentOrderPage = 1;
+let orderPaginationData = null;
+
+async function loadOrders(page = 1) {
     try {
-        const response = await fetch('api/orders.php?action=list');
+        const response = await fetch(`api/orders.php?action=list&page=${page}`);
         const data = await response.json();
 
         if (data.success) {
-            const newOrderCount = data.orders.length;
+            const newOrderCount = data.pagination?.total || data.orders.length;
 
-            // Détecter nouvelle commande
-            if (newOrderCount > AppState.lastOrderCount && AppState.lastOrderCount > 0) {
+            // Détecter nouvelle commande (seulement en page 1)
+            if (page === 1 && newOrderCount > AppState.lastOrderCount && AppState.lastOrderCount > 0) {
                 playNotification();
                 showNotificationBadge();
             }
 
             AppState.lastOrderCount = newOrderCount;
             AppState.orders = data.orders;
+            currentOrderPage = page;
+            orderPaginationData = data.pagination;
             renderOrders(data.orders);
+            // ⚡ PAGINATION: Afficher les boutons
+            renderOrdersPagination(data.pagination);
             updateStats(data.orders);
         }
     } catch (error) {
@@ -216,6 +224,48 @@ function renderOrders(orders) {
             ` : ''}
         </div>
     `).join('');
+}
+
+// ⚡ PAGINATION: Afficher les boutons de pagination pour les commandes
+function renderOrdersPagination(pagination) {
+    const ordersList = document.getElementById('orders-list');
+
+    // Retirer ancienne pagination si existe
+    const oldPagination = document.getElementById('orders-pagination');
+    if (oldPagination) {
+        oldPagination.remove();
+    }
+
+    if (!pagination || pagination.total_pages <= 1) {
+        // Pas besoin de pagination si 1 seule page
+        return;
+    }
+
+    const paginationDiv = document.createElement('div');
+    paginationDiv.id = 'orders-pagination';
+    paginationDiv.className = 'flex justify-center items-center gap-3 mt-6 mb-4';
+    paginationDiv.innerHTML = `
+        ${pagination.page > 1 ? `
+            <button onclick="loadOrders(${pagination.page - 1})"
+                    class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold transition-all">
+                <i class="fas fa-chevron-left mr-2"></i>Précédent
+            </button>
+        ` : ''}
+
+        <span class="text-white font-semibold px-4">
+            Page ${pagination.page} / ${pagination.total_pages}
+            <span class="text-gray-400 text-sm ml-2">(${pagination.total} commandes)</span>
+        </span>
+
+        ${pagination.page < pagination.total_pages ? `
+            <button onclick="loadOrders(${pagination.page + 1})"
+                    class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold transition-all">
+                Suivant<i class="fas fa-chevron-right ml-2"></i>
+            </button>
+        ` : ''}
+    `;
+
+    ordersList.parentNode.insertBefore(paginationDiv, ordersList.nextSibling);
 }
 
 // Obtenir le label du statut

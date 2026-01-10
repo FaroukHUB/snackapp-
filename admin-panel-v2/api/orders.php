@@ -69,15 +69,25 @@ switch ($action) {
    ========================= */
 
 function listOrders(bool $useMySQL) {
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
+    // ⚡ PAGINATION: 10 commandes par page (au lieu de 50)
+    $perPage = isset($_GET['per_page']) ? (int)$_GET['per_page'] : 10;
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $offset = ($page - 1) * $perPage;
     $archived = isset($_GET['archived']) && $_GET['archived'] === '1';
 
     if ($useMySQL) {
+        // ⚡ Récupérer TOUTES les commandes pour calculer le total
         if ($archived) {
-            $orders = OrderRepository::getArchivedOrders(SNACK_RESTAURANT_ID, $limit);
+            $allOrders = OrderRepository::getArchivedOrders(SNACK_RESTAURANT_ID, 9999);
         } else {
-            $orders = OrderRepository::getActiveOrders(SNACK_RESTAURANT_ID, $limit);
+            $allOrders = OrderRepository::getActiveOrders(SNACK_RESTAURANT_ID, 9999);
         }
+
+        $totalOrders = count($allOrders);
+        $totalPages = ceil($totalOrders / $perPage);
+
+        // ⚡ Paginer les résultats
+        $orders = array_slice($allOrders, $offset, $perPage);
 
         // Formater pour compatibilité
         foreach ($orders as &$order) {
@@ -94,12 +104,21 @@ function listOrders(bool $useMySQL) {
 
         usort($orders, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
 
-        if ($limit > 0) {
-            $orders = array_slice($orders, 0, $limit);
-        }
+        // ⚡ PAGINATION
+        $totalOrders = count($orders);
+        $totalPages = ceil($totalOrders / $perPage);
+        $orders = array_slice($orders, $offset, $perPage);
     }
 
-    jsonSuccess(['orders' => $orders]);
+    jsonSuccess([
+        'orders' => $orders,
+        'pagination' => [
+            'page' => $page,
+            'per_page' => $perPage,
+            'total' => $totalOrders,
+            'total_pages' => $totalPages
+        ]
+    ]);
 }
 
 function getOrder(bool $useMySQL) {
