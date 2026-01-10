@@ -27,13 +27,10 @@ if (!$useMySQL) {
     exit(1);
 }
 
-// Charger Database class
-require_once __DIR__ . '/api/database.php';
-
-// Vérifier que la classe Database est disponible
+// Vérifier que la classe Database est disponible (chargée par bootstrap.php)
 if (!class_exists('Database')) {
     echo "❌ Erreur: Classe Database non disponible.\n";
-    echo "   Vérifiez que le fichier api/database.php existe.\n";
+    echo "   Vérifiez que bootstrap.php a bien chargé database/Database.php.\n";
     exit(4);
 }
 
