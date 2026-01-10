@@ -189,120 +189,138 @@ async function showCustomerDetails(customerId) {
         }
 
         modal.innerHTML = `
-            <div class="modal-content">
-                <div style="max-height: 85vh; overflow-y: auto; padding: 24px;">
-                    <!-- Header -->
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e5e7eb;">
-                        <div>
-                            <h3 style="font-size: 1.75rem; font-weight: 700; color: #1f2937; margin-bottom: 8px;">
-                                ${escapeHtml(customer.name)}
-                            </h3>
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap; color: #6b7280;">
-                                <span><i class="fas fa-phone mr-1"></i>${escapeHtml(customer.phone)}</span>
-                                ${customer.email ? `<span><i class="fas fa-envelope mr-1"></i>${escapeHtml(customer.email)}</span>` : ''}
-                            </div>
+            <div class="modal-content" style="background: white; border-radius: 16px; padding: 32px; max-width: 800px; width: 100%;">
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid #e5e7eb; padding-bottom: 16px;">
+                    <div>
+                        <h2 style="font-size: 1.75rem; font-weight: 700; color: #1f2937; margin-bottom: 8px;">
+                            ${escapeHtml(customer.name)}
+                        </h2>
+                        <div style="color: #6b7280; font-size: 0.95rem;">
+                            <i class="fas fa-phone" style="margin-right: 8px;"></i>${escapeHtml(customer.phone)}
+                            ${customer.email ? `<span style="margin: 0 8px;">•</span><i class="fas fa-envelope" style="margin-right: 8px;"></i>${escapeHtml(customer.email)}` : ''}
                         </div>
-                        <button onclick="closeCustomerModal()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-weight: 600;">
-                            <i class="fas fa-times"></i> Fermer
-                        </button>
                     </div>
+                    <button onclick="closeCustomerModal()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; font-weight: 600;">
+                        <i class="fas fa-times"></i> Fermer
+                    </button>
+                </div>
 
-                    <!-- Stats principales -->
-                    <div class="grid grid-cols-2" style="gap: 16px; margin-bottom: 24px;">
-                        <div style="background: #f3f4f6; border-radius: 12px; padding: 20px; text-align: center;">
-                            <div style="font-size: 2rem; font-weight: 700; color: #1f2937;">${customer.orders_count}</div>
-                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Commandes</div>
-                        </div>
-                        <div style="background: #f3f4f6; border-radius: 12px; padding: 20px; text-align: center;">
-                        <div class="text-3xl font-bold text-white">${Math.round(customer.total_spent)} DA</div>
-                        <div class="text-sm text-gray-400 mt-1">Dépensé</div>
+                <!-- Stats principales -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+                    <div style="background: #eff6ff; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 700; color: #1e40af;">${customer.orders_count}</div>
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Commandes</div>
                     </div>
-                    <div class="glass rounded-xl p-4 text-center">
-                        <div class="text-3xl font-bold" style="color: var(--primary-color);">${customer.loyalty_points}</div>
-                        <div class="text-sm text-gray-400 mt-1">Points</div>
+                    <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 700; color: #15803d;">${Math.round(customer.total_spent)} DA</div>
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Dépensé</div>
                     </div>
-                    <div class="glass rounded-xl p-4 text-center">
-                        <div class="text-2xl font-bold text-white">${customer.orders_count > 0 ? Math.round(customer.total_spent / customer.orders_count) : 0} DA</div>
-                        <div class="text-sm text-gray-400 mt-1">Panier moyen</div>
+                    <div style="background: #fef3c7; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">${customer.loyalty_points}</div>
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Points fidélité</div>
+                    </div>
+                    <div style="background: #f3f4f6; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 700; color: #1f2937;">${customer.orders_count > 0 ? Math.round(customer.total_spent / customer.orders_count) : 0} DA</div>
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Panier moyen</div>
                     </div>
                 </div>
 
                 <!-- Tags -->
-                <div class="glass rounded-xl p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-white font-semibold flex items-center">
-                            <i class="fas fa-tags mr-2" style="color: var(--primary-color);"></i>Tags
+                <div style="background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h4 style="font-weight: 600; color: #1f2937; display: flex; align-items: center;">
+                            <i class="fas fa-tags" style="color: #f59e0b; margin-right: 8px;"></i>Tags
                         </h4>
-                        <button onclick="showAddTagModal('${customer.id}')" class="btn-sm px-3 py-1 rounded-lg glass text-white text-sm">
-                            <i class="fas fa-plus mr-1"></i>Ajouter
-                        </button>
                     </div>
-                    <div class="flex flex-wrap gap-2" id="customer-tags-container">
-                        ${renderCustomerTags(customer.tags || [])}
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        ${(customer.tags && customer.tags.length > 0) ? customer.tags.map(tag => {
+                            const tagInfo = availableTags.find(t => t.value === tag);
+                            const color = tagInfo?.color || '#6b7280';
+                            return `<span style="background: ${color}20; color: ${color}; padding: 6px 12px; border-radius: 6px; font-size: 0.875rem; font-weight: 600;">${escapeHtml(tag)}</span>`;
+                        }).join('') : '<span style="color: #9ca3af; font-size: 0.875rem;">Aucun tag</span>'}
                     </div>
                 </div>
 
                 <!-- Adresses -->
-                <div class="glass rounded-xl p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-white font-semibold flex items-center">
-                            <i class="fas fa-map-marker-alt mr-2" style="color: var(--primary-color);"></i>Adresses de livraison
+                <div style="background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h4 style="font-weight: 600; color: #1f2937; display: flex; align-items: center;">
+                            <i class="fas fa-map-marker-alt" style="color: #f59e0b; margin-right: 8px;"></i>Adresses de livraison
                         </h4>
-                        ${(customer.addresses?.length || 0) < 2 ? `
-                            <button onclick="showAddAddressModal('${customer.id}')" class="btn-sm px-3 py-1 rounded-lg glass text-white text-sm">
-                                <i class="fas fa-plus mr-1"></i>Ajouter
-                            </button>
-                        ` : ''}
                     </div>
-                    <div class="space-y-2" id="customer-addresses-container">
-                        ${renderCustomerAddresses(customer.addresses || [])}
-                    </div>
+                    ${(customer.addresses && customer.addresses.length > 0) ? customer.addresses.map(addr => `
+                        <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px;">
+                                        ${escapeHtml(addr.label)}
+                                        ${addr.is_default ? '<span style="background: #dcfce7; color: #16a34a; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">Par défaut</span>' : ''}
+                                    </div>
+                                    <div style="color: #6b7280; font-size: 0.875rem;">${escapeHtml(addr.address)}</div>
+                                    ${addr.notes ? `<div style="color: #9ca3af; font-size: 0.75rem; margin-top: 4px;"><i class="fas fa-comment" style="margin-right: 4px;"></i>${escapeHtml(addr.notes)}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('') : '<span style="color: #9ca3af; font-size: 0.875rem;">Aucune adresse enregistrée</span>'}
                 </div>
 
-                <!-- Préférences & Allergies -->
-                <div class="glass rounded-xl p-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-white font-semibold flex items-center">
-                            <i class="fas fa-heart mr-2" style="color: var(--primary-color);"></i>Préférences
-                        </h4>
-                        <button onclick="showEditPreferencesModal('${customer.id}')" class="btn-sm px-3 py-1 rounded-lg glass text-white text-sm">
-                            <i class="fas fa-edit mr-1"></i>Modifier
-                        </button>
-                    </div>
-                    ${renderCustomerPreferences(customer.preferences || {}, customer.favorite_products || [])}
+                <!-- Préférences & Favoris -->
+                <div style="background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <h4 style="font-weight: 600; color: #1f2937; display: flex; align-items: center; margin-bottom: 12px;">
+                        <i class="fas fa-heart" style="color: #f59e0b; margin-right: 8px;"></i>Préférences & Favoris
+                    </h4>
+
+                    ${(customer.preferences?.allergies && customer.preferences.allergies.length > 0) ? `
+                        <div style="background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                            <div style="color: #dc2626; font-weight: 600; font-size: 0.875rem; margin-bottom: 4px;">
+                                <i class="fas fa-exclamation-triangle" style="margin-right: 6px;"></i>Allergies
+                            </div>
+                            <div style="color: #991b1b; font-size: 0.875rem;">${customer.preferences.allergies.map(escapeHtml).join(', ')}</div>
+                        </div>
+                    ` : ''}
+
+                    ${(customer.favorite_products && customer.favorite_products.length > 0) ? `
+                        <div>
+                            <div style="color: #6b7280; font-size: 0.875rem; margin-bottom: 8px;"><i class="fas fa-star" style="color: #f59e0b; margin-right: 6px;"></i>Produits favoris:</div>
+                            ${customer.favorite_products.map((fav, idx) => `
+                                <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.875rem;">
+                                    <span style="color: #1f2937;">${idx + 1}. ${escapeHtml(fav.name)}</span>
+                                    <span style="color: #6b7280;">${fav.count}x commandé</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<span style="color: #9ca3af; font-size: 0.875rem;">Aucune préférence enregistrée</span>'}
                 </div>
 
                 <!-- Historique commandes -->
-                <div class="glass rounded-xl p-4">
-                    <h4 class="text-white font-semibold mb-3 flex items-center">
-                        <i class="fas fa-history mr-2" style="color: var(--primary-color);"></i>Historique (${customer.order_history?.length || 0} dernières)
+                <div style="background: #f9fafb; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <h4 style="font-weight: 600; color: #1f2937; display: flex; align-items: center; margin-bottom: 12px;">
+                        <i class="fas fa-history" style="color: #f59e0b; margin-right: 8px;"></i>Dernières commandes (${customer.order_history?.length || 0})
                     </h4>
-                    <div class="space-y-2 max-h-64 overflow-y-auto">
-                        ${renderOrderHistory(customer.order_history || [])}
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        ${(customer.order_history && customer.order_history.length > 0) ? customer.order_history.slice(0, 5).map(order => `
+                            <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <div>
+                                        <span style="font-weight: 600; color: #1f2937;">${escapeHtml(order.order_number)}</span>
+                                        <span style="color: #9ca3af; font-size: 0.75rem; margin-left: 8px;">${formatDate(order.created_at)}</span>
+                                    </div>
+                                    <span style="font-weight: 700; color: #f59e0b;">${Math.round(order.total)} DA</span>
+                                </div>
+                                ${order.items ? `<div style="color: #6b7280; font-size: 0.75rem;">${order.items.split(',').slice(0, 2).join(', ')}${order.items.split(',').length > 2 ? '...' : ''}</div>` : ''}
+                            </div>
+                        `).join('') : '<span style="color: #9ca3af; font-size: 0.875rem;">Aucune commande</span>'}
                     </div>
                 </div>
 
-                <!-- Notes admin -->
-                <div class="glass rounded-xl p-4">
-                    <h4 class="text-white font-semibold mb-3 flex items-center">
-                        <i class="fas fa-sticky-note mr-2" style="color: var(--primary-color);"></i>Notes admin (privées)
-                    </h4>
-                    <textarea
-                        id="admin-notes-textarea"
-                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white resize-none"
-                        rows="3"
-                        placeholder="Notes privées sur ce client..."
-                        onchange="saveAdminNotes('${customer.id}')"
-                    >${escapeHtml(customer.admin_notes || '')}</textarea>
-                </div>
-
-                <!-- Actions rapides -->
-                <div class="grid grid-cols-2 gap-2 sticky bottom-0 bg-gray-900/95 backdrop-blur-sm pt-4 -mb-2 pb-2">
-                    <button onclick="showWhatsAppTemplates('${customer.id}')" class="py-3 rounded-xl bg-green-500 text-white font-semibold btn flex items-center justify-center">
-                        <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                <!-- Actions -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 24px;">
+                    <button onclick="window.open('https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}', '_blank')" style="background: #25D366; color: white; border: none; border-radius: 8px; padding: 12px; cursor: pointer; font-weight: 600;">
+                        <i class="fab fa-whatsapp" style="margin-right: 8px;"></i>WhatsApp
                     </button>
-                    <button onclick="addBonusPoints('${customer.id}')" class="py-3 rounded-xl glass text-white font-semibold btn flex items-center justify-center">
-                        <i class="fas fa-gift mr-2"></i>Ajouter points
+                    <button onclick="addBonusPoints('${customer.id}')" style="background: #f59e0b; color: white; border: none; border-radius: 8px; padding: 12px; cursor: pointer; font-weight: 600;">
+                        <i class="fas fa-gift" style="margin-right: 8px;"></i>Ajouter points
                     </button>
                 </div>
             </div>
