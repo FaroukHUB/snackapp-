@@ -3552,8 +3552,6 @@ async function syncMenu() {
 }
 
 
-    </script>
-
 // ========== SÉLECTION MULTIPLE COMMANDES ==========
 
 function toggleAllOrders(checkbox) {
@@ -3642,6 +3640,8 @@ function deleteSelectedOrders() {
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
     });
 }
+
+    </script>
 
 </body>
 </html>
