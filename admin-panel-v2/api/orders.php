@@ -60,6 +60,10 @@ switch ($action) {
         getStats($useMySQL);
         break;
 
+    case 'delete_multiple':
+        deleteMultipleOrders($useMySQL);
+        break;
+
     default:
         jsonError('Action invalide');
 }
@@ -533,5 +537,68 @@ function getStats(bool $useMySQL) {
         ];
 
         jsonSuccess(['stats' => $stats]);
+    }
+}
+
+function deleteMultipleOrders(bool $useMySQL) {
+    global $requestData;
+    
+    $orderIds = $requestData['order_ids'] ?? null;
+    
+    if (!$orderIds || !is_array($orderIds) || empty($orderIds)) {
+        jsonError('Aucune commande sélectionnée');
+    }
+    
+    if ($useMySQL) {
+        $deletedCount = 0;
+        
+        foreach ($orderIds as $orderId) {
+            try {
+                // Trouver l'ID interne si c'est un numéro de commande
+                if (!is_numeric($orderId)) {
+                    $order = OrderRepository::getByNumber(SNACK_RESTAURANT_ID, $orderId);
+                    if (!$order) {
+                        continue; // Skip si non trouvé
+                    }
+                    $orderId = $order['id'];
+                }
+                
+                // Supprimer la commande de la base de données
+                Database::execute(
+                    "DELETE FROM orders WHERE id = ? AND restaurant_id = ?",
+                    [(int)$orderId, SNACK_RESTAURANT_ID]
+                );
+                
+                // Supprimer les items associés
+                Database::execute(
+                    "DELETE FROM order_items WHERE order_id = ?",
+                    [(int)$orderId]
+                );
+                
+                $deletedCount++;
+            } catch (Exception $e) {
+                error_log("Erreur suppression commande {$orderId}: " . $e->getMessage());
+            }
+        }
+        
+        jsonSuccess([
+            'deleted' => $deletedCount,
+            'total' => count($orderIds)
+        ]);
+    } else {
+        require_once __DIR__ . '/../config.php';
+        $orders = loadData('orders.json') ?? [];
+        
+        // Filtrer les commandes à garder
+        $orders = array_filter($orders, function($order) use ($orderIds) {
+            return !in_array($order['id'], $orderIds);
+        });
+        
+        saveData('orders.json', array_values($orders));
+        
+        jsonSuccess([
+            'deleted' => count($orderIds),
+            'total' => count($orderIds)
+        ]);
     }
 }

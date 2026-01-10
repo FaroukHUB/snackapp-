@@ -901,13 +901,29 @@ if (isset($_GET['export'])) {
         <div id="section-orders" class="section active">
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2><i class="fas fa-receipt" style="color: <?php echo $primaryColor; ?>;"></i> Commandes (<?php echo $totalOrders; ?>)</h2>
-                <?php if (!empty($orders)): ?>
-                <form method="POST" style="margin: 0;">
-                    <input type="hidden" name="action" value="clear_orders">
-                    <button type="submit" onclick="return confirm('Archiver toutes les commandes terminées ?')" class="btn btn-sm btn-gray"><i class="fas fa-archive"></i> Archiver tout</button>
-                </form>
-                <?php endif; ?>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <h2><i class="fas fa-receipt" style="color: <?php echo $primaryColor; ?>;"></i> Commandes (<?php echo $totalOrders; ?>)</h2>
+                    <?php if (!empty($orders)): ?>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #9ca3af; font-size: 14px;">
+                            <input type="checkbox" id="selectAllOrders" onclick="toggleAllOrders(this)" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span>Tout sélectionner</span>
+                        </label>
+                    <?php endif; ?>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <?php if (!empty($orders)): ?>
+                    <!-- Bouton supprimer sélection (caché par défaut) -->
+                    <button id="deleteSelectedOrders" onclick="deleteSelectedOrders()"
+                            style="display: none; padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s;"
+                            onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                        <i class="fas fa-trash"></i> Supprimer (<span id="selectedOrdersCount">0</span>)
+                    </button>
+                    <form method="POST" style="margin: 0;">
+                        <input type="hidden" name="action" value="clear_orders">
+                        <button type="submit" onclick="return confirm('Archiver toutes les commandes terminées ?')" class="btn btn-sm btn-gray"><i class="fas fa-archive"></i> Archiver tout</button>
+                    </form>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <!-- Stats -->
@@ -948,13 +964,19 @@ if (isset($_GET['export'])) {
                     $itemCount = count($items);
                 ?>
                 <!-- CARTE COMPACTE -->
-                <div class="card order-card-compact" style="border-left: 4px solid <?php echo $statusColor; ?>; padding: 16px; cursor: pointer; transition: all 0.3s ease;"
+                <div class="card order-card-compact" style="position: relative; border-left: 4px solid <?php echo $statusColor; ?>; padding: 16px; cursor: pointer; transition: all 0.3s ease;"
                      onclick="showOrderDetails('<?php echo htmlspecialchars($order['id'], ENT_QUOTES); ?>')"
                      onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.4)'"
                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.2)'">
 
+                    <!-- Checkbox sélection (en haut à gauche) -->
+                    <input type="checkbox" class="order-checkbox" data-order-id="<?php echo htmlspecialchars($order['id'], ENT_QUOTES); ?>"
+                           onclick="event.stopPropagation(); updateOrdersSelection();"
+                           style="position: absolute; top: 12px; left: 12px; width: 20px; height: 20px; cursor: pointer; z-index: 10;">
+
+
                     <!-- Header: Numéro + Statut -->
-                    <div style="display: flex; justify-between; align-items: center; margin-bottom: 12px;">
+                    <div style="display: flex; justify-between; align-items: center; margin-bottom: 12px; padding-left: 30px;">
                         <span style="font-size: 16px; font-weight: 700; color: <?php echo $primaryColor; ?>;">
                             #<?php echo htmlspecialchars($order['id']); ?>
                         </span>
@@ -3531,5 +3553,95 @@ async function syncMenu() {
 
 
     </script>
+
+// ========== SÉLECTION MULTIPLE COMMANDES ==========
+
+function toggleAllOrders(checkbox) {
+    const orderCheckboxes = document.querySelectorAll('.order-checkbox');
+    orderCheckboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    updateOrdersSelection();
+}
+
+function updateOrdersSelection() {
+    const checked = document.querySelectorAll('.order-checkbox:checked');
+    const count = checked.length;
+    const deleteBtn = document.getElementById('deleteSelectedOrders');
+    const countSpan = document.getElementById('selectedOrdersCount');
+    const selectAllCheckbox = document.getElementById('selectAllOrders');
+
+    if (count > 0) {
+        deleteBtn.style.display = 'inline-block';
+        countSpan.textContent = count;
+    } else {
+        deleteBtn.style.display = 'none';
+    }
+
+    // Mettre à jour "tout sélectionner"
+    const total = document.querySelectorAll('.order-checkbox').length;
+    selectAllCheckbox.checked = (count === total && total > 0);
+}
+
+function deleteSelectedOrders() {
+    const checked = document.querySelectorAll('.order-checkbox:checked');
+    const count = checked.length;
+
+    if (count === 0) return;
+
+    const confirmation = confirm(
+        "⚠️ ATTENTION: Action irréversible!\n\n" +
+        "Vous êtes sur le point de SUPPRIMER DÉFINITIVEMENT " + count + " commande(s).\n\n" +
+        "Cette action est IRRÉVERSIBLE et les données seront perdues à jamais.\n\n" +
+        "Voulez-vous vraiment continuer?"
+    );
+
+    if (!confirmation) return;
+
+    // Double confirmation pour plus de sécurité
+    const doubleCheck = confirm(
+        "Dernière confirmation:\n\n" +
+        "Êtes-vous ABSOLUMENT SÛR de vouloir supprimer " + count + " commande(s)?"
+    );
+
+    if (!doubleCheck) return;
+
+    // Récupérer les IDs
+    const orderIds = Array.from(checked).map(cb => cb.dataset.orderId);
+
+    // Désactiver le bouton pendant la suppression
+    const deleteBtn = document.getElementById('deleteSelectedOrders');
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
+
+    // Envoyer la requête de suppression
+    fetch('api/orders.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            action: 'delete_multiple',
+            order_ids: orderIds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("✅ " + count + " commande(s) supprimée(s) avec succès");
+            location.reload();
+        } else {
+            alert("❌ Erreur: " + (data.error || 'Impossible de supprimer les commandes'));
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
+        }
+    })
+    .catch(error => {
+        alert("❌ Erreur de connexion: " + error.message);
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
+    });
+}
+
 </body>
 </html>
