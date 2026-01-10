@@ -34,6 +34,9 @@ switch ($action) {
     case 'delete':
         deleteCustomer($useMySQL);
         break;
+    case 'delete_multiple':
+        deleteMultipleCustomers($useMySQL);
+        break;
     case 'add_points':
         addLoyaltyPoints($useMySQL);
         break;
@@ -361,6 +364,58 @@ function deleteCustomer(bool $useMySQL) {
             jsonSuccess();
         } else {
             jsonError('Client introuvable');
+        }
+    }
+}
+
+function deleteMultipleCustomers(bool $useMySQL) {
+    global $requestData;
+
+    $customerIds = $requestData['customer_ids'] ?? null;
+
+    if (!$customerIds || !is_array($customerIds) || count($customerIds) === 0) {
+        jsonError('Aucun client à supprimer');
+    }
+
+    if ($useMySQL) {
+        $deletedCount = 0;
+
+        foreach ($customerIds as $customerId) {
+            if (!is_numeric($customerId)) {
+                continue;
+            }
+
+            // Supprimer le client
+            $deleted = CustomerRepository::deleteCustomer((int)$customerId, SNACK_RESTAURANT_ID);
+
+            if ($deleted) {
+                $deletedCount++;
+            }
+        }
+
+        jsonSuccess([
+            'deleted' => $deletedCount,
+            'total' => count($customerIds)
+        ], "$deletedCount client(s) supprimé(s)");
+    } else {
+        // Mode JSON
+        $customers = loadData('customers.json') ?? [];
+        $initialCount = count($customers);
+
+        $filtered = array_filter($customers, function($c) use ($customerIds) {
+            return !in_array($c['id'] ?? '', $customerIds);
+        });
+
+        $deletedCount = $initialCount - count($filtered);
+
+        if ($deletedCount > 0) {
+            saveData('customers.json', array_values($filtered));
+            jsonSuccess([
+                'deleted' => $deletedCount,
+                'total' => count($customerIds)
+            ], "$deletedCount client(s) supprimé(s)");
+        } else {
+            jsonError('Aucun client supprimé');
         }
     }
 }

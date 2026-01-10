@@ -1463,8 +1463,24 @@ if (isset($_GET['export'])) {
 
             <!-- Header avec boutons -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2><i class="fas fa-users"></i> Clients (<?= $totalCustomers ?>)</h2>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <h2><i class="fas fa-users"></i> Clients (<?= $totalCustomers ?>)</h2>
+                    <?php if (!empty($customers)): ?>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #9ca3af; font-size: 14px;">
+                            <input type="checkbox" id="selectAllClients" onclick="toggleAllClients(this)" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span>Tout sélectionner</span>
+                        </label>
+                    <?php endif; ?>
+                </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <?php if (!empty($customers)): ?>
+                    <!-- Bouton supprimer sélection (caché par défaut) -->
+                    <button id="deleteSelectedClients" onclick="deleteSelectedClients()"
+                            style="display: none; padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s;"
+                            onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                        <i class="fas fa-trash"></i> Supprimer (<span id="selectedClientsCount">0</span>)
+                    </button>
+                    <?php endif; ?>
                     <a href="clients.php" target="_blank" class="btn btn-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 2px solid #fbbf24;">
                         <i class="fas fa-sparkles"></i> Nouvelle Interface CRM
                     </a>
@@ -1581,6 +1597,9 @@ if (isset($_GET['export'])) {
                             ?>
                             <tr class="customer-row" data-category="<?= $category ?>" data-search="<?= strtolower(($customer['name'] ?? '') . ' ' . ($customer['phone'] ?? '') . ' ' . ($customer['loyalty_code'] ?? '')) ?>" style="border-bottom: 1px solid #2d3748; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
                                 <td style="padding: 10px 15px;">
+                                    <!-- Checkbox pour suppression -->
+                                    <input type="checkbox" class="client-checkbox" data-customer-id="<?= $customer['id'] ?>" onclick="updateClientsSelection();" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <!-- Checkbox pour broadcast (caché) -->
                                     <input type="checkbox" class="customer-checkbox broadcast-cb" value="<?= htmlspecialchars($customer['phone'] ?? '') ?>" data-customer-id="<?= $customer['id'] ?>" onchange="updateSelectedCount()" style="width: 16px; height: 16px; display: none;">
                                 </td>
                                 <td style="padding: 10px 15px;">
@@ -3672,6 +3691,108 @@ async function performDeleteOrders(checked, count) {
             location.reload();
         } else {
             alert("❌ Erreur: " + (data.error || 'Impossible de supprimer les commandes'));
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
+        }
+    })
+    .catch(error => {
+        alert("❌ Erreur de connexion: " + error.message);
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
+    });
+}
+
+// ========== SÉLECTION MULTIPLE CLIENTS ==========
+
+function toggleAllClients(checkbox) {
+    const clientCheckboxes = document.querySelectorAll('.client-checkbox');
+    clientCheckboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    updateClientsSelection();
+}
+
+function updateClientsSelection() {
+    const checked = document.querySelectorAll('.client-checkbox:checked');
+    const count = checked.length;
+    const deleteBtn = document.getElementById('deleteSelectedClients');
+    const countSpan = document.getElementById('selectedClientsCount');
+    const selectAllCheckbox = document.getElementById('selectAllClients');
+
+    // Vérifier que les éléments existent
+    if (!deleteBtn || !countSpan || !selectAllCheckbox) {
+        return;
+    }
+
+    if (count > 0) {
+        deleteBtn.style.display = 'inline-block';
+        countSpan.textContent = count;
+    } else {
+        deleteBtn.style.display = 'none';
+    }
+
+    // Mettre à jour "tout sélectionner"
+    const total = document.querySelectorAll('.client-checkbox').length;
+    selectAllCheckbox.checked = (count === total && total > 0);
+}
+
+function deleteSelectedClients() {
+    const checked = document.querySelectorAll('.client-checkbox:checked');
+    const count = checked.length;
+
+    if (count === 0) return;
+
+    // 🔒 ÉTAPE 1: Demander le PIN admin via modal
+    showPinModalForDeletion(() => {
+        // Cette fonction sera appelée après validation du PIN
+        performDeleteClients(checked, count);
+    });
+}
+
+async function performDeleteClients(checked, count) {
+    // 🔒 ÉTAPE 2: Double confirmation
+    const confirmation = confirm(
+        "⚠️ ATTENTION: Action irréversible!\n\n" +
+        "Vous êtes sur le point de SUPPRIMER DÉFINITIVEMENT " + count + " client(s).\n\n" +
+        "Cette action est IRRÉVERSIBLE et les données seront perdues à jamais.\n\n" +
+        "Voulez-vous vraiment continuer?"
+    );
+
+    if (!confirmation) return;
+
+    const doubleCheck = confirm(
+        "Dernière confirmation:\n\n" +
+        "Êtes-vous ABSOLUMENT SÛR de vouloir supprimer " + count + " client(s)?"
+    );
+
+    if (!doubleCheck) return;
+
+    // Récupérer les IDs
+    const customerIds = Array.from(checked).map(cb => cb.dataset.customerId);
+
+    // Désactiver le bouton pendant la suppression
+    const deleteBtn = document.getElementById('deleteSelectedClients');
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
+
+    // Envoyer la requête de suppression
+    fetch('api/customers.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            action: 'delete_multiple',
+            customer_ids: customerIds
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("✅ " + count + " client(s) supprimé(s) avec succès");
+            location.reload();
+        } else {
+            alert("❌ Erreur: " + (data.error || 'Impossible de supprimer les clients'));
             deleteBtn.disabled = false;
             deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
         }
