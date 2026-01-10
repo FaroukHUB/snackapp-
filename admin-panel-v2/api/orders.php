@@ -620,13 +620,13 @@ function deleteMultipleOrders(bool $useMySQL) {
                 }
                 
                 // Supprimer la commande de la base de données
-                Database::execute(
+                Database::query(
                     "DELETE FROM orders WHERE id = ? AND restaurant_id = ?",
                     [(int)$orderId, SNACK_RESTAURANT_ID]
                 );
-                
+
                 // Supprimer les items associés
-                Database::execute(
+                Database::query(
                     "DELETE FROM order_items WHERE order_id = ?",
                     [(int)$orderId]
                 );
