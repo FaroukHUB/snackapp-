@@ -1545,6 +1545,7 @@ if (isset($_GET['export'])) {
             <div style="margin-bottom: 15px;">
                 <input type="text" id="customerSearch" placeholder="🔍 Rechercher par nom, téléphone ou code fidélité..."
                        onkeyup="searchCustomers()"
+                       autocomplete="off"
                        style="width: 100%; padding: 12px 16px; background: #1e293b; border: 1px solid #374151; border-radius: 10px; color: white; font-size: 14px;">
             </div>
 
