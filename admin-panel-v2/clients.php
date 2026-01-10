@@ -326,6 +326,22 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Spacing utilities */
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        .hidden { display: none; }
+        .w-full { width: 100%; }
+
+        /* Additional colors */
+        .bg-gray-800 { background: #1f2937; }
+        .bg-gray-800\/50 { background: rgba(31, 41, 59, 0.5); }
+        .border-gray-700 { border-color: #374151; }
+        .bg-green-500 { background: #10b981; }
+        .text-green-400 { color: #34d399; }
+        .bg-green-500\/20 { background: rgba(16, 185, 129, 0.2); }
+
         /* Responsive */
         @media (max-width: 768px) {
             body {
