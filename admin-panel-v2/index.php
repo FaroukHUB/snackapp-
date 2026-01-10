@@ -31,7 +31,16 @@ if ($useMySQL) {
 
     // Toujours charger les settings depuis restaurant.json (source de vérité)
     $restaurantSettings = json_decode(file_get_contents(__DIR__ . '/../config/restaurant.json'), true) ?? [];
-    $orders = OrderRepository::getActiveOrders(SNACK_RESTAURANT_ID, 50);
+
+    // ⚡ PAGINATION: 10 commandes par page
+    $ordersPage = isset($_GET['orders_page']) ? (int)$_GET['orders_page'] : 1;
+    $ordersPerPage = 10;
+    $allOrders = OrderRepository::getActiveOrders(SNACK_RESTAURANT_ID, 9999);
+    $totalOrders = count($allOrders);
+    $totalOrdersPages = ceil($totalOrders / $ordersPerPage);
+    $ordersOffset = ($ordersPage - 1) * $ordersPerPage;
+    $orders = array_slice($allOrders, $ordersOffset, $ordersPerPage);
+
     $archivedOrders = OrderRepository::getArchivedOrders(SNACK_RESTAURANT_ID, 500);
     $customers = CustomerRepository::getAll(SNACK_RESTAURANT_ID);
     $stats = OrderRepository::getTodayStats(SNACK_RESTAURANT_ID);
@@ -892,7 +901,7 @@ if (isset($_GET['export'])) {
         <div id="section-orders" class="section active">
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2><i class="fas fa-receipt" style="color: <?php echo $primaryColor; ?>;"></i> Commandes (<?php echo count($orders); ?>)</h2>
+                <h2><i class="fas fa-receipt" style="color: <?php echo $primaryColor; ?>;"></i> Commandes (<?php echo $totalOrders; ?>)</h2>
                 <?php if (!empty($orders)): ?>
                 <form method="POST" style="margin: 0;">
                     <input type="hidden" name="action" value="clear_orders">
@@ -1033,6 +1042,34 @@ if (isset($_GET['export'])) {
                 </div>
                 <?php endforeach; ?>
                 </div>
+
+                <!-- ⚡ PAGINATION COMMANDES -->
+                <?php if ($totalOrdersPages > 1): ?>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 30px; padding: 20px;">
+                    <?php if ($ordersPage > 1): ?>
+                        <a href="?orders_page=<?php echo $ordersPage - 1; ?>#orders"
+                           style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: rgba(255,255,255,0.1); color: white; text-decoration: none; border-radius: 10px; font-weight: 600; transition: all 0.3s;"
+                           onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                           onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                            <i class="fas fa-chevron-left"></i> Précédent
+                        </a>
+                    <?php endif; ?>
+
+                    <span style="color: white; font-weight: 600; padding: 0 10px;">
+                        Page <?php echo $ordersPage; ?> / <?php echo $totalOrdersPages; ?>
+                        <span style="color: #9ca3af; font-size: 13px; margin-left: 5px;">(<?php echo $totalOrders; ?> commandes)</span>
+                    </span>
+
+                    <?php if ($ordersPage < $totalOrdersPages): ?>
+                        <a href="?orders_page=<?php echo $ordersPage + 1; ?>#orders"
+                           style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: rgba(255,255,255,0.1); color: white; text-decoration: none; border-radius: 10px; font-weight: 600; transition: all 0.3s;"
+                           onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+                           onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                            Suivant <i class="fas fa-chevron-right"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
             <?php endif; ?>
 
             <!-- MODAL DÉTAILS COMMANDE -->
