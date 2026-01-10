@@ -139,6 +139,9 @@ class OrderRepository {
             'status' => 'pending',
             'notes' => $data['notes'] ?? null,
             'pickup_time' => $data['pickup_time'] ?? null,
+            // ⚡ NOUVEAU: Sauvegarder l'adresse de livraison
+            'delivery_address' => $data['delivery_address'] ?? null,
+            'delivery_instructions' => $data['delivery_instructions'] ?? null,
             'loyalty_reward_id' => $loyaltyRewardId,
             'loyalty_points_used' => $finalLoyaltyPointsUsed,
             'loyalty_redeemed' => 0

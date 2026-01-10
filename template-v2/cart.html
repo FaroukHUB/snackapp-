@@ -2358,8 +2358,25 @@
                 // Pas de réduction avec points - total normal
                 const totalAmount = savedSubtotal - savedDiscount;
 
-                // Build notes based on mode
+                // Prepare payment/change info for delivery (AVANT notes)
+                let paymentInfo = {};
+                if (this.mode === 'delivery') {
+                    const changeOption = this.changeOption || 'exact';
+                    if (changeOption === 'exact') {
+                        paymentInfo.has_exact_change = true;
+                    } else if (changeOption === 'change') {
+                        const changeForAmount = parseFloat(document.getElementById('changeForAmount').value);
+                        if (changeForAmount > 0) {
+                            paymentInfo.change_for = changeForAmount;
+                        }
+                    }
+                }
+
+                // Build notes based on mode + prepare delivery address
                 let modeNotes = '';
+                let deliveryAddress = null;
+                let deliveryInstructions = null;
+
                 if (this.mode === 'dinein') {
                     const tableNumber = document.getElementById('tableNumber').value.trim();
                     const salleName = this.room === 'famille' ? 'Salle Famille' : 'Salle Femme';
@@ -2383,28 +2400,31 @@
                             fullAddress += ` ${postalCode}`;
                         }
 
+                        // ⚡ NOUVEAU: Sauvegarder l'adresse dans un champ dédié
+                        deliveryAddress = fullAddress;
                         modeNotes = `🚗 LIVRAISON\nAdresse: ${fullAddress}`;
                     } else if (deliveryType === 'riad-city') {
                         const bat = document.getElementById('riadCityBat').value;
                         const appt = document.getElementById('riadCityAppt').value.trim();
-                        modeNotes = `🚗 LIVRAISON: Riad City Bât ${bat}${appt ? ' - Appt ' + appt : ''}`;
+                        const fullAddress = `Riad City Bât ${bat}${appt ? ' - Appt ' + appt : ''}`;
+
+                        // ⚡ NOUVEAU: Sauvegarder l'adresse Riad City
+                        deliveryAddress = fullAddress;
+                        modeNotes = `🚗 LIVRAISON: ${fullAddress}`;
                     } else if (deliveryType === 'riad-prestige') {
                         const villa = document.getElementById('riadPrestigeVilla').value;
-                        modeNotes = `🚗 LIVRAISON: Riad Prestige Villa ${villa}`;
-                    }
-                }
+                        const fullAddress = `Riad Prestige Villa ${villa}`;
 
-                // Prepare payment/change info for delivery
-                let paymentInfo = {};
-                if (this.mode === 'delivery') {
-                    const changeOption = this.changeOption || 'exact';
-                    if (changeOption === 'exact') {
-                        paymentInfo.has_exact_change = true;
-                    } else if (changeOption === 'change') {
-                        const changeForAmount = parseFloat(document.getElementById('changeForAmount').value);
-                        if (changeForAmount > 0) {
-                            paymentInfo.change_for = changeForAmount;
-                        }
+                        // ⚡ NOUVEAU: Sauvegarder l'adresse Riad Prestige
+                        deliveryAddress = fullAddress;
+                        modeNotes = `🚗 LIVRAISON: ${fullAddress}`;
+                    }
+
+                    // ⚡ NOUVEAU: Instructions de livraison depuis les options de monnaie
+                    if (paymentInfo.change_for) {
+                        deliveryInstructions = `Monnaie pour ${paymentInfo.change_for} DA`;
+                    } else if (paymentInfo.has_exact_change) {
+                        deliveryInstructions = 'Client a la monnaie exacte';
                     }
                 }
 
@@ -2419,6 +2439,9 @@
                     loyalty_reward_id: this.selectedReward || null,
                     loyalty_customer_id: this.loyaltyCustomer?.id || null,
                     notes: [modeNotes, note].filter(Boolean).join(' | '),
+                    // ⚡ NOUVEAU: Envoyer l'adresse de livraison séparément
+                    delivery_address: deliveryAddress,
+                    delivery_instructions: deliveryInstructions,
                     ...paymentInfo
                 };
 
