@@ -542,12 +542,35 @@ function getStats(bool $useMySQL) {
 
 function deleteMultipleOrders(bool $useMySQL) {
     global $requestData;
-    
+
+    // 🔒 SÉCURITÉ: Vérifier le PIN admin avant suppression
+    if (empty($_SESSION['pin_unlocked']) || empty($_SESSION['pin_unlocked_at'])) {
+        error_log('[DELETE] ⛔ Tentative sans PIN - IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        jsonError('PIN requis pour supprimer des commandes', 403);
+    }
+
+    // Vérifier que la session PIN n'a pas expiré (1h)
+    $elapsed = time() - $_SESSION['pin_unlocked_at'];
+    if ($elapsed >= 3600) {
+        error_log('[DELETE] ⛔ Session PIN expirée');
+        unset($_SESSION['pin_unlocked'], $_SESSION['pin_unlocked_at']);
+        jsonError('Session PIN expirée. Veuillez vous réauthentifier.', 403);
+    }
+
+    // Vérifier que $requestData existe
+    if (!is_array($requestData)) {
+        error_log('[DELETE] Erreur: requestData n\'est pas un array: ' . var_export($requestData, true));
+        jsonError('Données de requête invalides');
+    }
+
     $orderIds = $requestData['order_ids'] ?? null;
-    
+
     if (!$orderIds || !is_array($orderIds) || empty($orderIds)) {
+        error_log('[DELETE] Erreur: orderIds invalide: ' . var_export($orderIds, true));
         jsonError('Aucune commande sélectionnée');
     }
+
+    error_log('[DELETE] ✅ Suppression autorisée de ' . count($orderIds) . ' commande(s) - IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
     
     if ($useMySQL) {
         $deletedCount = 0;

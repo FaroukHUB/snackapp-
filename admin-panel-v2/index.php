@@ -3581,12 +3581,44 @@ function updateOrdersSelection() {
     selectAllCheckbox.checked = (count === total && total > 0);
 }
 
-function deleteSelectedOrders() {
+async function deleteSelectedOrders() {
     const checked = document.querySelectorAll('.order-checkbox:checked');
     const count = checked.length;
 
     if (count === 0) return;
 
+    // 🔒 ÉTAPE 1: Demander le PIN admin
+    const pin = prompt(
+        "🔒 SÉCURITÉ: PIN Admin requis\n\n" +
+        "Cette action nécessite le code PIN administrateur.\n" +
+        "Après 3 tentatives incorrectes, vous serez bloqué pendant 1 heure.\n\n" +
+        "Entrez le PIN:"
+    );
+
+    if (!pin) return; // Annulé
+
+    // Vérifier le PIN
+    try {
+        const pinResponse = await fetch('api/admin-pin.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'verify', pin: pin })
+        });
+
+        const pinData = await pinResponse.json();
+
+        if (!pinData.success) {
+            alert("❌ " + (pinData.error || 'PIN incorrect'));
+            return;
+        }
+
+        // PIN correct, continuer
+    } catch (error) {
+        alert("❌ Erreur de vérification du PIN: " + error.message);
+        return;
+    }
+
+    // 🔒 ÉTAPE 2: Double confirmation
     const confirmation = confirm(
         "⚠️ ATTENTION: Action irréversible!\n\n" +
         "Vous êtes sur le point de SUPPRIMER DÉFINITIVEMENT " + count + " commande(s).\n\n" +
@@ -3596,7 +3628,6 @@ function deleteSelectedOrders() {
 
     if (!confirmation) return;
 
-    // Double confirmation pour plus de sécurité
     const doubleCheck = confirm(
         "Dernière confirmation:\n\n" +
         "Êtes-vous ABSOLUMENT SÛR de vouloir supprimer " + count + " commande(s)?"

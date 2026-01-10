@@ -96,11 +96,11 @@ switch ($action) {
 
             error_log('[PIN] ❌ PIN incorrect - tentative ' . $_SESSION['pin_attempts'] . '/3 - IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
 
-            // Bloquer après 3 tentatives (5 minutes)
+            // Bloquer après 3 tentatives (1 heure)
             if ($_SESSION['pin_attempts'] >= 3) {
-                $_SESSION['pin_blocked_until'] = time() + 300; // 5 minutes
-                error_log('[PIN] ⛔ BLOQUÉ pour 5 minutes après 3 tentatives échouées');
-                jsonError('Trop de tentatives. Réessayez dans 5 minutes.', 429);
+                $_SESSION['pin_blocked_until'] = time() + 3600; // 1 heure
+                error_log('[PIN] ⛔ BLOQUÉ pour 1 heure après 3 tentatives échouées');
+                jsonError('Trop de tentatives. Réessayez dans 1 heure.', 429);
             }
 
             $remaining = 3 - $_SESSION['pin_attempts'];
