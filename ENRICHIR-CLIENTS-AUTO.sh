@@ -2,7 +2,16 @@
 # Script d'enrichissement automatique des profils clients
 # Analyse l'historique des commandes et enrichit les profils
 
-cd ~/Marvelous.mon-agenceweb.fr/admin-panel-v2
+# Déterminer le répertoire du script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/admin-panel-v2"
+
+# Vérifier que nous sommes dans le bon répertoire
+if [ ! -f "enrich-customers-auto.php" ]; then
+    echo "❌ Erreur: Impossible de trouver enrich-customers-auto.php"
+    echo "   Vérifiez que le script est exécuté depuis la racine du projet"
+    exit 1
+fi
 
 echo "============================================"
 echo "🔄 ENRICHISSEMENT AUTOMATIQUE CLIENTS"
@@ -23,13 +32,30 @@ fi
 
 # Exécuter le script PHP
 php enrich-customers-auto.php
+EXIT_CODE=$?
 
 echo ""
-echo "============================================"
-echo "✅ Enrichissement terminé!"
-echo "============================================"
-echo ""
-echo "Prochaines étapes:"
-echo "  → Ouvrez clients.php pour voir les adresses"
-echo "  → Les produits favoris s'affichent automatiquement"
-echo ""
+
+if [ $EXIT_CODE -eq 0 ]; then
+    echo "============================================"
+    echo "✅ Enrichissement terminé!"
+    echo "============================================"
+    echo ""
+    echo "Prochaines étapes:"
+    echo "  → Ouvrez clients.php pour voir les adresses"
+    echo "  → Les produits favoris s'affichent automatiquement"
+    echo ""
+else
+    echo "============================================"
+    echo "❌ Erreur lors de l'enrichissement"
+    echo "============================================"
+    echo ""
+    echo "Code de sortie: $EXIT_CODE"
+    echo ""
+    echo "Vérifiez:"
+    echo "  → La connexion MySQL est-elle active?"
+    echo "  → Le fichier config.php est-il correct?"
+    echo "  → Les permissions sont-elles correctes?"
+    echo ""
+    exit $EXIT_CODE
+fi

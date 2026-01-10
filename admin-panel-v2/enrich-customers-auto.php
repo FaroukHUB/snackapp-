@@ -9,8 +9,7 @@
  * Les données manuelles (tags, notes admin, allergies) sont préservées
  */
 
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/bootstrap.php';
 
 // Activer affichage erreurs pour debug
 error_reporting(E_ALL);
@@ -24,11 +23,19 @@ echo "============================================\n\n";
 $useMySQL = !SNACK_USE_JSON && !defined('SNACK_DB_ERROR');
 
 if (!$useMySQL) {
-    die("❌ Ce script nécessite MySQL. Mode JSON non supporté.\n");
+    echo "❌ Ce script nécessite MySQL. Mode JSON non supporté.\n";
+    exit(1);
 }
 
 // Charger Database class
 require_once __DIR__ . '/api/database.php';
+
+// Vérifier que la classe Database est disponible
+if (!class_exists('Database')) {
+    echo "❌ Erreur: Classe Database non disponible.\n";
+    echo "   Vérifiez que le fichier api/database.php existe.\n";
+    exit(4);
+}
 
 echo "📊 Analyse des commandes...\n\n";
 
@@ -36,7 +43,8 @@ echo "📊 Analyse des commandes...\n\n";
 $customers = Database::fetchAll("SELECT id, name, phone FROM customers WHERE restaurant_id = ?", [SNACK_RESTAURANT_ID]);
 
 if (empty($customers)) {
-    die("❌ Aucun client trouvé.\n");
+    echo "❌ Aucun client trouvé.\n";
+    exit(2);
 }
 
 echo "✅ " . count($customers) . " clients trouvés\n\n";
@@ -134,3 +142,6 @@ echo "Erreurs: {$stats['errors']}\n";
 echo "\n✅ Enrichissement terminé!\n";
 echo "\n💡 Les produits favoris sont calculés automatiquement à l'affichage.\n";
 echo "   Aucune action nécessaire pour cette donnée.\n\n";
+
+// Retourner code de succès (0) ou échec (3) selon les erreurs
+exit($stats['errors'] > 0 ? 3 : 0);
