@@ -3598,6 +3598,11 @@ function updateOrdersSelection() {
     const countSpan = document.getElementById('selectedOrdersCount');
     const selectAllCheckbox = document.getElementById('selectAllOrders');
 
+    // Vérifier que les éléments existent (peut être sur une autre page)
+    if (!deleteBtn || !countSpan || !selectAllCheckbox) {
+        return;
+    }
+
     if (count > 0) {
         deleteBtn.style.display = 'inline-block';
         countSpan.textContent = count;
