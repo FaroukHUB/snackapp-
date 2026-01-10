@@ -7,6 +7,7 @@ class OrderNotificationSystem {
     constructor() {
         this.isPlaying = false;
         this.lastOrderId = null;
+        this.lastOrderCount = 0; // 🔧 Tracker le nombre de commandes
         this.checkInterval = null;
         this.audioEnabled = false;
         this.activationShown = localStorage.getItem('audio_activated') === 'true';
@@ -103,18 +104,35 @@ class OrderNotificationSystem {
 
             const data = await res.json();
 
-            if (!data.success || !data.orders || !data.orders.length) return;
-
-            const latest = data.orders[0];
-
-            if (this.lastOrderId === null) {
-                this.lastOrderId = latest.id;
+            if (!data.success || !data.orders || !data.orders.length) {
+                // Aucune commande active
+                this.lastOrderCount = 0;
+                this.lastOrderId = null;
                 return;
             }
 
-            if (latest.id !== this.lastOrderId) {
+            const latest = data.orders[0];
+            const currentCount = data.pagination?.total || data.orders.length;
+
+            // 🔧 PREMIÈRE VISITE: Initialiser sans notifier
+            if (this.lastOrderId === null) {
                 this.lastOrderId = latest.id;
+                this.lastOrderCount = currentCount;
+                console.log('[Notifications] Initialisé: ' + currentCount + ' commandes');
+                return;
+            }
+
+            // 🔧 DÉTECTION: Nouvelle commande UNIQUEMENT si le count augmente ET l'ID est différent
+            if (currentCount > this.lastOrderCount && latest.id !== this.lastOrderId) {
+                console.log('[Notifications] ✅ Nouvelle commande détectée: ' + latest.id);
+                this.lastOrderId = latest.id;
+                this.lastOrderCount = currentCount;
                 this.onNewOrder(latest);
+            } else if (currentCount !== this.lastOrderCount) {
+                // Le count a changé (archive/suppression) mais pas de nouvelle commande
+                console.log('[Notifications] Count changé: ' + this.lastOrderCount + ' → ' + currentCount + ' (pas de notification)');
+                this.lastOrderId = latest.id;
+                this.lastOrderCount = currentCount;
             }
         } catch (e) {
             if (e.name !== 'AbortError') {
