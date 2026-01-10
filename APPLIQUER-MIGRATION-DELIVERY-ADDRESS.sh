@@ -10,27 +10,32 @@ echo "============================================"
 echo ""
 
 # 1. Lire la config database
-CONFIG_FILE="database/config.php"
-if [ ! -f "$CONFIG_FILE" ]; then
-    echo "❌ Erreur: $CONFIG_FILE introuvable"
+echo "🔍 Lecture configuration database..."
+DB_CONFIG=$(php -r "
+    \$config = require 'database/config.php';
+    echo json_encode(\$config['database']);
+")
+
+DB_HOST=$(echo $DB_CONFIG | php -r "echo json_decode(file_get_contents('php://stdin'), true)['host'];")
+DB_NAME=$(echo $DB_CONFIG | php -r "echo json_decode(file_get_contents('php://stdin'), true)['dbname'];")
+DB_USER=$(echo $DB_CONFIG | php -r "echo json_decode(file_get_contents('php://stdin'), true)['username'];")
+DB_PASS=$(echo $DB_CONFIG | php -r "echo json_decode(file_get_contents('php://stdin'), true)['password'];")
+
+if [ -z "$DB_HOST" ] || [ -z "$DB_NAME" ]; then
+    echo "❌ Impossible de lire la configuration database"
     exit 1
 fi
 
-DB_HOST=$(php -r "include '$CONFIG_FILE'; echo \$config['database']['host'];")
-DB_NAME=$(php -r "include '$CONFIG_FILE'; echo \$config['database']['dbname'];")
-DB_USER=$(php -r "include '$CONFIG_FILE'; echo \$config['database']['username'];")
-DB_PASS=$(php -r "include '$CONFIG_FILE'; echo \$config['database']['password'];")
-
-echo "📊 Configuration:"
-echo "  - Host: $DB_HOST"
-echo "  - Database: $DB_NAME"
-echo "  - User: $DB_USER"
+echo "✅ Configuration chargée"
+echo "   Host: $DB_HOST"
+echo "   Database: $DB_NAME"
+echo "   User: $DB_USER"
 echo ""
 
 # 2. Backup de la table orders
 BACKUP_FILE="backup_orders_$(date +%Y%m%d_%H%M%S).sql"
 echo "💾 Backup de la table orders..."
-MYSQL_PWD="$DB_PASS" mysqldump -h"$DB_HOST" -u"$DB_USER" "$DB_NAME" orders > "$BACKUP_FILE"
+MYSQL_PWD="$DB_PASS" mysqldump -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" orders > "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
     echo "✅ Backup créé: $BACKUP_FILE"
@@ -50,7 +55,7 @@ fi
 
 # 3. Appliquer la migration
 echo "🔧 Application de la migration..."
-MYSQL_PWD="$DB_PASS" mysql -h"$DB_HOST" -u"$DB_USER" "$DB_NAME" < database/migrations/2026-01-10-add-delivery-address.sql
+MYSQL_PWD="$DB_PASS" mysql -h "$DB_HOST" -u "$DB_USER" "$DB_NAME" < database/migrations/2026-01-10-add-delivery-address.sql
 
 if [ $? -eq 0 ]; then
     echo "✅ Migration appliquée avec succès!"
@@ -58,7 +63,7 @@ else
     echo "❌ Erreur lors de la migration"
     echo ""
     echo "Pour restaurer le backup:"
-    echo "  MYSQL_PWD=\"$DB_PASS\" mysql -h\"$DB_HOST\" -u\"$DB_USER\" \"$DB_NAME\" < $BACKUP_FILE"
+    echo "  MYSQL_PWD=\"$DB_PASS\" mysql -h \"$DB_HOST\" -u \"$DB_USER\" \"$DB_NAME\" < $BACKUP_FILE"
     exit 1
 fi
 
