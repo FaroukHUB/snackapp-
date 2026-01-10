@@ -121,10 +121,22 @@ foreach ($images as $imagePath) {
             $newWidth = $maxWidth;
             $newHeight = (int)($sourceHeight * $ratio);
 
-            $resizedImage = imagescale($sourceImage, $newWidth, $newHeight, IMG_BICUBIC);
+            // Utiliser imagecopyresampled au lieu de imagescale (plus compatible)
+            $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+            // Préserver la transparence pour PNG
+            if ($mime === 'image/png') {
+                imagealphablending($resizedImage, false);
+                imagesavealpha($resizedImage, true);
+                $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+                imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+            }
+
+            $success = imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $sourceWidth, $sourceHeight);
             imagedestroy($sourceImage);
 
-            if ($resizedImage === false) {
+            if (!$success) {
+                imagedestroy($resizedImage);
                 throw new Exception('Échec redimensionnement');
             }
 
@@ -146,12 +158,22 @@ foreach ($images as $imagePath) {
 
         // Taille après
         $sizeAfter = filesize($webpPath);
-        $stats['size_after'] += $sizeAfter;
 
         // Calculer la réduction
         $reduction = round((($sizeBefore - $sizeAfter) / $sizeBefore) * 100, 1);
         $sizeBeforeKB = round($sizeBefore / 1024, 1);
         $sizeAfterKB = round($sizeAfter / 1024, 1);
+
+        // ⚠️ Si le WebP est plus gros, garder l'original
+        if ($sizeAfter >= $sizeBefore) {
+            unlink($webpPath); // Supprimer le WebP trop gros
+            echo " ⏭️  {$sizeBeforeKB} KB → {$sizeAfterKB} KB (+{$reduction}%) - GARDÉ ORIGINAL\n";
+            $stats['skipped']++;
+            $stats['size_after'] += $sizeBefore;
+            continue;
+        }
+
+        $stats['size_after'] += $sizeAfter;
 
         echo " ✅ {$sizeBeforeKB} KB → {$sizeAfterKB} KB (-{$reduction}%)\n";
 

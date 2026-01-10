@@ -73,10 +73,22 @@ function convertToOptimizedWebP(string $sourcePath, int $quality = 85, int $maxW
         $newWidth = $maxWidth;
         $newHeight = (int)($sourceHeight * $ratio);
 
-        $resizedImage = imagescale($sourceImage, $newWidth, $newHeight, IMG_BICUBIC);
+        // Utiliser imagecopyresampled (plus compatible que imagescale)
+        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+
+        // Préserver la transparence pour PNG/WebP
+        if ($mime === 'image/png' || $mime === 'image/webp') {
+            imagealphablending($resizedImage, false);
+            imagesavealpha($resizedImage, true);
+            $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+        }
+
+        $success = imagecopyresampled($resizedImage, $sourceImage, 0, 0, 0, 0, $newWidth, $newHeight, $sourceWidth, $sourceHeight);
         imagedestroy($sourceImage);
 
-        if ($resizedImage === false) {
+        if (!$success) {
+            imagedestroy($resizedImage);
             throw new Exception('Échec redimensionnement image');
         }
 
