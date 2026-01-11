@@ -1211,6 +1211,51 @@ if (isset($_GET['export'])) {
                     </div>
                 `;
 
+                // Salle et Table pour "Sur place"
+                if (order.notes && order.notes.includes('SUR PLACE')) {
+                    const salleMatch = order.notes.match(/Salle (Famille|Femme)/);
+                    const tableMatch = order.notes.match(/Table ([A-Z0-9]+)/i);
+
+                    html += `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                            <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #ec4899;">
+                                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Salle</div>
+                                <div style="font-size: 14px; color: white; font-weight: 600;">
+                                    ${salleMatch && salleMatch[1] === 'Famille' ? '<i class="fas fa-users" style="color: #ec4899;"></i> Famille' : '<i class="fas fa-female" style="color: #ec4899;"></i> Femme'}
+                                </div>
+                            </div>
+                            <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #8b5cf6;">
+                                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Table</div>
+                                <div style="font-size: 14px; color: white; font-weight: 600;">
+                                    <i class="fas fa-chair" style="color: #8b5cf6;"></i> ${tableMatch ? tableMatch[1] : 'N/A'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Appoint/Monnaie pour paiement Espèces (sur place ET livraison)
+                if ((order.notes && (order.notes.includes('SUR PLACE') || order.notes.includes('LIVRAISON'))) && order.delivery_instructions) {
+                    const hasExactChange = order.delivery_instructions.includes('monnaie exacte');
+                    const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) DA/);
+
+                    html += `
+                        <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #10b981; margin-bottom: 20px;">
+                            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">
+                                <i class="fas fa-coins"></i> Paiement et monnaie
+                            </div>
+                            <div style="font-size: 14px; color: white; font-weight: 600;">
+                                ${hasExactChange ?
+                                    '<i class="fas fa-check-circle" style="color: #10b981;"></i> J\'ai l\'appoint <span style="color: #9ca3af; font-size: 12px;">(Montant exact)</span>' :
+                                    `<i class="fas fa-money-bill-wave" style="color: #fbbf24;"></i> Prévoir la monnaie <span style="color: #fbbf24; font-size: 13px; font-weight: 700;">${changeMatch ? changeMatch[1] + ' DA' : ''}</span>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += `
+
                 // Adresse de livraison si applicable
                 if (order.delivery_address) {
                     html += `
