@@ -240,11 +240,35 @@
                     {
                         "id": "salade-composee",
                         "name": "Salade Composée",
-                        "description": "Salade fraîche du jour.",
+                        "description": "Choisissez votre salade fraîche.",
                         "price": 400,
                         "image": "",
                         "status": "available",
-                        "priceSolo": 0
+                        "priceSolo": 0,
+                        "hasBeverageOptions": true,
+                        "beverageOptions": [
+                            {
+                                "id": "salade-simple",
+                                "name": "Salade Simple",
+                                "price": 400
+                            },
+                            {
+                                "id": "salade-poulet",
+                                "name": "Salade Poulet",
+                                "price": 500
+                            },
+                            {
+                                "id": "salade-thon",
+                                "name": "Salade Thon",
+                                "price": 500
+                            },
+                            {
+                                "id": "salade-complete",
+                                "name": "Salade Complète",
+                                "price": 600
+                            }
+                        ],
+                        "pricePrefix": "À partir de"
                     },
                     {
                         "id": "sandwich-thon",
