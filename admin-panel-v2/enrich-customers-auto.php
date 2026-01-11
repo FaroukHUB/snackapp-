@@ -92,7 +92,7 @@ foreach ($customers as $customer) {
                         'type' => count($uniqueAddresses) === 0 ? 'home' : 'work',
                         'label' => count($uniqueAddresses) === 0 ? 'Maison' : 'Bureau',
                         'address' => $addr,
-                        'notes' => $order['delivery_instructions'] ?? '',
+                        'notes' => '', // Ne pas inclure les instructions de monnaie
                         'is_default' => count($addresses) === 0 && count($uniqueAddresses) === 0
                     ];
 
