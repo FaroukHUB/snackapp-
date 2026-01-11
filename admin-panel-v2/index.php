@@ -1055,6 +1055,18 @@ if (isset($_GET['export'])) {
                         <?php endif; ?>
                     </div>
 
+                    <!-- Bouton imprimer (visible si imprimante connectée) -->
+                    <div class="print-button-container" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 2px solid #374151;">
+                        <button class="btn-print-order"
+                                data-order-id="<?php echo htmlspecialchars($order['id'], ENT_QUOTES); ?>"
+                                onclick="event.stopPropagation(); printOrder('<?php echo htmlspecialchars($order['id'], ENT_QUOTES); ?>');"
+                                style="width: 100%; padding: 10px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);"
+                                onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.5)'"
+                                onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)'">
+                            <i class="fas fa-print"></i> Imprimer le ticket
+                        </button>
+                    </div>
+
                     <!-- Bouton détails -->
                     <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #374151;">
                         <div style="text-align: center; font-size: 12px; color: #10b981; font-weight: 700;">
@@ -2095,6 +2107,36 @@ if (isset($_GET['export'])) {
                 </div>
             </div>
             <?php endif; ?>
+
+            <!-- Gestion de l'Imprimante -->
+            <div class="card" style="border-left: 4px solid #10b981; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-print" style="color: #10b981;"></i> Imprimante de Tickets</h3>
+                <p style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">
+                    Connectez une imprimante thermique Bluetooth (ESC/POS) pour imprimer les tickets de commandes
+                </p>
+
+                <div id="printer-status" style="padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-circle" id="printer-status-icon" style="color: #dc2626; font-size: 10px;"></i>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: 4px;" id="printer-status-text">Aucune imprimante connectée</div>
+                            <div style="font-size: 11px; color: #9ca3af;" id="printer-name"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button id="btn-connect-printer" class="btn" style="background: #10b981; color: white;">
+                        <i class="fas fa-bluetooth"></i> Connecter une imprimante
+                    </button>
+                    <button id="btn-disconnect-printer" class="btn" style="background: #dc2626; color: white; display: none;">
+                        <i class="fas fa-times"></i> Déconnecter
+                    </button>
+                    <button id="btn-test-print" class="btn" style="background: #6b7280; color: white; display: none;">
+                        <i class="fas fa-file-invoice"></i> Imprimer un test
+                    </button>
+                </div>
+            </div>
 
             <!-- Horaires -->
             <div class="card" style="border-left: 4px solid #3b82f6;">
@@ -4101,6 +4143,441 @@ async function performDeleteArchives(checked, count) {
         deleteBtn.disabled = false;
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer (' + count + ')';
     });
+}
+
+// ========================================
+// 🖨️ SYSTÈME D'IMPRESSION BLUETOOTH
+// ========================================
+
+// Variables globales pour l'imprimante
+let printerDevice = null;
+let printerCharacteristic = null;
+let isPrinterConnected = false;
+
+// UUID pour imprimantes ESC/POS (Generic Access Profile)
+const PRINTER_SERVICE_UUID = 0x18F0;
+const PRINTER_CHARACTERISTIC_UUID = '00002af1-0000-1000-8000-00805f9b34fb';
+
+// Fonction pour sauvegarder l'état de connexion dans localStorage
+function savePrinterState(deviceName) {
+    localStorage.setItem('printerConnected', 'true');
+    localStorage.setItem('printerName', deviceName);
+}
+
+function clearPrinterState() {
+    localStorage.removeItem('printerConnected');
+    localStorage.removeItem('printerName');
+}
+
+// Fonction pour mettre à jour l'UI du statut de l'imprimante
+function updatePrinterUI(connected, deviceName = '') {
+    const statusIcon = document.getElementById('printer-status-icon');
+    const statusText = document.getElementById('printer-status-text');
+    const printerName = document.getElementById('printer-name');
+    const btnConnect = document.getElementById('btn-connect-printer');
+    const btnDisconnect = document.getElementById('btn-disconnect-printer');
+    const btnTest = document.getElementById('btn-test-print');
+    const printButtons = document.querySelectorAll('.print-button-container');
+
+    if (connected) {
+        statusIcon.style.color = '#10b981';
+        statusText.textContent = 'Imprimante connectée';
+        printerName.textContent = deviceName;
+        btnConnect.style.display = 'none';
+        btnDisconnect.style.display = 'inline-block';
+        btnTest.style.display = 'inline-block';
+
+        // Afficher tous les boutons d'impression sur les cartes
+        printButtons.forEach(btn => btn.style.display = 'block');
+    } else {
+        statusIcon.style.color = '#dc2626';
+        statusText.textContent = 'Aucune imprimante connectée';
+        printerName.textContent = '';
+        btnConnect.style.display = 'inline-block';
+        btnDisconnect.style.display = 'none';
+        btnTest.style.display = 'none';
+
+        // Masquer tous les boutons d'impression
+        printButtons.forEach(btn => btn.style.display = 'none');
+    }
+}
+
+// Connexion à l'imprimante Bluetooth
+async function connectPrinter() {
+    try {
+        // Vérifier si Web Bluetooth est disponible
+        if (!navigator.bluetooth) {
+            alert('❌ Web Bluetooth n\'est pas disponible sur ce navigateur.\n\nUtilisez Chrome ou Edge sur Windows/Mac/Android.');
+            return;
+        }
+
+        // Demander à l'utilisateur de sélectionner une imprimante
+        console.log('Recherche d\'imprimantes Bluetooth...');
+
+        printerDevice = await navigator.bluetooth.requestDevice({
+            filters: [
+                { services: [PRINTER_SERVICE_UUID] }
+            ],
+            optionalServices: [PRINTER_SERVICE_UUID]
+        });
+
+        console.log('Imprimante sélectionnée:', printerDevice.name);
+
+        // Connexion au serveur GATT
+        const server = await printerDevice.gatt.connect();
+        console.log('Connecté au serveur GATT');
+
+        // Récupérer le service d'impression
+        const service = await server.getPrimaryService(PRINTER_SERVICE_UUID);
+        console.log('Service d\'impression récupéré');
+
+        // Récupérer la caractéristique d'écriture
+        printerCharacteristic = await service.getCharacteristic(PRINTER_CHARACTERISTIC_UUID);
+        console.log('Caractéristique d\'impression récupérée');
+
+        // Succès!
+        isPrinterConnected = true;
+        updatePrinterUI(true, printerDevice.name);
+        savePrinterState(printerDevice.name);
+
+        alert('✅ Imprimante connectée avec succès!\n\n' + printerDevice.name);
+
+        // Gérer la déconnexion
+        printerDevice.addEventListener('gattserverdisconnected', onPrinterDisconnected);
+
+    } catch (error) {
+        console.error('Erreur connexion imprimante:', error);
+
+        if (error.name === 'NotFoundError') {
+            alert('❌ Aucune imprimante trouvée.\n\nAssurez-vous que:\n- L\'imprimante est allumée\n- Le Bluetooth est activé\n- L\'imprimante est en mode appairage');
+        } else {
+            alert('❌ Erreur de connexion:\n\n' + error.message);
+        }
+
+        isPrinterConnected = false;
+        updatePrinterUI(false);
+    }
+}
+
+// Déconnexion de l'imprimante
+function disconnectPrinter() {
+    if (printerDevice && printerDevice.gatt.connected) {
+        printerDevice.gatt.disconnect();
+    }
+
+    printerDevice = null;
+    printerCharacteristic = null;
+    isPrinterConnected = false;
+    clearPrinterState();
+    updatePrinterUI(false);
+
+    alert('✅ Imprimante déconnectée');
+}
+
+// Gestion de la déconnexion automatique
+function onPrinterDisconnected() {
+    console.log('Imprimante déconnectée');
+    isPrinterConnected = false;
+    clearPrinterState();
+    updatePrinterUI(false);
+}
+
+// Fonction pour envoyer des données à l'imprimante (ESC/POS)
+async function sendToPrinter(data) {
+    if (!isPrinterConnected || !printerCharacteristic) {
+        throw new Error('Imprimante non connectée');
+    }
+
+    try {
+        // Convertir les données en Uint8Array si nécessaire
+        const buffer = typeof data === 'string' ?
+            new TextEncoder().encode(data) :
+            new Uint8Array(data);
+
+        // Envoyer par chunks de 512 octets (limitation Bluetooth)
+        const chunkSize = 512;
+        for (let i = 0; i < buffer.length; i += chunkSize) {
+            const chunk = buffer.slice(i, i + chunkSize);
+            await printerCharacteristic.writeValue(chunk);
+            // Petit délai pour éviter de saturer la connexion
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Erreur envoi imprimante:', error);
+        throw error;
+    }
+}
+
+// Commandes ESC/POS de base
+const ESC = 0x1B;
+const GS = 0x1D;
+
+const ESC_POS = {
+    INIT: [ESC, 0x40], // Initialiser l'imprimante
+    ALIGN_CENTER: [ESC, 0x61, 0x01], // Centrer
+    ALIGN_LEFT: [ESC, 0x61, 0x00], // Aligner à gauche
+    BOLD_ON: [ESC, 0x45, 0x01], // Gras ON
+    BOLD_OFF: [ESC, 0x45, 0x00], // Gras OFF
+    SIZE_NORMAL: [GS, 0x21, 0x00], // Taille normale
+    SIZE_DOUBLE: [GS, 0x21, 0x11], // Double taille
+    SIZE_LARGE: [GS, 0x21, 0x22], // Grande taille
+    CUT: [GS, 0x56, 0x00], // Couper le papier
+    FEED: [ESC, 0x64, 0x03], // Avancer papier
+    LINE: '--------------------------------\n'
+};
+
+// Fonction pour créer le ticket de commande
+function createTicketData(order) {
+    const data = [];
+    const encoder = new TextEncoder();
+
+    // Fonction helper pour ajouter du texte
+    function addText(text) {
+        data.push(...encoder.encode(text));
+    }
+
+    function addCommand(...commands) {
+        commands.forEach(cmd => {
+            if (Array.isArray(cmd)) {
+                data.push(...cmd);
+            }
+        });
+    }
+
+    // === EN-TÊTE ===
+    addCommand(ESC_POS.INIT);
+    addCommand(ESC_POS.ALIGN_CENTER);
+    addCommand(ESC_POS.SIZE_LARGE, ESC_POS.BOLD_ON);
+    addText('<?php echo addslashes($restaurantName ?? 'Restaurant'); ?>\n');
+    addCommand(ESC_POS.SIZE_NORMAL, ESC_POS.BOLD_OFF);
+    addText('\n');
+
+    // === INFO COMMANDE ===
+    addCommand(ESC_POS.ALIGN_CENTER, ESC_POS.SIZE_DOUBLE, ESC_POS.BOLD_ON);
+    addText('COMMANDE #' + order.id + '\n');
+    addCommand(ESC_POS.SIZE_NORMAL, ESC_POS.BOLD_OFF);
+    addText(new Date(order.created_at).toLocaleString('fr-FR') + '\n');
+    addText('\n');
+    addCommand(ESC_POS.ALIGN_LEFT);
+    addText(ESC_POS.LINE);
+
+    // === CLIENT ===
+    addCommand(ESC_POS.BOLD_ON);
+    addText('CLIENT:\n');
+    addCommand(ESC_POS.BOLD_OFF);
+    addText(order.customer_name + '\n');
+    if (order.customer_phone) {
+        addText('Tel: ' + order.customer_phone + '\n');
+    }
+    addText('\n');
+
+    // === TYPE DE COMMANDE ===
+    addText(ESC_POS.LINE);
+    addCommand(ESC_POS.BOLD_ON);
+    addText('TYPE: ');
+    addCommand(ESC_POS.BOLD_OFF);
+
+    if (order.notes && order.notes.includes('LIVRAISON')) {
+        addText('LIVRAISON\n');
+        if (order.delivery_address) {
+            addText('Adresse: ' + order.delivery_address + '\n');
+        }
+    } else if (order.notes && order.notes.includes('SUR PLACE')) {
+        addText('SUR PLACE\n');
+        // Extraire salle et table des notes
+        const salleMatch = order.notes.match(/Salle (Famille|Femme)/);
+        const tableMatch = order.notes.match(/Table ([A-Z0-9]+)/i);
+        if (salleMatch) {
+            addText('Salle: ' + salleMatch[1] + '\n');
+        }
+        if (tableMatch) {
+            addText('Table: ' + tableMatch[1] + '\n');
+        }
+    } else {
+        addText('A EMPORTER\n');
+    }
+
+    // === ARTICLES ===
+    addText('\n');
+    addText(ESC_POS.LINE);
+    addCommand(ESC_POS.BOLD_ON);
+    addText('ARTICLES:\n');
+    addCommand(ESC_POS.BOLD_OFF);
+    addText('\n');
+
+    order.items.forEach(item => {
+        const qty = item.quantity || 1;
+        const name = item.name;
+        const price = (item.price || 0);
+        const total = qty * price;
+
+        addCommand(ESC_POS.BOLD_ON);
+        addText(qty + 'x ' + name + '\n');
+        addCommand(ESC_POS.BOLD_OFF);
+        addText('   ' + price.toFixed(0) + ' DA x ' + qty + ' = ' + total.toFixed(0) + ' DA\n');
+
+        // Options
+        if (item.options && item.options.length > 0) {
+            item.options.forEach(opt => {
+                addText('   + ' + opt + '\n');
+            });
+        }
+        addText('\n');
+    });
+
+    // === TOTAL ===
+    addText(ESC_POS.LINE);
+    addCommand(ESC_POS.SIZE_DOUBLE, ESC_POS.BOLD_ON);
+    addText('TOTAL: ' + (order.total || 0).toFixed(0) + ' DA\n');
+    addCommand(ESC_POS.SIZE_NORMAL, ESC_POS.BOLD_OFF);
+    addText(ESC_POS.LINE);
+
+    // === PAIEMENT ===
+    const paymentMethod = !order.payment_method || order.payment_method === 'cash' ? 'Espèces' : 'Carte';
+    addText('\n');
+    addCommand(ESC_POS.BOLD_ON);
+    addText('PAIEMENT: ');
+    addCommand(ESC_POS.BOLD_OFF);
+    addText(paymentMethod + '\n');
+
+    // Info appoint/monnaie
+    if (order.delivery_instructions && paymentMethod === 'Espèces') {
+        if (order.delivery_instructions.includes('monnaie exacte')) {
+            addText('Client a l\'appoint\n');
+        } else {
+            const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) DA/);
+            if (changeMatch) {
+                addText('Monnaie pour: ' + changeMatch[1] + ' DA\n');
+            }
+        }
+    }
+
+    // === NOTES ===
+    if (order.notes && !order.notes.includes('LIVRAISON') && !order.notes.includes('SUR PLACE')) {
+        addText('\n');
+        addText(ESC_POS.LINE);
+        addCommand(ESC_POS.BOLD_ON);
+        addText('NOTES:\n');
+        addCommand(ESC_POS.BOLD_OFF);
+        addText(order.notes + '\n');
+    }
+
+    // === FOOTER ===
+    addText('\n');
+    addCommand(ESC_POS.ALIGN_CENTER);
+    addText('Merci de votre visite!\n');
+    addText('\n');
+
+    // Couper le papier
+    addCommand(ESC_POS.FEED);
+    addCommand(ESC_POS.CUT);
+
+    return new Uint8Array(data);
+}
+
+// Fonction pour imprimer une commande
+async function printOrder(orderId) {
+    if (!isPrinterConnected) {
+        alert('❌ Aucune imprimante connectée.\n\nConnectez d\'abord une imprimante dans les Réglages.');
+        return;
+    }
+
+    try {
+        // Récupérer les détails de la commande
+        const order = allOrders.find(o => o.id === orderId);
+        if (!order) {
+            alert('❌ Commande non trouvée');
+            return;
+        }
+
+        console.log('Impression de la commande:', orderId);
+
+        // Créer les données du ticket
+        const ticketData = createTicketData(order);
+
+        // Envoyer à l'imprimante
+        await sendToPrinter(ticketData);
+
+        // Notification succès
+        showNotification('✅ Ticket imprimé avec succès!', 'success');
+
+    } catch (error) {
+        console.error('Erreur impression:', error);
+        alert('❌ Erreur lors de l\'impression:\n\n' + error.message);
+    }
+}
+
+// Test d'impression
+async function testPrint() {
+    if (!isPrinterConnected) {
+        alert('❌ Aucune imprimante connectée');
+        return;
+    }
+
+    try {
+        const data = [];
+        const encoder = new TextEncoder();
+
+        function addText(text) {
+            data.push(...encoder.encode(text));
+        }
+
+        function addCommand(...commands) {
+            commands.forEach(cmd => {
+                if (Array.isArray(cmd)) {
+                    data.push(...cmd);
+                }
+            });
+        }
+
+        addCommand(ESC_POS.INIT);
+        addCommand(ESC_POS.ALIGN_CENTER);
+        addCommand(ESC_POS.SIZE_DOUBLE, ESC_POS.BOLD_ON);
+        addText('TEST D\'IMPRESSION\n');
+        addCommand(ESC_POS.SIZE_NORMAL, ESC_POS.BOLD_OFF);
+        addText('\n');
+        addText('Imprimante connectee!\n');
+        addText('\n');
+        addText('<?php echo addslashes($restaurantName ?? 'Restaurant'); ?>\n');
+        addText('\n');
+        addText(new Date().toLocaleString('fr-FR') + '\n');
+        addText('\n');
+        addCommand(ESC_POS.FEED);
+        addCommand(ESC_POS.CUT);
+
+        await sendToPrinter(new Uint8Array(data));
+
+        alert('✅ Test d\'impression envoyé!');
+
+    } catch (error) {
+        console.error('Erreur test impression:', error);
+        alert('❌ Erreur lors du test:\n\n' + error.message);
+    }
+}
+
+// Event listeners pour les boutons de gestion imprimante
+document.getElementById('btn-connect-printer').addEventListener('click', connectPrinter);
+document.getElementById('btn-disconnect-printer').addEventListener('click', disconnectPrinter);
+document.getElementById('btn-test-print').addEventListener('click', testPrint);
+
+// Restaurer l'état de connexion au chargement (optionnel)
+window.addEventListener('load', () => {
+    const wasConnected = localStorage.getItem('printerConnected') === 'true';
+    const printerName = localStorage.getItem('printerName');
+
+    if (wasConnected && printerName) {
+        // Afficher l'état mais ne pas se reconnecter automatiquement
+        // (la reconnexion auto nécessiterait de stocker l'ID du device, complexe)
+        updatePrinterUI(false);
+    }
+});
+
+// Helper pour notifications
+function showNotification(message, type = 'info') {
+    // Utiliser l'alert existant ou implémenter un toast si disponible
+    console.log(message);
 }
 
     </script>
