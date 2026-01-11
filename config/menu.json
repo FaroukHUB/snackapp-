@@ -219,8 +219,7 @@
                                 "image": "assets/images/patisserie/tiramisu.jpg"
                             }
                         ],
-                        "priceSolo": 0,
-                        "pricePrefix": "À partir de"
+                        "priceSolo": 0
                     },
                     {
                         "id": "croque-monsieur",
@@ -267,8 +266,7 @@
                                 "name": "Salade Complète",
                                 "price": 600
                             }
-                        ],
-                        "pricePrefix": "À partir de"
+                        ]
                     },
                     {
                         "id": "sandwich-thon",
@@ -683,8 +681,7 @@
                             }
                         ],
                         "priceSolo": 0,
-                        "image": "images/uploads/jus-frais-14a2cdec.webp",
-                        "pricePrefix": "À partir de"
+                        "image": "images/uploads/jus-frais-14a2cdec.webp"
                     },
                     {
                         "id": "smoothie",
@@ -702,8 +699,7 @@
                             }
                         ],
                         "priceSolo": 0,
-                        "image": "images/uploads/smoothie-b58cf619.webp",
-                        "pricePrefix": "À partir de"
+                        "image": "images/uploads/smoothie-b58cf619.webp"
                     },
                     {
                         "id": "cocktail-maison",
@@ -722,8 +718,7 @@
                             }
                         ],
                         "priceSolo": 0,
-                        "image": "images/uploads/cocktail-maison-4a35a464.webp",
-                        "pricePrefix": "À partir de"
+                        "image": "images/uploads/cocktail-maison-4a35a464.webp"
                     }
                 ]
             },
