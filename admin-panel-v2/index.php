@@ -2081,6 +2081,21 @@ if (isset($_GET['export'])) {
                 <h2><i class="fas fa-cog" style="color: #6b7280;"></i> Réglages</h2>
             </div>
 
+            <?php if (($_SESSION['admin_role'] ?? 'staff') === 'owner'): ?>
+            <!-- Gestion des Admins (seulement pour owner) -->
+            <div class="card" style="border-left: 4px solid #dc2626; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin-bottom: 8px;"><i class="fas fa-user-shield" style="color: #dc2626;"></i> Utilisateurs Administrateurs</h3>
+                        <p style="color: #9ca3af; font-size: 12px;">Gérer les comptes admin (créer, modifier, supprimer)</p>
+                    </div>
+                    <a href="admin-users.php" class="btn" style="background: #dc2626; color: white; text-decoration: none;">
+                        <i class="fas fa-users-cog"></i> Gérer les admins
+                    </a>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <!-- Horaires -->
             <div class="card" style="border-left: 4px solid #3b82f6;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-clock" style="color: #3b82f6;"></i> Horaires d'ouverture</h3>
