@@ -1235,9 +1235,25 @@ if (isset($_GET['export'])) {
                 }
 
                 // Appoint/Monnaie pour paiement Espèces (sur place ET livraison)
-                if ((order.notes && (order.notes.includes('SUR PLACE') || order.notes.includes('LIVRAISON'))) && order.delivery_instructions) {
-                    const hasExactChange = order.delivery_instructions.includes('monnaie exacte');
-                    const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) DA/);
+                const isCashPayment = !order.payment_method || order.payment_method === 'cash' || order.payment_method === 'especes';
+                if ((order.notes && (order.notes.includes('SUR PLACE') || order.notes.includes('LIVRAISON'))) && isCashPayment) {
+                    let changeInfo = '';
+
+                    if (order.delivery_instructions) {
+                        const hasExactChange = order.delivery_instructions.includes('monnaie exacte');
+                        const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) DA/);
+
+                        if (hasExactChange) {
+                            changeInfo = '<i class="fas fa-check-circle" style="color: #10b981;"></i> J\'ai l\'appoint <span style="color: #9ca3af; font-size: 12px;">(Montant exact)</span>';
+                        } else if (changeMatch) {
+                            changeInfo = `<i class="fas fa-money-bill-wave" style="color: #fbbf24;"></i> Prévoir la monnaie <span style="color: #fbbf24; font-size: 13px; font-weight: 700;">${changeMatch[1]} DA</span>`;
+                        }
+                    }
+
+                    // Afficher la carte même si pas d'info (pour paiement espèces)
+                    if (!changeInfo) {
+                        changeInfo = '<i class="fas fa-money-bill-wave" style="color: #10b981;"></i> Paiement en espèces <span style="color: #9ca3af; font-size: 12px;">(Info non précisée)</span>';
+                    }
 
                     html += `
                         <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #10b981; margin-bottom: 20px;">
@@ -1245,10 +1261,7 @@ if (isset($_GET['export'])) {
                                 <i class="fas fa-coins"></i> Paiement et monnaie
                             </div>
                             <div style="font-size: 14px; color: white; font-weight: 600;">
-                                ${hasExactChange ?
-                                    '<i class="fas fa-check-circle" style="color: #10b981;"></i> J\'ai l\'appoint <span style="color: #9ca3af; font-size: 12px;">(Montant exact)</span>' :
-                                    `<i class="fas fa-money-bill-wave" style="color: #fbbf24;"></i> Prévoir la monnaie <span style="color: #fbbf24; font-size: 13px; font-weight: 700;">${changeMatch ? changeMatch[1] + ' DA' : ''}</span>`
-                                }
+                                ${changeInfo}
                             </div>
                         </div>
                     `;
