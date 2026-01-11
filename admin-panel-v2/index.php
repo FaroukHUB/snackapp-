@@ -2114,7 +2114,10 @@ if (isset($_GET['export'])) {
                     <h3 style="margin: 0;"><i class="fas fa-print" style="color: #10b981;"></i> Imprimante de Tickets</h3>
                     <div class="printer-help-tooltip" style="position: relative; display: inline-block;">
                         <i class="fas fa-question-circle" style="color: #6b7280; font-size: 18px; cursor: help;"></i>
-                        <div class="printer-help-content" style="display: none; position: absolute; left: 30px; top: -10px; background: #1e293b; border: 2px solid #10b981; border-radius: 12px; padding: 20px; width: 420px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <!-- Overlay sombre -->
+                        <div class="printer-help-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 99998;"></div>
+                        <!-- Tooltip modal -->
+                        <div class="printer-help-content" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 2px solid #10b981; border-radius: 12px; padding: 20px; width: 420px; max-width: 90vw; max-height: 80vh; overflow-y: auto; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                             <div style="font-size: 14px; font-weight: 700; color: #10b981; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                                 <i class="fas fa-info-circle"></i> Comment utiliser l'impression
                             </div>
@@ -4632,28 +4635,49 @@ function showNotification(message, type = 'info') {
 const printerHelpTooltip = document.querySelector('.printer-help-tooltip');
 const printerHelpIcon = printerHelpTooltip?.querySelector('.fa-question-circle');
 const printerHelpContent = printerHelpTooltip?.querySelector('.printer-help-content');
+const printerHelpOverlay = printerHelpTooltip?.querySelector('.printer-help-overlay');
 
-if (printerHelpIcon && printerHelpContent) {
+if (printerHelpIcon && printerHelpContent && printerHelpOverlay) {
     let helpVisible = false;
 
-    // Toggle au clic sur l'icône
+    function showHelp() {
+        helpVisible = true;
+        printerHelpOverlay.style.display = 'block';
+        printerHelpContent.style.display = 'block';
+    }
+
+    function hideHelp() {
+        helpVisible = false;
+        printerHelpOverlay.style.display = 'none';
+        printerHelpContent.style.display = 'none';
+    }
+
+    // Ouvrir au clic sur l'icône
     printerHelpIcon.addEventListener('click', (e) => {
         e.stopPropagation();
-        helpVisible = !helpVisible;
-        printerHelpContent.style.display = helpVisible ? 'block' : 'none';
+        showHelp();
     });
 
-    // Fermer si on clique ailleurs
+    // Fermer au clic sur l'overlay
+    printerHelpOverlay.addEventListener('click', hideHelp);
+
+    // Fermer au clic ailleurs
     document.addEventListener('click', (e) => {
-        if (helpVisible && !printerHelpTooltip.contains(e.target)) {
-            helpVisible = false;
-            printerHelpContent.style.display = 'none';
+        if (helpVisible && !printerHelpTooltip.contains(e.target) && !printerHelpContent.contains(e.target)) {
+            hideHelp();
         }
     });
 
     // Empêcher la fermeture si on clique dans le tooltip
     printerHelpContent.addEventListener('click', (e) => {
         e.stopPropagation();
+    });
+
+    // Fermer avec la touche Escape
+    document.addEventListener('keydown', (e) => {
+        if (helpVisible && e.key === 'Escape') {
+            hideHelp();
+        }
     });
 }
 
