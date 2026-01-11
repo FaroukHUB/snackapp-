@@ -1365,6 +1365,9 @@ const Products = {
         document.querySelectorAll('.beverage-item').forEach(item => {
             item.classList.toggle('selected', item.dataset.id === beverageId);
         });
+
+        // Update total price since beverage has individual pricing
+        this.updateModalUI();
     },
 
     /**
@@ -1526,6 +1529,10 @@ const Products = {
         // If pâtisserie is selected, use its price (pâtisserie products have individual pricing)
         else if (this.selectedPatisserie) {
             basePrice = this.selectedPatisserie.price || 0;
+        }
+        // If beverage is selected (jus, smoothie, salade), use its price
+        else if (this.selectedBeverage) {
+            basePrice = this.selectedBeverage.price || 0;
         } else if (this.menuType === 'menu' && this.currentProduct?.priceMenu) {
             basePrice = this.currentProduct.priceMenu;
         } else {
