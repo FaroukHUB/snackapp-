@@ -106,26 +106,35 @@ switch ($action) {
             exit;
         }
 
-        // Hasher le mot de passe
-        $passwordHash = password_hash($password, PASSWORD_ARGON2ID);
+        // Hasher le mot de passe (fallback à BCRYPT si ARGON2ID pas dispo)
+        if (defined('PASSWORD_ARGON2ID')) {
+            $passwordHash = password_hash($password, PASSWORD_ARGON2ID);
+        } else {
+            $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+        }
 
         // Créer l'admin
-        $adminId = Database::insert('admin_users', [
-            'restaurant_id' => $restaurantId,
-            'username' => $username,
-            'password_hash' => $passwordHash,
-            'role' => $role,
-            'created_at' => date('Y-m-d H:i:s')
-        ]);
-
-        if ($adminId) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'Admin créé avec succès',
-                'admin_id' => $adminId
+        try {
+            $adminId = Database::insert('admin_users', [
+                'restaurant_id' => $restaurantId,
+                'username' => $username,
+                'password_hash' => $passwordHash,
+                'role' => $role,
+                'created_at' => date('Y-m-d H:i:s')
             ]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Erreur lors de la création']);
+
+            if ($adminId) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Admin créé avec succès',
+                    'admin_id' => $adminId
+                ]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Erreur lors de la création (ID non retourné)']);
+            }
+        } catch (Exception $e) {
+            error_log('Erreur création admin: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Erreur lors de la création: ' . $e->getMessage()]);
         }
         break;
 
