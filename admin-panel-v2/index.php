@@ -1254,8 +1254,6 @@ if (isset($_GET['export'])) {
                     `;
                 }
 
-                html += `
-
                 // Adresse de livraison si applicable
                 if (order.delivery_address) {
                     html += `
