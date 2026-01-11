@@ -2110,7 +2110,51 @@ if (isset($_GET['export'])) {
 
             <!-- Gestion de l'Imprimante -->
             <div class="card" style="border-left: 4px solid #10b981; margin-bottom: 20px;">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-print" style="color: #10b981;"></i> Imprimante de Tickets</h3>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <h3 style="margin: 0;"><i class="fas fa-print" style="color: #10b981;"></i> Imprimante de Tickets</h3>
+                    <div class="printer-help-tooltip" style="position: relative; display: inline-block;">
+                        <i class="fas fa-question-circle" style="color: #6b7280; font-size: 18px; cursor: help;"></i>
+                        <div class="printer-help-content" style="display: none; position: absolute; left: 30px; top: -10px; background: #1e293b; border: 2px solid #10b981; border-radius: 12px; padding: 20px; width: 420px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                            <div style="font-size: 14px; font-weight: 700; color: #10b981; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-info-circle"></i> Comment utiliser l'impression
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-weight: 600; color: white; margin-bottom: 6px; font-size: 13px;">📱 1. PRÉREQUIS</div>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #d1d5db; line-height: 1.6;">
+                                    <li>Tablette/PC <strong>Android</strong> (Windows/Mac aussi)</li>
+                                    <li>Navigateur <strong>Chrome</strong> ou <strong>Edge</strong></li>
+                                    <li>Imprimante thermique <strong>Bluetooth</strong> (58mm ou 80mm)</li>
+                                    <li>Protocole <strong>ESC/POS</strong> (standard restaurants)</li>
+                                </ul>
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-weight: 600; color: white; margin-bottom: 6px; font-size: 13px;">🔗 2. CONNEXION</div>
+                                <ol style="margin: 0; padding-left: 20px; font-size: 12px; color: #d1d5db; line-height: 1.6;">
+                                    <li>Allumez votre imprimante Bluetooth</li>
+                                    <li>Activez le Bluetooth sur votre tablette</li>
+                                    <li>Cliquez sur "Connecter une imprimante"</li>
+                                    <li>Sélectionnez votre imprimante dans la liste</li>
+                                    <li>Testez avec "Imprimer un test"</li>
+                                </ol>
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-weight: 600; color: white; margin-bottom: 6px; font-size: 13px;">🖨️ 3. IMPRESSION</div>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #d1d5db; line-height: 1.6;">
+                                    <li>Une fois connectée, un bouton <strong>"Imprimer le ticket"</strong> apparaît sur chaque commande</li>
+                                    <li>Cliquez dessus = impression <strong>instantanée</strong> (pas de dialogue)</li>
+                                    <li>Le ticket contient tous les détails (client, articles, total, paiement...)</li>
+                                </ul>
+                            </div>
+
+                            <div style="padding: 10px; background: rgba(239, 68, 68, 0.15); border-left: 3px solid #ef4444; border-radius: 6px; font-size: 11px; color: #fca5a5;">
+                                <strong>⚠️ Note :</strong> iOS (iPhone/iPad) ne supporte pas le Bluetooth Web. Utilisez une tablette Android pour l'impression.
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <p style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">
                     Connectez une imprimante thermique Bluetooth (ESC/POS) pour imprimer les tickets de commandes
                 </p>
@@ -4578,6 +4622,39 @@ window.addEventListener('load', () => {
 function showNotification(message, type = 'info') {
     // Utiliser l'alert existant ou implémenter un toast si disponible
     console.log(message);
+}
+
+// ========================================
+// 📖 TOOLTIP D'AIDE IMPRIMANTE
+// ========================================
+
+// Gérer l'affichage du tooltip d'aide
+const printerHelpTooltip = document.querySelector('.printer-help-tooltip');
+const printerHelpIcon = printerHelpTooltip?.querySelector('.fa-question-circle');
+const printerHelpContent = printerHelpTooltip?.querySelector('.printer-help-content');
+
+if (printerHelpIcon && printerHelpContent) {
+    let helpVisible = false;
+
+    // Toggle au clic sur l'icône
+    printerHelpIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        helpVisible = !helpVisible;
+        printerHelpContent.style.display = helpVisible ? 'block' : 'none';
+    });
+
+    // Fermer si on clique ailleurs
+    document.addEventListener('click', (e) => {
+        if (helpVisible && !printerHelpTooltip.contains(e.target)) {
+            helpVisible = false;
+            printerHelpContent.style.display = 'none';
+        }
+    });
+
+    // Empêcher la fermeture si on clique dans le tooltip
+    printerHelpContent.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 }
 
     </script>
