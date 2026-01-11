@@ -1745,6 +1745,9 @@
                     let price = product.price || product.priceSolo || 0;
                     const hasImage = product.image && product.image.length > 0;
 
+                    // Vérifier si le produit a des options
+                    const hasOptions = product.hasPâtisserieOptions || product.hasBeverageOptions || product.hasViennoiserieOptions;
+
                     // Si price = 0 et produit a des options, calculer le prix minimum
                     if (price === 0 && product.pâtisserieOptions && product.pâtisserieOptions.length > 0) {
                         price = Math.min(...product.pâtisserieOptions.map(opt => opt.price || 0));
@@ -1752,8 +1755,10 @@
                         price = Math.min(...product.beverageOptions.map(opt => opt.price || 0));
                     }
 
-                    // Afficher le prix calculé depuis les options
-                    const priceText = `+${Config.formatPrice(price)}`;
+                    // Afficher "À partir de" si le produit a des options, sinon "+"
+                    const priceText = hasOptions
+                        ? `À partir de ${Config.formatPrice(price)}`
+                        : `+${Config.formatPrice(price)}`;
 
                     // Échapper les guillemets pour les attributs HTML
                     const safeId = (product.id || '').replace(/'/g, "\\'");
