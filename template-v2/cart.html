@@ -1058,57 +1058,6 @@
                             </select>
                         </div>
 
-                        <!-- Option de monnaie pour livraison - Design Moderne -->
-                        <div class="form-row payment-modern-section">
-                            <label class="payment-modern-title">
-                                <i class="fas fa-wallet" style="color: #10b981; margin-right: 8px;"></i>
-                                Paiement et monnaie *
-                            </label>
-                            <div class="payment-options-container">
-                                <label class="payment-option-card exact-payment">
-                                    <input type="radio" name="changeOption" value="exact" onchange="CartPage.setChangeOption('exact')" checked>
-                                    <div class="payment-card-content">
-                                        <div class="payment-icon">
-                                            <i class="fas fa-check-circle"></i>
-                                        </div>
-                                        <div class="payment-info">
-                                            <div class="payment-label">J'ai l'appoint</div>
-                                            <div class="payment-desc">Montant exact</div>
-                                        </div>
-                                        <div class="payment-checkmark">
-                                            <i class="fas fa-check"></i>
-                                        </div>
-                                    </div>
-                                    <div class="payment-card-shine"></div>
-                                </label>
-
-                                <label class="payment-option-card change-payment">
-                                    <input type="radio" name="changeOption" value="change" onchange="CartPage.setChangeOption('change')">
-                                    <div class="payment-card-content">
-                                        <div class="payment-icon">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                        </div>
-                                        <div class="payment-info">
-                                            <div class="payment-label">Prévoir la monnaie</div>
-                                            <div class="payment-desc">Je paie avec:</div>
-                                        </div>
-                                        <div class="payment-amount-input">
-                                            <input type="number" id="changeForAmount" placeholder="5000" min="0" step="100" disabled>
-                                            <span class="currency-badge">DA</span>
-                                        </div>
-                                        <div class="payment-checkmark">
-                                            <i class="fas fa-check"></i>
-                                        </div>
-                                    </div>
-                                    <div class="payment-card-shine"></div>
-                                </label>
-                            </div>
-                            <div class="payment-tip">
-                                <i class="fas fa-lightbulb"></i>
-                                <span>Facilitez la livraison en indiquant si vous avez l'appoint</span>
-                            </div>
-                        </div>
-
                         <style>
                         /* Design Ultramoderne pour le paiement */
                         .payment-modern-section {
@@ -1370,6 +1319,60 @@
                             }
                         }
                         </style>
+                    </div>
+
+                    <!-- Options de paiement et monnaie (pour livraison ET sur place) -->
+                    <div id="paymentFields" style="display: none;">
+                        <!-- Option de monnaie - Design Moderne -->
+                        <div class="form-row payment-modern-section">
+                            <label class="payment-modern-title">
+                                <i class="fas fa-wallet" style="color: #10b981; margin-right: 8px;"></i>
+                                Paiement et monnaie *
+                            </label>
+                            <div class="payment-options-container">
+                                <label class="payment-option-card exact-payment">
+                                    <input type="radio" name="changeOptionCommon" value="exact" onchange="CartPage.setChangeOption('exact')" checked>
+                                    <div class="payment-card-content">
+                                        <div class="payment-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="payment-info">
+                                            <div class="payment-label">J'ai l'appoint</div>
+                                            <div class="payment-desc">Montant exact</div>
+                                        </div>
+                                        <div class="payment-checkmark">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                    </div>
+                                    <div class="payment-card-shine"></div>
+                                </label>
+
+                                <label class="payment-option-card change-payment">
+                                    <input type="radio" name="changeOptionCommon" value="change" onchange="CartPage.setChangeOption('change')">
+                                    <div class="payment-card-content">
+                                        <div class="payment-icon">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                        <div class="payment-info">
+                                            <div class="payment-label">Prévoir la monnaie</div>
+                                            <div class="payment-desc">Je paie avec:</div>
+                                        </div>
+                                        <div class="payment-amount-input">
+                                            <input type="number" id="changeForAmountCommon" placeholder="5000" min="0" step="100" disabled>
+                                            <span class="currency-badge">DA</span>
+                                        </div>
+                                        <div class="payment-checkmark">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                    </div>
+                                    <div class="payment-card-shine"></div>
+                                </label>
+                            </div>
+                            <div class="payment-tip">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Facilitez le service en indiquant si vous avez l'appoint</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-row">
@@ -1996,6 +1999,7 @@
                 // Show/hide fields based on mode
                 document.getElementById('dineinFields').style.display = mode === 'dinein' ? 'block' : 'none';
                 document.getElementById('deliveryFields').style.display = mode === 'delivery' ? 'block' : 'none';
+                document.getElementById('paymentFields').style.display = (mode === 'delivery' || mode === 'dinein') ? 'block' : 'none';
             },
 
             setRoom(room) {
@@ -2027,7 +2031,7 @@
 
             setChangeOption(option) {
                 this.changeOption = option;
-                const changeInput = document.getElementById('changeForAmount');
+                const changeInput = document.getElementById('changeForAmountCommon');
 
                 if (option === 'change') {
                     changeInput.disabled = false;
@@ -2337,10 +2341,13 @@
                         }
                     }
 
-                    // Validation option de monnaie
+                }
+
+                // Validation option de monnaie (pour LIVRAISON ET SUR PLACE)
+                if (this.mode === 'delivery' || this.mode === 'dinein') {
                     const changeOption = this.changeOption || 'exact';
                     if (changeOption === 'change') {
-                        const changeForAmount = parseFloat(document.getElementById('changeForAmount').value);
+                        const changeForAmount = parseFloat(document.getElementById('changeForAmountCommon').value);
                         if (!changeForAmount || changeForAmount <= 0) {
                             this.showToast('Veuillez indiquer le montant pour la monnaie', 'error');
                             return;
@@ -2412,14 +2419,14 @@
                 // Pas de réduction avec points - total normal
                 const totalAmount = savedSubtotal - savedDiscount;
 
-                // Prepare payment/change info for delivery (AVANT notes)
+                // Prepare payment/change info for delivery AND dinein (AVANT notes)
                 let paymentInfo = {};
-                if (this.mode === 'delivery') {
+                if (this.mode === 'delivery' || this.mode === 'dinein') {
                     const changeOption = this.changeOption || 'exact';
                     if (changeOption === 'exact') {
                         paymentInfo.has_exact_change = true;
                     } else if (changeOption === 'change') {
-                        const changeForAmount = parseFloat(document.getElementById('changeForAmount').value);
+                        const changeForAmount = parseFloat(document.getElementById('changeForAmountCommon').value);
                         if (changeForAmount > 0) {
                             paymentInfo.change_for = changeForAmount;
                         }
@@ -2473,8 +2480,10 @@
                         deliveryAddress = fullAddress;
                         modeNotes = `🚗 LIVRAISON: ${fullAddress}`;
                     }
+                }
 
-                    // ⚡ NOUVEAU: Instructions de livraison depuis les options de monnaie
+                // ⚡ Instructions de paiement pour LIVRAISON ET SUR PLACE
+                if (this.mode === 'delivery' || this.mode === 'dinein') {
                     if (paymentInfo.change_for) {
                         deliveryInstructions = `Monnaie pour ${paymentInfo.change_for} DA`;
                     } else if (paymentInfo.has_exact_change) {
