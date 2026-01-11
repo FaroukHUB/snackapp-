@@ -4,12 +4,22 @@
  */
 
 require_once __DIR__ . '/bootstrap.php';
-requireAdminLogin();
+
+// Vérifier la connexion
+if (!isAdminLoggedIn()) {
+    header('Location: login.php');
+    exit;
+}
 
 // Seul un owner peut accéder à cette page
 if (($_SESSION['admin_role'] ?? 'staff') !== 'owner') {
     header('Location: index.php');
     exit;
+}
+
+// Vérifier que le système MySQL est actif
+if (SNACK_USE_JSON || defined('SNACK_DB_ERROR')) {
+    die('Cette fonctionnalité nécessite MySQL. Le mode JSON ne supporte pas la gestion multi-utilisateurs.');
 }
 
 $restaurant = getCurrentRestaurant();

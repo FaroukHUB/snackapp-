@@ -6,6 +6,13 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
+// Vérifier que MySQL est actif
+if (SNACK_USE_JSON || defined('SNACK_DB_ERROR')) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Cette fonctionnalité nécessite MySQL']);
+    exit;
+}
+
 // Vérifier que l'utilisateur est connecté
 if (!isAdminLoggedIn()) {
     http_response_code(401);
@@ -227,7 +234,7 @@ switch ($action) {
 
         // Vérifier que l'admin existe et appartient au restaurant
         $admin = Database::fetchOne(
-            "SELECT id FROM admin_users WHERE id = ? AND restaurant_id = ?",
+            "SELECT id, role FROM admin_users WHERE id = ? AND restaurant_id = ?",
             [$adminId, $restaurantId]
         );
 
