@@ -15,6 +15,345 @@
             "status": "available",
             "supplements": [],
             "image": "images/uploads/croque-monsieur-82c66930.webp"
+        },
+        "lyonnaise": {
+            "name": "La Lyonnaise",
+            "description": "Oignons, lardons, crème fraîche, fromage.",
+            "priceSolo": 550,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/lyonnaise-453a2160.webp"
+        },
+        "parisienne": {
+            "name": "La Parisienne",
+            "description": "Jambon, champignons, fromage, crème.",
+            "priceSolo": 550,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/parisienne-29372258.webp"
+        },
+        "patisserie": {
+            "name": "Pâtisserie",
+            "description": "Choisissez votre pâtisserie.",
+            "priceSolo": 0,
+            "pricePrefix": "À partir de 300 Da",
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/patisserie-1d91431b.webp"
+        },
+        "fromagere": {
+            "name": "La Fromagère",
+            "description": "Mix de fromages fondants.",
+            "priceSolo": 650,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/fromagere-cc86a524.webp"
+        },
+        "fumee": {
+            "name": "La Fumée",
+            "description": "Saumon fumé, crème fraîche, aneth.",
+            "priceSolo": 650,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/fumee-0e517794.webp"
+        },
+        "boisee": {
+            "name": "La Boisée",
+            "description": "Champignons, fromage, crème forestière.",
+            "priceSolo": 650,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/boisee-86294324.webp"
+        },
+        "mexicaine": {
+            "name": "La Mexicaine",
+            "description": "Poulet épicé, poivrons, oignons, cheddar, sauce piquante.",
+            "priceSolo": 700,
+            "badge": "Épicé 🌶️",
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/mexicaine-bca4a810.webp"
+        },
+        "la-dz": {
+            "name": "La DZ",
+            "description": "Viande hachée épicée, chakchouka, fromage, épices algériennes.",
+            "priceSolo": 700,
+            "badge": "Spécialité 🇩🇿",
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/la-dz-2241c0a9.webp"
+        },
+        "la-marvelous": {
+            "name": "La Marvelous",
+            "description": "Notre signature! Viande hachée, mix fromages, oignons confits, poivrons, sauce maison.",
+            "priceSolo": 850,
+            "badge": "Signature ⭐",
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/la-marvelous-285461ea.webp"
+        },
+        "la-crousti": {
+            "name": "La Crousti",
+            "description": "Mix fromages, tenders maison croustillants, sauce maison, oignons crispy, sauce thaï.",
+            "priceSolo": 800,
+            "badge": "Nouveau 🆕",
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/la-crousti-21722201.webp"
+        },
+        "salade-composee": {
+            "name": "Salade Composée",
+            "description": "Salade fraîche du jour.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/salade-composee-20d72835.webp"
+        },
+        "crepe-nature": {
+            "name": "Crêpe Nature",
+            "description": "Crêpe simple avec sucre.",
+            "priceSolo": 200,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/crepe-nature-836fe0cf.webp"
+        },
+        "crepe-chocolat": {
+            "name": "Crêpe Chocolat",
+            "description": "Sauce chocolat maison.",
+            "priceSolo": 300,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/crepe-chocolat-593fec4d.webp"
+        },
+        "crepe-nutella": {
+            "name": "Crêpe Nutella",
+            "description": "Nutella généreux.",
+            "priceSolo": 400,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/crepe-nutella-b6cb54ff.webp"
+        },
+        "crepe-confiture": {
+            "name": "Crêpe Confiture",
+            "description": "Confiture au choix.",
+            "priceSolo": 300,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/crepe-confiture-f31b52fe.webp"
+        },
+        "crepe-creme-noisette": {
+            "name": "Crêpe Crème Noisette",
+            "description": "Crème de noisette onctueuse.",
+            "priceSolo": 300,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/crepe-creme-noisette-96039249.webp"
+        },
+        "crepe-miel": {
+            "name": "Crêpe Miel",
+            "description": "Miel naturel.",
+            "priceSolo": 300,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/crepe-miel-29089ffa.webp"
+        },
+        "crepe-beurre-cacahuete": {
+            "name": "Crêpe Beurre de Cacahuète",
+            "description": "Beurre de cacahuète onctueux.",
+            "priceSolo": 300,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/crepe-beurre-cacahuete-278f5025.webp"
+        },
+        "cocktail-maison": {
+            "name": "Cocktail Maison",
+            "description": "Citron ou Mojito (sans alcool).",
+            "priceSolo": 0,
+            "pricePrefix": "À partir de",
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/cocktail-maison-4a35a464.webp"
+        },
+        "smoothie": {
+            "name": "Smoothie",
+            "description": "Choisissez votre smoothie.",
+            "priceSolo": 0,
+            "pricePrefix": "À partir de",
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/smoothie-b58cf619.webp"
+        },
+        "jus-frais": {
+            "name": "Jus Frais",
+            "description": "Choisissez votre jus frais.",
+            "priceSolo": 0,
+            "pricePrefix": "À partir de",
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/jus-frais-14a2cdec.webp"
+        },
+        "cafe-lor": {
+            "name": "Café l'Or",
+            "description": "Café premium L'Or.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "variants": [
+                {
+                    "id": "court",
+                    "name": "Court",
+                    "price": 200
+                },
+                {
+                    "id": "long",
+                    "name": "Long",
+                    "price": 250
+                }
+            ],
+            "capsuleNumbers": [
+                1,
+                3,
+                4,
+                5,
+                6,
+                11,
+                13,
+                14,
+                15,
+                2,
+                11,
+                12,
+                13,
+                14,
+                15
+            ],
+            "image": "images/uploads/cafe-lor-2ee0f6cb.webp"
+        },
+        "cafe-caps": {
+            "name": "Café Caps",
+            "description": "Café capsule.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "variants": [
+                {
+                    "id": "court",
+                    "name": "Court",
+                    "price": 100
+                },
+                {
+                    "id": "long",
+                    "name": "Long",
+                    "price": 150
+                }
+            ],
+            "capsuleNumbers": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+            ],
+            "image": "images/uploads/cafe-caps-353f92e0.webp"
+        },
+        "the-infusion": {
+            "name": "Thé Infusion",
+            "description": "Thé ou infusion au choix.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/the-infusion-30f6a5fd.webp"
+        },
+        "cafe-au-lait": {
+            "name": "Café au Lait",
+            "description": "Café avec lait chaud.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/cafe-au-lait-8747be8e.webp"
+        },
+        "cappuccino": {
+            "name": "Cappuccino",
+            "description": "Café, lait mousseux, cacao.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/cappuccino-f41941f6.webp"
+        },
+        "chocolat-chaud": {
+            "name": "Chocolat Chaud",
+            "description": "Chocolat onctueux.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/chocolat-chaud-6f06d1e8.webp"
+        },
+        "jus": {
+            "name": "Jus",
+            "description": "Choisissez votre jus.",
+            "priceSolo": 0,
+            "pricePrefix": "300 Da",
+            "status": "available",
+            "supplements": []
+        },
+        "crepe-kids-salee": {
+            "name": "Crêpe Kids Salée",
+            "description": "1 Crêpe Fumée ou poulet, pomme de terre, mayonnaise ou ketchup, +1 jus Daily",
+            "priceSolo": 0,
+            "badge": "Mini",
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/crepe-kids-salee-3e482977.webp"
+        },
+        "crepe-kids-sucree": {
+            "name": "Crêpe Kids Sucrée",
+            "description": "1 crêpe au chocolat et 1 jus daily",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/crepe-kids-sucree-a153d49a.webp"
+        },
+        "sandwich-thon": {
+            "name": "Sandwich Thon/Crudités",
+            "description": "Thon, crudités fraîches, sauce.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/sandwich-thon-051ac668.webp"
+        },
+        "sandwich-poulet-fume": {
+            "name": "Sandwich Poulet crispy",
+            "description": "Poulet crispy, crudités, sauce.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/sandwich-poulet-fume-2bf5f85f.webp"
+        },
+        "sandwich-poulet-marine": {
+            "name": "Sandwich Poulet Mariné",
+            "description": "Poulet mariné aux épices, crudités.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/sandwich-poulet-marine-6868166b.webp"
+        },
+        "wraps-poulet": {
+            "name": "Wraps Poulet",
+            "description": "Tortilla, poulet, crudités, sauce.",
+            "priceSolo": 0,
+            "status": "available",
+            "supplements": [],
+            "image": "images/uploads/wraps-poulet-f514117b.webp"
         }
     },
     "categories": [],
@@ -24,42 +363,9 @@
             "name": "Burgers",
             "description": "",
             "items": []
-        },
-        "ouscous": {
-            "id": "ouscous",
-            "name": "Couscous",
-            "description": "",
-            "flavor": "sale",
-            "items": []
         }
     },
     "customProducts": {
-        "urgers": {
-            "id": "urgers",
-            "categoryId": "sucres-sales",
-            "name": "Burgers",
-            "description": "Burgers frais ",
-            "priceSolo": 700,
-            "priceMenu": 900,
-            "badge": "hebla",
-            "image": "images/uploads/urgers-cfce7857.webp",
-            "status": "available",
-            "supplements": [],
-            "baseIngredients": []
-        },
-        "acos": {
-            "id": "acos",
-            "categoryId": "sucres-sales",
-            "name": "Tacos",
-            "description": "",
-            "priceSolo": 490,
-            "priceMenu": null,
-            "badge": null,
-            "image": "images/uploads/acos-628ae502.webp",
-            "status": "available",
-            "supplements": [],
-            "baseIngredients": []
-        },
         "ptit-dej": {
             "id": "ptit-dej",
             "categoryId": "test-direct",
@@ -188,9 +494,26 @@
             "image": "images/uploads/oyal-6a3e9e99.png",
             "status": "available",
             "supplements": []
+        },
+        "andwich-oulet-hawarma": {
+            "id": "andwich-oulet-hawarma",
+            "categoryId": "sucres-sales",
+            "name": "Sandwich Poulet Shawarma",
+            "description": "Poulet shawarma, crudités, sauce.",
+            "priceSolo": 400,
+            "priceMenu": null,
+            "badge": null,
+            "pricePrefix": null,
+            "image": "images/uploads/andwich-oulet-hawarma-0adab602.webp",
+            "status": "available",
+            "supplements": []
         }
     },
-    "deletedProducts": [],
+    "deletedProducts": [
+        "acos",
+        "urgers",
+        "crepe-kids"
+    ],
     "deletedCategories": [
         "test-direct",
         "izza",
@@ -199,7 +522,8 @@
         "ateau",
         "iz",
         "lats-pic-s",
-        "lat-maison"
+        "lat-maison",
+        "ouscous"
     ],
     "formules": [],
     "customFormules": {

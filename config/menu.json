@@ -17,7 +17,7 @@
                         "name": "La Lyonnaise",
                         "description": "Oignons, lardons, crème fraîche, fromage.",
                         "priceSolo": 550,
-                        "image": "",
+                        "image": "images/uploads/lyonnaise-453a2160.webp",
                         "baseIngredients": [
                             "oignons",
                             "lardons",
@@ -31,7 +31,7 @@
                         "name": "La Parisienne",
                         "description": "Jambon, champignons, fromage, crème.",
                         "priceSolo": 550,
-                        "image": "",
+                        "image": "images/uploads/parisienne-29372258.webp",
                         "baseIngredients": [
                             "jambon",
                             "champignons",
@@ -45,7 +45,7 @@
                         "name": "La Fromagère",
                         "description": "Mix de fromages fondants.",
                         "priceSolo": 650,
-                        "image": "",
+                        "image": "images/uploads/fromagere-cc86a524.webp",
                         "baseIngredients": [
                             "mix fromages"
                         ],
@@ -56,7 +56,7 @@
                         "name": "La Fumée",
                         "description": "Saumon fumé, crème fraîche, aneth.",
                         "priceSolo": 650,
-                        "image": "",
+                        "image": "images/uploads/fumee-0e517794.webp",
                         "baseIngredients": [
                             "saumon fumé",
                             "crème fraîche",
@@ -69,7 +69,7 @@
                         "name": "La Boisée",
                         "description": "Champignons, fromage, crème forestière.",
                         "priceSolo": 650,
-                        "image": "",
+                        "image": "images/uploads/boisee-86294324.webp",
                         "baseIngredients": [
                             "champignons",
                             "fromage",
@@ -82,7 +82,7 @@
                         "name": "La Mexicaine",
                         "description": "Poulet épicé, poivrons, oignons, cheddar, sauce piquante.",
                         "priceSolo": 700,
-                        "image": "",
+                        "image": "images/uploads/mexicaine-bca4a810.webp",
                         "baseIngredients": [
                             "poulet",
                             "poivrons",
@@ -97,7 +97,7 @@
                         "name": "La DZ",
                         "description": "Viande hachée épicée, chakchouka, fromage, épices algériennes.",
                         "priceSolo": 700,
-                        "image": "",
+                        "image": "images/uploads/la-dz-2241c0a9.webp",
                         "baseIngredients": [
                             "viande hachée",
                             "chakchouka",
@@ -112,7 +112,7 @@
                         "name": "La Marvelous",
                         "description": "Notre signature! Viande hachée, mix fromages, oignons confits, poivrons, sauce maison.",
                         "priceSolo": 850,
-                        "image": "",
+                        "image": "images/uploads/la-marvelous-285461ea.webp",
                         "baseIngredients": [
                             "viande hachée",
                             "mix fromages",
@@ -129,7 +129,7 @@
                         "name": "La Crousti",
                         "description": "Mix fromages, tenders maison croustillants, sauce maison, oignons crispy, sauce thaï.",
                         "priceSolo": 800,
-                        "image": "",
+                        "image": "images/uploads/la-crousti-21722201.webp",
                         "baseIngredients": [
                             "mix fromages",
                             "tenders maison",
@@ -196,7 +196,7 @@
                         "id": "patisserie",
                         "name": "Pâtisserie",
                         "description": "Choisissez votre pâtisserie.",
-                        "image": "",
+                        "image": "images/uploads/patisserie-1d91431b.webp",
                         "status": "available",
                         "hasPâtisserieOptions": true,
                         "pâtisserieOptions": [
@@ -242,7 +242,7 @@
                         "name": "Salade Composée",
                         "description": "Choisissez votre salade fraîche.",
                         "price": 400,
-                        "image": "",
+                        "image": "images/uploads/salade-composee-20d72835.webp",
                         "status": "available",
                         "priceSolo": 0,
                         "hasBeverageOptions": true,
@@ -275,7 +275,7 @@
                         "name": "Sandwich Thon/Crudités",
                         "description": "Thon, crudités fraîches, sauce.",
                         "price": 400,
-                        "image": "",
+                        "image": "images/uploads/sandwich-thon-051ac668.webp",
                         "baseIngredients": [
                             "thon",
                             "crudités",
@@ -286,10 +286,10 @@
                     },
                     {
                         "id": "sandwich-poulet-fume",
-                        "name": "Sandwich Poulet Fumé",
-                        "description": "Poulet fumé, crudités, sauce.",
+                        "name": "Sandwich Poulet crispy",
+                        "description": "Poulet crispy, crudités, sauce.",
                         "price": 400,
-                        "image": "",
+                        "image": "images/uploads/sandwich-poulet-fume-2bf5f85f.webp",
                         "baseIngredients": [
                             "poulet fumé",
                             "crudités",
@@ -303,7 +303,7 @@
                         "name": "Sandwich Poulet Mariné",
                         "description": "Poulet mariné aux épices, crudités.",
                         "price": 400,
-                        "image": "",
+                        "image": "images/uploads/sandwich-poulet-marine-6868166b.webp",
                         "baseIngredients": [
                             "poulet mariné",
                             "crudités"
@@ -316,7 +316,7 @@
                         "name": "Wraps Poulet",
                         "description": "Tortilla, poulet, crudités, sauce.",
                         "price": 400,
-                        "image": "",
+                        "image": "images/uploads/wraps-poulet-f514117b.webp",
                         "baseIngredients": [
                             "tortilla",
                             "poulet",
@@ -325,32 +325,6 @@
                         ],
                         "status": "available",
                         "priceSolo": 0
-                    },
-                    {
-                        "id": "urgers",
-                        "categoryId": "sucres-sales",
-                        "name": "Burgers",
-                        "description": "Burgers frais ",
-                        "priceSolo": 700,
-                        "priceMenu": 900,
-                        "badge": "hebla",
-                        "image": "images/uploads/urgers-cfce7857.webp",
-                        "status": "available",
-                        "supplements": [],
-                        "baseIngredients": []
-                    },
-                    {
-                        "id": "acos",
-                        "categoryId": "sucres-sales",
-                        "name": "Tacos",
-                        "description": "",
-                        "priceSolo": 490,
-                        "priceMenu": null,
-                        "badge": null,
-                        "image": "images/uploads/acos-628ae502.webp",
-                        "status": "available",
-                        "supplements": [],
-                        "baseIngredients": []
                     }
                 ]
             },
@@ -364,7 +338,7 @@
                         "name": "Crêpe Nature",
                         "description": "Crêpe simple avec sucre.",
                         "priceSolo": 200,
-                        "image": "",
+                        "image": "images/uploads/crepe-nature-836fe0cf.webp",
                         "baseIngredients": [],
                         "status": "available"
                     },
@@ -373,7 +347,7 @@
                         "name": "Crêpe Chocolat",
                         "description": "Sauce chocolat maison.",
                         "priceSolo": 300,
-                        "image": "",
+                        "image": "images/uploads/crepe-chocolat-593fec4d.webp",
                         "baseIngredients": [
                             "chocolat"
                         ],
@@ -384,7 +358,7 @@
                         "name": "Crêpe Nutella",
                         "description": "Nutella généreux.",
                         "priceSolo": 400,
-                        "image": "",
+                        "image": "images/uploads/crepe-nutella-b6cb54ff.webp",
                         "baseIngredients": [
                             "nutella"
                         ],
@@ -396,7 +370,7 @@
                         "name": "Crêpe Confiture",
                         "description": "Confiture au choix.",
                         "priceSolo": 300,
-                        "image": "",
+                        "image": "images/uploads/crepe-confiture-f31b52fe.webp",
                         "baseIngredients": [
                             "confiture"
                         ],
@@ -407,7 +381,7 @@
                         "name": "Crêpe Crème Noisette",
                         "description": "Crème de noisette onctueuse.",
                         "priceSolo": 300,
-                        "image": "",
+                        "image": "images/uploads/crepe-creme-noisette-96039249.webp",
                         "baseIngredients": [
                             "crème noisette"
                         ],
@@ -418,7 +392,7 @@
                         "name": "Crêpe Miel",
                         "description": "Miel naturel.",
                         "priceSolo": 300,
-                        "image": "",
+                        "image": "images/uploads/crepe-miel-29089ffa.webp",
                         "baseIngredients": [
                             "miel"
                         ],
@@ -429,21 +403,11 @@
                         "name": "Crêpe Beurre de Cacahuète",
                         "description": "Beurre de cacahuète onctueux.",
                         "priceSolo": 300,
-                        "image": "",
+                        "image": "images/uploads/crepe-beurre-cacahuete-278f5025.webp",
                         "baseIngredients": [
                             "beurre cacahuète"
                         ],
                         "status": "available"
-                    },
-                    {
-                        "id": "crepe-kids",
-                        "name": "Crêpe Kids",
-                        "description": "Petite crêpe sucrée pour les enfants.",
-                        "priceSolo": 250,
-                        "image": "",
-                        "baseIngredients": [],
-                        "status": "available",
-                        "isKids": true
                     }
                 ]
             },
@@ -527,10 +491,35 @@
                         "status": "available",
                         "priceSolo": 0,
                         "variants": [
-                            {"id": "court", "name": "Court", "price": 100},
-                            {"id": "long", "name": "Long", "price": 150}
+                            {
+                                "id": "court",
+                                "name": "Court",
+                                "price": 100
+                            },
+                            {
+                                "id": "long",
+                                "name": "Long",
+                                "price": 150
+                            }
                         ],
-                        "capsuleNumbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                        "capsuleNumbers": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15
+                        ],
+                        "image": "images/uploads/cafe-caps-353f92e0.webp"
                     },
                     {
                         "id": "the-infusion",
@@ -538,7 +527,8 @@
                         "description": "Thé ou infusion au choix.",
                         "price": 100,
                         "status": "available",
-                        "priceSolo": 0
+                        "priceSolo": 0,
+                        "image": "images/uploads/the-infusion-30f6a5fd.webp"
                     },
                     {
                         "id": "cafe-au-lait",
@@ -546,7 +536,8 @@
                         "description": "Café avec lait chaud.",
                         "price": 150,
                         "status": "available",
-                        "priceSolo": 0
+                        "priceSolo": 0,
+                        "image": "images/uploads/cafe-au-lait-8747be8e.webp"
                     },
                     {
                         "id": "cafe-lor",
@@ -556,10 +547,35 @@
                         "status": "available",
                         "priceSolo": 0,
                         "variants": [
-                            {"id": "court", "name": "Court", "price": 200},
-                            {"id": "long", "name": "Long", "price": 250}
+                            {
+                                "id": "court",
+                                "name": "Court",
+                                "price": 200
+                            },
+                            {
+                                "id": "long",
+                                "name": "Long",
+                                "price": 250
+                            }
                         ],
-                        "capsuleNumbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                        "capsuleNumbers": [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15
+                        ],
+                        "image": "images/uploads/cafe-lor-2ee0f6cb.webp"
                     },
                     {
                         "id": "cappuccino",
@@ -567,7 +583,8 @@
                         "description": "Café, lait mousseux, cacao.",
                         "price": 250,
                         "status": "available",
-                        "priceSolo": 0
+                        "priceSolo": 0,
+                        "image": "images/uploads/cappuccino-f41941f6.webp"
                     },
                     {
                         "id": "chocolat-chaud",
@@ -575,7 +592,8 @@
                         "description": "Chocolat onctueux.",
                         "price": 250,
                         "status": "available",
-                        "priceSolo": 0
+                        "priceSolo": 0,
+                        "image": "images/uploads/chocolat-chaud-6f06d1e8.webp"
                     }
                 ]
             },
@@ -665,7 +683,7 @@
                             }
                         ],
                         "priceSolo": 0,
-                        "image": "",
+                        "image": "images/uploads/jus-frais-14a2cdec.webp",
                         "pricePrefix": "À partir de"
                     },
                     {
@@ -684,7 +702,7 @@
                             }
                         ],
                         "priceSolo": 0,
-                        "image": "",
+                        "image": "images/uploads/smoothie-b58cf619.webp",
                         "pricePrefix": "À partir de"
                     },
                     {
@@ -704,7 +722,7 @@
                             }
                         ],
                         "priceSolo": 0,
-                        "image": "",
+                        "image": "images/uploads/cocktail-maison-4a35a464.webp",
                         "pricePrefix": "À partir de"
                     }
                 ]
@@ -749,7 +767,8 @@
                                 }
                             ]
                         },
-                        "priceSolo": 0
+                        "priceSolo": 0,
+                        "image": "images/uploads/crepe-kids-salee-3e482977.webp"
                     },
                     {
                         "id": "crepe-kids-sucree",
@@ -758,7 +777,8 @@
                         "price": 250,
                         "isKids": true,
                         "status": "available",
-                        "priceSolo": 0
+                        "priceSolo": 0,
+                        "image": "images/uploads/crepe-kids-sucree-a153d49a.webp"
                     }
                 ]
             },
