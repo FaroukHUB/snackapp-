@@ -191,6 +191,31 @@ const Products = {
         }
 
         grid.innerHTML = featuredProducts.map(product => {
+            // Si pricePrefix existe (ex: "À partir de 500 Da"), afficher SEULEMENT ça
+            if (product.pricePrefix) {
+                const priceText = product.pricePrefix;
+                const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
+                return `
+                    <div class="featured-card">
+                        <div class="product-image-wrapper" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
+                            <img src="../${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="product-image"
+                                 loading="lazy"
+                                 onerror="this.style.display='none'">
+                            ${product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : ''}
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name" onclick="Products.openProductModal('${escapeHtml(product.id)}')">${escapeHtml(product.name)}</h3>
+                            <p class="product-desc">${escapeHtml(desc)}</p>
+                            <div class="product-footer">
+                                <span class="product-price">${priceText}</span>
+                                <button class="product-add-btn" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">Ajouter</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Sinon, calculer le prix normalement
             let price = product.priceSolo || product.price || 0;
 
             // Si price = 0 et produit a des options, calculer le prix minimum
@@ -200,8 +225,7 @@ const Products = {
                 price = Math.min(...product.beverageOptions.map(opt => opt.price || 0));
             }
 
-            // ✅ FIX: Afficher "À partir de" + prix au lieu de juste "À partir de"
-            const priceText = product.pricePrefix ? `${product.pricePrefix} ${Config.formatPrice(price)}` : Config.formatPrice(price);
+            const priceText = Config.formatPrice(price);
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
             return `
                 <div class="featured-card">
@@ -520,17 +544,24 @@ const Products = {
         console.log(`🍽️ Rendering ${products.length} products for category: ${categoryId}`);
         return products.map(product => {
             const isUnavailable = product.status === 'unavailable';
-            let price = product.price || product.priceSolo || 0;
 
-            // Si price = 0 et produit a des options, calculer le prix minimum
-            if (price === 0 && product.pâtisserieOptions && product.pâtisserieOptions.length > 0) {
-                price = Math.min(...product.pâtisserieOptions.map(opt => opt.price || 0));
-            } else if (price === 0 && product.beverageOptions && product.beverageOptions.length > 0) {
-                price = Math.min(...product.beverageOptions.map(opt => opt.price || 0));
+            // Si pricePrefix existe (ex: "À partir de 500 Da"), afficher SEULEMENT ça
+            let priceText;
+            if (product.pricePrefix) {
+                priceText = product.pricePrefix;
+            } else {
+                // Sinon, calculer le prix normalement
+                let price = product.price || product.priceSolo || 0;
+
+                // Si price = 0 et produit a des options, calculer le prix minimum
+                if (price === 0 && product.pâtisserieOptions && product.pâtisserieOptions.length > 0) {
+                    price = Math.min(...product.pâtisserieOptions.map(opt => opt.price || 0));
+                } else if (price === 0 && product.beverageOptions && product.beverageOptions.length > 0) {
+                    price = Math.min(...product.beverageOptions.map(opt => opt.price || 0));
+                }
+
+                priceText = Config.formatPrice(price);
             }
-
-            // ✅ FIX: Afficher "À partir de" + prix au lieu de juste "À partir de"
-            const priceText = product.pricePrefix ? `${product.pricePrefix} ${Config.formatPrice(price)}` : Config.formatPrice(price);
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
 
             return `
