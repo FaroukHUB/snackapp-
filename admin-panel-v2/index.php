@@ -898,7 +898,7 @@ if (isset($_GET['export'])) {
         </div>
 
         <!-- COMMANDES -->
-        <div id="section-orders" class="section active">
+        <div id="section-orders" class="section active" style="background: #f3f4f6; padding: 20px; border-radius: 16px; margin: -10px; margin-bottom: 20px;">
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
@@ -963,11 +963,11 @@ if (isset($_GET['export'])) {
                     $items = $order['items'] ?? [];
                     $itemCount = count($items);
                 ?>
-                <!-- CARTE COMMANDE (Design moderne gris + bleu) -->
-                <div class="card order-card-compact" style="position: relative; border-left: 4px solid <?php echo $statusColor; ?>; padding: 18px; cursor: pointer; transition: all 0.3s ease; background: #f8fafc; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+                <!-- CARTE COMMANDE (Design moderne sombre) -->
+                <div class="card order-card-compact" style="position: relative; border-left: 4px solid <?php echo $statusColor; ?>; padding: 18px; cursor: pointer; transition: all 0.3s ease; background: #1e293b; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"
                      onclick="showOrderDetails('<?php echo htmlspecialchars($order['id'], ENT_QUOTES); ?>')"
-                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 24px rgba(0,0,0,0.15)'; this.style.background='#e0f2fe'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'; this.style.background='#f8fafc'">
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 24px rgba(0,0,0,0.5)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.3)'">
 
                     <!-- Checkbox sélection (en haut à gauche) -->
                     <input type="checkbox" class="order-checkbox" data-order-id="<?php echo htmlspecialchars($order['id'], ENT_QUOTES); ?>"
@@ -977,7 +977,7 @@ if (isset($_GET['export'])) {
 
                     <!-- Header: Numéro + Statut -->
                     <div style="display: flex; justify-between; align-items: center; margin-bottom: 14px; padding-left: 30px;">
-                        <span style="font-size: 18px; font-weight: 700; color: #1e3a8a;">
+                        <span style="font-size: 18px; font-weight: 700; color: white;">
                             <i class="fas fa-hashtag" style="font-size: 14px;"></i><?php echo htmlspecialchars($order['id']); ?>
                         </span>
                         <span style="background: <?php echo $statusColor; ?>; color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; box-shadow: 0 2px 6px <?php echo $statusColor; ?>44;">
@@ -986,15 +986,15 @@ if (isset($_GET['export'])) {
                     </div>
 
                     <!-- Client: Avatar + Nom + Téléphone -->
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 2px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 2px solid #374151;">
                         <div style="width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #1e40af, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: white; flex-shrink: 0; box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);">
                             <?php echo strtoupper(substr($order['customer_name'] ?? 'C', 0, 1)); ?>
                         </div>
                         <div style="flex: 1; min-width: 0;">
-                            <div style="font-weight: 700; font-size: 15px; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <div style="font-weight: 700; font-size: 15px; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <?php echo htmlspecialchars($order['customer_name'] ?? 'Client'); ?>
                             </div>
-                            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                            <div style="font-size: 12px; color: #9ca3af; margin-top: 2px;">
                                 <i class="fas fa-phone" style="color: #3b82f6;"></i>
                                 <?php
                                 $phone = $order['customer_phone'] ?? '';
@@ -1006,32 +1006,32 @@ if (isset($_GET['export'])) {
 
                     <!-- Items (3 premiers) -->
                     <div style="margin-bottom: 12px;">
-                        <div style="font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 600;">
+                        <div style="font-size: 11px; color: #9ca3af; margin-bottom: 6px; font-weight: 600;">
                             <i class="fas fa-shopping-bag" style="color: #3b82f6;"></i> <?php echo $itemCount; ?> article<?php echo $itemCount > 1 ? 's' : ''; ?>
                         </div>
                         <?php
                         $displayItems = array_slice($items, 0, 3);
                         foreach ($displayItems as $item):
                         ?>
-                            <div style="font-size: 12px; color: #334155; padding: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <div style="font-size: 12px; color: #e5e7eb; padding: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <strong style="color: #1e40af;"><?php echo $item['quantity'] ?? 1; ?>x</strong>
                                 <?php echo htmlspecialchars($item['name']); ?>
                             </div>
                         <?php endforeach; ?>
                         <?php if ($itemCount > 3): ?>
-                            <div style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 4px;">
+                            <div style="font-size: 11px; color: #9ca3af; font-style: italic; margin-top: 4px;">
                                 <i class="fas fa-ellipsis-h" style="font-size: 9px;"></i> <?php echo $itemCount - 3; ?> autre<?php echo ($itemCount - 3) > 1 ? 's' : ''; ?>...
                             </div>
                         <?php endif; ?>
                     </div>
 
                     <!-- Total + Fidélité -->
-                    <div style="margin-bottom: 12px; padding: 12px; background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%); border-radius: 12px; border: 1px solid #bfdbfe;">
-                        <div style="font-size: 22px; font-weight: 800; color: #1e3a8a; text-align: center;">
+                    <div style="margin-bottom: 12px; padding: 12px; background: #0f172a; border-radius: 12px; border: 2px solid <?php echo $primaryColor; ?>;">
+                        <div style="font-size: 22px; font-weight: 800; color: <?php echo $primaryColor; ?>; text-align: center;">
                             <i class="fas fa-coins" style="font-size: 18px; margin-right: 4px;"></i><?php echo number_format($order['total'] ?? 0, 0); ?> DA
                         </div>
                         <?php if (!empty($order['loyalty_reward_id']) || !empty($order['loyalty_code'])): ?>
-                            <div style="text-align: center; margin-top: 6px; font-size: 11px; color: #d97706; font-weight: 700; background: #fef3c7; padding: 4px 8px; border-radius: 6px; display: inline-block; width: 100%;">
+                            <div style="text-align: center; margin-top: 6px; font-size: 11px; color: #f59e0b; font-weight: 700; background: rgba(245,158,11,0.1); padding: 4px 8px; border-radius: 6px; display: inline-block; width: 100%;">
                                 <i class="fas fa-gift"></i>
                                 <?php if (!empty($order['loyalty_code'])): ?>
                                     <?php echo htmlspecialchars($order['loyalty_code']); ?>
@@ -1045,7 +1045,7 @@ if (isset($_GET['export'])) {
 
                     <!-- Heure + Note -->
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 11px; color: #64748b; font-weight: 600;">
+                        <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">
                             <i class="fas fa-clock" style="color: #3b82f6;"></i> <?php echo date('H:i', strtotime($order['created_at'])); ?>
                         </span>
                         <?php if (!empty($order['notes'])): ?>
@@ -1056,7 +1056,7 @@ if (isset($_GET['export'])) {
                     </div>
 
                     <!-- Bouton détails -->
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #e2e8f0;">
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #374151;">
                         <div style="text-align: center; font-size: 12px; color: #1e40af; font-weight: 700;">
                             <i class="fas fa-info-circle"></i> Cliquer pour plus de détails
                         </div>
