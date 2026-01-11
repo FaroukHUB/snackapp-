@@ -1640,24 +1640,37 @@ function handleFormuleImageUpload(string $baseId): ?string {
         mkdir($uploadsDir, 0755, true);
     }
 
-    // ✅ SÉCURITÉ: Nom de fichier sécurisé
-    $filename = $baseId . '-' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
+    // ⚡ OPTIMISATION: Convertir en WebP optimisé avant sauvegarde
+    $webpTempFile = null;
+    try {
+        $webpTempFile = convertToOptimizedWebP($file['tmp_name'], 85, 800);
 
-    // Vérifier qu'il n'y a pas d'extensions dangereuses
-    if (preg_match('/\.(php|phtml|php3|php4|php5|phps|phar|htaccess|exe|sh|bat|cmd)/i', $filename)) {
-        jsonError('Extension de fichier non autorisée détectée');
+        // ✅ SÉCURITÉ: Nom de fichier sécurisé - toujours .webp maintenant
+        $filename = $baseId . '-' . bin2hex(random_bytes(4)) . '.webp';
+
+        // Vérifier qu'il n'y a pas d'extensions dangereuses cachées
+        if (preg_match('/\.(php|phtml|php3|php4|php5|phps|phar|htaccess|exe|sh|bat|cmd)/i', $filename)) {
+            jsonError('Extension de fichier non autorisée détectée');
+        }
+
+        $dest = $uploadsDir . '/' . $filename;
+
+        if (!rename($webpTempFile, $dest)) {
+            jsonError('Échec sauvegarde image WebP formule');
+        }
+
+        // ✅ SÉCURITÉ: Permissions strictes sur le fichier uploadé
+        chmod($dest, 0644);
+
+        return 'images/formules/' . $filename;
+
+    } catch (Exception $e) {
+        // Nettoyer le fichier temporaire en cas d'erreur
+        if ($webpTempFile && file_exists($webpTempFile)) {
+            @unlink($webpTempFile);
+        }
+        jsonError('Échec conversion WebP formule: ' . $e->getMessage());
     }
-
-    $dest = $uploadsDir . '/' . $filename;
-
-    if (!move_uploaded_file($file['tmp_name'], $dest)) {
-        jsonError('Échec sauvegarde image formule');
-    }
-
-    // ✅ SÉCURITÉ: Permissions strictes
-    chmod($dest, 0644);
-
-    return 'images/formules/' . $filename;
 }
 
 /* =========================
