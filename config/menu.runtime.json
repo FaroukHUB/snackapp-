@@ -108,7 +108,7 @@
             "status": "available",
             "supplements": [],
             "image": "images/uploads/salade-composee-20d72835.webp",
-            "pricePrefix": "À partir de 500 Da"
+            "pricePrefix": "A partir 500 Da"
         },
         "crepe-nature": {
             "name": "Crêpe Nature",
@@ -170,7 +170,7 @@
             "name": "Cocktail Maison",
             "description": "Citron ou Mojito (sans alcool).",
             "priceSolo": 0,
-            "pricePrefix": "À partir de",
+            "pricePrefix": "À partir de 350",
             "status": "available",
             "supplements": [],
             "image": "images/uploads/cocktail-maison-4a35a464.webp"
@@ -188,7 +188,7 @@
             "name": "Jus Frais",
             "description": "Choisissez votre jus frais.",
             "priceSolo": 0,
-            "pricePrefix": "À partir de",
+            "pricePrefix": "À partir de 350",
             "status": "available",
             "supplements": [],
             "image": "images/uploads/jus-frais-14a2cdec.webp"

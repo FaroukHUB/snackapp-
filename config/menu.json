@@ -240,7 +240,7 @@
                         "id": "salade-composee",
                         "name": "Salade Composée",
                         "description": "Salade fraîche du jour.",
-                        "price": 400,
+                        "price": 0,
                         "image": "images/uploads/salade-composee-20d72835.webp",
                         "status": "available",
                         "priceSolo": 0,
@@ -251,6 +251,12 @@
                                 "name": "Salade thon crudités",
                                 "price": 450,
                                 "image": "assets/images/beverages/saladecompose_1768123966.png"
+                            },
+                            {
+                                "id": "salade-composee-saladecrispy",
+                                "name": "salade crispy",
+                                "price": 600,
+                                "image": "assets/images/beverages/saladecompose_1768128802.png"
                             }
                         ]
                     },
@@ -664,6 +670,11 @@
                                 "name": "Orange",
                                 "price": 350,
                                 "image": "assets/images/beverages/caf_1767886491.webp"
+                            },
+                            {
+                                "id": "jus-frais-fraise",
+                                "name": "Fraise",
+                                "price": 450
                             }
                         ],
                         "priceSolo": 0,
@@ -682,6 +693,11 @@
                                 "name": "Fraise",
                                 "price": 300,
                                 "image": "assets/images/beverages/caf_1767886450.webp"
+                            },
+                            {
+                                "id": "smoothie-banane",
+                                "name": "Banane",
+                                "price": 450
                             }
                         ],
                         "priceSolo": 0,
@@ -701,6 +717,11 @@
                                 "name": "Mojito",
                                 "price": 350,
                                 "image": "assets/images/beverages/caf_1767886410.webp"
+                            },
+                            {
+                                "id": "cocktail-maison-fraisecitron",
+                                "name": "Fraise citron",
+                                "price": 450
                             }
                         ],
                         "priceSolo": 0,
