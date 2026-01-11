@@ -1655,6 +1655,11 @@
                                     <i class="fas fa-info-circle" style="font-size: 11px;"></i> ${[item.options?.selectedBeverage?.name, item.options?.selectedViennoiserie?.name, item.options?.selectedPatisserie?.name].filter(Boolean).join(', ')}
                                 </div>
                             ` : ''}
+                            ${item.options?.selectedVariant || item.options?.selectedCapsuleNumber ? `
+                                <div class="cart-item-options" style="color: var(--gray-600); font-size: 13px;">
+                                    <i class="fas fa-coffee" style="font-size: 11px;"></i> ${[item.options?.selectedVariant?.name, item.options?.selectedCapsuleNumber ? `Capsule ${item.options.selectedCapsuleNumber.name}` : ''].filter(Boolean).join(' - ')}
+                                </div>
+                            ` : ''}
                             <div class="cart-item-price">${Config.formatPrice(Cart.getItemTotal(item))}</div>
                         </div>
                         <div class="cart-item-actions">
@@ -1745,7 +1750,11 @@
                 console.log('🔎 hasPâtisserieOptions:', product.hasPâtisserieOptions);
 
                 // Si le produit a des options (modal requis), ouvrir le modal
-                if (product.hasBeverageOptions || product.hasViennoiserieOptions || product.hasPâtisserieOptions) {
+                // ✅ Ajout: vérifier aussi variants et capsuleNumbers pour Café Caps et Café l'Or
+                const hasVariants = product.variants && product.variants.length > 0;
+                const hasCapsuleNumbers = product.capsuleNumbers && product.capsuleNumbers.length > 0;
+
+                if (product.hasBeverageOptions || product.hasViennoiserieOptions || product.hasPâtisserieOptions || hasVariants || hasCapsuleNumbers) {
                     console.log('✅ Ouverture du modal pour:', product.name);
                     this.openUpsellModal(product);
                 } else {
@@ -1831,6 +1840,43 @@
                     `;
                 }
 
+                // ✅ Afficher les variants (Court/Long pour Café Caps et Café l'Or)
+                if (product.variants && product.variants.length > 0) {
+                    console.log('☕ Ajout variants:', product.variants);
+                    optionsHTML += `
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 12px;">Choisissez la taille:</h3>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                ${product.variants.map(variant => `
+                                    <button type="button" class="option-btn" data-option-type="variant" data-option-id="${variant.id}"
+                                            onclick="CartPage.selectUpsellOption('variant', '${variant.id}', '${variant.name}', ${variant.price || 0}, event)">
+                                        ${variant.name} (${Config.formatPrice(variant.price || 0)})
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // ✅ Afficher les numéros de capsules (1-15 pour Café Caps et Café l'Or)
+                if (product.capsuleNumbers && product.capsuleNumbers.length > 0) {
+                    console.log('🔢 Ajout capsuleNumbers:', product.capsuleNumbers);
+                    optionsHTML += `
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 12px;">Numéro de capsule <span style="color: var(--gray-500); font-size: 14px; font-weight: normal;">(Optionnel)</span>:</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px;">
+                                ${product.capsuleNumbers.map(num => `
+                                    <button type="button" class="option-btn" data-option-type="capsuleNumber" data-option-id="${num}"
+                                            onclick="CartPage.selectUpsellOption('capsuleNumber', '${num}', '${num}', 0, event)"
+                                            style="padding: 10px; text-align: center;">
+                                        ${num}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
                 console.log('📝 HTML généré, mise à jour du modal...');
                 modalBody.innerHTML = optionsHTML;
 
@@ -1903,6 +1949,13 @@
                 }
                 if (this.selectedUpsellOptions.patisserie) {
                     options.selectedPatisserie = this.selectedUpsellOptions.patisserie;
+                }
+                // ✅ Ajouter variant (Court/Long) et capsuleNumber pour cafés
+                if (this.selectedUpsellOptions.variant) {
+                    options.selectedVariant = this.selectedUpsellOptions.variant;
+                }
+                if (this.selectedUpsellOptions.capsuleNumber) {
+                    options.selectedCapsuleNumber = this.selectedUpsellOptions.capsuleNumber;
                 }
 
                 console.log('✅ Ajout:', this.currentUpsellProduct.name, 'avec options:', options);
