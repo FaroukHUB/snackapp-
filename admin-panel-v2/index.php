@@ -2117,7 +2117,7 @@ if (isset($_GET['export'])) {
                         <!-- Overlay sombre -->
                         <div class="printer-help-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 99998;"></div>
                         <!-- Tooltip modal -->
-                        <div class="printer-help-content" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 2px solid #10b981; border-radius: 12px; padding: 20px; width: 420px; max-width: 90vw; max-height: 80vh; overflow-y: auto; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <div class="printer-help-content" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 2px solid #10b981; border-radius: 12px; padding: 20px; width: 420px; max-width: 90vw; max-height: 65vh; overflow-y: auto; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                             <div style="font-size: 14px; font-weight: 700; color: #10b981; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                                 <i class="fas fa-info-circle"></i> Comment utiliser l'impression
                             </div>
