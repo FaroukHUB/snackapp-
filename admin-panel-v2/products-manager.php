@@ -697,8 +697,8 @@ $csrfToken = getCsrfToken();
           </div>
           <div class="two">
             <div class="field">
-              <label for="editPriceSolo">Prix (solo)</label>
-              <input id="editPriceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" required />
+              <label for="editPriceSolo">Prix (solo) <span class="muted">(optionnel pour produits avec options)</span></label>
+              <input id="editPriceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" />
             </div>
             <div class="field">
               <label for="editPriceMenu">Prix (menu)</label>
