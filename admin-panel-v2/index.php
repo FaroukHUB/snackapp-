@@ -1274,15 +1274,38 @@ if (isset($_GET['export'])) {
                     `;
                 }
 
-                // Total
-                html += `
-                    <div style="text-align: center; padding: 20px; background: ${primaryColor}22; border: 2px solid ${primaryColor}; border-radius: 12px; margin-bottom: 20px;">
-                        <div style="font-size: 14px; color: #9ca3af; margin-bottom: 8px;">Total</div>
-                        <div style="font-size: 32px; font-weight: 700; color: ${primaryColor};">
-                            ${order.total.toLocaleString('fr-FR')} DA
+                // Détail du total (si frais de livraison)
+                const deliveryFee = parseFloat(order.delivery_fee || 0);
+                const subtotal = parseFloat(order.subtotal || order.total);
+
+                if (deliveryFee > 0) {
+                    html += `
+                        <div style="background: #1e293b; padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #374151;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #9ca3af; font-size: 14px;">
+                                <span>Sous-total:</span>
+                                <span style="color: white;">${subtotal.toLocaleString('fr-FR')} DA</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #f59e0b; font-size: 14px; font-weight: 600;">
+                                <span><i class="fas fa-motorcycle"></i> Frais de livraison:</span>
+                                <span>+${deliveryFee.toLocaleString('fr-FR')} DA</span>
+                            </div>
+                            <div style="border-top: 1px solid #374151; margin: 8px 0; padding-top: 8px; display: flex; justify-content: space-between; font-size: 16px; font-weight: 700;">
+                                <span style="color: white;">Total:</span>
+                                <span style="color: ${primaryColor};">${order.total.toLocaleString('fr-FR')} DA</span>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // Total simple sans frais
+                    html += `
+                        <div style="text-align: center; padding: 20px; background: ${primaryColor}22; border: 2px solid ${primaryColor}; border-radius: 12px; margin-bottom: 20px;">
+                            <div style="font-size: 14px; color: #9ca3af; margin-bottom: 8px;">Total</div>
+                            <div style="font-size: 32px; font-weight: 700; color: ${primaryColor};">
+                                ${order.total.toLocaleString('fr-FR')} DA
+                            </div>
+                        </div>
+                    `;
+                }
 
                 // Actions
                 html += `<div style="display: grid; grid-template-columns: 1fr auto; gap: 12px;">`;

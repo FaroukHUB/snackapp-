@@ -136,6 +136,7 @@ class OrderRepository {
             'customer_phone' => $data['customer_phone'] ?? '',
             'subtotal' => $data['subtotal'] ?? $data['total'] ?? 0,
             'total' => $data['total'] ?? 0,
+            'delivery_fee' => $data['delivery_fee'] ?? 0,
             'status' => 'pending',
             'notes' => $data['notes'] ?? null,
             'pickup_time' => $data['pickup_time'] ?? null,

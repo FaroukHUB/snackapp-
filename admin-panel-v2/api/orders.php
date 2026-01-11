@@ -362,6 +362,12 @@ function addOrder(bool $useMySQL) {
                 $notes .= "\nPrévoir monnaie sur: {$changeFor} DA";
             }
 
+            // Ajouter les frais de livraison dans les notes si applicable
+            $deliveryFee = (float)($requestData['delivery_fee'] ?? 0);
+            if ($deliveryFee > 0) {
+                $notes .= "\nFrais de livraison: +{$deliveryFee} DA";
+            }
+
             // Créer la commande
             $orderId = OrderRepository::createOrder(SNACK_RESTAURANT_ID, [
                 'customer_name' => $requestData['customer_name'] ?? 'Client',
@@ -369,6 +375,7 @@ function addOrder(bool $useMySQL) {
                 'items' => $requestData['items'],
                 'subtotal' => $requestData['subtotal'] ?? $requestData['total'],
                 'total' => (float)$requestData['total'],
+                'delivery_fee' => (float)($requestData['delivery_fee'] ?? 0),
                 'loyalty_reward_id' => $loyaltyRewardId,
                 'notes' => trim($notes),
                 'pickup_time' => $requestData['pickup_time'] ?? null,

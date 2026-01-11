@@ -1411,6 +1411,10 @@
                         <span>Réduction</span>
                         <span id="summaryDiscount" style="color: var(--success);">-0 DA</span>
                     </div>
+                    <div class="cart-summary-row" id="deliveryFeeRow" style="display: none;">
+                        <span>Frais de livraison</span>
+                        <span id="summaryDeliveryFee" style="color: #f59e0b;">+0 DA</span>
+                    </div>
 
                     <!-- Programme de fidélité - Récompenses -->
                     <div class="loyalty-rewards-section" id="loyaltyRewardsSection" style="background: white; border-radius: 12px; padding: 16px; margin: 12px 0; border: 2px solid #10b981;">
@@ -1967,16 +1971,38 @@
 
             updateSummary() {
                 const subtotal = Cart.getSubtotal();
-                const total = subtotal - this.discount;
+
+                // Calculer les frais de livraison selon le type
+                let deliveryFee = 0;
+                if (this.mode === 'delivery') {
+                    const deliveryType = this.deliveryType || 'libre';
+                    if (deliveryType === 'riad-city') {
+                        deliveryFee = 50;
+                    } else if (deliveryType === 'riad-prestige') {
+                        deliveryFee = 100;
+                    }
+                }
+                this.deliveryFee = deliveryFee;
+
+                const total = subtotal - this.discount + deliveryFee;
 
                 document.getElementById('summarySubtotal').textContent = Config.formatPrice(subtotal);
                 document.getElementById('summaryTotal').textContent = Config.formatPrice(Math.max(0, total));
 
+                // Afficher/masquer la réduction
                 if (this.discount > 0) {
                     document.getElementById('discountRow').style.display = 'flex';
                     document.getElementById('summaryDiscount').textContent = `-${Config.formatPrice(this.discount)}`;
                 } else {
                     document.getElementById('discountRow').style.display = 'none';
+                }
+
+                // Afficher/masquer les frais de livraison
+                if (deliveryFee > 0) {
+                    document.getElementById('deliveryFeeRow').style.display = 'flex';
+                    document.getElementById('summaryDeliveryFee').textContent = `+${Config.formatPrice(deliveryFee)}`;
+                } else {
+                    document.getElementById('deliveryFeeRow').style.display = 'none';
                 }
             },
 
@@ -2000,6 +2026,9 @@
                 document.getElementById('dineinFields').style.display = mode === 'dinein' ? 'block' : 'none';
                 document.getElementById('deliveryFields').style.display = mode === 'delivery' ? 'block' : 'none';
                 document.getElementById('paymentFields').style.display = (mode === 'delivery' || mode === 'dinein') ? 'block' : 'none';
+
+                // Recalculer le résumé (frais de livraison dépendent du mode)
+                this.updateSummary();
             },
 
             setRoom(room) {
@@ -2027,6 +2056,9 @@
                 } else if (type === 'riad-prestige') {
                     document.getElementById('deliveryRiadPrestige').style.display = 'block';
                 }
+
+                // Recalculer le résumé (frais de livraison changent selon le type)
+                this.updateSummary();
             },
 
             setChangeOption(option) {
@@ -2416,8 +2448,11 @@
                     };
                 });
 
-                // Pas de réduction avec points - total normal
-                const totalAmount = savedSubtotal - savedDiscount;
+                // Calculer les frais de livraison
+                const deliveryFee = this.deliveryFee || 0;
+
+                // Total = Sous-total - Réduction + Frais de livraison
+                const totalAmount = savedSubtotal - savedDiscount + deliveryFee;
 
                 // Prepare payment/change info for delivery AND dinein (AVANT notes)
                 let paymentInfo = {};
@@ -2499,6 +2534,7 @@
                     items: formattedItems,
                     subtotal: savedSubtotal,
                     total: totalAmount,
+                    delivery_fee: deliveryFee,
                     loyalty_reward_id: this.selectedReward || null,
                     loyalty_customer_id: this.loyaltyCustomer?.id || null,
                     notes: [modeNotes, note].filter(Boolean).join(' | '),
