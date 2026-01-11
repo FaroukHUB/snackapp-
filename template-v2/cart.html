@@ -712,6 +712,38 @@
             border-color: #10b981;
             color: white;
         }
+
+        /* Cartes d'options upsell modernes */
+        .upsell-option-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+        }
+
+        .upsell-option-card:hover {
+            background: var(--gray-100);
+            border-color: var(--gray-300);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .upsell-option-card.selected {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+            color: white;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .upsell-option-card.selected div {
+            color: white !important;
+        }
     </style>
 </head>
 <body class="cart-page">
@@ -1560,7 +1592,7 @@
 
             <div class="product-modal-footer">
                 <button type="button" class="product-add-btn" onclick="CartPage.addUpsellToCart(event)" id="addUpsellBtn">
-                    <i class="fas fa-shopping-cart"></i> Ajouter
+                    <i class="fas fa-shopping-cart"></i> Ajouter • <span id="upsellModalPrice">0 DA</span>
                 </button>
             </div>
         </div>
@@ -1795,12 +1827,15 @@
                     console.log('🥤 Ajout options boisson:', product.beverageOptions);
                     optionsHTML += `
                         <div style="margin-bottom: 20px;">
-                            <h3 style="margin-bottom: 12px;">Choisissez votre boisson <span style="color: var(--gray-500); font-size: 14px; font-weight: normal;">(Optionnel)</span>:</h3>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                ${product.beverageOptions.map(opt => `
-                                    <button type="button" class="option-btn" data-option-type="beverage" data-option-id="${opt.id}"
-                                            onclick="CartPage.selectUpsellOption('beverage', '${opt.id}', '${opt.name}', 0, event)">
-                                        ${opt.name}
+                            <h3 style="margin-bottom: 12px;">Choisissez votre ${product.name.toLowerCase()}:</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
+                                ${product.beverageOptions.map((opt, index) => `
+                                    <button type="button" class="upsell-option-card ${index === 0 ? 'selected' : ''}"
+                                            data-option-type="beverage" data-option-id="${opt.id}"
+                                            onclick="CartPage.selectUpsellOption('beverage', '${opt.id}', '${opt.name}', ${opt.price || 0}, event)">
+                                        ${opt.image ? `<img src="../${opt.image}" alt="${opt.name}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" onerror="this.style.display='none'">` : ''}
+                                        <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">${opt.name}</div>
+                                        <div style="color: var(--primary); font-weight: 700;">${Config.formatPrice(opt.price || 0)}</div>
                                     </button>
                                 `).join('')}
                             </div>
@@ -1831,12 +1866,15 @@
                     console.log('🍰 Ajout options pâtisserie:', product.pâtisserieOptions);
                     optionsHTML += `
                         <div style="margin-bottom: 20px;">
-                            <h3 style="margin-bottom: 12px;">Choisissez votre pâtisserie <span style="color: var(--gray-500); font-size: 14px; font-weight: normal;">(Optionnel)</span>:</h3>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                ${product.pâtisserieOptions.map(opt => `
-                                    <button type="button" class="option-btn" data-option-type="patisserie" data-option-id="${opt.id}"
+                            <h3 style="margin-bottom: 12px;">Choisissez votre pâtisserie:</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
+                                ${product.pâtisserieOptions.map((opt, index) => `
+                                    <button type="button" class="upsell-option-card ${index === 0 ? 'selected' : ''}"
+                                            data-option-type="patisserie" data-option-id="${opt.id}"
                                             onclick="CartPage.selectUpsellOption('patisserie', '${opt.id}', '${opt.name}', ${opt.price || 0}, event)">
-                                        ${opt.name}
+                                        ${opt.image ? `<img src="../${opt.image}" alt="${opt.name}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" onerror="this.style.display='none'">` : ''}
+                                        <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">${opt.name}</div>
+                                        <div style="color: var(--primary); font-weight: 700;">${Config.formatPrice(opt.price || 0)}</div>
                                     </button>
                                 `).join('')}
                             </div>
@@ -1884,6 +1922,16 @@
                 console.log('📝 HTML généré, mise à jour du modal...');
                 modalBody.innerHTML = optionsHTML;
 
+                // Sélectionner la première option par défaut
+                if (product.hasPâtisserieOptions && product.pâtisserieOptions && product.pâtisserieOptions.length > 0) {
+                    const firstOpt = product.pâtisserieOptions[0];
+                    this.selectedUpsellOptions.patisserie = {id: firstOpt.id, name: firstOpt.name, price: firstOpt.price || 0};
+                }
+                if (product.hasBeverageOptions && product.beverageOptions && product.beverageOptions.length > 0) {
+                    const firstOpt = product.beverageOptions[0];
+                    this.selectedUpsellOptions.beverage = {id: firstOpt.id, name: firstOpt.name, price: firstOpt.price || 0};
+                }
+
                 const modal = document.getElementById('upsellModal');
                 console.log('🎯 Modal element:', modal);
 
@@ -1891,6 +1939,9 @@
                     console.error('❌ Element upsellModal non trouvé!');
                     return;
                 }
+
+                // Mettre à jour le prix
+                this.updateUpsellModalUI();
 
                 console.log('✅ Affichage du modal...');
                 modal.style.display = 'flex';
@@ -1915,6 +1966,33 @@
                 document.querySelectorAll(`[data-option-type="${type}"]`).forEach(btn => {
                     btn.classList.toggle('selected', btn.dataset.optionId === id);
                 });
+
+                // Mettre à jour le prix du modal
+                this.updateUpsellModalUI();
+            },
+
+            updateUpsellModalUI() {
+                // Calculer le prix basé sur les options sélectionnées
+                let basePrice = 0;
+
+                // Priorité: variant (café) > pâtisserie > beverage
+                if (this.selectedUpsellOptions.variant) {
+                    basePrice = this.selectedUpsellOptions.variant.price || 0;
+                } else if (this.selectedUpsellOptions.patisserie) {
+                    basePrice = this.selectedUpsellOptions.patisserie.price || 0;
+                } else if (this.selectedUpsellOptions.beverage) {
+                    basePrice = this.selectedUpsellOptions.beverage.price || 0;
+                } else if (this.currentUpsellProduct) {
+                    basePrice = this.currentUpsellProduct.price || 0;
+                }
+
+                // Mettre à jour l'affichage du prix dans le bouton
+                const priceElement = document.getElementById('upsellModalPrice');
+                if (priceElement) {
+                    priceElement.textContent = Config.formatPrice(basePrice);
+                }
+
+                console.log('💰 Prix modal mis à jour:', basePrice, 'DA');
             },
 
             closeUpsellModal(event) {
