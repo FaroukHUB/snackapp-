@@ -748,7 +748,7 @@ ul {
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: var(--transition-slow);
 }
 
@@ -2676,7 +2676,7 @@ ul {
     .product-image {
         width: 100% !important;
         height: 140px !important;
-        object-fit: cover !important;
+        object-fit: contain !important;
     }
 
     .product-info {
