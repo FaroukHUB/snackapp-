@@ -63,11 +63,22 @@ switch ($action) {
 
     case 'create':
         // Créer un nouvel admin
-        $data = json_decode(file_get_contents('php://input'), true);
+        $rawInput = file_get_contents('php://input');
+        $data = json_decode($rawInput, true);
+
+        // DEBUG: Logger les données reçues
+        error_log('=== DEBUG CREATE ADMIN ===');
+        error_log('Raw input: ' . $rawInput);
+        error_log('Decoded data: ' . print_r($data, true));
+        error_log('Restaurant ID: ' . $restaurantId);
 
         $username = trim($data['username'] ?? '');
         $password = $data['password'] ?? '';
         $role = $data['role'] ?? 'staff';
+
+        error_log('Username: ' . $username);
+        error_log('Password length: ' . strlen($password));
+        error_log('Role: ' . $role);
 
         // Validation
         if (empty($username)) {
