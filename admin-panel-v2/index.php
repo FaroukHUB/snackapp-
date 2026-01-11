@@ -2117,14 +2117,14 @@ if (isset($_GET['export'])) {
                         <!-- Overlay sombre -->
                         <div class="printer-help-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 99998;"></div>
                         <!-- Tooltip modal -->
-                        <div class="printer-help-content" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 2px solid #10b981; border-radius: 12px; padding: 20px; width: 420px; max-width: 90vw; max-height: 50vh; overflow-y: auto; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                            <div style="font-size: 14px; font-weight: 700; color: #10b981; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <div class="printer-help-content" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #1e293b; border: 2px solid #10b981; border-radius: 12px; padding: 16px; width: 420px; max-width: 90vw; max-height: 40vh; overflow-y: auto; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                            <div style="font-size: 14px; font-weight: 700; color: #10b981; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
                                 <i class="fas fa-info-circle"></i> Comment utiliser l'impression
                             </div>
 
-                            <div style="margin-bottom: 16px;">
-                                <div style="font-weight: 600; color: white; margin-bottom: 6px; font-size: 13px;">📱 1. PRÉREQUIS</div>
-                                <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #d1d5db; line-height: 1.6;">
+                            <div style="margin-bottom: 12px;">
+                                <div style="font-weight: 600; color: white; margin-bottom: 4px; font-size: 13px;">📱 1. PRÉREQUIS</div>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 11px; color: #d1d5db; line-height: 1.5;">
                                     <li>Tablette/PC <strong>Android</strong> (Windows/Mac aussi)</li>
                                     <li>Navigateur <strong>Chrome</strong> ou <strong>Edge</strong></li>
                                     <li>Imprimante thermique <strong>Bluetooth</strong> (58mm ou 80mm)</li>
@@ -2132,9 +2132,9 @@ if (isset($_GET['export'])) {
                                 </ul>
                             </div>
 
-                            <div style="margin-bottom: 16px;">
-                                <div style="font-weight: 600; color: white; margin-bottom: 6px; font-size: 13px;">🔗 2. CONNEXION</div>
-                                <ol style="margin: 0; padding-left: 20px; font-size: 12px; color: #d1d5db; line-height: 1.6;">
+                            <div style="margin-bottom: 12px;">
+                                <div style="font-weight: 600; color: white; margin-bottom: 4px; font-size: 13px;">🔗 2. CONNEXION</div>
+                                <ol style="margin: 0; padding-left: 20px; font-size: 11px; color: #d1d5db; line-height: 1.5;">
                                     <li>Allumez votre imprimante Bluetooth</li>
                                     <li>Activez le Bluetooth sur votre tablette</li>
                                     <li>Cliquez sur "Connecter une imprimante"</li>
@@ -2143,16 +2143,16 @@ if (isset($_GET['export'])) {
                                 </ol>
                             </div>
 
-                            <div style="margin-bottom: 16px;">
-                                <div style="font-weight: 600; color: white; margin-bottom: 6px; font-size: 13px;">🖨️ 3. IMPRESSION</div>
-                                <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #d1d5db; line-height: 1.6;">
+                            <div style="margin-bottom: 12px;">
+                                <div style="font-weight: 600; color: white; margin-bottom: 4px; font-size: 13px;">🖨️ 3. IMPRESSION</div>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 11px; color: #d1d5db; line-height: 1.5;">
                                     <li>Une fois connectée, un bouton <strong>"Imprimer le ticket"</strong> apparaît sur chaque commande</li>
                                     <li>Cliquez dessus = impression <strong>instantanée</strong> (pas de dialogue)</li>
                                     <li>Le ticket contient tous les détails (client, articles, total, paiement...)</li>
                                 </ul>
                             </div>
 
-                            <div style="padding: 10px; background: rgba(239, 68, 68, 0.15); border-left: 3px solid #ef4444; border-radius: 6px; font-size: 11px; color: #fca5a5;">
+                            <div style="padding: 8px; background: rgba(239, 68, 68, 0.15); border-left: 3px solid #ef4444; border-radius: 6px; font-size: 10px; color: #fca5a5;">
                                 <strong>⚠️ Note :</strong> iOS (iPhone/iPad) ne supporte pas le Bluetooth Web. Utilisez une tablette Android pour l'impression.
                             </div>
                         </div>
