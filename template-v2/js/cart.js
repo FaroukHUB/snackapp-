@@ -194,6 +194,10 @@ const Cart = {
         // Si pâtisserie sélectionnée, utiliser SON prix (REMPLACE le basePrice, ne s'additionne pas!)
         else if (item.options && item.options.selectedPatisserie && item.options.selectedPatisserie.price) {
             total = item.options.selectedPatisserie.price;
+        }
+        // ✅ FIX: Si beverage sélectionné (jus, smoothie, salade), utiliser SON prix
+        else if (item.options && item.options.selectedBeverage && item.options.selectedBeverage.price) {
+            total = item.options.selectedBeverage.price;
         } else {
             // Sinon, utiliser le prix de base
             total = item.basePrice;
