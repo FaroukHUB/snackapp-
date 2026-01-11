@@ -1503,7 +1503,8 @@ $csrfToken = getCsrfToken();
         'jus': 'Jus',
         'jus-frais': 'Jus Frais',
         'smoothie': 'Smoothie',
-        'cocktail-maison': 'Cocktail Maison'
+        'cocktail-maison': 'Cocktail Maison',
+        'salade-composee': 'Salade Composée'
       };
       $("#currentBeverageType").textContent = typeNames[product.id] || product.name;
       renderBeverageOptionsList();
@@ -2009,7 +2010,7 @@ $csrfToken = getCsrfToken();
           // Detect special products that need options management instead of regular edit
           if (it.id === 'patisserie') {
             openManagePatisserieModal(it);
-          } else if (['soda', 'jus', 'jus-frais', 'smoothie', 'cocktail-maison'].includes(it.id)) {
+          } else if (['soda', 'jus', 'jus-frais', 'smoothie', 'cocktail-maison', 'salade-composee'].includes(it.id)) {
             openManageBeverageModal(it);
           } else {
             openEditProductModal(it, cat.id);
