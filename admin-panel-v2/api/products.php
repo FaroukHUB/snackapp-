@@ -872,6 +872,21 @@ switch ($action) {
         // Gérer l'upload d'image
         $imagePath = handleImageUpload($productId);
         if ($imagePath) {
+            // Supprimer l'ancienne image si elle existe
+            $oldImagePath = null;
+            if (isset($runtime['customProducts'][$productId]['image'])) {
+                $oldImagePath = $runtime['customProducts'][$productId]['image'];
+            } elseif (isset($runtime['products'][$productId]['image'])) {
+                $oldImagePath = $runtime['products'][$productId]['image'];
+            }
+
+            if ($oldImagePath && $oldImagePath !== $imagePath) {
+                $fullPath = SNACK_ROOT . '/' . ltrim($oldImagePath, '/');
+                if (file_exists($fullPath) && strpos($oldImagePath, '/uploads/') !== false) {
+                    @unlink($fullPath);
+                }
+            }
+
             $patch['image'] = $imagePath;
         }
 
@@ -1254,6 +1269,21 @@ switch ($action) {
         // Gérer l'upload d'image
         $imagePath = handleFormuleImageUpload($formuleId);
         if ($imagePath) {
+            // Supprimer l'ancienne image si elle existe
+            $oldImagePath = null;
+            if (isset($runtime['customFormules'][$formuleId]['image'])) {
+                $oldImagePath = $runtime['customFormules'][$formuleId]['image'];
+            } elseif (isset($runtime['formules'][$formuleId]['image'])) {
+                $oldImagePath = $runtime['formules'][$formuleId]['image'];
+            }
+
+            if ($oldImagePath && $oldImagePath !== $imagePath) {
+                $fullPath = SNACK_ROOT . '/' . ltrim($oldImagePath, '/');
+                if (file_exists($fullPath) && strpos($oldImagePath, '/formules/') !== false) {
+                    @unlink($fullPath);
+                }
+            }
+
             $patch['image'] = $imagePath;
         }
 
@@ -1279,6 +1309,20 @@ switch ($action) {
 
         if (!$formuleId) {
             jsonError('ID formule manquant');
+        }
+
+        // Récupérer l'image de la formule avant suppression pour la nettoyer
+        $imagePath = null;
+        if (isset($runtime['customFormules'][$formuleId]['image'])) {
+            $imagePath = $runtime['customFormules'][$formuleId]['image'];
+        }
+
+        // Supprimer l'image si elle existe
+        if ($imagePath) {
+            $fullPath = SNACK_ROOT . '/' . ltrim($imagePath, '/');
+            if (file_exists($fullPath) && strpos($imagePath, '/formules/') !== false) {
+                @unlink($fullPath);
+            }
         }
 
         // Supprimer de customFormules si présent
