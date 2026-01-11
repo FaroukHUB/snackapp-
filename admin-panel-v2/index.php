@@ -987,7 +987,7 @@ if (isset($_GET['export'])) {
 
                     <!-- Client: Avatar + Nom + Téléphone -->
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 2px solid #374151;">
-                        <div style="width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #1e40af, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: white; flex-shrink: 0; box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);">
+                        <div style="width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #059669, #10b981); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: white; flex-shrink: 0; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
                             <?php echo strtoupper(substr($order['customer_name'] ?? 'C', 0, 1)); ?>
                         </div>
                         <div style="flex: 1; min-width: 0;">
@@ -995,7 +995,7 @@ if (isset($_GET['export'])) {
                                 <?php echo htmlspecialchars($order['customer_name'] ?? 'Client'); ?>
                             </div>
                             <div style="font-size: 12px; color: #9ca3af; margin-top: 2px;">
-                                <i class="fas fa-phone" style="color: #3b82f6;"></i>
+                                <i class="fas fa-phone" style="color: #10b981;"></i>
                                 <?php
                                 $phone = $order['customer_phone'] ?? '';
                                 echo htmlspecialchars(strlen($phone) > 12 ? substr($phone, 0, 12) . '..' : $phone);
@@ -1007,14 +1007,14 @@ if (isset($_GET['export'])) {
                     <!-- Items (3 premiers) -->
                     <div style="margin-bottom: 12px;">
                         <div style="font-size: 11px; color: #9ca3af; margin-bottom: 6px; font-weight: 600;">
-                            <i class="fas fa-shopping-bag" style="color: #3b82f6;"></i> <?php echo $itemCount; ?> article<?php echo $itemCount > 1 ? 's' : ''; ?>
+                            <i class="fas fa-shopping-bag" style="color: #10b981;"></i> <?php echo $itemCount; ?> article<?php echo $itemCount > 1 ? 's' : ''; ?>
                         </div>
                         <?php
                         $displayItems = array_slice($items, 0, 3);
                         foreach ($displayItems as $item):
                         ?>
                             <div style="font-size: 12px; color: #e5e7eb; padding: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                <strong style="color: #1e40af;"><?php echo $item['quantity'] ?? 1; ?>x</strong>
+                                <strong style="color: <?php echo $primaryColor; ?>;"><?php echo $item['quantity'] ?? 1; ?>x</strong>
                                 <?php echo htmlspecialchars($item['name']); ?>
                             </div>
                         <?php endforeach; ?>
@@ -1046,7 +1046,7 @@ if (isset($_GET['export'])) {
                     <!-- Heure + Note -->
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-size: 11px; color: #9ca3af; font-weight: 600;">
-                            <i class="fas fa-clock" style="color: #3b82f6;"></i> <?php echo date('H:i', strtotime($order['created_at'])); ?>
+                            <i class="fas fa-clock" style="color: #9ca3af;"></i> <?php echo date('H:i', strtotime($order['created_at'])); ?>
                         </span>
                         <?php if (!empty($order['notes'])): ?>
                             <span style="background: #dc2626; color: white; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);">
@@ -1057,7 +1057,7 @@ if (isset($_GET['export'])) {
 
                     <!-- Bouton détails -->
                     <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #374151;">
-                        <div style="text-align: center; font-size: 12px; color: #1e40af; font-weight: 700;">
+                        <div style="text-align: center; font-size: 12px; color: #10b981; font-weight: 700;">
                             <i class="fas fa-info-circle"></i> Cliquer pour plus de détails
                         </div>
                     </div>
