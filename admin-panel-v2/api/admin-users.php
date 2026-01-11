@@ -43,8 +43,19 @@ if ($currentAdminRole !== 'owner') {
 
 $restaurantId = SNACK_RESTAURANT_ID;
 
-// Récupérer l'action
-$action = $_GET['action'] ?? ($_POST['action'] ?? null);
+// Récupérer l'action depuis GET, POST ou JSON body
+$action = $_GET['action'] ?? null;
+
+if (!$action && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Pour les requêtes POST, vérifier si c'est du JSON
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (str_contains($contentType, 'application/json')) {
+        $jsonData = json_decode(file_get_contents('php://input'), true);
+        $action = $jsonData['action'] ?? null;
+    } else {
+        $action = $_POST['action'] ?? null;
+    }
+}
 
 if (!$action) {
     http_response_code(400);
