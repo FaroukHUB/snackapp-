@@ -310,10 +310,14 @@ async function showCustomerDetails(customerId) {
                         id="admin-notes-textarea"
                         placeholder="Ajoutez vos notes privées sur ce client (allergies, préférences, historique d'incidents, etc.)..."
                         style="width: 100%; min-height: 100px; padding: 12px; background: white; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem; color: #1f2937; resize: vertical;"
-                        onblur="saveAdminNotes('${customer.id}')"
                     >${customer.admin_notes || ''}</textarea>
+                    <button
+                        onclick="saveAdminNotes('${customer.id}')"
+                        style="background: #10b981; color: white; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-weight: 600; margin-top: 8px; font-size: 0.875rem;">
+                        <i class="fas fa-save" style="margin-right: 6px;"></i>Enregistrer les notes
+                    </button>
                     <p style="color: #92400e; font-size: 0.7rem; margin-top: 6px; font-style: italic;">
-                        <i class="fas fa-lock" style="margin-right: 4px;"></i>Ces notes sont privées et visibles uniquement par les administrateurs. Sauvegarde automatique.
+                        <i class="fas fa-lock" style="margin-right: 4px;"></i>Ces notes sont privées et visibles uniquement par les administrateurs.
                     </p>
                 </div>
 
