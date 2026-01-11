@@ -663,15 +663,15 @@ if (isset($_GET['export'])) {
         .card:hover { border-color: rgba(255,255,255,0.12); }
         .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
         .stat-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
-            backdrop-filter: blur(10px);
+            background: #1e293b;
             padding: 18px;
             text-align: center;
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid #374151;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.5); }
         .stat-number { font-size: 28px; font-weight: 700; margin-top: 6px; background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .bottom-nav {
             position: fixed;
