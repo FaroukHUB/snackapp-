@@ -898,7 +898,7 @@ if (isset($_GET['export'])) {
         </div>
 
         <!-- COMMANDES -->
-        <div id="section-orders" class="section active" style="background: #f3f4f6; padding: 20px; border-radius: 16px; margin: -10px; margin-bottom: 20px;">
+        <div id="section-orders" class="section active" style="background: #0f1419; padding: 20px; border-radius: 16px; margin: -10px; margin-bottom: 20px;">
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
