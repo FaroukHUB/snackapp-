@@ -2368,9 +2368,11 @@
 
                 // Format items for API (don't send product_id - it's a string, DB expects int)
                 const formattedItems = savedItems.map(item => {
-                    // Si pâtisserie/viennoiserie/beverage sélectionnée avec prix, utiliser SON prix (REMPLACE le basePrice!)
+                    // Si variant/pâtisserie/viennoiserie/beverage sélectionné avec prix, utiliser SON prix (REMPLACE le basePrice!)
                     let itemPrice = 0;
-                    if (item.options?.selectedPatisserie && item.options.selectedPatisserie.price) {
+                    if (item.options?.selectedVariant && item.options.selectedVariant.price) {
+                        itemPrice = item.options.selectedVariant.price;
+                    } else if (item.options?.selectedPatisserie && item.options.selectedPatisserie.price) {
                         itemPrice = item.options.selectedPatisserie.price;
                     } else if (item.options?.selectedViennoiserie && item.options.selectedViennoiserie.price) {
                         itemPrice = item.options.selectedViennoiserie.price;
@@ -2391,7 +2393,9 @@
                     if (item.options?.selectedAccompagnement) options.accompagnement = item.options.selectedAccompagnement;
                     if (item.options?.selectedViennoiserie) options.viennoiserie = item.options.selectedViennoiserie.name;
                     if (item.options?.selectedPatisserie) options.patisserie = item.options.selectedPatisserie.name;
-                    if (item.options?.selectedBeverage) options.boisson = item.options.selectedBeverage.name;
+                    if (item.options?.selectedBeverage) options.selectedBeverage = item.options.selectedBeverage;
+                    if (item.options?.selectedVariant) options.selectedVariant = item.options.selectedVariant;
+                    if (item.options?.selectedCapsule) options.selectedCapsule = item.options.selectedCapsule;
 
                     return {
                         name: item.name,
