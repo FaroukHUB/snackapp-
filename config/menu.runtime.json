@@ -107,7 +107,8 @@
             "priceSolo": 0,
             "status": "available",
             "supplements": [],
-            "image": "images/uploads/salade-composee-20d72835.webp"
+            "image": "images/uploads/salade-composee-20d72835.webp",
+            "pricePrefix": "À partir de 500 Da"
         },
         "crepe-nature": {
             "name": "Crêpe Nature",
@@ -178,7 +179,7 @@
             "name": "Smoothie",
             "description": "Choisissez votre smoothie.",
             "priceSolo": 0,
-            "pricePrefix": "À partir de",
+            "pricePrefix": "À partir de 300",
             "status": "available",
             "supplements": [],
             "image": "images/uploads/smoothie-b58cf619.webp"

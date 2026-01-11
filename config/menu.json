@@ -248,24 +248,10 @@
                         "hasBeverageOptions": true,
                         "beverageOptions": [
                             {
-                                "id": "salade-simple",
-                                "name": "Salade Simple",
-                                "price": 400
-                            },
-                            {
-                                "id": "salade-poulet",
-                                "name": "Salade Poulet",
-                                "price": 500
-                            },
-                            {
-                                "id": "salade-thon",
-                                "name": "Salade Thon",
-                                "price": 500
-                            },
-                            {
-                                "id": "salade-complete",
-                                "name": "Salade Complète",
-                                "price": 600
+                                "id": "salade-composee-saladethoncrudites",
+                                "name": "Salade thon crudités",
+                                "price": 450,
+                                "image": "assets/images/beverages/saladecompose_1768123966.png"
                             }
                         ],
                         "pricePrefix": "À partir de"
