@@ -109,8 +109,7 @@ foreach ($customers as $customer) {
                 Database::update(
                     'customers',
                     ['addresses' => json_encode($allAddresses)],
-                    'id = ?',
-                    [$customer['id']]
+                    ['id' => $customer['id']]
                 );
 
                 $stats['addresses_added'] += count($uniqueAddresses);
