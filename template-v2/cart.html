@@ -1856,11 +1856,12 @@
                 console.log('🔎 hasPâtisserieOptions:', product.hasPâtisserieOptions);
 
                 // Si le produit a des options (modal requis), ouvrir le modal
-                // ✅ Ajout: vérifier aussi variants et capsuleNumbers pour Café Caps et Café l'Or
+                // ✅ Vérifier aussi variants, capsuleNumbers (Café L'Or) et capsuleColors (Café Caps)
                 const hasVariants = product.variants && product.variants.length > 0;
                 const hasCapsuleNumbers = product.capsuleNumbers && product.capsuleNumbers.length > 0;
+                const hasCapsuleColors = product.capsuleColors && product.capsuleColors.length > 0;
 
-                if (product.hasBeverageOptions || product.hasViennoiserieOptions || product.hasPâtisserieOptions || hasVariants || hasCapsuleNumbers) {
+                if (product.hasBeverageOptions || product.hasViennoiserieOptions || product.hasPâtisserieOptions || hasVariants || hasCapsuleNumbers || hasCapsuleColors) {
                     console.log('✅ Ouverture du modal pour:', product.name);
                     this.openUpsellModal(product);
                 } else {
