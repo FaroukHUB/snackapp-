@@ -9,9 +9,8 @@ require_once __DIR__ . '/../admin-panel-v2/bootstrap.php';
 echo "🔧 Migration: Ajout colonne delivery_address\n\n";
 
 try {
-    // Récupérer la connexion PDO via la classe Database
-    $db = Database::getInstance();
-    $pdo = $db->getConnection();
+    // Database::getInstance() retourne directement l'instance PDO
+    $pdo = Database::getInstance();
 
     // Vérifier si la colonne existe déjà
     $check = $pdo->query("SHOW COLUMNS FROM orders LIKE 'delivery_address'")->fetch();
