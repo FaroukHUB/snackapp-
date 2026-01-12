@@ -384,9 +384,18 @@ function addOrder(bool $useMySQL) {
                 'delivery_instructions' => $requestData['delivery_instructions'] ?? null
             ]);
 
-            // ✅ Ajouter les points gagnés (100 DA = 1 point)
+            // ✅ Créer ou récupérer le client avec son adresse
             $phone = $requestData['customer_phone'];
-            $customer = CustomerRepository::getByPhone(SNACK_RESTAURANT_ID, $phone);
+            $deliveryAddress = $requestData['delivery_address'] ?? null;
+
+            // Créer/mettre à jour le client (inclut l'adresse)
+            $customerId = CustomerRepository::findOrCreate(SNACK_RESTAURANT_ID, [
+                'phone' => $phone,
+                'name' => $requestData['customer_name'] ?? 'Client',
+                'delivery_address' => $deliveryAddress
+            ]);
+
+            $customer = CustomerRepository::getById($customerId);
             $pointsEarned = 0;
             $pointsDeducted = 0;
 
@@ -399,24 +408,23 @@ function addOrder(bool $useMySQL) {
                 }
             }
 
-            if ($customer) {
-                $amountPaid = (float)$requestData['total'];
-                if ($amountPaid > 0) {
-                    $pointsEarned = floor($amountPaid / 100); // 100 DA = 1 point
-                    CustomerRepository::addPoints($customer['id'], SNACK_RESTAURANT_ID, $pointsEarned, $orderId);
-                }
+            // Ajouter les points gagnés (100 DA = 1 point)
+            $amountPaid = (float)$requestData['total'];
+            if ($amountPaid > 0) {
+                $pointsEarned = floor($amountPaid / 100); // 100 DA = 1 point
+                CustomerRepository::addPoints($customer['id'], SNACK_RESTAURANT_ID, $pointsEarned, $orderId);
+            }
 
-                // ✅ Débiter les points si une récompense a été sélectionnée
-                if ($loyaltyRewardId) {
-                    $reward = Database::fetchOne(
-                        "SELECT name, points_required FROM loyalty_rewards WHERE id = ? AND restaurant_id = ?",
-                        [$loyaltyRewardId, SNACK_RESTAURANT_ID]
-                    );
+            // ✅ Débiter les points si une récompense a été sélectionnée
+            if ($loyaltyRewardId) {
+                $reward = Database::fetchOne(
+                    "SELECT name, points_required FROM loyalty_rewards WHERE id = ? AND restaurant_id = ?",
+                    [$loyaltyRewardId, SNACK_RESTAURANT_ID]
+                );
 
-                    if ($reward) {
-                        $pointsDeducted = (int)$reward['points_required'];
-                        LoyaltyRepository::redeemPoints($customer['id'], SNACK_RESTAURANT_ID, $pointsDeducted, $reward['name']);
-                    }
+                if ($reward) {
+                    $pointsDeducted = (int)$reward['points_required'];
+                    LoyaltyRepository::redeemPoints($customer['id'], SNACK_RESTAURANT_ID, $pointsDeducted, $reward['name']);
                 }
             }
 

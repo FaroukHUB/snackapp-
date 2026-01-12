@@ -110,9 +110,16 @@ class CustomerRepository {
         );
 
         if ($existing) {
-            // Mettre à jour le nom si fourni
+            // Mettre à jour le nom et l'adresse si fournis
+            $updateData = [];
             if (!empty($data['name'])) {
-                Database::update('customers', ['name' => $data['name']], ['id' => $existing['id']]);
+                $updateData['name'] = $data['name'];
+            }
+            if (!empty($data['delivery_address'])) {
+                $updateData['delivery_address'] = $data['delivery_address'];
+            }
+            if (!empty($updateData)) {
+                Database::update('customers', $updateData, ['id' => $existing['id']]);
             }
             return $existing['id'];
         }
@@ -123,6 +130,7 @@ class CustomerRepository {
             'name' => $data['name'] ?? 'Client',
             'phone' => $phone,
             'email' => $data['email'] ?? null,
+            'delivery_address' => $data['delivery_address'] ?? null,
             'loyalty_points' => 0,
             'orders_count' => 0,
             'total_spent' => 0
