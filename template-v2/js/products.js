@@ -754,22 +754,50 @@ const Products = {
         const mapContainer = document.getElementById('mapContainer');
         const directionsBtn = document.getElementById('directionsBtn');
         if (mapContainer) {
-            const fullAddress = Config.getFullAddress();
-            if (fullAddress) {
-                const encodedAddress = encodeURIComponent(fullAddress);
+            const location = Config.restaurant?.location;
+            // Use custom embed URL if available, otherwise fallback to dynamic generation
+            const embedUrl = location?.googleMapsEmbed;
+            const mapsUrl = location?.googleMapsUrl;
+
+            if (embedUrl) {
                 mapContainer.innerHTML = `
                     <iframe
-                        src="https://www.google.com/maps?q=${encodedAddress}&output=embed"
+                        src="${embedUrl}"
                         allowfullscreen=""
                         loading="lazy"
                         referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
                 `;
-                // Set directions button link (opens in Google Maps / GPS)
-                if (directionsBtn) {
-                    directionsBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
-                }
             } else {
+                // Fallback: generate from address
+                const fullAddress = Config.getFullAddress();
+                if (fullAddress) {
+                    const encodedAddress = encodeURIComponent(fullAddress);
+                    mapContainer.innerHTML = `
+                        <iframe
+                            src="https://www.google.com/maps?q=${encodedAddress}&output=embed"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    `;
+                }
+            }
+
+            // Set directions button link (opens in Google Maps / GPS)
+            if (directionsBtn) {
+                if (mapsUrl) {
+                    directionsBtn.href = mapsUrl;
+                } else {
+                    const fullAddress = Config.getFullAddress();
+                    if (fullAddress) {
+                        const encodedAddress = encodeURIComponent(fullAddress);
+                        directionsBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+                    }
+                }
+            }
+
+            if (!embedUrl && !Config.getFullAddress()) {
                 document.getElementById('localisation')?.classList.add('hidden');
                 document.getElementById('localisation').style.display = 'none';
             }
