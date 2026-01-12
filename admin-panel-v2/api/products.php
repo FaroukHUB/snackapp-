@@ -836,7 +836,11 @@ switch ($action) {
         $patch = [];
         if (isset($input['name'])) $patch['name'] = trim($input['name']);
         if (isset($input['description'])) $patch['description'] = $input['description'];
-        if (isset($input['priceSolo'])) $patch['priceSolo'] = (float)$input['priceSolo'];
+        if (isset($input['priceSolo'])) {
+            $patch['priceSolo'] = (float)$input['priceSolo'];
+            // ✅ FIX: Mettre à jour "price" aussi pour écraser le menu.json de base
+            $patch['price'] = (float)$input['priceSolo'];
+        }
         if (isset($input['priceMenu'])) $patch['priceMenu'] = $input['priceMenu'] !== '' ? (float)$input['priceMenu'] : null;
         if (isset($input['badge'])) $patch['badge'] = $input['badge'] !== '' ? trim($input['badge']) : null;
         if (isset($input['pricePrefix'])) $patch['pricePrefix'] = $input['pricePrefix'] !== '' ? trim($input['pricePrefix']) : null;
