@@ -813,9 +813,9 @@ switch ($action) {
             'name' => $name,
             'description' => $input['description'] ?? '',
             'priceSolo' => $priceSolo,
-            'priceMenu' => isset($input['priceMenu']) && $input['priceMenu'] !== '' ? (float)$input['priceMenu'] : null,
-            'badge' => isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null,
-            'pricePrefix' => isset($input['pricePrefix']) && $input['pricePrefix'] !== '' ? trim($input['pricePrefix']) : null,
+            'priceMenu' => (array_key_exists('priceMenu', $input) && $input['priceMenu'] !== '' && $input['priceMenu'] !== null) ? (float)$input['priceMenu'] : null,
+            'badge' => (array_key_exists('badge', $input) && $input['badge'] !== '' && $input['badge'] !== null) ? trim($input['badge']) : null,
+            'pricePrefix' => (array_key_exists('pricePrefix', $input) && $input['pricePrefix'] !== '' && $input['pricePrefix'] !== null) ? trim($input['pricePrefix']) : null,
             'image' => $imagePath,
             'status' => 'available',
             'supplements' => $supplements
@@ -841,9 +841,10 @@ switch ($action) {
             // ✅ FIX: Mettre à jour "price" aussi pour écraser le menu.json de base
             $patch['price'] = (float)$input['priceSolo'];
         }
-        if (isset($input['priceMenu'])) $patch['priceMenu'] = $input['priceMenu'] !== '' ? (float)$input['priceMenu'] : null;
-        if (isset($input['badge'])) $patch['badge'] = $input['badge'] !== '' ? trim($input['badge']) : null;
-        if (isset($input['pricePrefix'])) $patch['pricePrefix'] = $input['pricePrefix'] !== '' ? trim($input['pricePrefix']) : null;
+        // ✅ FIX: Utiliser array_key_exists() au lieu de isset() pour détecter null
+        if (array_key_exists('priceMenu', $input)) $patch['priceMenu'] = $input['priceMenu'] !== '' && $input['priceMenu'] !== null ? (float)$input['priceMenu'] : null;
+        if (array_key_exists('badge', $input)) $patch['badge'] = $input['badge'] !== '' && $input['badge'] !== null ? trim($input['badge']) : null;
+        if (array_key_exists('pricePrefix', $input)) $patch['pricePrefix'] = $input['pricePrefix'] !== '' && $input['pricePrefix'] !== null ? trim($input['pricePrefix']) : null;
         if (isset($input['status'])) $patch['status'] = $input['status'];
 
         // Gérer les suppléments (peuvent être une chaîne JSON depuis FormData)
