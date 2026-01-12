@@ -3483,11 +3483,11 @@ ul {
 @media (max-width: 768px) {
     .hero-section {
         border-radius: var(--border-radius);
-        max-height: 380px;
+        max-height: 350px;
     }
 
     .hero-image {
-        max-height: 380px;
+        max-height: 350px;
     }
 
     .hero-content h1 {
@@ -3559,12 +3559,12 @@ ul {
 
 @media (max-width: 480px) {
     .hero-section {
-        max-height: 270px;
+        max-height: 250px;
         margin-bottom: 20px;
     }
 
     .hero-image {
-        max-height: 270px;
+        max-height: 250px;
     }
 
     .hero-content {
