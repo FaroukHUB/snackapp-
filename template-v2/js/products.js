@@ -1668,11 +1668,11 @@ const Products = {
      */
     filterProducts(searchTerm) {
         const term = searchTerm.toLowerCase().trim();
-        const cards = document.querySelectorAll('.product-card');
+        const cards = document.querySelectorAll('.product-card-new');
 
         cards.forEach(card => {
-            const name = card.querySelector('.product-name')?.textContent.toLowerCase() || '';
-            const desc = card.querySelector('.product-description')?.textContent.toLowerCase() || '';
+            const name = card.querySelector('.product-name-new')?.textContent.toLowerCase() || '';
+            const desc = card.querySelector('.product-desc-new')?.textContent.toLowerCase() || '';
 
             if (!term || name.includes(term) || desc.includes(term)) {
                 card.style.display = '';
@@ -1683,7 +1683,7 @@ const Products = {
 
         // Hide empty sections
         document.querySelectorAll('.product-section').forEach(section => {
-            const visibleCards = section.querySelectorAll('.product-card:not([style*="display: none"])');
+            const visibleCards = section.querySelectorAll('.product-card-new:not([style*="display: none"])');
             section.style.display = visibleCards.length > 0 ? '' : 'none';
         });
     },
