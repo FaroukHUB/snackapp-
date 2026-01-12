@@ -807,6 +807,14 @@ switch ($action) {
             }
         }
 
+        $baseIngredients = [];
+        if (isset($input['baseIngredients'])) {
+            $baseIngData = is_string($input['baseIngredients']) ? json_decode($input['baseIngredients'], true) : $input['baseIngredients'];
+            if (is_array($baseIngData)) {
+                $baseIngredients = array_values($baseIngData);
+            }
+        }
+
         $runtime['customProducts'][$productId] = [
             'id' => $productId,
             'categoryId' => $categoryId,
@@ -818,7 +826,8 @@ switch ($action) {
             'pricePrefix' => (array_key_exists('pricePrefix', $input) && $input['pricePrefix'] !== '' && $input['pricePrefix'] !== null) ? trim($input['pricePrefix']) : null,
             'image' => $imagePath,
             'status' => 'available',
-            'supplements' => $supplements
+            'supplements' => $supplements,
+            'baseIngredients' => $baseIngredients
         ];
 
         // ⚡ OPTIMISATION: Une seule synchronisation à la fin
@@ -854,6 +863,15 @@ switch ($action) {
                 $sups = json_decode($sups, true) ?? [];
             }
             $patch['supplements'] = is_array($sups) ? $sups : [];
+        }
+
+        // Gérer les baseIngredients (ingrédients retirables)
+        if (isset($input['baseIngredients'])) {
+            $baseIng = $input['baseIngredients'];
+            if (is_string($baseIng)) {
+                $baseIng = json_decode($baseIng, true) ?? [];
+            }
+            $patch['baseIngredients'] = is_array($baseIng) ? $baseIng : [];
         }
 
         // Gérer les variants (Court/Long pour cafés)

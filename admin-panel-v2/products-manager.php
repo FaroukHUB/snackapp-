@@ -606,6 +606,12 @@ $csrfToken = getCsrfToken();
             <span class="muted">Apparaît sur la photo du produit (max 30 caractères)</span>
           </div>
 
+          <div class="field">
+            <label for="prodBaseIngredients">🥘 Ingrédients retirables (optionnel)</label>
+            <textarea id="prodBaseIngredients" name="baseIngredients" class="textarea" rows="3" placeholder="Ex: oignons, poivrons, fromage, sauce"></textarea>
+            <span class="muted">Ingrédients que le client peut retirer. Séparez par des virgules.</span>
+          </div>
+
           <div class="field" id="prodPricePrefixField" style="display:none;">
             <label for="prodPricePrefix">Texte avant le prix (optionnel)</label>
             <input id="prodPricePrefix" name="pricePrefix" class="input" type="text" placeholder="Ex: À partir de" maxlength="20" />
@@ -739,6 +745,12 @@ $csrfToken = getCsrfToken();
               Sélectionnez les numéros de capsules disponibles (1-15)
             </p>
             <div id="editCapsulesList" style="display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;"></div>
+          </div>
+
+          <div class="field" id="editIngredientsField">
+            <label for="editBaseIngredients">🥘 Ingrédients retirables (optionnel)</label>
+            <textarea id="editBaseIngredients" name="baseIngredients" class="textarea" rows="3" placeholder="Ex: oignons, poivrons, fromage, sauce"></textarea>
+            <span class="muted">Ingrédients que le client peut retirer. Séparez par des virgules.</span>
           </div>
 
           <div class="field">
@@ -1627,6 +1639,7 @@ $csrfToken = getCsrfToken();
       $("#editPriceMenu").value = product.priceMenu ?? "";
       $("#editProdBadge").value = product.badge ?? "";
       $("#editPricePrefix").value = product.pricePrefix ?? "";
+      $("#editBaseIngredients").value = product.baseIngredients ? product.baseIngredients.join(", ") : "";
       $("#editStatus").value = product.status ?? "available";
 
       // Afficher l'image actuelle
@@ -1777,6 +1790,12 @@ $csrfToken = getCsrfToken();
       const status = $("#editStatus").value;
       const imageFile = $("#editProductImage").files[0];
 
+      // BaseIngredients: convertir la chaîne en tableau
+      const baseIngredientsText = $("#editBaseIngredients").value.trim();
+      const baseIngredients = baseIngredientsText
+        ? baseIngredientsText.split(",").map(ing => ing.trim()).filter(ing => ing.length > 0)
+        : [];
+
       // Suppléments : Affichage automatique selon le flavor (pas de sélection manuelle)
       const supplements = []; // Vide car géré automatiquement côté frontend
 
@@ -1797,6 +1816,7 @@ $csrfToken = getCsrfToken();
           formData.set("pricePrefix", pricePrefix || "");
           formData.set("status", status);
           formData.set("supplements", JSON.stringify(supplements));
+          formData.set("baseIngredients", JSON.stringify(baseIngredients));
           if (variants) formData.set("variants", JSON.stringify(variants));
           if (capsuleNumbers) formData.set("capsuleNumbers", JSON.stringify(capsuleNumbers));
           formData.set("image", imageFile);
@@ -1813,7 +1833,8 @@ $csrfToken = getCsrfToken();
             badge: badge || null,
             pricePrefix: pricePrefix || null,
             status,
-            supplements
+            supplements,
+            baseIngredients
           };
           if (variants) payload.variants = variants;
           if (capsuleNumbers) payload.capsuleNumbers = capsuleNumbers;
@@ -2076,6 +2097,13 @@ $csrfToken = getCsrfToken();
 
       // Suppléments : Affichage automatique selon le flavor (pas de sélection manuelle)
       fd.set("supplements", JSON.stringify([]));
+
+      // BaseIngredients: convertir la chaîne en tableau JSON
+      const baseIngredientsText = (fd.get("baseIngredients") || "").trim();
+      const baseIngredients = baseIngredientsText
+        ? baseIngredientsText.split(",").map(ing => ing.trim()).filter(ing => ing.length > 0)
+        : [];
+      fd.set("baseIngredients", JSON.stringify(baseIngredients));
 
       try{
         await apiPostMultipart(fd, "add_product");
