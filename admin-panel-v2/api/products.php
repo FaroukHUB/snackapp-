@@ -883,13 +883,22 @@ switch ($action) {
             $patch['variants'] = is_array($variants) ? $variants : [];
         }
 
-        // Gérer les numéros de capsules
+        // Gérer les numéros de capsules (legacy)
         if (isset($input['capsuleNumbers'])) {
             $capsuleNumbers = $input['capsuleNumbers'];
             if (is_string($capsuleNumbers)) {
                 $capsuleNumbers = json_decode($capsuleNumbers, true) ?? [];
             }
             $patch['capsuleNumbers'] = is_array($capsuleNumbers) ? $capsuleNumbers : [];
+        }
+
+        // Gérer les couleurs de capsules (nouvelle logique)
+        if (isset($input['capsuleColors'])) {
+            $capsuleColors = $input['capsuleColors'];
+            if (is_string($capsuleColors)) {
+                $capsuleColors = json_decode($capsuleColors, true) ?? [];
+            }
+            $patch['capsuleColors'] = is_array($capsuleColors) ? $capsuleColors : [];
         }
 
         // Gérer l'upload d'image

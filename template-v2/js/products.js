@@ -1139,28 +1139,57 @@ const Products = {
             variantsContainer.style.display = 'none';
         }
 
-        // Render capsule numbers
+        // Render capsule colors or numbers
         const capsulesContainer = document.getElementById('modalCapsules');
         const capsuleOptions = document.getElementById('capsuleOptions');
 
-        if (product.capsuleNumbers && product.capsuleNumbers.length > 0) {
-            // Remove duplicates and sort
-            const uniqueCapsules = [...new Set(product.capsuleNumbers)].sort((a, b) => a - b);
-            console.log('Capsule numbers (original):', product.capsuleNumbers);
-            console.log('Capsule numbers (unique):', uniqueCapsules);
+        // Priorité aux couleurs, fallback vers numéros
+        const hasCapsuleColors = product.capsuleColors && product.capsuleColors.length > 0;
+        const hasCapsuleNumbers = product.capsuleNumbers && product.capsuleNumbers.length > 0;
 
+        if (hasCapsuleColors || hasCapsuleNumbers) {
             capsulesContainer.classList.remove('hidden');
             capsulesContainer.style.display = '';
-            capsuleOptions.innerHTML = uniqueCapsules.map((num, index) => `
-                <div class="capsule-item ${index === 0 ? 'selected' : ''}" data-number="${num}" onclick="Products.selectCapsule(${num})">
-                    <div class="capsule-radio">
-                        <i class="fas fa-check"></i>
+
+            if (hasCapsuleColors) {
+                // Nouvelle logique : afficher les couleurs
+                const uniqueColors = [...new Set(product.capsuleColors)];
+                console.log('Capsule colors:', uniqueColors);
+
+                // Mise à jour du titre
+                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-palette"></i> Couleur de capsule';
+
+                capsuleOptions.innerHTML = uniqueColors.map((colorName, index) => {
+                    const colorCode = this.getCapsuleColorCode(colorName);
+                    return `
+                        <div class="capsule-item capsule-color ${index === 0 ? 'selected' : ''}" data-color="${colorName}" onclick="Products.selectCapsule('${colorName}')">
+                            <div class="capsule-radio">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="capsule-color-preview" style="background-color: ${colorCode};"></div>
+                            <span class="capsule-number">${colorName}</span>
+                        </div>
+                    `;
+                }).join('');
+                this.selectedCapsule = uniqueColors[0];
+            } else {
+                // Ancienne logique : afficher les numéros (fallback)
+                const uniqueCapsules = [...new Set(product.capsuleNumbers)].sort((a, b) => a - b);
+                console.log('Capsule numbers (legacy):', uniqueCapsules);
+
+                // Remettre le titre original
+                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-hashtag"></i> Numéro de capsule';
+
+                capsuleOptions.innerHTML = uniqueCapsules.map((num, index) => `
+                    <div class="capsule-item ${index === 0 ? 'selected' : ''}" data-number="${num}" onclick="Products.selectCapsule(${num})">
+                        <div class="capsule-radio">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span class="capsule-number">${num}</span>
                     </div>
-                    <span class="capsule-number">${num}</span>
-                </div>
-            `).join('');
-            // Select first capsule by default
-            this.selectedCapsule = uniqueCapsules[0];
+                `).join('');
+                this.selectedCapsule = uniqueCapsules[0];
+            }
         } else {
             capsulesContainer.classList.add('hidden');
             capsulesContainer.style.display = 'none';
@@ -1459,16 +1488,45 @@ const Products = {
     },
 
     /**
-     * Select capsule number (for cafe-caps and cafe-lor)
+     * Get color code for capsule color name
      */
-    selectCapsule(capsuleNumber) {
-        if (!this.currentProduct?.capsuleNumbers) return;
+    getCapsuleColorCode(colorName) {
+        const colorMap = {
+            'mauve': '#9b87f5',
+            'marron': '#8b4513',
+            'noir': '#1a1a1a',
+            'bleu': '#2563eb',
+            'rouge': '#dc2626',
+            'orange': '#ea580c',
+            'vert': '#16a34a',
+            'jaune': '#eab308',
+            'rose': '#ec4899',
+            'violet': '#7c3aed'
+        };
+        const normalized = colorName.toLowerCase().trim();
+        return colorMap[normalized] || '#6b7280'; // gray fallback
+    },
 
-        this.selectedCapsule = capsuleNumber;
+    /**
+     * Select capsule number or color (for cafe-caps and cafe-lor)
+     */
+    selectCapsule(capsuleValue) {
+        const hasCapsuleColors = this.currentProduct?.capsuleColors && this.currentProduct.capsuleColors.length > 0;
+        const hasCapsuleNumbers = this.currentProduct?.capsuleNumbers && this.currentProduct.capsuleNumbers.length > 0;
+
+        if (!hasCapsuleColors && !hasCapsuleNumbers) return;
+
+        this.selectedCapsule = capsuleValue;
 
         // Update UI - radio button style (only one selected)
         document.querySelectorAll('.capsule-item').forEach(item => {
-            item.classList.toggle('selected', parseInt(item.dataset.number) === capsuleNumber);
+            if (hasCapsuleColors) {
+                // Compare color names
+                item.classList.toggle('selected', item.dataset.color === capsuleValue);
+            } else {
+                // Compare numbers
+                item.classList.toggle('selected', parseInt(item.dataset.number) === capsuleValue);
+            }
         });
     },
 

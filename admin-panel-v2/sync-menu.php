@@ -68,6 +68,22 @@ function syncMenuStatuses() {
                         if (array_key_exists('badge', $productData)) {
                             $item['badge'] = $productData['badge'];
                         }
+                        // Synchroniser les variants (Court/Long pour cafés)
+                        if (isset($productData['variants'])) {
+                            $item['variants'] = $productData['variants'];
+                        }
+                        // Synchroniser les numéros de capsules (legacy)
+                        if (isset($productData['capsuleNumbers'])) {
+                            $item['capsuleNumbers'] = $productData['capsuleNumbers'];
+                        }
+                        // Synchroniser les couleurs de capsules (nouvelle logique)
+                        if (isset($productData['capsuleColors'])) {
+                            $item['capsuleColors'] = $productData['capsuleColors'];
+                        }
+                        // Synchroniser les baseIngredients
+                        if (isset($productData['baseIngredients'])) {
+                            $item['baseIngredients'] = $productData['baseIngredients'];
+                        }
                     }
                 }
 

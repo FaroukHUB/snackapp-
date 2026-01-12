@@ -738,13 +738,22 @@ $csrfToken = getCsrfToken();
             <button type="button" class="btn btn-good btn-sm" id="btnAddVariant" style="width:100%;">+ Ajouter un variant</button>
           </div>
 
-          <!-- Numéros de capsules -->
+          <!-- Numéros de capsules (Legacy - déprécié) -->
           <div class="field" id="editCapsulesField" style="display:none;">
-            <label>#️⃣ Numéros de capsules disponibles</label>
+            <label>#️⃣ Numéros de capsules (Ancien système)</label>
             <p class="muted" style="margin-top:6px;font-size:13px;margin-bottom:12px;">
-              Sélectionnez les numéros de capsules disponibles (1-15)
+              ⚠️ Ancien système déprécié. Utilisez les couleurs ci-dessous à la place.
             </p>
             <div id="editCapsulesList" style="display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;"></div>
+          </div>
+
+          <!-- Couleurs de capsules (Nouveau système) -->
+          <div class="field" id="editCapsuleColorsField" style="display:none;">
+            <label>🎨 Couleurs de capsules disponibles</label>
+            <p class="muted" style="margin-top:6px;font-size:13px;margin-bottom:12px;">
+              Sélectionnez les couleurs de capsules disponibles. Cliquez pour ajouter/retirer.
+            </p>
+            <div id="editCapsuleColorsList" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;"></div>
           </div>
 
           <div class="field" id="editIngredientsField">
@@ -1668,19 +1677,25 @@ $csrfToken = getCsrfToken();
       const hasVariants = product.id === 'cafe-caps' || product.id === 'cafe-lor';
       const variantsField = $("#editVariantsField");
       const capsulesField = $("#editCapsulesField");
+      const capsuleColorsField = $("#editCapsuleColorsField");
 
       if (hasVariants) {
         variantsField.style.display = "";
-        capsulesField.style.display = "";
+        // capsulesField.style.display = ""; // Désactivé car déprécié
+        capsuleColorsField.style.display = "";
 
         // Charger les variants existants
         renderVariantsList(product.variants || []);
 
-        // Charger les capsules existantes
-        renderCapsulesList(product.capsuleNumbers || []);
+        // Charger les capsules existantes (legacy)
+        // renderCapsulesList(product.capsuleNumbers || []);
+
+        // Charger les couleurs de capsules (nouveau système)
+        renderCapsuleColorsList(product.capsuleColors || []);
       } else {
         variantsField.style.display = "none";
         capsulesField.style.display = "none";
+        capsuleColorsField.style.display = "none";
       }
 
       openModal("#modalEditProduct");
@@ -1767,6 +1782,55 @@ $csrfToken = getCsrfToken();
       });
     }
 
+    // Fonction pour afficher la liste des couleurs de capsules (nouveau système)
+    function renderCapsuleColorsList(selectedColors) {
+      const container = $("#editCapsuleColorsList");
+      const availableColors = [
+        {name: 'Mauve', code: '#9b87f5'},
+        {name: 'Marron', code: '#8b4513'},
+        {name: 'Noir', code: '#1a1a1a'},
+        {name: 'Bleu', code: '#2563eb'},
+        {name: 'Rouge', code: '#dc2626'},
+        {name: 'Orange', code: '#ea580c'},
+        {name: 'Vert', code: '#16a34a'},
+        {name: 'Jaune', code: '#eab308'},
+        {name: 'Rose', code: '#ec4899'},
+        {name: 'Violet', code: '#7c3aed'}
+      ];
+
+      container.innerHTML = availableColors.map(color => {
+        const isSelected = selectedColors && selectedColors.includes(color.name);
+        return `
+          <label style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;background:${isSelected ? 'rgba(59, 130, 246, 0.1)' : 'rgba(0,0,0,0.05)'};border:2px solid ${isSelected ? '#3b82f6' : 'transparent'};border-radius:8px;cursor:pointer;user-select:none;transition:all 0.2s;">
+            <input type="checkbox" data-capsule-color="${color.name}" ${isSelected ? 'checked' : ''} style="display:none;">
+            <div style="width:36px;height:36px;background:${color.code};border-radius:50%;border:3px solid ${isSelected ? '#3b82f6' : '#e5e7eb'};box-shadow:0 2px 4px rgba(0,0,0,0.1);"></div>
+            <span style="font-weight:${isSelected ? '700' : '500'};font-size:13px;color:${isSelected ? '#3b82f6' : 'inherit'};">${color.name}</span>
+          </label>
+        `;
+      }).join('');
+
+      // Event listeners pour toggle couleurs
+      container.querySelectorAll('[data-capsule-color]').forEach(checkbox => {
+        checkbox.parentElement.addEventListener('click', () => {
+          checkbox.checked = !checkbox.checked;
+
+          const colorName = checkbox.dataset.capsuleColor;
+          if (!currentEditProduct.capsuleColors) currentEditProduct.capsuleColors = [];
+
+          if (checkbox.checked) {
+            if (!currentEditProduct.capsuleColors.includes(colorName)) {
+              currentEditProduct.capsuleColors.push(colorName);
+            }
+          } else {
+            currentEditProduct.capsuleColors = currentEditProduct.capsuleColors.filter(c => c !== colorName);
+          }
+
+          // Re-render pour mettre à jour l'UI
+          renderCapsuleColorsList(currentEditProduct.capsuleColors);
+        });
+      });
+    }
+
     // Bouton ajouter variant
     $("#btnAddVariant").addEventListener('click', () => {
       if (!currentEditProduct.variants) currentEditProduct.variants = [];
@@ -1802,6 +1866,7 @@ $csrfToken = getCsrfToken();
       // Variants et capsules (seulement pour cafés)
       const variants = currentEditProduct?.variants || null;
       const capsuleNumbers = currentEditProduct?.capsuleNumbers || null;
+      const capsuleColors = currentEditProduct?.capsuleColors || null;
 
       try {
         // Si une image est sélectionnée, utiliser FormData
@@ -1819,6 +1884,7 @@ $csrfToken = getCsrfToken();
           formData.set("baseIngredients", JSON.stringify(baseIngredients));
           if (variants) formData.set("variants", JSON.stringify(variants));
           if (capsuleNumbers) formData.set("capsuleNumbers", JSON.stringify(capsuleNumbers));
+          if (capsuleColors) formData.set("capsuleColors", JSON.stringify(capsuleColors));
           formData.set("image", imageFile);
 
           await apiPostMultipart(formData, "update_product");
@@ -1838,6 +1904,7 @@ $csrfToken = getCsrfToken();
           };
           if (variants) payload.variants = variants;
           if (capsuleNumbers) payload.capsuleNumbers = capsuleNumbers;
+          if (capsuleColors) payload.capsuleColors = capsuleColors;
 
           await apiPostJson(payload);
         }
