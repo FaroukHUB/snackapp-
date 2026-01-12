@@ -1144,9 +1144,14 @@ const Products = {
         const capsuleOptions = document.getElementById('capsuleOptions');
 
         if (product.capsuleNumbers && product.capsuleNumbers.length > 0) {
+            // Remove duplicates and sort
+            const uniqueCapsules = [...new Set(product.capsuleNumbers)].sort((a, b) => a - b);
+            console.log('Capsule numbers (original):', product.capsuleNumbers);
+            console.log('Capsule numbers (unique):', uniqueCapsules);
+
             capsulesContainer.classList.remove('hidden');
             capsulesContainer.style.display = '';
-            capsuleOptions.innerHTML = product.capsuleNumbers.map((num, index) => `
+            capsuleOptions.innerHTML = uniqueCapsules.map((num, index) => `
                 <div class="capsule-item ${index === 0 ? 'selected' : ''}" data-number="${num}" onclick="Products.selectCapsule(${num})">
                     <div class="capsule-radio">
                         <i class="fas fa-check"></i>
@@ -1155,7 +1160,7 @@ const Products = {
                 </div>
             `).join('');
             // Select first capsule by default
-            this.selectedCapsule = product.capsuleNumbers[0];
+            this.selectedCapsule = uniqueCapsules[0];
         } else {
             capsulesContainer.classList.add('hidden');
             capsulesContainer.style.display = 'none';
