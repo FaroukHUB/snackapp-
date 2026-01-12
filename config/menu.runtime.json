@@ -28,7 +28,13 @@
             "price": 550,
             "priceMenu": null,
             "badge": null,
-            "pricePrefix": null
+            "pricePrefix": null,
+            "baseIngredients": [
+                "Mix de fromages",
+                "Jambon fumé",
+                "Pommes de terre",
+                "Sauce Fromagère maison."
+            ]
         },
         "parisienne": {
             "name": "La Parisienne",
@@ -40,7 +46,13 @@
             "price": 550,
             "priceMenu": null,
             "badge": null,
-            "pricePrefix": null
+            "pricePrefix": null,
+            "baseIngredients": [
+                "Mix de fromages",
+                "Jambon Blanc",
+                "oeuf",
+                "Sauce Forestière."
+            ]
         },
         "patisserie": {
             "name": "Pâtisserie",
@@ -62,7 +74,14 @@
             "price": 650,
             "priceMenu": null,
             "badge": null,
-            "pricePrefix": null
+            "pricePrefix": null,
+            "baseIngredients": [
+                "Mix de fromages",
+                "Camembert",
+                "Cheddar",
+                "Pommes de terre",
+                "Sauce Fromagère maison."
+            ]
         },
         "fumee": {
             "name": "La Fumée",
@@ -74,7 +93,14 @@
             "price": 650,
             "priceMenu": null,
             "badge": null,
-            "pricePrefix": null
+            "pricePrefix": null,
+            "baseIngredients": [
+                "Mix de fromages",
+                "Mix de jambons",
+                "Cheddar",
+                "Oignons Confits",
+                "Sauce Fromagère maison."
+            ]
         },
         "boisee": {
             "name": "La Boisée",
@@ -86,7 +112,14 @@
             "price": 650,
             "priceMenu": null,
             "badge": null,
-            "pricePrefix": null
+            "pricePrefix": null,
+            "baseIngredients": [
+                "Mix de fromages",
+                "Escalope de Poulet",
+                "Poivrons",
+                "Pommes de terre",
+                "Sauce Fromagère maison."
+            ]
         },
         "mexicaine": {
             "name": "La Mexicaine",
@@ -98,7 +131,13 @@
             "image": "images/uploads/mexicaine-bca4a810.webp",
             "price": 700,
             "priceMenu": null,
-            "pricePrefix": null
+            "pricePrefix": null,
+            "baseIngredients": [
+                "Mix de Fromages",
+                "Viande Hachée marinée",
+                "Mix de légumes à la Méxicaine",
+                "Sauce Fromagère maison."
+            ]
         },
         "la-dz": {
             "name": "La DZ",
@@ -110,7 +149,14 @@
             "image": "images/uploads/la-dz-2241c0a9.webp",
             "price": 700,
             "priceMenu": null,
-            "pricePrefix": null
+            "pricePrefix": null,
+            "baseIngredients": [
+                "Mix de Fromages",
+                "Viande Hachée Maison",
+                "Chakchouka",
+                "Oeuf",
+                "Sauce Fromagère maison."
+            ]
         },
         "la-marvelous": {
             "name": "La Marvelous",
@@ -122,7 +168,16 @@
             "image": "images/uploads/la-marvelous-285461ea.webp",
             "price": 850,
             "priceMenu": null,
-            "pricePrefix": null
+            "pricePrefix": null,
+            "baseIngredients": [
+                "Mix de Fromages",
+                "Escalope de poulet",
+                "Viande hachée maison",
+                "Poulet Fumé",
+                "Pommes de terre",
+                "Oignons confits",
+                "Sauce Fromagères maison."
+            ]
         },
         "la-crousti": {
             "name": "La Crousti",
@@ -134,7 +189,14 @@
             "image": "images/uploads/la-crousti-21722201.webp",
             "price": 800,
             "priceMenu": null,
-            "pricePrefix": null
+            "pricePrefix": null,
+            "baseIngredients": [
+                "Mix de Fromages",
+                "Tenders maison croustillants",
+                "Sauce Maison",
+                "Oignons Crispy",
+                "Sauce Thaï."
+            ]
         },
         "salade-composee": {
             "name": "Salade Composée",
