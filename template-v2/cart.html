@@ -2134,12 +2134,15 @@
                 if (this.selectedUpsellOptions.patisserie) {
                     options.selectedPatisserie = this.selectedUpsellOptions.patisserie;
                 }
-                // ✅ Ajouter variant (Court/Long) et capsuleNumber pour cafés
+                // ✅ Ajouter variant (Court/Long), capsuleNumber (L'Or) et capsuleColor (Caps) pour cafés
                 if (this.selectedUpsellOptions.variant) {
                     options.selectedVariant = this.selectedUpsellOptions.variant;
                 }
                 if (this.selectedUpsellOptions.capsuleNumber) {
                     options.selectedCapsuleNumber = this.selectedUpsellOptions.capsuleNumber;
+                }
+                if (this.selectedUpsellOptions.capsuleColor) {
+                    options.selectedCapsuleColor = this.selectedUpsellOptions.capsuleColor;
                 }
 
                 console.log('✅ Ajout:', this.currentUpsellProduct.name, 'avec options:', options);
