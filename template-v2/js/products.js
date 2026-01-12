@@ -1143,7 +1143,7 @@ const Products = {
         const capsulesContainer = document.getElementById('modalCapsules');
         const capsuleOptions = document.getElementById('capsuleOptions');
 
-        // Priorité aux couleurs, fallback vers numéros
+        // Café Caps → Couleurs | Café L'Or → Numéros
         const hasCapsuleColors = product.capsuleColors && product.capsuleColors.length > 0;
         const hasCapsuleNumbers = product.capsuleNumbers && product.capsuleNumbers.length > 0;
 
@@ -1152,12 +1152,12 @@ const Products = {
             capsulesContainer.style.display = '';
 
             if (hasCapsuleColors) {
-                // Nouvelle logique : afficher les couleurs
+                // Café Caps : afficher les couleurs Nespresso
                 const uniqueColors = [...new Set(product.capsuleColors)];
-                console.log('Capsule colors:', uniqueColors);
+                console.log('Café Caps - Couleurs Nespresso:', uniqueColors);
 
-                // Mise à jour du titre
-                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-palette"></i> Couleur de capsule';
+                // Titre pour Café Caps
+                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-palette"></i> Couleur de capsule Nespresso';
 
                 capsuleOptions.innerHTML = uniqueColors.map((colorName, index) => {
                     const colorCode = this.getCapsuleColorCode(colorName);
@@ -1172,13 +1172,13 @@ const Products = {
                     `;
                 }).join('');
                 this.selectedCapsule = uniqueColors[0];
-            } else {
-                // Ancienne logique : afficher les numéros (fallback)
+            } else if (hasCapsuleNumbers) {
+                // Café L'Or : afficher les numéros (intensité)
                 const uniqueCapsules = [...new Set(product.capsuleNumbers)].sort((a, b) => a - b);
-                console.log('Capsule numbers (legacy):', uniqueCapsules);
+                console.log('Café L\'Or - Intensité:', uniqueCapsules);
 
-                // Remettre le titre original
-                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-hashtag"></i> Numéro de capsule';
+                // Titre pour Café L'Or
+                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-hashtag"></i> Intensité de capsule L\'Or';
 
                 capsuleOptions.innerHTML = uniqueCapsules.map((num, index) => `
                     <div class="capsule-item ${index === 0 ? 'selected' : ''}" data-number="${num}" onclick="Products.selectCapsule(${num})">

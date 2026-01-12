@@ -738,20 +738,20 @@ $csrfToken = getCsrfToken();
             <button type="button" class="btn btn-good btn-sm" id="btnAddVariant" style="width:100%;">+ Ajouter un variant</button>
           </div>
 
-          <!-- Numéros de capsules (Legacy - déprécié) -->
+          <!-- Numéros de capsules (Pour Café L'Or uniquement) -->
           <div class="field" id="editCapsulesField" style="display:none;">
-            <label>#️⃣ Numéros de capsules (Ancien système)</label>
+            <label>#️⃣ Numéros de capsules L'Or (5 à 13)</label>
             <p class="muted" style="margin-top:6px;font-size:13px;margin-bottom:12px;">
-              ⚠️ Ancien système déprécié. Utilisez les couleurs ci-dessous à la place.
+              Sélectionnez les numéros de capsules L'Or disponibles (intensité de 5 à 13)
             </p>
             <div id="editCapsulesList" style="display:grid;grid-template-columns:repeat(5, 1fr);gap:8px;"></div>
           </div>
 
-          <!-- Couleurs de capsules (Nouveau système) -->
+          <!-- Couleurs de capsules (Pour Café Caps uniquement) -->
           <div class="field" id="editCapsuleColorsField" style="display:none;">
-            <label>🎨 Couleurs de capsules disponibles</label>
+            <label>🎨 Couleurs de capsules Nespresso</label>
             <p class="muted" style="margin-top:6px;font-size:13px;margin-bottom:12px;">
-              Sélectionnez les couleurs de capsules disponibles. Cliquez pour ajouter/retirer.
+              Sélectionnez les couleurs de capsules Nespresso disponibles. Cliquez pour ajouter/retirer.
             </p>
             <div id="editCapsuleColorsList" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;"></div>
           </div>
@@ -1674,24 +1674,31 @@ $csrfToken = getCsrfToken();
       // Les suppléments s'affichent automatiquement côté frontend
 
       // Variants et capsules pour cafés
-      const hasVariants = product.id === 'cafe-caps' || product.id === 'cafe-lor';
+      const isCafeCaps = product.id === 'cafe-caps';
+      const isCafeLor = product.id === 'cafe-lor';
+      const hasVariants = isCafeCaps || isCafeLor;
       const variantsField = $("#editVariantsField");
       const capsulesField = $("#editCapsulesField");
       const capsuleColorsField = $("#editCapsuleColorsField");
 
       if (hasVariants) {
         variantsField.style.display = "";
-        // capsulesField.style.display = ""; // Désactivé car déprécié
-        capsuleColorsField.style.display = "";
 
         // Charger les variants existants
         renderVariantsList(product.variants || []);
 
-        // Charger les capsules existantes (legacy)
-        // renderCapsulesList(product.capsuleNumbers || []);
-
-        // Charger les couleurs de capsules (nouveau système)
-        renderCapsuleColorsList(product.capsuleColors || []);
+        // Café Caps : Couleurs uniquement
+        if (isCafeCaps) {
+          capsulesField.style.display = "none";
+          capsuleColorsField.style.display = "";
+          renderCapsuleColorsList(product.capsuleColors || []);
+        }
+        // Café L'Or : Numéros uniquement (5 à 13)
+        else if (isCafeLor) {
+          capsulesField.style.display = "";
+          capsuleColorsField.style.display = "none";
+          renderCapsulesList(product.capsuleNumbers || [], 5, 13); // Numéros de 5 à 13
+        }
       } else {
         variantsField.style.display = "none";
         capsulesField.style.display = "none";
@@ -1746,9 +1753,12 @@ $csrfToken = getCsrfToken();
     }
 
     // Fonction pour afficher la liste des capsules
-    function renderCapsulesList(selectedCapsules) {
+    function renderCapsulesList(selectedCapsules, minNum = 1, maxNum = 15) {
       const container = $("#editCapsulesList");
-      const allNumbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+      const allNumbers = [];
+      for (let i = minNum; i <= maxNum; i++) {
+        allNumbers.push(i);
+      }
 
       container.innerHTML = allNumbers.map(num => {
         const isSelected = selectedCapsules && selectedCapsules.includes(num);
@@ -1777,7 +1787,7 @@ $csrfToken = getCsrfToken();
           }
 
           // Re-render pour mettre à jour les couleurs
-          renderCapsulesList(currentEditProduct.capsuleNumbers);
+          renderCapsulesList(currentEditProduct.capsuleNumbers, minNum, maxNum);
         });
       });
     }
