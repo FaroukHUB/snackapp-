@@ -196,22 +196,24 @@ const Products = {
                 const priceText = product.pricePrefix;
                 const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
                 return `
-                    <div class="featured-card">
-                        <div class="product-image-wrapper" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
-                            <img src="../${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="product-image"
-                                 loading="lazy"
-                                 onerror="this.style.display='none'">
-                            ${product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : ''}
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name" onclick="Products.openProductModal('${escapeHtml(product.id)}')">${escapeHtml(product.name)}</h3>
-                            <p class="product-desc">${escapeHtml(desc)}</p>
-                            <div class="product-footer">
-                                <span class="product-price">${priceText}</span>
-                                <button class="product-add-btn" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">Ajouter</button>
+                    <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
+                        ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
+                        <img src="../${escapeHtml(product.image)}"
+                             alt="${escapeHtml(product.name)}"
+                             class="product-image-new"
+                             loading="lazy"
+                             onerror="this.style.display='none'">
+                        <div class="product-content-new">
+                            <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
+                            <p class="product-desc-new">${escapeHtml(desc)}</p>
+                            <div class="product-footer-new">
+                                <span class="product-price-new">${priceText}</span>
+                                <button class="product-btn-new" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">
+                                    <span>Ajouter</span>
+                                </button>
                             </div>
                         </div>
-                    </div>
+                    </article>
                 `;
             }
 
@@ -228,22 +230,24 @@ const Products = {
             const priceText = Config.formatPrice(price);
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
             return `
-                <div class="featured-card">
-                    <div class="product-image-wrapper" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
-                        <img src="../${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="product-image"
-                             loading="lazy"
-                             onerror="this.style.display='none'">
-                        ${product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : ''}
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name" onclick="Products.openProductModal('${escapeHtml(product.id)}')">${escapeHtml(product.name)}</h3>
-                        <p class="product-desc">${escapeHtml(desc)}</p>
-                        <div class="product-footer">
-                            <span class="product-price">${priceText}</span>
-                            <button class="product-add-btn" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">Ajouter</button>
+                <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
+                    ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
+                    <img src="../${escapeHtml(product.image)}"
+                         alt="${escapeHtml(product.name)}"
+                         class="product-image-new"
+                         loading="lazy"
+                         onerror="this.style.display='none'">
+                    <div class="product-content-new">
+                        <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
+                        <p class="product-desc-new">${escapeHtml(desc)}</p>
+                        <div class="product-footer-new">
+                            <span class="product-price-new">${priceText}</span>
+                            <button class="product-btn-new" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">
+                                <span>Ajouter</span>
+                            </button>
                         </div>
                     </div>
-                </div>
+                </article>
             `;
         }).join('');
     },
@@ -565,22 +569,24 @@ const Products = {
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
 
             return `
-                <div class="featured-card ${isUnavailable ? 'unavailable' : ''}" data-product-id="${escapeHtml(product.id)}">
-                    <div class="product-image-wrapper" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
-                        <img src="../${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="product-image"
-                             loading="lazy"
-                             onerror="this.style.display='none'">
-                        ${product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : ''}
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-name" onclick="Products.openProductModal('${escapeHtml(product.id)}')">${escapeHtml(product.name)}</h3>
-                        <p class="product-desc">${escapeHtml(desc)}</p>
-                        <div class="product-footer">
-                            <span class="product-price">${priceText}</span>
-                            <button class="product-add-btn" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">Ajouter</button>
+                <article class="product-card-new ${isUnavailable ? 'unavailable' : ''}" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
+                    ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
+                    <img src="../${escapeHtml(product.image)}"
+                         alt="${escapeHtml(product.name)}"
+                         class="product-image-new"
+                         loading="lazy"
+                         onerror="this.style.display='none'">
+                    <div class="product-content-new">
+                        <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
+                        <p class="product-desc-new">${escapeHtml(desc)}</p>
+                        <div class="product-footer-new">
+                            <span class="product-price-new">${priceText}</span>
+                            <button class="product-btn-new" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">
+                                <span>Ajouter</span>
+                            </button>
                         </div>
                     </div>
-                </div>
+                </article>
             `;
         }).join('');
     },
