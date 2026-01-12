@@ -1811,7 +1811,7 @@ $csrfToken = getCsrfToken();
             priceSolo,
             priceMenu,
             badge,
-            pricePrefix,
+            pricePrefix: pricePrefix || "",
             status,
             supplements
           };
