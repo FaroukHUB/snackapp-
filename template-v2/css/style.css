@@ -738,8 +738,7 @@ ul {
 
 .product-image-wrapper {
     position: relative;
-    padding: 10px;
-    padding-top: calc(65% + 10px);
+    padding-top: 65%;
     background: var(--gray-100);
     overflow: hidden;
 }
@@ -2671,12 +2670,12 @@ ul {
     }
 
     .product-image-wrapper {
+        position: relative;
         width: 100%;
         height: 180px;
         overflow: hidden;
         background: var(--gray-100);
-        padding: 10px !important;
-        box-sizing: border-box !important;
+        padding: 0 !important;
     }
 
     .product-image {
