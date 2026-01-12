@@ -399,7 +399,17 @@ function applyRuntimeToConfig($config, $runtime) {
                 if (isset($deletedProducts[$pid])) { unset($config['menu']['categories'][$ci]['items'][$ii]); continue; }
 
                 if (isset($productPatches[$pid]) && is_array($productPatches[$pid])) {
-                    $config['menu']['categories'][$ci]['items'][$ii] = array_replace_recursive($item, $productPatches[$pid]);
+                    // Fusionner les patches
+                    $merged = array_replace_recursive($item, $productPatches[$pid]);
+
+                    // ✅ FIX: Supprimer les clés avec valeur null (pour permettre la suppression de badge, pricePrefix, etc.)
+                    foreach ($productPatches[$pid] as $key => $value) {
+                        if ($value === null) {
+                            unset($merged[$key]);
+                        }
+                    }
+
+                    $config['menu']['categories'][$ci]['items'][$ii] = $merged;
                 }
             }
             // reindex
