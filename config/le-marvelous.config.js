@@ -30,8 +30,8 @@ window.SNACK_CONFIG = {
 
   urls: {
     website: "https://marvelous.mon-agenceweb.fr/",
-    googleMaps: "https://www.google.com/maps?q=Le+MARVELOUS+Ouled+Moussa",
-    googleMapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3198.7146763237606!2d3.3693709!3d36.705393699999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128e5df9ea007565%3A0x61e9a9aae68c8648!2sLe%20MARVELOUS!5e0!3m2!1sfr!2sdz!4v1765556127293!5m2!1sfr!2sdz"
+    googleMaps: "https://maps.app.goo.gl/yCGHBfEXKbhBqsaSA",
+    googleMapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3198.7146774777384!2d3.3667959758340036!3d36.70539367227425!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128e5df9ea007565%3A0x61e9a9aae68c8648!2sLe%20MARVELOUS!5e0!3m2!1sfr!2sdz!4v1768232143312!5m2!1sfr!2sdz"
   },
 
   social: {
@@ -45,7 +45,7 @@ window.SNACK_CONFIG = {
     placeId: null,
     rating: 5.0,
     reviewCount: 87,
-    url: "https://www.google.com/maps?q=Le+MARVELOUS+Ouled+Moussa",
+    url: "https://www.google.com/search?sca_esv=b243d552b696475b&rlz=1C5CHFA_enDZ1142DZ1143&sxsrf=ANbL-n7MnzELJzxRRAuob8C08vW8BOmpGw:1768232073160&q=marvelous+ouled+moussa&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOR7_uxVy-zhzsx0dTVqPMUUKZRSWYDZl1XaHwxiwgJkvZ_TqgPMTm9n81Gw7rU9-44pz8vEwedj_WqguvxavQLeqSMY2&sa=X&ved=2ahUKEwiatefkqYaSAxWmTqQEHTV4B_gQrrQLegQIHBAA&biw=1584&bih=877&dpr=2&aic=0",
     cuisine: ["Crêperie", "Coffee Shop", "Diner 50's"]
   },
 
