@@ -1338,10 +1338,16 @@ if (isset($_GET['export'])) {
                             if (opts.selectedVariant && opts.selectedVariant.name) html += `<div style="color: #8b5cf6; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-coffee" style="font-size: 11px;"></i> ${opts.selectedVariant.name}</div>`;
                             // Ancien système (rétrocompatibilité)
                             if (opts.selectedCapsule) html += `<div style="color: #6366f1; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-hashtag" style="font-size: 11px;"></i> Capsule n°${opts.selectedCapsule}</div>`;
-                            // Nouveau système L'Or (numéros d'intensité)
-                            if (opts.selectedCapsuleNumber && opts.selectedCapsuleNumber.name) html += `<div style="color: #6366f1; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-hashtag" style="font-size: 11px;"></i> Intensité L'Or: ${opts.selectedCapsuleNumber.name}</div>`;
-                            // Nouveau système Caps (couleurs Nespresso)
-                            if (opts.selectedCapsuleColor && opts.selectedCapsuleColor.name) html += `<div style="color: #9b87f5; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-palette" style="font-size: 11px;"></i> Couleur Nespresso: ${opts.selectedCapsuleColor.name}</div>`;
+                            // Nouveau système L'Or (numéros d'intensité) - support objet et string
+                            if (opts.selectedCapsuleNumber) {
+                                const capsuleNum = typeof opts.selectedCapsuleNumber === 'object' ? opts.selectedCapsuleNumber.name : opts.selectedCapsuleNumber;
+                                html += `<div style="color: #6366f1; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-hashtag" style="font-size: 11px;"></i> Intensité L'Or: ${capsuleNum}</div>`;
+                            }
+                            // Nouveau système Caps (couleurs Nespresso) - support objet et string
+                            if (opts.selectedCapsuleColor) {
+                                const capsuleColor = typeof opts.selectedCapsuleColor === 'object' ? opts.selectedCapsuleColor.name : opts.selectedCapsuleColor;
+                                html += `<div style="color: #9b87f5; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-palette" style="font-size: 11px;"></i> Couleur Nespresso: ${capsuleColor}</div>`;
+                            }
                             if (opts.crepe) html += `<div style="color: #f59e0b; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-utensils" style="font-size: 11px;"></i> Crêpe: ${opts.crepe}</div>`;
                             if (opts.sauce) html += `<div style="color: #ef4444; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-droplet" style="font-size: 11px;"></i> Sauce: ${opts.sauce}</div>`;
                             if (opts.accompagnement) html += `<div style="color: #fbbf24; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-bowl-food" style="font-size: 11px;"></i> ${opts.accompagnement}</div>`;
