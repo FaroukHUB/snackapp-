@@ -1792,8 +1792,8 @@ $csrfToken = getCsrfToken();
           formData.set("name", name);
           formData.set("description", description);
           formData.set("priceSolo", priceSolo);
-          if (priceMenu !== null) formData.set("priceMenu", priceMenu);
-          if (badge) formData.set("badge", badge);
+          formData.set("priceMenu", priceMenu !== null ? priceMenu : "");
+          formData.set("badge", badge || "");
           formData.set("pricePrefix", pricePrefix || "");
           formData.set("status", status);
           formData.set("supplements", JSON.stringify(supplements));
@@ -1809,9 +1809,9 @@ $csrfToken = getCsrfToken();
             name,
             description,
             priceSolo,
-            priceMenu,
-            badge,
-            pricePrefix: pricePrefix || "",
+            priceMenu: priceMenu !== null ? priceMenu : null,
+            badge: badge || null,
+            pricePrefix: pricePrefix || null,
             status,
             supplements
           };
