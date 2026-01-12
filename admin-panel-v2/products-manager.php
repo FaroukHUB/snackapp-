@@ -1794,7 +1794,7 @@ $csrfToken = getCsrfToken();
           formData.set("priceSolo", priceSolo);
           if (priceMenu !== null) formData.set("priceMenu", priceMenu);
           if (badge) formData.set("badge", badge);
-          if (pricePrefix) formData.set("pricePrefix", pricePrefix);
+          formData.set("pricePrefix", pricePrefix || "");
           formData.set("status", status);
           formData.set("supplements", JSON.stringify(supplements));
           if (variants) formData.set("variants", JSON.stringify(variants));
