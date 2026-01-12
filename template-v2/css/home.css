@@ -899,7 +899,7 @@ body {
     }
 
     .product-card .product-image {
-        height: 110px;
+        height: 180px;
     }
 
     .product-card .product-info {
@@ -945,7 +945,7 @@ body {
     }
 
     .product-card .product-image {
-        height: 100px;
+        height: 160px;
         padding: 10px;
     }
 }
