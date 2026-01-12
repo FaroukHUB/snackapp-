@@ -738,17 +738,21 @@ ul {
 
 .product-image-wrapper {
     position: relative;
-    padding-top: 65%;
+    padding: 10px;
+    padding-top: calc(65% + 10px);
     background: var(--gray-100);
     overflow: hidden;
 }
 
 .product-image {
     position: absolute;
-    inset: 10px;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
     width: calc(100% - 20px);
     height: calc(100% - 20px);
-    object-fit: contain;
+    object-fit: cover;
     transition: var(--transition-slow);
 }
 
@@ -2671,14 +2675,19 @@ ul {
         height: 140px;
         overflow: hidden;
         background: var(--gray-100);
+        padding: 10px !important;
+        box-sizing: border-box !important;
     }
 
     .product-image {
-        width: 100% !important;
-        height: 140px !important;
-        object-fit: contain !important;
-        padding: 10px !important;
-        box-sizing: border-box !important;
+        position: absolute !important;
+        top: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+        bottom: 10px !important;
+        width: calc(100% - 20px) !important;
+        height: calc(100% - 20px) !important;
+        object-fit: cover !important;
     }
 
     .product-info {
