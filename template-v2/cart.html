@@ -1629,6 +1629,69 @@
 
                 // Initial render
                 this.render();
+
+                // ⚡ Auto-compléter l'adresse depuis les données client
+                this.setupPhoneAutoComplete();
+            },
+
+            /**
+             * Configure l'auto-complétion de l'adresse depuis le téléphone
+             */
+            setupPhoneAutoComplete() {
+                const phoneInput = document.getElementById('customerPhone');
+                if (!phoneInput) return;
+
+                let timeout;
+                phoneInput.addEventListener('input', () => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        this.fetchCustomerAddress();
+                    }, 800); // Attendre 800ms après la dernière frappe
+                });
+            },
+
+            /**
+             * Récupère l'adresse du client depuis l'API fidélité
+             */
+            async fetchCustomerAddress() {
+                const countryCode = document.getElementById('customerCountry').value;
+                const phoneNumber = document.getElementById('customerPhone').value.trim();
+
+                if (!phoneNumber || phoneNumber.length < 6) return;
+
+                // Combiner code pays + numéro
+                const cleanPhone = phoneNumber.replace(/[\s\-\(\)]/g, '').replace(/^0+/, '');
+                const fullPhone = countryCode + cleanPhone;
+
+                try {
+                    const response = await fetch(`/admin-panel-v2/api/loyalty-public.php?action=check_points&phone=${encodeURIComponent(fullPhone)}`);
+                    const data = await response.json();
+
+                    if (data.success && data.customer) {
+                        const customer = data.customer;
+
+                        // Auto-compléter le nom si vide
+                        const nameInput = document.getElementById('customerName');
+                        if (nameInput && !nameInput.value && customer.name) {
+                            nameInput.value = customer.name;
+                        }
+
+                        // Auto-compléter l'adresse si en mode livraison
+                        if (this.mode === 'delivery' && customer.delivery_address) {
+                            const addressInput = document.getElementById('customerAddress');
+                            if (addressInput && !addressInput.value) {
+                                addressInput.value = customer.delivery_address;
+                                // Flash visuel pour indiquer que l'adresse a été remplie
+                                addressInput.style.background = '#d1fae5';
+                                setTimeout(() => {
+                                    addressInput.style.background = '';
+                                }, 1500);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.log('Impossible de récupérer les données client:', error);
+                }
             },
 
             /**

@@ -89,6 +89,7 @@ function checkPoints() {
                 'id' => $mainCustomer['id'],
                 'name' => $mainCustomer['name'],
                 'phone' => $mainCustomer['phone'],
+                'delivery_address' => $mainCustomer['delivery_address'] ?? null, // ⚡ Adresse de livraison
                 'loyalty_points' => $totalPoints, // Points combinés de tous les comptes
                 'duplicate_count' => count($matchingCustomers) // Nombre de comptes en double
             ]
