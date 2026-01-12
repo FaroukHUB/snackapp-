@@ -381,7 +381,16 @@ function applyRuntimeToConfig($config, $runtime) {
             } else {
                 // ✅ FIX: Produit existe : FUSIONNER les données du runtime
                 $existing = $config['menu']['categories'][$catIndex]['items'][$existingIndex];
-                $config['menu']['categories'][$catIndex]['items'][$existingIndex] = array_merge($existing, $p);
+                $merged = array_merge($existing, $p);
+
+                // ✅ FIX: Supprimer les clés avec valeur null (pour permettre la suppression)
+                foreach ($p as $key => $value) {
+                    if ($value === null) {
+                        unset($merged[$key]);
+                    }
+                }
+
+                $config['menu']['categories'][$catIndex]['items'][$existingIndex] = $merged;
                 error_log('✅ [SYNC] Produit custom mis à jour: ' . $pid . ' dans ' . $categoryId);
             }
         }
