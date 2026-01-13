@@ -235,7 +235,7 @@ const Products = {
                     <img src="../${escapeHtml(product.image)}"
                          alt="${escapeHtml(product.name)}"
                          class="product-image-new"
-                         ${index >= 6 ? 'loading="lazy"' : ''}
+                         loading="lazy"
                          onerror="this.style.display='none'">
                     <div class="product-content-new">
                         <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
@@ -574,7 +574,7 @@ const Products = {
                     <img src="../${escapeHtml(product.image)}"
                          alt="${escapeHtml(product.name)}"
                          class="product-image-new"
-                         ${index >= 6 ? 'loading="lazy"' : ''}
+                         loading="lazy"
                          onerror="this.style.display='none'">
                     <div class="product-content-new">
                         <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
