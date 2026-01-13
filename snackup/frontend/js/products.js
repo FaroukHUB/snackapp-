@@ -1272,21 +1272,29 @@ const Products = {
             const patisserieOptions = document.getElementById('patisserieOptions');
 
             if (product.hasPâtisserieOptions && product.pâtisserieOptions && product.pâtisserieOptions.length > 0) {
-                patisserieContainer.classList.remove('hidden');
-                patisserieContainer.style.display = '';
-                patisserieOptions.innerHTML = product.pâtisserieOptions.map((patisserie, index) => `
-                    <div class="patisserie-item ${index === 0 ? 'selected' : ''}" data-id="${patisserie.id}" onclick="Products.selectPatisserie('${patisserie.id}')">
-                        <div class="patisserie-image-container">
-                            <img src="../${patisserie.image}" alt="${patisserie.name}" class="patisserie-image" loading="lazy" onerror="this.style.display='none'">
+                // Filtrer les options disponibles seulement
+                const availablePatisseries = product.pâtisserieOptions.filter(p => !p.status || p.status === 'available');
+
+                if (availablePatisseries.length > 0) {
+                    patisserieContainer.classList.remove('hidden');
+                    patisserieContainer.style.display = '';
+                    patisserieOptions.innerHTML = availablePatisseries.map((patisserie, index) => `
+                        <div class="patisserie-item ${index === 0 ? 'selected' : ''}" data-id="${patisserie.id}" onclick="Products.selectPatisserie('${patisserie.id}')">
+                            <div class="patisserie-image-container">
+                                <img src="../${patisserie.image}" alt="${patisserie.name}" class="patisserie-image" loading="lazy" onerror="this.style.display='none'">
+                            </div>
+                            <div class="patisserie-divider"></div>
+                            <div class="patisserie-name">${patisserie.name}</div>
+                            <div class="patisserie-divider"></div>
+                            <div class="patisserie-price">${Config.formatPrice(patisserie.price)}</div>
                         </div>
-                        <div class="patisserie-divider"></div>
-                        <div class="patisserie-name">${patisserie.name}</div>
-                        <div class="patisserie-divider"></div>
-                        <div class="patisserie-price">${Config.formatPrice(patisserie.price)}</div>
-                    </div>
-                `).join('');
-                // Select first pâtisserie by default
-                this.selectedPatisserie = product.pâtisserieOptions[0];
+                    `).join('');
+                    // Select first pâtisserie by default
+                    this.selectedPatisserie = availablePatisseries[0];
+                } else {
+                    patisserieContainer.classList.add('hidden');
+                    patisserieContainer.style.display = 'none';
+                }
             } else {
                 patisserieContainer.classList.add('hidden');
                 patisserieContainer.style.display = 'none';
@@ -1298,26 +1306,34 @@ const Products = {
             const beverageTitle = document.getElementById('beverageTitle');
 
             if (product.hasBeverageOptions && product.beverageOptions && product.beverageOptions.length > 0) {
-                beverageContainer.classList.remove('hidden');
-                beverageContainer.style.display = '';
-                beverageTitle.textContent = `Choisissez votre ${product.name.toLowerCase()}`;
-                beverageOptions.innerHTML = product.beverageOptions.map((beverage, index) => `
-                    <div class="beverage-item ${index === 0 ? 'selected' : ''}" data-id="${beverage.id}" onclick="Products.selectBeverage('${beverage.id}')">
-                        ${beverage.image ? `
-                            <div class="beverage-image-container">
-                                <img src="../${beverage.image}" alt="${beverage.name}" class="beverage-image" loading="lazy" onerror="this.style.display='none'">
-                            </div>
-                        ` : ''}
-                        <div class="beverage-divider"></div>
-                        <div class="beverage-name">${beverage.name}</div>
-                        ${beverage.price ? `
+                // Filtrer les options disponibles seulement
+                const availableBeverages = product.beverageOptions.filter(b => !b.status || b.status === 'available');
+
+                if (availableBeverages.length > 0) {
+                    beverageContainer.classList.remove('hidden');
+                    beverageContainer.style.display = '';
+                    beverageTitle.textContent = `Choisissez votre ${product.name.toLowerCase()}`;
+                    beverageOptions.innerHTML = availableBeverages.map((beverage, index) => `
+                        <div class="beverage-item ${index === 0 ? 'selected' : ''}" data-id="${beverage.id}" onclick="Products.selectBeverage('${beverage.id}')">
+                            ${beverage.image ? `
+                                <div class="beverage-image-container">
+                                    <img src="../${beverage.image}" alt="${beverage.name}" class="beverage-image" loading="lazy" onerror="this.style.display='none'">
+                                </div>
+                            ` : ''}
                             <div class="beverage-divider"></div>
-                            <div class="beverage-price">${Config.formatPrice(beverage.price)}</div>
-                        ` : ''}
-                    </div>
-                `).join('');
-                // Select first beverage by default
-                this.selectedBeverage = product.beverageOptions[0];
+                            <div class="beverage-name">${beverage.name}</div>
+                            ${beverage.price ? `
+                                <div class="beverage-divider"></div>
+                                <div class="beverage-price">${Config.formatPrice(beverage.price)}</div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+                    // Select first beverage by default
+                    this.selectedBeverage = availableBeverages[0];
+                } else {
+                    beverageContainer.classList.add('hidden');
+                    beverageContainer.style.display = 'none';
+                }
             } else {
                 beverageContainer.classList.add('hidden');
                 beverageContainer.style.display = 'none';
