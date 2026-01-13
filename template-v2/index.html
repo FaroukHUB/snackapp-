@@ -144,7 +144,7 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="cart-btn" id="cartBtn">
+            <button class="cart-btn" id="cartBtn" aria-label="Panier">
                 <i class="fas fa-shopping-bag"></i>
                 <span class="cart-badge" id="cartBadge">0</span>
                 <span class="cart-total" id="cartTotal">0 DA</span>
@@ -376,9 +376,9 @@
 
                 <!-- Slider Controls -->
                 <div class="slider-controls">
-                    <button class="slider-btn" id="prevReview"><i class="fas fa-chevron-left"></i></button>
+                    <button class="slider-btn" id="prevReview" aria-label="Avis précédent"><i class="fas fa-chevron-left"></i></button>
                     <div class="slider-dots" id="reviewsDots"></div>
-                    <button class="slider-btn" id="nextReview"><i class="fas fa-chevron-right"></i></button>
+                    <button class="slider-btn" id="nextReview" aria-label="Avis suivant"><i class="fas fa-chevron-right"></i></button>
                 </div>
 
                 <!-- CTA Button -->
@@ -433,7 +433,7 @@
     <div class="modal" id="productModal">
         <div class="modal-backdrop"></div>
         <div class="modal-content">
-            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            <button class="modal-close" id="modalClose" aria-label="Fermer"><i class="fas fa-times"></i></button>
             <div class="modal-body">
                 <div class="modal-image">
                     <img src="" alt="Image du produit" id="modalImage">
@@ -553,9 +553,9 @@
                     <!-- Quantity & Add to Cart -->
                     <div class="modal-actions">
                         <div class="quantity-selector">
-                            <button class="qty-btn" id="qtyMinus"><i class="fas fa-minus"></i></button>
+                            <button class="qty-btn" id="qtyMinus" aria-label="Diminuer la quantité"><i class="fas fa-minus"></i></button>
                             <span class="qty-value" id="qtyValue">1</span>
-                            <button class="qty-btn" id="qtyPlus"><i class="fas fa-plus"></i></button>
+                            <button class="qty-btn" id="qtyPlus" aria-label="Augmenter la quantité"><i class="fas fa-plus"></i></button>
                         </div>
                         <button class="btn-add-cart" id="addToCartBtn">
                             <i class="fas fa-shopping-bag"></i>
@@ -574,7 +574,7 @@
             <h3><i class="fas fa-shopping-bag"></i> Votre commande</h3>
             <div class="mini-cart-header-actions">
                 <button class="mini-cart-clear-btn" onclick="Cart.clear(); Cart.updateUI();">Vider</button>
-                <button class="mini-cart-close" id="miniCartClose"><i class="fas fa-times"></i></button>
+                <button class="mini-cart-close" id="miniCartClose" aria-label="Fermer le panier"><i class="fas fa-times"></i></button>
             </div>
         </div>
         <div class="mini-cart-items" id="miniCartItems">

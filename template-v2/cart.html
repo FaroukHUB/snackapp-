@@ -1578,7 +1578,7 @@
     <div id="upsellModal" class="product-modal" style="display: none;">
         <div class="product-modal-overlay" onclick="CartPage.closeUpsellModal(event)"></div>
         <div class="product-modal-content" onclick="event.stopPropagation()">
-            <button type="button" class="product-modal-close" onclick="CartPage.closeUpsellModal(event)">
+            <button type="button" class="product-modal-close" onclick="CartPage.closeUpsellModal(event)" aria-label="Fermer">
                 <i class="fas fa-times"></i>
             </button>
 
@@ -1794,15 +1794,15 @@
                             <div class="cart-item-price">${Config.formatPrice(Cart.getItemTotal(item))}</div>
                         </div>
                         <div class="cart-item-actions">
-                            <button class="cart-item-remove" onclick="console.log('🗑️ Remove clicked, key:', decodeURIComponent(this.closest('.cart-item').dataset.key)); Cart.removeItem(decodeURIComponent(this.closest('.cart-item').dataset.key))">
+                            <button class="cart-item-remove" onclick="console.log('🗑️ Remove clicked, key:', decodeURIComponent(this.closest('.cart-item').dataset.key)); Cart.removeItem(decodeURIComponent(this.closest('.cart-item').dataset.key))" aria-label="Supprimer l'article">
                                 <i class="fas fa-trash"></i>
                             </button>
                             <div class="cart-item-qty">
-                                <button onclick="console.log('➖ Decrement clicked, key:', decodeURIComponent(this.closest('.cart-item').dataset.key)); Cart.decrement(decodeURIComponent(this.closest('.cart-item').dataset.key))">
+                                <button onclick="console.log('➖ Decrement clicked, key:', decodeURIComponent(this.closest('.cart-item').dataset.key)); Cart.decrement(decodeURIComponent(this.closest('.cart-item').dataset.key))" aria-label="Diminuer la quantité">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <span>${item.quantity}</span>
-                                <button onclick="console.log('➕ Increment clicked, key:', decodeURIComponent(this.closest('.cart-item').dataset.key)); Cart.increment(decodeURIComponent(this.closest('.cart-item').dataset.key))">
+                                <button onclick="console.log('➕ Increment clicked, key:', decodeURIComponent(this.closest('.cart-item').dataset.key)); Cart.increment(decodeURIComponent(this.closest('.cart-item').dataset.key))" aria-label="Augmenter la quantité">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
