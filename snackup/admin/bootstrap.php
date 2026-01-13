@@ -1,7 +1,7 @@
 <?php
 /**
- * SnackApp v1 - Bootstrap
- * À inclure au début de chaque fichier PHP
+ * Bootstrap Admin Panel - Snackup v2 (MySQL)
+ * À inclure au début de chaque fichier PHP qui nécessite l'authentification
  */
 
 // 🔒 SÉCURITÉ: Configuration session sécurisée
@@ -23,67 +23,33 @@ if (session_status() === PHP_SESSION_NONE) {
 header('X-Frame-Options: DENY');  // Protection clickjacking
 header('X-Content-Type-Options: nosniff');  // Protection MIME sniffing
 // HSTS uniquement en HTTPS
-if ($isHttps) {
+if (isset($isHttps) && $isHttps) {
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');  // Force HTTPS
 }
 header('Referrer-Policy: strict-origin-when-cross-origin');  // Limite fuite d'infos
 header('Permissions-Policy: geolocation=(), microphone=(), camera=()');  // Permissions strictes
 
-// Chemins
-define('SNACK_ROOT', dirname(__DIR__));
-define('SNACK_DB_PATH', SNACK_ROOT . '/database');
-define('SNACK_CONFIG_PATH', SNACK_ROOT . '/config');
-define('SNACK_ADMIN_PATH', __DIR__);
-
-// Charger les fonctions de config (loadMenuRuntime, saveMenuRuntime, etc.)
+// Charger la configuration principale (qui charge l'instance et la DB)
 require_once __DIR__ . '/config.php';
 
-// Charger les classes database
-require_once SNACK_DB_PATH . '/Database.php';
-require_once SNACK_DB_PATH . '/repositories/RestaurantRepository.php';
-require_once SNACK_DB_PATH . '/repositories/MenuRepository.php';
-require_once SNACK_DB_PATH . '/repositories/OrderRepository.php';
-require_once SNACK_DB_PATH . '/repositories/CustomerRepository.php';
-require_once SNACK_DB_PATH . '/repositories/PromoCodeRepository.php';
+// Charger les repositories
+require_once __DIR__ . '/../backend/repositories/RestaurantRepository.php';
+require_once __DIR__ . '/../backend/repositories/MenuRepository.php';
+require_once __DIR__ . '/../backend/repositories/OrderRepository.php';
+require_once __DIR__ . '/../backend/repositories/CustomerRepository.php';
+require_once __DIR__ . '/../backend/repositories/PromoCodeRepository.php';
+require_once __DIR__ . '/../backend/repositories/LoyaltyRepository.php';
 
-// Charger la config database
-$dbConfigFile = SNACK_DB_PATH . '/config.php';
-if (!file_exists($dbConfigFile)) {
-    // Fallback: mode JSON (compatibilité)
-    define('SNACK_USE_JSON', true);
-} else {
-    define('SNACK_USE_JSON', false);
-    $dbConfig = require $dbConfigFile;
-
-    try {
-        Database::init($dbConfig['database']);
-        // Tester la connexion
-        Database::getInstance();
-    } catch (Exception $e) {
-        error_log("SnackApp DB Error: " . $e->getMessage());
-        // Fallback JSON si la DB échoue
-        define('SNACK_DB_ERROR', $e->getMessage());
-    }
-}
-
-// Restaurant actuel (pour multi-tenant)
-// Le Marvelous (ID 2)
-if (!defined('SNACK_RESTAURANT_ID')) {
-    // Essayer de récupérer depuis la session ou le domaine
-    if (isset($_SESSION['restaurant_id'])) {
-        define('SNACK_RESTAURANT_ID', $_SESSION['restaurant_id']);
-    } else {
-        // Le Marvelous = restaurant ID 2
-        define('SNACK_RESTAURANT_ID', 2);
-    }
-}
+// Constantes pour le mode MySQL
+define('SNACK_USE_JSON', false);
+define('SNACK_RESTAURANT_ID', RESTAURANT_ID);
 
 /**
  * Helper: Récupérer le restaurant actuel
  */
 function getCurrentRestaurant(): ?array {
     static $restaurant = null;
-    if ($restaurant === null && !SNACK_USE_JSON) {
+    if ($restaurant === null) {
         $restaurant = RestaurantRepository::getById(SNACK_RESTAURANT_ID);
     }
     return $restaurant;
@@ -94,7 +60,7 @@ function getCurrentRestaurant(): ?array {
  */
 function getRestaurantSettings(): ?array {
     static $settings = null;
-    if ($settings === null && !SNACK_USE_JSON) {
+    if ($settings === null) {
         $settings = RestaurantRepository::getSettings(SNACK_RESTAURANT_ID);
     }
     return $settings;
@@ -123,7 +89,7 @@ function requireAdmin(): void {
 function jsonResponse(array $data, int $statusCode = 200): void {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
 
@@ -173,7 +139,7 @@ function regenerateCsrfToken(): string {
 function requireCsrf(): void {
     $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
     if (!validateCsrfToken($token)) {
-        // Détecter si c'est une requête API (path commence par /api/ ou Accept contient json)
+        // Détecter si c'est une requête API
         $isApiRequest = str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/')
                      || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')
                      || str_contains($_SERVER['CONTENT_TYPE'] ?? '', 'json');
