@@ -1211,13 +1211,58 @@ if (isset($_GET['export'])) {
                         <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #3b82f6;">
                             <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Mode</div>
                             <div style="font-size: 14px; color: white; font-weight: 600;">
-                                ${order.mode_notes ? order.mode_notes.replace('📦', '<i class="fas fa-shopping-bag" style="color: #10b981;"></i>').replace('🏠', '<i class="fas fa-utensils" style="color: #f59e0b;"></i>').replace('🚗', '<i class="fas fa-motorcycle" style="color: #3b82f6;"></i>') : order.notes && order.notes.includes('LIVRAISON') ? '<i class="fas fa-motorcycle" style="color: #3b82f6;"></i> Livraison' : order.notes && order.notes.includes('SUR PLACE') ? '<i class="fas fa-utensils" style="color: #f59e0b;"></i> Sur place' : '<i class="fas fa-shopping-bag" style="color: #10b981;"></i> À emporter'}
+                                ${(() => {
+                                    // Extraire le mode simple depuis mode_notes
+                                    if (order.mode_notes) {
+                                        if (order.mode_notes.includes('📦') || order.mode_notes.includes('À EMPORTER')) {
+                                            return '<i class="fas fa-shopping-bag" style="color: #10b981;"></i> À emporter';
+                                        } else if (order.mode_notes.includes('🏠') || order.mode_notes.includes('SUR PLACE')) {
+                                            return '<i class="fas fa-utensils" style="color: #f59e0b;"></i> Sur place';
+                                        } else if (order.mode_notes.includes('🚗') || order.mode_notes.includes('LIVRAISON')) {
+                                            return '<i class="fas fa-motorcycle" style="color: #3b82f6;"></i> Livraison';
+                                        }
+                                    }
+                                    // Fallback sur notes
+                                    if (order.notes && order.notes.includes('LIVRAISON')) return '<i class="fas fa-motorcycle" style="color: #3b82f6;"></i> Livraison';
+                                    if (order.notes && order.notes.includes('SUR PLACE')) return '<i class="fas fa-utensils" style="color: #f59e0b;"></i> Sur place';
+                                    return '<i class="fas fa-shopping-bag" style="color: #10b981;"></i> À emporter';
+                                })()}
                             </div>
                         </div>
                         <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #10b981;">
                             <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Paiement</div>
                             <div style="font-size: 14px; color: white; font-weight: 600;">
-                                ${order.payment_method === 'ccp' ? '<i class="fas fa-credit-card" style="color: #10b981;"></i> CCP' : order.payment_method === 'baridi_mob' ? '<i class="fas fa-mobile-alt" style="color: #fbbf24;"></i> BaridiMob' : '<i class="fas fa-money-bill-wave" style="color: #10b981;"></i> Espèces'}
+                                ${(() => {
+                                    let paymentIcon = '';
+                                    let paymentText = '';
+                                    let extraInfo = '';
+
+                                    // Type de paiement
+                                    if (order.payment_method === 'ccp') {
+                                        paymentIcon = '<i class="fas fa-credit-card" style="color: #10b981;"></i>';
+                                        paymentText = ' CCP';
+                                    } else if (order.payment_method === 'baridi_mob') {
+                                        paymentIcon = '<i class="fas fa-mobile-alt" style="color: #fbbf24;"></i>';
+                                        paymentText = ' BaridiMob';
+                                    } else {
+                                        paymentIcon = '<i class="fas fa-money-bill-wave" style="color: #10b981;"></i>';
+                                        paymentText = ' Espèces';
+
+                                        // Info appoint/monnaie pour espèces
+                                        if (order.delivery_instructions) {
+                                            if (order.delivery_instructions.includes('monnaie exacte')) {
+                                                extraInfo = '<br><span style="color: #10b981; font-size: 12px;"><i class="fas fa-check-circle"></i> J\'ai l\'appoint</span>';
+                                            } else {
+                                                const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) DA/);
+                                                if (changeMatch) {
+                                                    extraInfo = `<br><span style="color: #fbbf24; font-size: 12px;"><i class="fas fa-coins"></i> Prévoir ${changeMatch[1]} DA</span>`;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    return paymentIcon + paymentText + extraInfo;
+                                })()}
                             </div>
                         </div>
                     </div>
@@ -1253,9 +1298,11 @@ if (isset($_GET['export'])) {
                 }
 
                 // Salle et Table pour "Sur place"
-                if (order.mode_notes && order.mode_notes.includes('SUR PLACE') || order.notes && order.notes.includes('SUR PLACE')) {
-                    const salleMatch = order.notes.match(/Salle (Famille|Femme)/);
-                    const tableMatch = order.notes.match(/Table ([A-Z0-9]+)/i);
+                if ((order.mode_notes && order.mode_notes.includes('SUR PLACE')) || (order.notes && order.notes.includes('SUR PLACE'))) {
+                    // Chercher d'abord dans mode_notes, puis fallback sur notes
+                    const searchText = order.mode_notes || order.notes || '';
+                    const salleMatch = searchText.match(/Salle (Famille|Femme)/);
+                    const tableMatch = searchText.match(/Table ([A-Z0-9]+)/i);
 
                     html += `
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
@@ -1270,39 +1317,6 @@ if (isset($_GET['export'])) {
                                 <div style="font-size: 14px; color: white; font-weight: 600;">
                                     <i class="fas fa-chair" style="color: #8b5cf6;"></i> ${tableMatch ? tableMatch[1] : 'N/A'}
                                 </div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // Appoint/Monnaie pour paiement Espèces (sur place ET livraison)
-                const isCashPayment = !order.payment_method || order.payment_method === 'cash' || order.payment_method === 'especes';
-                if ((order.notes && (order.notes.includes('SUR PLACE') || order.notes.includes('LIVRAISON'))) && isCashPayment) {
-                    let changeInfo = '';
-
-                    if (order.delivery_instructions) {
-                        const hasExactChange = order.delivery_instructions.includes('monnaie exacte');
-                        const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) DA/);
-
-                        if (hasExactChange) {
-                            changeInfo = '<i class="fas fa-check-circle" style="color: #10b981;"></i> J\'ai l\'appoint <span style="color: #9ca3af; font-size: 12px;">(Montant exact)</span>';
-                        } else if (changeMatch) {
-                            changeInfo = `<i class="fas fa-money-bill-wave" style="color: #fbbf24;"></i> Prévoir la monnaie <span style="color: #fbbf24; font-size: 13px; font-weight: 700;">${changeMatch[1]} DA</span>`;
-                        }
-                    }
-
-                    // Afficher la carte même si pas d'info (pour paiement espèces)
-                    if (!changeInfo) {
-                        changeInfo = '<i class="fas fa-money-bill-wave" style="color: #10b981;"></i> Paiement en espèces <span style="color: #9ca3af; font-size: 12px;">(Info non précisée)</span>';
-                    }
-
-                    html += `
-                        <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #10b981; margin-bottom: 20px;">
-                            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">
-                                <i class="fas fa-coins"></i> Paiement et monnaie
-                            </div>
-                            <div style="font-size: 14px; color: white; font-weight: 600;">
-                                ${changeInfo}
                             </div>
                         </div>
                     `;
