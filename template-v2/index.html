@@ -40,6 +40,17 @@
     <meta name="msapplication-TileColor" content="#2ec4b6">
     <meta name="msapplication-TileImage" content="../images/favicon.png">
 
+    <!-- Critical CSS Inline - Prévenir FOUC (Flash of Unstyled Content) -->
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafb;
+            color: #1f2937;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+    </style>
+
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
