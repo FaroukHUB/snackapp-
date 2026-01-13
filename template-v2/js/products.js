@@ -851,7 +851,7 @@ const Products = {
         const backdrop = modal?.querySelector('.modal-backdrop');
         const closeBtn = document.getElementById('modalClose');
 
-        backdrop?.addEventListener('click', () => this.closeModal());
+        backdrop?.addEventListener('click', () => this.closeModal(), { passive: true });
         closeBtn?.addEventListener('click', () => this.closeModal());
 
         // Quantity buttons
@@ -872,13 +872,11 @@ const Products = {
             this.addCurrentToCart();
         });
 
-        // Close on Escape
-        document.addEventListener('keydown', (e) => {
+        // ⚡ FIX: Stocker les handlers pour éviter la multiplication
+        this._escapeHandler = this._escapeHandler || ((e) => {
             if (e.key === 'Escape') this.closeModal();
         });
-
-        // Formule add button click (event delegation)
-        document.addEventListener('click', (e) => {
+        this._formuleClickHandler = this._formuleClickHandler || ((e) => {
             const btn = e.target.closest('.formule-add-btn');
             if (btn) {
                 e.preventDefault();
@@ -889,6 +887,14 @@ const Products = {
                 }
             }
         });
+
+        // Remove avant d'add pour éviter les doublons (au cas où)
+        document.removeEventListener('keydown', this._escapeHandler);
+        document.removeEventListener('click', this._formuleClickHandler);
+
+        // Ajouter les listeners globaux
+        document.addEventListener('keydown', this._escapeHandler, { passive: true });
+        document.addEventListener('click', this._formuleClickHandler, { passive: true });
     },
 
     /**

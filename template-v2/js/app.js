@@ -4,6 +4,9 @@
    ============================================ */
 
 const App = {
+    // Protection flags pour éviter la multiplication des event listeners
+    _setupComplete: false,
+
     /**
      * Initialize the application
      */
@@ -26,10 +29,13 @@ const App = {
             // Initialize products display
             Products.init();
 
-            // Setup UI interactions
-            this.setupSidebar();
-            this.setupMiniCart();
-            this.setupSmoothScroll();
+            // Setup UI interactions (une seule fois)
+            if (!this._setupComplete) {
+                this.setupSidebar();
+                this.setupMiniCart();
+                this.setupSmoothScroll();
+                this._setupComplete = true;
+            }
 
             console.log('SnackApp initialized successfully!');
 
@@ -115,6 +121,19 @@ const App = {
             miniCart?.classList.remove('active');
         };
 
+        // ⚡ FIX: Stocker les handlers pour éviter la multiplication
+        this._miniCartClickOutsideHandler = this._miniCartClickOutsideHandler || ((e) => {
+            if (miniCart?.classList.contains('active') &&
+                !miniCart.contains(e.target) &&
+                !cartBtn?.contains(e.target)) {
+                closeMiniCart();
+            }
+        });
+
+        this._miniCartEscapeHandler = this._miniCartEscapeHandler || ((e) => {
+            if (e.key === 'Escape') closeMiniCart();
+        });
+
         cartBtn?.addEventListener('click', (e) => {
             e.preventDefault();
             // On mobile, go directly to cart page
@@ -127,19 +146,15 @@ const App = {
 
         closeBtn?.addEventListener('click', closeMiniCart);
 
+        // Remove avant d'add pour éviter les doublons
+        document.removeEventListener('click', this._miniCartClickOutsideHandler);
+        document.removeEventListener('keydown', this._miniCartEscapeHandler);
+
         // Close when clicking outside
-        document.addEventListener('click', (e) => {
-            if (miniCart?.classList.contains('active') &&
-                !miniCart.contains(e.target) &&
-                !cartBtn?.contains(e.target)) {
-                closeMiniCart();
-            }
-        });
+        document.addEventListener('click', this._miniCartClickOutsideHandler, { passive: true });
 
         // Close on Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeMiniCart();
-        });
+        document.addEventListener('keydown', this._miniCartEscapeHandler, { passive: true });
     },
 
     /**
