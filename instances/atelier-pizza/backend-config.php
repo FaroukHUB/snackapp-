@@ -7,9 +7,9 @@
 return [
     'database' => [
         'host' => 'localhost',
-        'name' => 'atelier_pizza_db',  // À créer sur o2switch
-        'user' => 'atelier_pizza_user', // Utilisateur MySQL
-        'password' => 'VOTRE_MOT_DE_PASSE_ICI', // À définir
+        'name' => 'zajr1824_atelierpizza',
+        'user' => 'zajr1824_atelierpizza',
+        'password' => 'VOTRE_MOT_DE_PASSE_ICI', // À remplacer par le vrai mot de passe
         'charset' => 'utf8mb4'
     ],
 
