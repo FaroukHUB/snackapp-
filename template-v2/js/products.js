@@ -317,7 +317,7 @@ const Products = {
         if (featured?.enabled && featured?.items?.length > 0) {
             html += `
                 <li>
-                    <a href="javascript:void(0)" onclick="Products.scrollToSection('featuredSection')" class="active">
+                    <a href="javascript:void(0)" data-section="featuredSection" onclick="Products.scrollToSection('featuredSection')" class="active">
                         <i class="fas fa-star"></i>
                         ${featured.title || 'Sélection pour vous'}
                     </a>
@@ -332,7 +332,7 @@ const Products = {
             if (cat.items && cat.items.length > 0) {
                 html += `
                     <li>
-                        <a href="javascript:void(0)" onclick="Products.scrollToSection('${cat.id}')">
+                        <a href="javascript:void(0)" data-section="${cat.id}" onclick="Products.scrollToSection('${cat.id}')">
                             <i class="fas ${icon}"></i>
                             ${cat.name}
                         </a>
@@ -346,7 +346,7 @@ const Products = {
         if (formules.length > 0) {
             html += `
                 <li>
-                    <a href="#formulesSection">
+                    <a href="javascript:void(0)" data-section="formulesSection" onclick="Products.scrollToSection('formulesSection')">
                         <i class="fas fa-fire"></i>
                         Nos Formules
                     </a>
@@ -373,7 +373,7 @@ const Products = {
                     const id = entry.target.id;
                     navLinks.forEach(link => {
                         link.classList.remove('active');
-                        if (link.getAttribute('href') === `#${id}`) {
+                        if (link.getAttribute('data-section') === id) {
                             link.classList.add('active');
                         }
                     });
