@@ -47,6 +47,9 @@ if (!is_dir(UPLOADS_DIR)) {
 // Charger la classe Database
 require_once __DIR__ . '/../backend/Database.php';
 
+// Initialiser la connexion Database avec les credentials
+Database::init($instanceConfig['database']);
+
 /**
  * Obtenir une connexion à la base de données
  */
