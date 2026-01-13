@@ -190,7 +190,7 @@ const Products = {
             return;
         }
 
-        grid.innerHTML = featuredProducts.map(product => {
+        grid.innerHTML = featuredProducts.map((product, index) => {
             // Si pricePrefix existe (ex: "À partir de 500 Da"), afficher SEULEMENT ça
             if (product.pricePrefix) {
                 const priceText = product.pricePrefix;
@@ -201,7 +201,7 @@ const Products = {
                         <img src="../${escapeHtml(product.image)}"
                              alt="${escapeHtml(product.name)}"
                              class="product-image-new"
-                             loading="lazy"
+                             ${index >= 6 ? 'loading="lazy"' : ''}
                              onerror="this.style.display='none'">
                         <div class="product-content-new">
                             <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
@@ -235,7 +235,7 @@ const Products = {
                     <img src="../${escapeHtml(product.image)}"
                          alt="${escapeHtml(product.name)}"
                          class="product-image-new"
-                         loading="lazy"
+                         ${index >= 6 ? 'loading="lazy"' : ''}
                          onerror="this.style.display='none'">
                     <div class="product-content-new">
                         <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
@@ -574,7 +574,7 @@ const Products = {
                     <img src="../${escapeHtml(product.image)}"
                          alt="${escapeHtml(product.name)}"
                          class="product-image-new"
-                         loading="lazy"
+                         ${index >= 6 ? 'loading="lazy"' : ''}
                          onerror="this.style.display='none'">
                     <div class="product-content-new">
                         <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
