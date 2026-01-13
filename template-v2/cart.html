@@ -2016,11 +2016,11 @@
                     `;
                 }
 
-                // ✅ Afficher les couleurs de capsules (pour Café Caps Nespresso)
+                // ✅ Afficher les couleurs de capsules (pour Café Caps)
                 if (product.capsuleColors && product.capsuleColors.length > 0) {
                     console.log('🎨 Ajout capsuleColors:', product.capsuleColors);
 
-                    // Map des couleurs Nespresso
+                    // Map des couleurs capsules
                     const colorMap = {
                         'mauve': '#9b87f5', 'marron': '#8b4513', 'noir': '#1a1a1a',
                         'bleu': '#2563eb', 'rouge': '#dc2626', 'orange': '#ea580c',
@@ -2029,7 +2029,7 @@
 
                     optionsHTML += `
                         <div style="margin-bottom: 20px;">
-                            <h3 style="margin-bottom: 12px;">Couleur de capsule Nespresso <span style="color: var(--gray-500); font-size: 14px; font-weight: normal;">(Optionnel)</span>:</h3>
+                            <h3 style="margin-bottom: 12px;">Couleur capsule <span style="color: var(--gray-500); font-size: 14px; font-weight: normal;">(Optionnel)</span>:</h3>
                             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                                 ${product.capsuleColors.map(color => {
                                     const colorCode = colorMap[color.toLowerCase().trim()] || '#6b7280';

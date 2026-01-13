@@ -1152,12 +1152,12 @@ const Products = {
             capsulesContainer.style.display = '';
 
             if (hasCapsuleColors) {
-                // Café Caps : afficher les couleurs Nespresso
+                // Café Caps : afficher les couleurs capsules
                 const uniqueColors = [...new Set(product.capsuleColors)];
-                console.log('Café Caps - Couleurs Nespresso:', uniqueColors);
+                console.log('Café Caps - Couleurs capsules:', uniqueColors);
 
                 // Titre pour Café Caps
-                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-palette"></i> Couleur de capsule Nespresso';
+                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-palette"></i> Couleur capsule';
 
                 capsuleOptions.innerHTML = uniqueColors.map((colorName, index) => {
                     const colorCode = this.getCapsuleColorCode(colorName);
