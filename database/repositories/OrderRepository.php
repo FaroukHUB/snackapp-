@@ -140,6 +140,11 @@ class OrderRepository {
             'status' => 'pending',
             'notes' => $data['notes'] ?? null,
             'pickup_time' => $data['pickup_time'] ?? null,
+            // ⚡ NOUVEAU: Précommande (date + heure de retrait)
+            'preorder_date' => $data['preorder_date'] ?? null,
+            'preorder_time' => $data['preorder_time'] ?? null,
+            // ⚡ NOUVEAU: Mode de commande (À emporter, Sur place, Livraison)
+            'mode_notes' => $data['mode_notes'] ?? null,
             // ⚡ NOUVEAU: Sauvegarder l'adresse de livraison
             'delivery_address' => $data['delivery_address'] ?? null,
             'delivery_instructions' => $data['delivery_instructions'] ?? null,
