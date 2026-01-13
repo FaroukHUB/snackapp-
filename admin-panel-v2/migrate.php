@@ -15,23 +15,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['execute'])) {
     try {
         $pdo = Database::getInstance();
 
-        // Vérifier si les colonnes existent déjà
-        $stmt = $pdo->query("SHOW COLUMNS FROM `orders` LIKE 'preorder_date'");
-        if ($stmt->fetch()) {
-            throw new Exception("Les colonnes existent déjà. Migration déjà exécutée.");
+        // Vérifier quelles colonnes existent déjà
+        $existingColumns = [];
+        $stmt = $pdo->query("SHOW COLUMNS FROM `orders`");
+        while ($row = $stmt->fetch()) {
+            $existingColumns[] = $row['Field'];
         }
 
-        // Exécuter la migration
-        $sql = "
-            ALTER TABLE `orders`
-            ADD COLUMN `preorder_date` DATE DEFAULT NULL COMMENT 'Date de retrait pour précommande' AFTER `pickup_time`,
-            ADD COLUMN `preorder_time` TIME DEFAULT NULL COMMENT 'Heure de retrait pour précommande' AFTER `preorder_date`,
-            ADD COLUMN `mode_notes` VARCHAR(100) DEFAULT NULL COMMENT 'Mode de commande (À emporter, Sur place, Livraison)' AFTER `preorder_time`,
-            ADD COLUMN `delivery_fee` DECIMAL(10,2) DEFAULT 0 COMMENT 'Frais de livraison' AFTER `total`,
-            ADD COLUMN `delivery_address` TEXT DEFAULT NULL COMMENT 'Adresse de livraison complète' AFTER `mode_notes`,
-            ADD COLUMN `delivery_instructions` TEXT DEFAULT NULL COMMENT 'Instructions de livraison' AFTER `delivery_address`;
-        ";
+        $columnsToAdd = [];
 
+        // Vérifier chaque colonne individuellement
+        if (!in_array('preorder_date', $existingColumns)) {
+            $columnsToAdd[] = "ADD COLUMN `preorder_date` DATE DEFAULT NULL COMMENT 'Date de retrait pour précommande' AFTER `pickup_time`";
+        }
+        if (!in_array('preorder_time', $existingColumns)) {
+            $columnsToAdd[] = "ADD COLUMN `preorder_time` TIME DEFAULT NULL COMMENT 'Heure de retrait pour précommande' AFTER `pickup_time`";
+        }
+        if (!in_array('mode_notes', $existingColumns)) {
+            $columnsToAdd[] = "ADD COLUMN `mode_notes` VARCHAR(100) DEFAULT NULL COMMENT 'Mode de commande (À emporter, Sur place, Livraison)' AFTER `pickup_time`";
+        }
+        if (!in_array('delivery_fee', $existingColumns)) {
+            $columnsToAdd[] = "ADD COLUMN `delivery_fee` DECIMAL(10,2) DEFAULT 0 COMMENT 'Frais de livraison' AFTER `total`";
+        }
+        if (!in_array('delivery_address', $existingColumns)) {
+            $columnsToAdd[] = "ADD COLUMN `delivery_address` TEXT DEFAULT NULL COMMENT 'Adresse de livraison complète' AFTER `notes`";
+        }
+        if (!in_array('delivery_instructions', $existingColumns)) {
+            $columnsToAdd[] = "ADD COLUMN `delivery_instructions` TEXT DEFAULT NULL COMMENT 'Instructions de livraison' AFTER `notes`";
+        }
+
+        if (empty($columnsToAdd)) {
+            throw new Exception("Toutes les colonnes existent déjà. Migration déjà exécutée.");
+        }
+
+        // Exécuter la migration pour les colonnes manquantes
+        $sql = "ALTER TABLE `orders` " . implode(", ", $columnsToAdd) . ";";
         $pdo->exec($sql);
         $migrationExecuted = true;
 
