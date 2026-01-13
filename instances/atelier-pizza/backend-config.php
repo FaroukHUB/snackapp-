@@ -21,6 +21,7 @@ return [
     ],
 
     'app' => [
+        'name' => "L'Atelier Pizza",
         'instance_id' => 'atelier-pizza-roubaix',
         'restaurant_id' => 3, // ID unique pour cette instance dans la DB
         'timezone' => 'Europe/Paris',
