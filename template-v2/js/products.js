@@ -317,7 +317,7 @@ const Products = {
         if (featured?.enabled && featured?.items?.length > 0) {
             html += `
                 <li>
-                    <a href="#featuredSection" class="active">
+                    <a href="javascript:void(0)" onclick="Products.scrollToSection('featuredSection')" class="active">
                         <i class="fas fa-star"></i>
                         ${featured.title || 'Sélection pour vous'}
                     </a>
@@ -332,7 +332,7 @@ const Products = {
             if (cat.items && cat.items.length > 0) {
                 html += `
                     <li>
-                        <a href="#${cat.id}">
+                        <a href="javascript:void(0)" onclick="Products.scrollToSection('${cat.id}')">
                             <i class="fas ${icon}"></i>
                             ${cat.name}
                         </a>
@@ -384,6 +384,26 @@ const Products = {
         });
 
         sections.forEach(section => observer.observe(section));
+    },
+
+    /**
+     * Scroll to section without adding hash to URL
+     */
+    scrollToSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        // Smooth scroll to section
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Update active state on navigation
+        const navLinks = document.querySelectorAll('#categoryNav a');
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('data-section') === sectionId) {
+                link.classList.add('active');
+            }
+        });
     },
 
     /**
