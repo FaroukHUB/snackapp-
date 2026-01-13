@@ -9,7 +9,7 @@ ADD COLUMN IF NOT EXISTS payment_method ENUM(
   'card_terminal',  -- CB au TPE (livraison/sur place)
   'card_online',    -- CB en ligne (Stripe)
   'ticket_resto'    -- Ticket Restaurant
-) DEFAULT 'cash' AFTER payment_type;
+) DEFAULT 'cash' AFTER notes;
 
 -- Ajouter colonne pour le statut du paiement
 ALTER TABLE orders
