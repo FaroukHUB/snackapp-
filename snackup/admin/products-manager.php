@@ -1446,8 +1446,10 @@ $csrfToken = getCsrfToken();
             <strong style="font-size:13px;">${escapeHtml(opt.name)}</strong>
             <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} DA</div>
           </div>
-          <button class="btn btn-sm ${isAvailable ? 'btn-good' : 'btn-ghost'}" data-toggle-status-pat="${idx}" type="button" title="${isAvailable ? 'Mettre indisponible' : 'Mettre disponible'}">${isAvailable ? '✓' : '✕'}</button>
-          <button class="btn btn-error btn-sm" data-delete-pat="${idx}" type="button">🗑️</button>
+          <button class="btn" type="button" data-toggle-status-pat="${idx}" style="padding:6px 12px;font-size:12px;font-weight:600;${isAvailable ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
+            ${isAvailable ? '✓ Disponible' : '✕ Indisponible'}
+          </button>
+          <button class="btn btn-danger btn-sm" data-delete-pat="${idx}" type="button" style="padding:6px 10px;">🗑️</button>
         `;
         container.appendChild(div);
       });
@@ -1567,8 +1569,10 @@ $csrfToken = getCsrfToken();
             <strong style="font-size:13px;">${escapeHtml(opt.name)}</strong>
             <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} DA</div>
           </div>
-          <button class="btn btn-sm ${isAvailable ? 'btn-good' : 'btn-ghost'}" data-toggle-status-bev="${idx}" type="button" title="${isAvailable ? 'Mettre indisponible' : 'Mettre disponible'}">${isAvailable ? '✓' : '✕'}</button>
-          <button class="btn btn-error btn-sm" data-delete-bev="${idx}" type="button">🗑️</button>
+          <button class="btn" type="button" data-toggle-status-bev="${idx}" style="padding:6px 12px;font-size:12px;font-weight:600;${isAvailable ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
+            ${isAvailable ? '✓ Disponible' : '✕ Indisponible'}
+          </button>
+          <button class="btn btn-danger btn-sm" data-delete-bev="${idx}" type="button" style="padding:6px 10px;">🗑️</button>
         `;
         container.appendChild(div);
       });
