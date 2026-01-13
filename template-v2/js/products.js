@@ -900,458 +900,460 @@ const Products = {
         console.log('Product found:', product);
         if (!product) return;
 
-        // Reset state
-        this.currentProduct = product;
-        this.currentQuantity = 1;
-        this.selectedSupplements = [];
-        this.removedIngredients = [];
-        this.menuType = 'solo';
-        this.selectedDrink = null;
-        this.selectedSauce = null;
-        this.selectedAccompagnement = null;
-        this.selectedViennoiserie = null;
-        this.selectedPatisserie = null;
-        this.selectedBeverage = null;
-        this.selectedKidsCrepe = null;
-        this.selectedKidsSauce = null;
-        this.selectedVariant = null;
-        this.selectedCapsule = null;
-
+        // Ouvrir le modal IMMÉDIATEMENT pour un feedback visuel instantané
         const modal = document.getElementById('productModal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
 
-        // Update modal content
-        const imgEl = document.getElementById('modalImage');
-        if (product.image) {
-            imgEl.src = '../' + product.image;
-            imgEl.style.display = '';
-        } else {
-            imgEl.src = '';
-            imgEl.style.display = 'none';
-        }
-        document.getElementById('modalTitle').textContent = product.name;
-        document.getElementById('modalDescription').textContent = product.description || '';
+        // Remplir le contenu dans le prochain frame (non-bloquant)
+        requestAnimationFrame(() => {
+            // Reset state
+            this.currentProduct = product;
+            this.currentQuantity = 1;
+            this.selectedSupplements = [];
+            this.removedIngredients = [];
+            this.menuType = 'solo';
+            this.selectedDrink = null;
+            this.selectedSauce = null;
+            this.selectedAccompagnement = null;
+            this.selectedViennoiserie = null;
+            this.selectedPatisserie = null;
+            this.selectedBeverage = null;
+            this.selectedKidsCrepe = null;
+            this.selectedKidsSauce = null;
+            this.selectedVariant = null;
+            this.selectedCapsule = null;
 
-        // Menu/Solo toggle
-        const menuToggleSection = document.getElementById('menuToggleSection');
-        const hasMenuOption = product.priceMenu && product.priceMenu > 0;
+            // Update modal content
+            const imgEl = document.getElementById('modalImage');
+            if (product.image) {
+                imgEl.src = '../' + product.image;
+                imgEl.style.display = '';
+            } else {
+                imgEl.src = '';
+                imgEl.style.display = 'none';
+            }
+            document.getElementById('modalTitle').textContent = product.name;
+            document.getElementById('modalDescription').textContent = product.description || '';
 
-        if (hasMenuOption) {
-            menuToggleSection.classList.remove('hidden');
-            menuToggleSection.style.display = '';
-            document.getElementById('priceSolo').textContent = Config.formatPrice(product.priceSolo || 0);
-            document.getElementById('priceMenu').textContent = Config.formatPrice(product.priceMenu || 0);
-            // Reset toggle to solo
-            document.querySelectorAll('.menu-option').forEach(opt => {
-                opt.classList.toggle('active', opt.dataset.type === 'solo');
-            });
-        } else {
-            menuToggleSection.classList.add('hidden');
-            menuToggleSection.style.display = 'none';
-        }
+            // Menu/Solo toggle
+            const menuToggleSection = document.getElementById('menuToggleSection');
+            const hasMenuOption = product.priceMenu && product.priceMenu > 0;
 
-        // Ingredients to remove
-        const ingredientsSection = document.getElementById('modalIngredients');
-        const ingredientsList = document.getElementById('ingredientsList');
-        const hasIngredients = product.baseIngredients && product.baseIngredients.length > 0;
-
-        // Categories where "Retirer des ingrédients" should be hidden
-        const categoriesWithoutIngredientRemoval = [
-            'sucres-sales',      // Nos Sucrés et Salés (Viennoiseries, Pâtisserie)
-            'crepes-sucrees',    // Crêpes Sucrées
-            'gaufres',           // Gaufres
-            'bubble-waffle'      // Bubble Waffle
-        ];
-
-        const shouldShowIngredients = hasIngredients &&
-            !categoriesWithoutIngredientRemoval.includes(product.categoryId);
-
-        if (shouldShowIngredients) {
-            ingredientsSection.classList.remove('hidden');
-            ingredientsSection.style.display = '';
-            ingredientsList.innerHTML = product.baseIngredients.map(ing => `
-                <div class="ingredient-item" data-ingredient="${ing}" onclick="Products.toggleIngredient('${ing}')">
-                    <i class="fas fa-times"></i>
-                    <span>${this.capitalize(ing)}</span>
-                </div>
-            `).join('');
-        } else {
-            ingredientsSection.classList.add('hidden');
-            ingredientsSection.style.display = 'none';
-        }
-
-        // Render supplements
-        const supplements = Config.getSupplementsForCategory(product.categoryId);
-        const supplementsContainer = document.getElementById('modalSupplements');
-        const supplementsList = document.getElementById('supplementsList');
-
-        if (supplements.length > 0) {
-            supplementsContainer.classList.remove('hidden');
-            supplementsContainer.style.display = '';
-
-            // Grouper les suppléments par catégorie
-            const saledCategoryOrder = ['fromage', 'legume', 'viande', 'autre'];
-            const sucreCategoryOrder = ['base', 'croquant', 'fruit', 'prime'];
-            const categoryLabels = {
-                // Salés
-                'fromage': 'Fromages',
-                'legume': 'Légumes',
-                'viande': 'Viandes',
-                'autre': 'Autres',
-                // Sucrés
-                'base': 'Base',
-                'croquant': 'Croquant',
-                'fruit': 'Fruit',
-                'prime': 'Prime'
-            };
-
-            const grouped = {};
-            supplements.forEach(sup => {
-                const cat = sup.category || 'autre';
-                if (!grouped[cat]) grouped[cat] = [];
-                grouped[cat].push(sup);
-            });
-
-            // Déterminer si c'est salé ou sucré
-            const hasSaled = saledCategoryOrder.some(cat => grouped[cat] && grouped[cat].length > 0);
-            const hasSucre = sucreCategoryOrder.some(cat => grouped[cat] && grouped[cat].length > 0);
-
-            let html = '';
-
-            // Afficher les suppléments salés
-            if (hasSaled) {
-                saledCategoryOrder.forEach(cat => {
-                    if (grouped[cat] && grouped[cat].length > 0) {
-                        html += `
-                            <div class="supplement-category">
-                                <h4 class="supplement-category-title">${categoryLabels[cat]}</h4>
-                                <div class="supplement-category-items">
-                                    ${grouped[cat].map(sup => `
-                                        <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
-                                            <div class="supplement-info">
-                                                <div class="supplement-checkbox">
-                                                    <i class="fas fa-check" style="font-size: 12px;"></i>
-                                                </div>
-                                                <span class="supplement-name">${sup.name}</span>
-                                            </div>
-                                            <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }
+            if (hasMenuOption) {
+                menuToggleSection.classList.remove('hidden');
+                menuToggleSection.style.display = '';
+                document.getElementById('priceSolo').textContent = Config.formatPrice(product.priceSolo || 0);
+                document.getElementById('priceMenu').textContent = Config.formatPrice(product.priceMenu || 0);
+                // Reset toggle to solo
+                document.querySelectorAll('.menu-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.type === 'solo');
                 });
+            } else {
+                menuToggleSection.classList.add('hidden');
+                menuToggleSection.style.display = 'none';
             }
 
-            // Afficher les suppléments sucrés
-            if (hasSucre) {
-                sucreCategoryOrder.forEach(cat => {
-                    if (grouped[cat] && grouped[cat].length > 0) {
-                        html += `
-                            <div class="supplement-category">
-                                <h4 class="supplement-category-title">${categoryLabels[cat]}</h4>
-                                <div class="supplement-category-items">
-                                    ${grouped[cat].map(sup => `
-                                        <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
-                                            <div class="supplement-info">
-                                                <div class="supplement-checkbox">
-                                                    <i class="fas fa-check" style="font-size: 12px;"></i>
-                                                </div>
-                                                <span class="supplement-name">${sup.name}</span>
-                                            </div>
-                                            <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-            }
+            // Ingredients to remove
+            const ingredientsSection = document.getElementById('modalIngredients');
+            const ingredientsList = document.getElementById('ingredientsList');
+            const hasIngredients = product.baseIngredients && product.baseIngredients.length > 0;
 
-            supplementsList.innerHTML = html;
-        } else {
-            supplementsContainer.classList.add('hidden');
-            supplementsContainer.style.display = 'none';
-        }
+            // Categories where "Retirer des ingrédients" should be hidden
+            const categoriesWithoutIngredientRemoval = [
+                'sucres-sales',      // Nos Sucrés et Salés (Viennoiseries, Pâtisserie)
+                'crepes-sucrees',    // Crêpes Sucrées
+                'gaufres',           // Gaufres
+                'bubble-waffle'      // Bubble Waffle
+            ];
 
-        // Render drinks selection (for menu option)
-        const drinksContainer = document.getElementById('modalDrinks');
-        const drinksList = document.getElementById('drinksList');
-        const drinks = Config.getDrinks();
+            const shouldShowIngredients = hasIngredients &&
+                !categoriesWithoutIngredientRemoval.includes(product.categoryId);
 
-        if (hasMenuOption && drinks.length > 0) {
-            drinksList.innerHTML = drinks.map(drink => `
-                <div class="drink-item" data-id="${drink.id}" onclick="Products.selectDrink('${drink.id}')">
-                    ${drink.name}
-                </div>
-            `).join('');
-            // Hide by default (shown when menu is selected)
-            drinksContainer.classList.add('hidden');
-            drinksContainer.style.display = 'none';
-        } else {
-            drinksContainer.classList.add('hidden');
-            drinksContainer.style.display = 'none';
-        }
-
-        // Render sauce options (for Crousti)
-        const sauceContainer = document.getElementById('modalSauce');
-        const sauceOptions = document.getElementById('sauceOptions');
-
-        if (product.hasSpecialSauce && product.sauceOptions && product.sauceOptions.length > 0) {
-            sauceContainer.classList.remove('hidden');
-            sauceContainer.style.display = '';
-            sauceOptions.innerHTML = product.sauceOptions.map((sauce, index) => `
-                <div class="sauce-item ${index === 0 ? 'selected' : ''}" data-id="${sauce.id}" onclick="Products.selectSauce('${sauce.id}')">
-                    <div class="sauce-radio">
-                        <i class="fas fa-check"></i>
-                    </div>
-                    <span class="sauce-name">${sauce.name}</span>
-                </div>
-            `).join('');
-            // Select first sauce by default
-            this.selectedSauce = product.sauceOptions[0];
-        } else {
-            sauceContainer.classList.add('hidden');
-            sauceContainer.style.display = 'none';
-        }
-
-        // Render kids options (for Crêpe Kids Salée)
-        const kidsContainer = document.getElementById('modalKidsOptions');
-        const kidsCrepeOptions = document.getElementById('kidsCrepeOptions');
-        const kidsSauceOptions = document.getElementById('kidsSauceOptions');
-
-        if (product.hasKidsOptions && product.kidsOptions) {
-            kidsContainer.classList.remove('hidden');
-            kidsContainer.style.display = '';
-
-            // Render crepe type options
-            if (product.kidsOptions.crepeTypes && product.kidsOptions.crepeTypes.length > 0) {
-                kidsCrepeOptions.innerHTML = product.kidsOptions.crepeTypes.map((crepe, index) => `
-                    <div class="sauce-item ${index === 0 ? 'selected' : ''}" data-id="${crepe.id}" onclick="Products.selectKidsCrepe('${crepe.id}')">
-                        <div class="sauce-radio">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <span class="sauce-name">${crepe.name}</span>
+            if (shouldShowIngredients) {
+                ingredientsSection.classList.remove('hidden');
+                ingredientsSection.style.display = '';
+                ingredientsList.innerHTML = product.baseIngredients.map(ing => `
+                    <div class="ingredient-item" data-ingredient="${ing}" onclick="Products.toggleIngredient('${ing}')">
+                        <i class="fas fa-times"></i>
+                        <span>${this.capitalize(ing)}</span>
                     </div>
                 `).join('');
-                this.selectedKidsCrepe = product.kidsOptions.crepeTypes[0];
+            } else {
+                ingredientsSection.classList.add('hidden');
+                ingredientsSection.style.display = 'none';
             }
 
-            // Render sauce options
-            if (product.kidsOptions.sauces && product.kidsOptions.sauces.length > 0) {
-                kidsSauceOptions.innerHTML = product.kidsOptions.sauces.map((sauce, index) => `
-                    <div class="sauce-item ${index === 0 ? 'selected' : ''}" data-id="${sauce.id}" onclick="Products.selectKidsSauce('${sauce.id}')">
+            // Render supplements
+            const supplements = Config.getSupplementsForCategory(product.categoryId);
+            const supplementsContainer = document.getElementById('modalSupplements');
+            const supplementsList = document.getElementById('supplementsList');
+
+            if (supplements.length > 0) {
+                supplementsContainer.classList.remove('hidden');
+                supplementsContainer.style.display = '';
+
+                // Grouper les suppléments par catégorie
+                const saledCategoryOrder = ['fromage', 'legume', 'viande', 'autre'];
+                const sucreCategoryOrder = ['base', 'croquant', 'fruit', 'prime'];
+                const categoryLabels = {
+                    // Salés
+                    'fromage': 'Fromages',
+                    'legume': 'Légumes',
+                    'viande': 'Viandes',
+                    'autre': 'Autres',
+                    // Sucrés
+                    'base': 'Base',
+                    'croquant': 'Croquant',
+                    'fruit': 'Fruit',
+                    'prime': 'Prime'
+                };
+
+                const grouped = {};
+                supplements.forEach(sup => {
+                    const cat = sup.category || 'autre';
+                    if (!grouped[cat]) grouped[cat] = [];
+                    grouped[cat].push(sup);
+                });
+
+                // Déterminer si c'est salé ou sucré
+                const hasSaled = saledCategoryOrder.some(cat => grouped[cat] && grouped[cat].length > 0);
+                const hasSucre = sucreCategoryOrder.some(cat => grouped[cat] && grouped[cat].length > 0);
+
+                let html = '';
+
+                // Afficher les suppléments salés
+                if (hasSaled) {
+                    saledCategoryOrder.forEach(cat => {
+                        if (grouped[cat] && grouped[cat].length > 0) {
+                            html += `
+                                <div class="supplement-category">
+                                    <h4 class="supplement-category-title">${categoryLabels[cat]}</h4>
+                                    <div class="supplement-category-items">
+                                        ${grouped[cat].map(sup => `
+                                            <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
+                                                <div class="supplement-info">
+                                                    <div class="supplement-checkbox">
+                                                        <i class="fas fa-check" style="font-size: 12px;"></i>
+                                                    </div>
+                                                    <span class="supplement-name">${sup.name}</span>
+                                                </div>
+                                                <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+
+                // Afficher les suppléments sucrés
+                if (hasSucre) {
+                    sucreCategoryOrder.forEach(cat => {
+                        if (grouped[cat] && grouped[cat].length > 0) {
+                            html += `
+                                <div class="supplement-category">
+                                    <h4 class="supplement-category-title">${categoryLabels[cat]}</h4>
+                                    <div class="supplement-category-items">
+                                        ${grouped[cat].map(sup => `
+                                            <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
+                                                <div class="supplement-info">
+                                                    <div class="supplement-checkbox">
+                                                        <i class="fas fa-check" style="font-size: 12px;"></i>
+                                                    </div>
+                                                    <span class="supplement-name">${sup.name}</span>
+                                                </div>
+                                                <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+
+                supplementsList.innerHTML = html;
+            } else {
+                supplementsContainer.classList.add('hidden');
+                supplementsContainer.style.display = 'none';
+            }
+
+            // Render drinks selection (for menu option)
+            const drinksContainer = document.getElementById('modalDrinks');
+            const drinksList = document.getElementById('drinksList');
+            const drinks = Config.getDrinks();
+
+            if (hasMenuOption && drinks.length > 0) {
+                drinksList.innerHTML = drinks.map(drink => `
+                    <div class="drink-item" data-id="${drink.id}" onclick="Products.selectDrink('${drink.id}')">
+                        ${drink.name}
+                    </div>
+                `).join('');
+                // Hide by default (shown when menu is selected)
+                drinksContainer.classList.add('hidden');
+                drinksContainer.style.display = 'none';
+            } else {
+                drinksContainer.classList.add('hidden');
+                drinksContainer.style.display = 'none';
+            }
+
+            // Render sauce options (for Crousti)
+            const sauceContainer = document.getElementById('modalSauce');
+            const sauceOptions = document.getElementById('sauceOptions');
+
+            if (product.hasSpecialSauce && product.sauceOptions && product.sauceOptions.length > 0) {
+                sauceContainer.classList.remove('hidden');
+                sauceContainer.style.display = '';
+                sauceOptions.innerHTML = product.sauceOptions.map((sauce, index) => `
+                    <div class="sauce-item ${index === 0 ? 'selected' : ''}" data-id="${sauce.id}" onclick="Products.selectSauce('${sauce.id}')">
                         <div class="sauce-radio">
                             <i class="fas fa-check"></i>
                         </div>
                         <span class="sauce-name">${sauce.name}</span>
                     </div>
                 `).join('');
-                this.selectedKidsSauce = product.kidsOptions.sauces[0];
+                // Select first sauce by default
+                this.selectedSauce = product.sauceOptions[0];
+            } else {
+                sauceContainer.classList.add('hidden');
+                sauceContainer.style.display = 'none';
             }
-        } else {
-            kidsContainer.classList.add('hidden');
-            kidsContainer.style.display = 'none';
-        }
 
-        // Render variants (Court/Long for cafe)
-        const variantsContainer = document.getElementById('modalVariants');
-        const variantOptions = document.getElementById('variantOptions');
+            // Render kids options (for Crêpe Kids Salée)
+            const kidsContainer = document.getElementById('modalKidsOptions');
+            const kidsCrepeOptions = document.getElementById('kidsCrepeOptions');
+            const kidsSauceOptions = document.getElementById('kidsSauceOptions');
 
-        if (product.variants && product.variants.length > 0) {
-            variantsContainer.classList.remove('hidden');
-            variantsContainer.style.display = '';
-            variantOptions.innerHTML = product.variants.map((variant, index) => `
-                <div class="variant-item ${index === 0 ? 'selected' : ''}" data-id="${variant.id}" onclick="Products.selectVariant('${escapeHtml(variant.id)}')">
-                    <div class="variant-radio">
-                        <i class="fas fa-check"></i>
+            if (product.hasKidsOptions && product.kidsOptions) {
+                kidsContainer.classList.remove('hidden');
+                kidsContainer.style.display = '';
+
+                // Render crepe type options
+                if (product.kidsOptions.crepeTypes && product.kidsOptions.crepeTypes.length > 0) {
+                    kidsCrepeOptions.innerHTML = product.kidsOptions.crepeTypes.map((crepe, index) => `
+                        <div class="sauce-item ${index === 0 ? 'selected' : ''}" data-id="${crepe.id}" onclick="Products.selectKidsCrepe('${crepe.id}')">
+                            <div class="sauce-radio">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span class="sauce-name">${crepe.name}</span>
+                        </div>
+                    `).join('');
+                    this.selectedKidsCrepe = product.kidsOptions.crepeTypes[0];
+                }
+
+                // Render sauce options
+                if (product.kidsOptions.sauces && product.kidsOptions.sauces.length > 0) {
+                    kidsSauceOptions.innerHTML = product.kidsOptions.sauces.map((sauce, index) => `
+                        <div class="sauce-item ${index === 0 ? 'selected' : ''}" data-id="${sauce.id}" onclick="Products.selectKidsSauce('${sauce.id}')">
+                            <div class="sauce-radio">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <span class="sauce-name">${sauce.name}</span>
+                        </div>
+                    `).join('');
+                    this.selectedKidsSauce = product.kidsOptions.sauces[0];
+                }
+            } else {
+                kidsContainer.classList.add('hidden');
+                kidsContainer.style.display = 'none';
+            }
+
+            // Render variants (Court/Long for cafe)
+            const variantsContainer = document.getElementById('modalVariants');
+            const variantOptions = document.getElementById('variantOptions');
+
+            if (product.variants && product.variants.length > 0) {
+                variantsContainer.classList.remove('hidden');
+                variantsContainer.style.display = '';
+                variantOptions.innerHTML = product.variants.map((variant, index) => `
+                    <div class="variant-item ${index === 0 ? 'selected' : ''}" data-id="${variant.id}" onclick="Products.selectVariant('${escapeHtml(variant.id)}')">
+                        <div class="variant-radio">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span class="variant-name">${escapeHtml(variant.name)}</span>
+                        <span class="variant-price">${Config.formatPrice(variant.price)}</span>
                     </div>
-                    <span class="variant-name">${escapeHtml(variant.name)}</span>
-                    <span class="variant-price">${Config.formatPrice(variant.price)}</span>
-                </div>
-            `).join('');
-            // Select first variant by default
-            this.selectedVariant = product.variants[0];
-        } else {
-            variantsContainer.classList.add('hidden');
-            variantsContainer.style.display = 'none';
-        }
+                `).join('');
+                // Select first variant by default
+                this.selectedVariant = product.variants[0];
+            } else {
+                variantsContainer.classList.add('hidden');
+                variantsContainer.style.display = 'none';
+            }
 
-        // Render capsule colors or numbers
-        const capsulesContainer = document.getElementById('modalCapsules');
-        const capsuleOptions = document.getElementById('capsuleOptions');
+            // Render capsule colors or numbers
+            const capsulesContainer = document.getElementById('modalCapsules');
+            const capsuleOptions = document.getElementById('capsuleOptions');
 
-        // Café Caps → Couleurs | Café L'Or → Numéros
-        const hasCapsuleColors = product.capsuleColors && product.capsuleColors.length > 0;
-        const hasCapsuleNumbers = product.capsuleNumbers && product.capsuleNumbers.length > 0;
+            // Café Caps → Couleurs | Café L'Or → Numéros
+            const hasCapsuleColors = product.capsuleColors && product.capsuleColors.length > 0;
+            const hasCapsuleNumbers = product.capsuleNumbers && product.capsuleNumbers.length > 0;
 
-        if (hasCapsuleColors || hasCapsuleNumbers) {
-            capsulesContainer.classList.remove('hidden');
-            capsulesContainer.style.display = '';
+            if (hasCapsuleColors || hasCapsuleNumbers) {
+                capsulesContainer.classList.remove('hidden');
+                capsulesContainer.style.display = '';
 
-            if (hasCapsuleColors) {
-                // Café Caps : afficher les couleurs capsules
-                const uniqueColors = [...new Set(product.capsuleColors)];
-                console.log('Café Caps - Couleurs capsules:', uniqueColors);
+                if (hasCapsuleColors) {
+                    // Café Caps : afficher les couleurs capsules
+                    const uniqueColors = [...new Set(product.capsuleColors)];
+                    console.log('Café Caps - Couleurs capsules:', uniqueColors);
 
-                // Titre pour Café Caps
-                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-palette"></i> Couleur capsule';
+                    // Titre pour Café Caps
+                    capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-palette"></i> Couleur capsule';
 
-                capsuleOptions.innerHTML = uniqueColors.map((colorName, index) => {
-                    const colorCode = this.getCapsuleColorCode(colorName);
-                    return `
-                        <div class="capsule-item capsule-color ${index === 0 ? 'selected' : ''}" data-color="${colorName}" onclick="Products.selectCapsule('${colorName}')">
+                    capsuleOptions.innerHTML = uniqueColors.map((colorName, index) => {
+                        const colorCode = this.getCapsuleColorCode(colorName);
+                        return `
+                            <div class="capsule-item capsule-color ${index === 0 ? 'selected' : ''}" data-color="${colorName}" onclick="Products.selectCapsule('${colorName}')">
+                                <div class="capsule-radio">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="capsule-color-preview" style="background-color: ${colorCode};"></div>
+                                <span class="capsule-number">${colorName}</span>
+                            </div>
+                        `;
+                    }).join('');
+                    this.selectedCapsule = uniqueColors[0];
+                } else if (hasCapsuleNumbers) {
+                    // Café L'Or : afficher les numéros (intensité)
+                    const uniqueCapsules = [...new Set(product.capsuleNumbers)].sort((a, b) => a - b);
+                    console.log('Café L\'Or - Intensité:', uniqueCapsules);
+
+                    // Titre pour Café L'Or
+                    capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-hashtag"></i> Intensité de capsule L\'Or';
+
+                    capsuleOptions.innerHTML = uniqueCapsules.map((num, index) => `
+                        <div class="capsule-item ${index === 0 ? 'selected' : ''}" data-number="${num}" onclick="Products.selectCapsule(${num})">
                             <div class="capsule-radio">
                                 <i class="fas fa-check"></i>
                             </div>
-                            <div class="capsule-color-preview" style="background-color: ${colorCode};"></div>
-                            <span class="capsule-number">${colorName}</span>
+                            <span class="capsule-number">${num}</span>
                         </div>
-                    `;
-                }).join('');
-                this.selectedCapsule = uniqueColors[0];
-            } else if (hasCapsuleNumbers) {
-                // Café L'Or : afficher les numéros (intensité)
-                const uniqueCapsules = [...new Set(product.capsuleNumbers)].sort((a, b) => a - b);
-                console.log('Café L\'Or - Intensité:', uniqueCapsules);
+                    `).join('');
+                    this.selectedCapsule = uniqueCapsules[0];
+                }
+            } else {
+                capsulesContainer.classList.add('hidden');
+                capsulesContainer.style.display = 'none';
+            }
 
-                // Titre pour Café L'Or
-                capsulesContainer.querySelector('h4').innerHTML = '<i class="fas fa-hashtag"></i> Intensité de capsule L\'Or';
+            // Render viennoiserie options
+            const viennoiserieContainer = document.getElementById('modalViennoiserie');
+            const viennoiserieOptions = document.getElementById('viennoiserieOptions');
 
-                capsuleOptions.innerHTML = uniqueCapsules.map((num, index) => `
-                    <div class="capsule-item ${index === 0 ? 'selected' : ''}" data-number="${num}" onclick="Products.selectCapsule(${num})">
-                        <div class="capsule-radio">
+            if (product.hasViennoiserieOptions && product.viennoiserieOptions && product.viennoiserieOptions.length > 0) {
+                viennoiserieContainer.classList.remove('hidden');
+                viennoiserieContainer.style.display = '';
+                viennoiserieOptions.innerHTML = product.viennoiserieOptions.map((viennoiserie, index) => `
+                    <div class="viennoiserie-item ${index === 0 ? 'selected' : ''}" data-id="${viennoiserie.id}" onclick="Products.selectViennoiserie('${viennoiserie.id}')">
+                        <div class="viennoiserie-radio">
                             <i class="fas fa-check"></i>
                         </div>
-                        <span class="capsule-number">${num}</span>
+                        <span class="viennoiserie-name">${viennoiserie.name}</span>
                     </div>
                 `).join('');
-                this.selectedCapsule = uniqueCapsules[0];
+                // Select first viennoiserie by default
+                this.selectedViennoiserie = product.viennoiserieOptions[0];
+            } else {
+                viennoiserieContainer.classList.add('hidden');
+                viennoiserieContainer.style.display = 'none';
             }
-        } else {
-            capsulesContainer.classList.add('hidden');
-            capsulesContainer.style.display = 'none';
-        }
 
-        // Render viennoiserie options
-        const viennoiserieContainer = document.getElementById('modalViennoiserie');
-        const viennoiserieOptions = document.getElementById('viennoiserieOptions');
+            // Render pâtisserie options
+            const patisserieContainer = document.getElementById('modalPatisserie');
+            const patisserieOptions = document.getElementById('patisserieOptions');
 
-        if (product.hasViennoiserieOptions && product.viennoiserieOptions && product.viennoiserieOptions.length > 0) {
-            viennoiserieContainer.classList.remove('hidden');
-            viennoiserieContainer.style.display = '';
-            viennoiserieOptions.innerHTML = product.viennoiserieOptions.map((viennoiserie, index) => `
-                <div class="viennoiserie-item ${index === 0 ? 'selected' : ''}" data-id="${viennoiserie.id}" onclick="Products.selectViennoiserie('${viennoiserie.id}')">
-                    <div class="viennoiserie-radio">
-                        <i class="fas fa-check"></i>
-                    </div>
-                    <span class="viennoiserie-name">${viennoiserie.name}</span>
-                </div>
-            `).join('');
-            // Select first viennoiserie by default
-            this.selectedViennoiserie = product.viennoiserieOptions[0];
-        } else {
-            viennoiserieContainer.classList.add('hidden');
-            viennoiserieContainer.style.display = 'none';
-        }
-
-        // Render pâtisserie options
-        const patisserieContainer = document.getElementById('modalPatisserie');
-        const patisserieOptions = document.getElementById('patisserieOptions');
-
-        if (product.hasPâtisserieOptions && product.pâtisserieOptions && product.pâtisserieOptions.length > 0) {
-            patisserieContainer.classList.remove('hidden');
-            patisserieContainer.style.display = '';
-            patisserieOptions.innerHTML = product.pâtisserieOptions.map((patisserie, index) => `
-                <div class="patisserie-item ${index === 0 ? 'selected' : ''}" data-id="${patisserie.id}" onclick="Products.selectPatisserie('${patisserie.id}')">
-                    <div class="patisserie-image-container">
-                        <img src="../${patisserie.image}" alt="${patisserie.name}" class="patisserie-image" onerror="this.style.display='none'">
-                    </div>
-                    <div class="patisserie-divider"></div>
-                    <div class="patisserie-name">${patisserie.name}</div>
-                    <div class="patisserie-divider"></div>
-                    <div class="patisserie-price">${Config.formatPrice(patisserie.price)}</div>
-                </div>
-            `).join('');
-            // Select first pâtisserie by default
-            this.selectedPatisserie = product.pâtisserieOptions[0];
-        } else {
-            patisserieContainer.classList.add('hidden');
-            patisserieContainer.style.display = 'none';
-        }
-
-        // Render beverage options (Soda, Jus, Jus Frais, Smoothie)
-        const beverageContainer = document.getElementById('modalBeverage');
-        const beverageOptions = document.getElementById('beverageOptions');
-        const beverageTitle = document.getElementById('beverageTitle');
-
-        if (product.hasBeverageOptions && product.beverageOptions && product.beverageOptions.length > 0) {
-            beverageContainer.classList.remove('hidden');
-            beverageContainer.style.display = '';
-            beverageTitle.textContent = `Choisissez votre ${product.name.toLowerCase()}`;
-            beverageOptions.innerHTML = product.beverageOptions.map((beverage, index) => `
-                <div class="beverage-item ${index === 0 ? 'selected' : ''}" data-id="${beverage.id}" onclick="Products.selectBeverage('${beverage.id}')">
-                    ${beverage.image ? `
-                        <div class="beverage-image-container">
-                            <img src="../${beverage.image}" alt="${beverage.name}" class="beverage-image" onerror="this.style.display='none'">
+            if (product.hasPâtisserieOptions && product.pâtisserieOptions && product.pâtisserieOptions.length > 0) {
+                patisserieContainer.classList.remove('hidden');
+                patisserieContainer.style.display = '';
+                patisserieOptions.innerHTML = product.pâtisserieOptions.map((patisserie, index) => `
+                    <div class="patisserie-item ${index === 0 ? 'selected' : ''}" data-id="${patisserie.id}" onclick="Products.selectPatisserie('${patisserie.id}')">
+                        <div class="patisserie-image-container">
+                            <img src="../${patisserie.image}" alt="${patisserie.name}" class="patisserie-image" loading="lazy" onerror="this.style.display='none'">
                         </div>
-                    ` : ''}
-                    <div class="beverage-divider"></div>
-                    <div class="beverage-name">${beverage.name}</div>
-                    ${beverage.price ? `
-                        <div class="beverage-divider"></div>
-                        <div class="beverage-price">${Config.formatPrice(beverage.price)}</div>
-                    ` : ''}
-                </div>
-            `).join('');
-            // Select first beverage by default
-            this.selectedBeverage = product.beverageOptions[0];
-        } else {
-            beverageContainer.classList.add('hidden');
-            beverageContainer.style.display = 'none';
-        }
-
-        // Render accompaniment options
-        const accompagnementContainer = document.getElementById('modalAccompagnement');
-        const accompagnementOptions = document.getElementById('accompagnementOptions');
-
-        // Get category info for accompaniment
-        const category = Config.getCategories().find(c => c.id === product.categoryId);
-        const hasAccompagnement = category?.hasAccompagnement || product.hasSpecialAccompagnement;
-
-        // Determine which accompaniment options to show
-        let accompOptions = [];
-        if (product.hasSpecialAccompagnement && product.accompagnementOptions) {
-            // Product-specific options (like Crousti with riz OR salade)
-            accompOptions = product.accompagnementOptions;
-        } else if (category?.hasAccompagnement && category?.accompagnementOptions) {
-            // Category-level options (salade for all savory crêpes)
-            accompOptions = category.accompagnementOptions;
-        }
-
-        if (hasAccompagnement && accompOptions.length > 0) {
-            accompagnementContainer.classList.remove('hidden');
-            accompagnementContainer.style.display = '';
-            accompagnementOptions.innerHTML = accompOptions.map(acc => `
-                <div class="accompagnement-item" data-id="${acc}" onclick="Products.toggleAccompagnement('${acc}')">
-                    <div class="accompagnement-checkbox">
-                        <i class="fas fa-check"></i>
+                        <div class="patisserie-divider"></div>
+                        <div class="patisserie-name">${patisserie.name}</div>
+                        <div class="patisserie-divider"></div>
+                        <div class="patisserie-price">${Config.formatPrice(patisserie.price)}</div>
                     </div>
-                    <span class="accompagnement-name">${this.capitalize(acc)}</span>
-                    <span class="accompagnement-price">Gratuit</span>
-                </div>
-            `).join('');
-        } else {
-            accompagnementContainer.classList.add('hidden');
-            accompagnementContainer.style.display = 'none';
-        }
+                `).join('');
+                // Select first pâtisserie by default
+                this.selectedPatisserie = product.pâtisserieOptions[0];
+            } else {
+                patisserieContainer.classList.add('hidden');
+                patisserieContainer.style.display = 'none';
+            }
 
-        this.updateModalUI();
-        console.log('Modal element:', modal);
-        modal.classList.add('active');
-        console.log('Modal classes after active:', modal?.className);
-        document.body.style.overflow = 'hidden';
+            // Render beverage options (Soda, Jus, Jus Frais, Smoothie)
+            const beverageContainer = document.getElementById('modalBeverage');
+            const beverageOptions = document.getElementById('beverageOptions');
+            const beverageTitle = document.getElementById('beverageTitle');
+
+            if (product.hasBeverageOptions && product.beverageOptions && product.beverageOptions.length > 0) {
+                beverageContainer.classList.remove('hidden');
+                beverageContainer.style.display = '';
+                beverageTitle.textContent = `Choisissez votre ${product.name.toLowerCase()}`;
+                beverageOptions.innerHTML = product.beverageOptions.map((beverage, index) => `
+                    <div class="beverage-item ${index === 0 ? 'selected' : ''}" data-id="${beverage.id}" onclick="Products.selectBeverage('${beverage.id}')">
+                        ${beverage.image ? `
+                            <div class="beverage-image-container">
+                                <img src="../${beverage.image}" alt="${beverage.name}" class="beverage-image" loading="lazy" onerror="this.style.display='none'">
+                            </div>
+                        ` : ''}
+                        <div class="beverage-divider"></div>
+                        <div class="beverage-name">${beverage.name}</div>
+                        ${beverage.price ? `
+                            <div class="beverage-divider"></div>
+                            <div class="beverage-price">${Config.formatPrice(beverage.price)}</div>
+                        ` : ''}
+                    </div>
+                `).join('');
+                // Select first beverage by default
+                this.selectedBeverage = product.beverageOptions[0];
+            } else {
+                beverageContainer.classList.add('hidden');
+                beverageContainer.style.display = 'none';
+            }
+
+            // Render accompaniment options
+            const accompagnementContainer = document.getElementById('modalAccompagnement');
+            const accompagnementOptions = document.getElementById('accompagnementOptions');
+
+            // Get category info for accompaniment
+            const category = Config.getCategories().find(c => c.id === product.categoryId);
+            const hasAccompagnement = category?.hasAccompagnement || product.hasSpecialAccompagnement;
+
+            // Determine which accompaniment options to show
+            let accompOptions = [];
+            if (product.hasSpecialAccompagnement && product.accompagnementOptions) {
+                // Product-specific options (like Crousti with riz OR salade)
+                accompOptions = product.accompagnementOptions;
+            } else if (category?.hasAccompagnement && category?.accompagnementOptions) {
+                // Category-level options (salade for all savory crêpes)
+                accompOptions = category.accompagnementOptions;
+            }
+
+            if (hasAccompagnement && accompOptions.length > 0) {
+                accompagnementContainer.classList.remove('hidden');
+                accompagnementContainer.style.display = '';
+                accompagnementOptions.innerHTML = accompOptions.map(acc => `
+                    <div class="accompagnement-item" data-id="${acc}" onclick="Products.toggleAccompagnement('${acc}')">
+                        <div class="accompagnement-checkbox">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span class="accompagnement-name">${this.capitalize(acc)}</span>
+                        <span class="accompagnement-price">Gratuit</span>
+                    </div>
+                `).join('');
+            } else {
+                accompagnementContainer.classList.add('hidden');
+                accompagnementContainer.style.display = 'none';
+            }
+
+            this.updateModalUI();
+        }); // Fin requestAnimationFrame
     },
 
     /**
