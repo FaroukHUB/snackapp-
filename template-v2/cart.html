@@ -1633,24 +1633,35 @@
             /**
              * Configure l'auto-complétion de l'adresse depuis le téléphone
              */
+            phoneAutoCompleteSetup: false,
+            phoneAutoCompleteTimeout: null,
             setupPhoneAutoComplete() {
                 const phoneInput = document.getElementById('customerPhone');
-                if (!phoneInput) return;
+                if (!phoneInput || this.phoneAutoCompleteSetup) return;
 
-                let timeout;
+                // Marquer comme configuré pour éviter les doublons
+                this.phoneAutoCompleteSetup = true;
+
                 phoneInput.addEventListener('input', () => {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => {
+                    clearTimeout(this.phoneAutoCompleteTimeout);
+                    this.phoneAutoCompleteTimeout = setTimeout(() => {
                         this.fetchCustomerAddress();
-                    }, 800); // Attendre 800ms après la dernière frappe
+                    }, 1000); // Augmenter à 1s pour réduire les appels
                 });
             },
 
             /**
              * Récupère l'adresse du client depuis l'API fidélité
              */
+            isFetchingAddress: false,
             async fetchCustomerAddress() {
-                const countryCode = document.getElementById('customerCountry').value;
+                // Éviter les appels simultanés
+                if (this.isFetchingAddress) {
+                    console.log('⏳ Appel API déjà en cours, ignoré');
+                    return;
+                }
+
+                const countryCode = document.getElementById('countryCode').value;
                 const phoneNumber = document.getElementById('customerPhone').value.trim();
 
                 if (!phoneNumber || phoneNumber.length < 6) return;
@@ -1659,6 +1670,7 @@
                 const cleanPhone = phoneNumber.replace(/[\s\-\(\)]/g, '').replace(/^0+/, '');
                 const fullPhone = countryCode + cleanPhone;
 
+                this.isFetchingAddress = true;
                 try {
                     const response = await fetch(`/admin-panel-v2/api/loyalty-public.php?action=check_points&phone=${encodeURIComponent(fullPhone)}`);
                     const data = await response.json();
@@ -1687,6 +1699,8 @@
                     }
                 } catch (error) {
                     console.log('Impossible de récupérer les données client:', error);
+                } finally {
+                    this.isFetchingAddress = false;
                 }
             },
 
@@ -1700,16 +1714,28 @@
                 return div.innerHTML;
             },
 
+            isRendering: false,
             render() {
-                const isEmpty = Cart.isEmpty();
+                // Protection contre les appels simultanés
+                if (this.isRendering) {
+                    console.log('⏳ Render déjà en cours, ignoré');
+                    return;
+                }
+                this.isRendering = true;
 
-                document.getElementById('cartEmpty').style.display = isEmpty ? 'block' : 'none';
-                document.getElementById('cartContent').style.display = isEmpty ? 'none' : 'block';
+                try {
+                    const isEmpty = Cart.isEmpty();
 
-                if (!isEmpty) {
-                    this.renderItems();
-                    this.renderUpsell();
-                    this.updateSummary();
+                    document.getElementById('cartEmpty').style.display = isEmpty ? 'block' : 'none';
+                    document.getElementById('cartContent').style.display = isEmpty ? 'none' : 'block';
+
+                    if (!isEmpty) {
+                        this.renderItems();
+                        this.renderUpsell();
+                        this.updateSummary();
+                    }
+                } finally {
+                    this.isRendering = false;
                 }
             },
 
