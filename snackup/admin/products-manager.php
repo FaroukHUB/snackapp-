@@ -1374,10 +1374,11 @@ $csrfToken = getCsrfToken();
           </span>
         </div>
         <div style="display:flex;gap:6px;">
-          <button class="btn btn-ghost" type="button" data-toggle-sup="${escapeHtml(sup.id)}" title="Activer/Désactiver">
-            ${sup.status === 'available' ? '🔴' : '🟢'}
+          <button class="btn" type="button" data-toggle-sup="${escapeHtml(sup.id)}"
+            style="padding:6px 12px;font-size:12px;font-weight:600;${sup.status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
+            ${sup.status === 'available' ? '✓ Disponible' : '✕ Indisponible'}
           </button>
-          <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(sup.id)}" style="padding:6px 10px;">✕</button>
+          <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(sup.id)}" style="padding:6px 10px;">🗑️</button>
         </div>
       `;
       return div;
