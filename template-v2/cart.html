@@ -1779,9 +1779,13 @@
                                     <i class="fas fa-info-circle" style="font-size: 11px;"></i> ${[item.options?.selectedBeverage?.name, item.options?.selectedViennoiserie?.name, item.options?.selectedPatisserie?.name].filter(Boolean).join(', ')}
                                 </div>
                             ` : ''}
-                            ${item.options?.selectedVariant || item.options?.selectedCapsuleNumber ? `
+                            ${item.options?.selectedVariant || item.options?.selectedCapsuleNumber || item.options?.selectedCapsuleColor ? `
                                 <div class="cart-item-options" style="color: var(--gray-600); font-size: 13px;">
-                                    <i class="fas fa-coffee" style="font-size: 11px;"></i> ${[item.options?.selectedVariant?.name, item.options?.selectedCapsuleNumber ? `Capsule ${item.options.selectedCapsuleNumber.name}` : ''].filter(Boolean).join(' - ')}
+                                    <i class="fas fa-coffee" style="font-size: 11px;"></i> ${[
+                                        item.options?.selectedVariant?.name,
+                                        item.options?.selectedCapsuleNumber ? `Capsule n°${item.options.selectedCapsuleNumber.name}` : '',
+                                        item.options?.selectedCapsuleColor ? `Capsule ${item.options.selectedCapsuleColor.name}` : ''
+                                    ].filter(Boolean).join(' - ')}
                                 </div>
                             ` : ''}
                             <div class="cart-item-price">${Config.formatPrice(Cart.getItemTotal(item))}</div>
