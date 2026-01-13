@@ -317,7 +317,7 @@ const Products = {
         if (featured?.enabled && featured?.items?.length > 0) {
             html += `
                 <li>
-                    <a href="javascript:void(0)" data-section="featuredSection" onclick="Products.scrollToSection('featuredSection')" class="active">
+                    <a href="#featuredSection" data-section="featuredSection" onclick="Products.scrollToSection('featuredSection', event)" class="active">
                         <i class="fas fa-star"></i>
                         ${featured.title || 'Sélection pour vous'}
                     </a>
@@ -332,7 +332,7 @@ const Products = {
             if (cat.items && cat.items.length > 0) {
                 html += `
                     <li>
-                        <a href="javascript:void(0)" data-section="${cat.id}" onclick="Products.scrollToSection('${cat.id}')">
+                        <a href="#${cat.id}" data-section="${cat.id}" onclick="Products.scrollToSection('${cat.id}', event)">
                             <i class="fas ${icon}"></i>
                             ${cat.name}
                         </a>
@@ -346,7 +346,7 @@ const Products = {
         if (formules.length > 0) {
             html += `
                 <li>
-                    <a href="javascript:void(0)" data-section="formulesSection" onclick="Products.scrollToSection('formulesSection')">
+                    <a href="#formulesSection" data-section="formulesSection" onclick="Products.scrollToSection('formulesSection', event)">
                         <i class="fas fa-fire"></i>
                         Nos Formules
                     </a>
@@ -389,7 +389,12 @@ const Products = {
     /**
      * Scroll to section without adding hash to URL
      */
-    scrollToSection(sectionId) {
+    scrollToSection(sectionId, event) {
+        // Prevent hash from being added to URL
+        if (event) {
+            event.preventDefault();
+        }
+
         const section = document.getElementById(sectionId);
         if (!section) return;
 
