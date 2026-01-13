@@ -30,6 +30,10 @@ const Products = {
     selectedVariant: null, // For variant selection (Court/Long)
     selectedCapsule: null, // For capsule number selection
 
+    // Protection flags pour éviter la multiplication des event listeners
+    modalSetup: false,
+    searchSetup: false,
+
     /**
      * Capitalize first letter of a string
      */
@@ -839,6 +843,10 @@ const Products = {
      * Setup product modal
      */
     setupModal() {
+        // Protection: éviter la multiplication des event listeners
+        if (this.modalSetup) return;
+        this.modalSetup = true;
+
         const modal = document.getElementById('productModal');
         const backdrop = modal?.querySelector('.modal-backdrop');
         const closeBtn = document.getElementById('modalClose');
@@ -1773,6 +1781,10 @@ const Products = {
      * Setup search functionality
      */
     setupSearch() {
+        // Protection: éviter la multiplication des event listeners
+        if (this.searchSetup) return;
+        this.searchSetup = true;
+
         const input = document.getElementById('searchInput');
         if (!input) return;
 
