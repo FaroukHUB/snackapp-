@@ -1,0 +1,20 @@
+{
+  "name": "Fabrik Burger - Commandez en ligne",
+  "short_name": "Fabrik Burger",
+  "description": "Commandez vos burgers gourmets en Click & Collect chez Fabrik Burger Lille",
+  "start_url": "/template-v2/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#e63946",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "../images/fabriklogo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["food", "shopping"],
+  "lang": "fr-FR"
+}

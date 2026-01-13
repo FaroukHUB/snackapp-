@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Marvelous - Diner 50's · Crêpes, Gaufres & Coffee | Ouled Moussa</title>
+    <meta name="description" content="Le Marvelous à Ouled Moussa : crêpes salées signature, crêpes sucrées, gaufres, boissons et menu enfant. Salle familles et salle femmes disponibles.">
+    <meta name="keywords" content="crepes ouled moussa, gaufres algerie, restaurant ouled moussa, le marvelous, diner 50s, coffee shop algerie">
+    <meta name="author" content="Le Marvelous">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://marvelous.mon-agenceweb.fr/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="restaurant">
+    <meta property="og:url" content="https://marvelous.mon-agenceweb.fr/">
+    <meta property="og:title" content="Le Marvelous - Diner 50's · Crêpes, Gaufres & Coffee">
+    <meta property="og:description" content="Crêpes salées signature, crêpes sucrées, gaufres et boissons. Ambiance Diner 50's à Ouled Moussa.">
+    <meta property="og:image" content="https://marvelous.mon-agenceweb.fr/images/hero.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Le Marvelous Diner 50's Ouled Moussa">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="Le Marvelous">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://marvelous.mon-agenceweb.fr/">
+    <meta name="twitter:title" content="Le Marvelous - Diner 50's · Crêpes, Gaufres & Coffee">
+    <meta name="twitter:description" content="Crêpes salées signature, crêpes sucrées, gaufres et boissons. Ambiance Diner 50's à Ouled Moussa.">
+    <meta name="twitter:image" content="https://marvelous.mon-agenceweb.fr/images/hero.webp">
+    <meta name="twitter:image:alt" content="Le Marvelous Diner 50's Ouled Moussa">
+
+    <!-- Favicon & Theme -->
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../images/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../images/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2ec4b6">
+    <meta name="msapplication-TileColor" content="#2ec4b6">
+    <meta name="msapplication-TileImage" content="../images/favicon.png">
+
+    <!-- Critical CSS Inline - Prévenir FOUC (Flash of Unstyled Content) -->
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafb;
+            color: #1f2937;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+    </style>
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <!-- Styles - Tous bloquants pour stabilité LCP/CLS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/product-card-new.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "name": "Le Marvelous",
+        "image": "https://marvelous.mon-agenceweb.fr/images/hero.webp",
+        "url": "https://marvelous.mon-agenceweb.fr",
+        "telephone": "+213556782194",
+        "priceRange": "DA",
+        "servesCuisine": ["Crêperie", "Coffee Shop", "Diner 50's"],
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Riad City, Cité OMS 562 logements",
+            "addressLocality": "Ouled Moussa",
+            "postalCode": "35520",
+            "addressCountry": "DZ"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 36.7053937,
+            "longitude": 3.3693709
+        },
+        "openingHoursSpecification": [
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Saturday", "Sunday"],
+                "opens": "07:00",
+                "closes": "21:30"
+            },
+            {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": "Friday",
+                "opens": "07:00",
+                "closes": "11:30"
+            }
+        ],
+        "menu": "https://marvelous.mon-agenceweb.fr/",
+        "acceptsReservations": "False",
+        "hasMenu": {
+            "@type": "Menu",
+            "hasMenuSection": [
+                {
+                    "@type": "MenuSection",
+                    "name": "Crêpes Salées Signature",
+                    "description": "Nos créations maison"
+                },
+                {
+                    "@type": "MenuSection",
+                    "name": "Crêpes Sucrées",
+                    "description": "Pour les gourmands"
+                },
+                {
+                    "@type": "MenuSection",
+                    "name": "Gaufres",
+                    "description": "Gaufres maison"
+                },
+                {
+                    "@type": "MenuSection",
+                    "name": "Boissons",
+                    "description": "Café, thé et boissons fraîches"
+                }
+            ]
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <div class="header-center">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Rechercher un produit..." id="searchInput">
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="cart-btn" id="cartBtn" aria-label="Panier">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="cart-badge" id="cartBadge">0</span>
+                <span class="cart-total" id="cartTotal">0 DA</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Menu</h3>
+                    <ul class="nav-list" id="categoryNav">
+                        <!-- Categories will be injected here -->
+                    </ul>
+                </div>
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Infos</h3>
+                    <ul class="nav-list nav-list-secondary">
+                        <li><a href="a-propos.html"><i class="fas fa-info-circle"></i> À Propos</a></li>
+                        <li><a href="fidelite.html"><i class="fas fa-star"></i> Fidélité</a></li>
+                        <li><a href="click-collect.html"><i class="fas fa-shopping-bag"></i> Click & Collect</a></li>
+                        <li><a href="#horaires"><i class="fas fa-clock"></i> Horaires</a></li>
+                        <li><a href="#contact"><i class="fas fa-phone"></i> Contact</a></li>
+                        <li id="sidebarPlatforms"><a href="#commander"><i class="fas fa-motorcycle"></i> Livraison</a></li>
+                        <li><a href="#localisation"><i class="fas fa-map-marker-alt"></i> Nous trouver</a></li>
+                        <li><a href="#faq"><i class="fas fa-question-circle"></i> FAQ</a></li>
+                    </ul>
+</div>
+            </nav>
+
+            <!-- Restaurant Info in Sidebar -->
+            <div class="sidebar-footer">
+                <div class="restaurant-status" id="restaurantStatus">
+                    <span class="status-dot open"></span>
+                    <span>Ouvert jusqu'à 23h30</span>
+                </div>
+                <div class="restaurant-address" id="restaurantAddress">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>110 Rue des Postes, Lille</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile sidebar -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Hero Section -->
+            <section class="hero-section" id="heroSection">
+                <div class="hero-image-wrapper">
+                    <img src="../images/hero.webp"
+                         alt="Le Marvelous Diner 50's Ouled Moussa"
+                         class="hero-image"
+                         id="heroImage">
+                    <div class="hero-overlay"></div>
+                </div>
+                <div class="hero-content">
+                    <h1 id="heroTitle">Bienvenue</h1>
+                    <p id="heroSubtitle">Découvrez nos burgers gourmets</p>
+                </div>
+            </section>
+
+            <!-- Category Icons Filter -->
+            <section class="category-icons-section" id="categoryIconsSection">
+                <div class="category-icons-container" id="categoryIconsContainer">
+                    <!-- Category icons will be injected here by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Sélection pour vous (Featured) -->
+            <section class="featured-section" id="featuredSection">
+                <div class="section-header">
+                    <h2><i class="fas fa-star"></i> <span id="featuredTitle">Sélection pour vous</span></h2>
+                    <p class="section-subtitle" id="featuredSubtitle">Nos produits les plus appréciés</p>
+                </div>
+                <div class="featured-grid" id="featuredGrid">
+                    <!-- Featured products will be injected here -->
+                </div>
+            </section>
+
+            <!-- Click & Collect / Fidélité Cards -->
+            <section class="services-section" id="servicesSection">
+                <div class="services-grid">
+                    <a href="click-collect.html" class="service-card service-card--collect">
+                        <div class="service-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Click & Collect</h3>
+                            <p>Commandez en ligne, récupérez sur place</p>
+                        </div>
+                        <i class="fas fa-chevron-right service-arrow"></i>
+                    </a>
+                    <a href="fidelite.html" class="service-card service-card--fidelite">
+                        <div class="service-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Programme Fidélité</h3>
+                            <p>Cumulez des points, gagnez des récompenses</p>
+                        </div>
+                        <i class="fas fa-chevron-right service-arrow"></i>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Products Sections (Menu) -->
+            <div id="productsContainer">
+                <!-- Product sections will be injected here with separations -->
+            </div>
+
+            <!-- Delivery Platforms Section -->
+            <section class="info-section" id="commander">
+                <h2><i class="fas fa-motorcycle"></i> Commander en ligne</h2>
+                <p class="section-desc">Faites-vous livrer via nos partenaires</p>
+                <div class="platforms-grid" id="platformsGrid">
+                    <!-- Platforms will be injected -->
+                </div>
+            </section>
+
+            <!-- Google Reviews Section -->
+            <section class="reviews-section">
+                <div class="reviews-header">
+                    <div class="reviews-title">
+                        <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_92x30dp.png" alt="Google" class="google-logo">
+                        <h2>Ce que disent nos clients</h2>
+                    </div>
+                    <div class="reviews-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="rating-text">5.0 sur Google</span>
+                    </div>
+                </div>
+
+                <div class="reviews-slider" id="reviewsSlider">
+                    <!-- Review 1 -->
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">HA</div>
+                                <div>
+                                    <h4>HA HD</h4>
+                                    <p class="reviewer-meta">Local Guide · 18 avis · il y a 5 mois</p>
+                                </div>
+                            </div>
+                            <div class="review-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="review-text">
+                            Très bon et beau restaurant, la décoration style américaine est faite avec goût, que ce soit pour prendre son petit déjeuner sur place ou à emporter, ou même leurs sandwichs ainsi que les gâteaux. Les croissants sont vraiment très bons ainsi que leurs jus d'orange frais. Tout ce qu'on a pris était très bon. Impossible de regretter le détour. Bonne continuation à vous, vous méritez vos 5 étoiles.
+                        </p>
+                        <div class="review-ratings">
+                            <span><strong>Cuisine :</strong> 5/5</span>
+                            <span><strong>Service :</strong> 5/5</span>
+                            <span><strong>Ambiance :</strong> 5/5</span>
+                        </div>
+                    </div>
+
+                    <!-- Review 2 -->
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">FB</div>
+                                <div>
+                                    <h4>Fay Bel</h4>
+                                    <p class="reviewer-meta">Local Guide · 85 avis · il y a un mois</p>
+                                </div>
+                            </div>
+                            <div class="review-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="review-text">
+                            Un très bon restaurant style fast food à Ouled Moussa. Nous sommes tombés un peu par hasard sur cet endroit à une heure un peu tardive et c'était vraiment une agréable surprise ! Tout était très bon que ce soit les crêpes salées, le riz au poulet crousty ou les tortillas !
+                        </p>
+                        <div class="review-ratings">
+                            <span><strong>Cuisine :</strong> 5/5</span>
+                            <span><strong>Service :</strong> 5/5</span>
+                            <span><strong>Ambiance :</strong> 5/5</span>
+                        </div>
+                    </div>
+
+                    <!-- Review 3 -->
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">RI</div>
+                                <div>
+                                    <h4>Rtc Ivry</h4>
+                                    <p class="reviewer-meta">Local Guide · 3 avis · il y a 5 mois</p>
+                                </div>
+                            </div>
+                            <div class="review-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p class="review-text">
+                            Très très bon restaurant. Nos enfants étaient ravis de manger de vraies crêpes que ce soit en sucrée ou salée, elles ont très bon goût mais comme tout ce que l'on a mangé. Nous y reviendrons rapidement.
+                        </p>
+                        <div class="review-ratings">
+                            <span><strong>Cuisine :</strong> 5/5</span>
+                            <span><strong>Service :</strong> 5/5</span>
+                            <span><strong>Ambiance :</strong> 5/5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slider Controls -->
+                <div class="slider-controls">
+                    <button class="slider-btn" id="prevReview" aria-label="Avis précédent"><i class="fas fa-chevron-left"></i></button>
+                    <div class="slider-dots" id="reviewsDots"></div>
+                    <button class="slider-btn" id="nextReview" aria-label="Avis suivant"><i class="fas fa-chevron-right"></i></button>
+                </div>
+
+                <!-- CTA Button -->
+                <a href="https://www.google.com/search?sca_esv=b243d552b696475b&rlz=1C5CHFA_enDZ1142DZ1143&sxsrf=ANbL-n7MnzELJzxRRAuob8C08vW8BOmpGw:1768232073160&q=marvelous+ouled+moussa&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOR7_uxVy-zhzsx0dTVqPMUUKZRSWYDZl1XaHwxiwgJkvZ_TqgPMTm9n81Gw7rU9-44pz8vEwedj_WqguvxavQLeqSMY2&sa=X&ved=2ahUKEwiatefkqYaSAxWmTqQEHTV4B_gQrrQLegQIHBAA&biw=1584&bih=877&dpr=2&aic=0" target="_blank" class="google-reviews-cta">
+                    <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_92x30dp.png" alt="Google" class="google-logo-btn">
+                    <span>Voir tous les avis</span>
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+            </section>
+
+            <!-- Map Section -->
+            <section class="info-section section-alt-bg" id="localisation">
+                <h2><i class="fas fa-map-marker-alt"></i> Nous trouver</h2>
+                <div class="map-container" id="mapContainer">
+                    <!-- Map will be injected -->
+                </div>
+                <a href="#" id="directionsBtn" class="directions-btn" target="_blank">
+                    <i class="fas fa-directions"></i> Itinéraire
+                </a>
+            </section>
+
+            <!-- FAQ Section -->
+            <section class="info-section" id="faq">
+                <h2><i class="fas fa-question-circle"></i> Questions fréquentes</h2>
+                <div class="faq-list" id="faqContent">
+                    <!-- FAQ will be injected -->
+                </div>
+            </section>
+
+            <!-- Hours & Contact Row -->
+            <div class="info-row">
+                <!-- Hours Section -->
+                <section class="info-section" id="horaires">
+                    <h2><i class="fas fa-clock"></i> Horaires</h2>
+                    <div class="info-content" id="horairesContent">
+                        <!-- Hours will be injected -->
+                    </div>
+                </section>
+
+                <!-- Contact Section -->
+                <section class="info-section" id="contact">
+                    <h2><i class="fas fa-phone"></i> Contact</h2>
+                    <div class="info-content" id="contactContent">
+                        <!-- Contact info will be injected -->
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose" aria-label="Fermer"><i class="fas fa-times"></i></button>
+            <div class="modal-body">
+                <div class="modal-image">
+                    <img src="" alt="Image du produit" id="modalImage">
+                </div>
+                <div class="modal-details">
+                    <h2 id="modalTitle">Nom du produit</h2>
+                    <p class="modal-description" id="modalDescription">Description</p>
+
+                    <!-- Menu/Solo Toggle -->
+                    <div class="modal-menu-toggle" id="menuToggleSection">
+                        <div class="menu-toggle-options">
+                            <button type="button" class="menu-option active" data-type="solo" onclick="Products.setMenuType('solo')">
+                                <span class="option-label">Seul</span>
+                                <span class="option-price" id="priceSolo">0 DA</span>
+                            </button>
+                            <button type="button" class="menu-option" data-type="menu" onclick="Products.setMenuType('menu')">
+                                <span class="option-label">Menu</span>
+                                <span class="option-desc">+ Frites + Boisson</span>
+                                <span class="option-price" id="priceMenu">0 DA</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Variants (Court/Long for cafe) -->
+                    <div class="modal-variants hidden" id="modalVariants">
+                        <h4><i class="fas fa-coffee"></i> Taille</h4>
+                        <div class="variant-options" id="variantOptions">
+                            <!-- Variant options will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Capsule Numbers (for cafe-caps and cafe-lor) -->
+                    <div class="modal-capsules hidden" id="modalCapsules">
+                        <h4><i class="fas fa-hashtag"></i> Numéro de capsule</h4>
+                        <div class="capsule-options" id="capsuleOptions">
+                            <!-- Capsule options will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Remove Ingredients -->
+                    <div class="modal-ingredients" id="modalIngredients">
+                        <h4><i class="fas fa-minus-circle"></i> Retirer des ingrédients</h4>
+                        <div class="ingredients-list" id="ingredientsList">
+                            <!-- Ingredients will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Sauce Options (for Crousti) -->
+                    <div class="modal-sauce hidden" id="modalSauce">
+                        <h4><i class="fas fa-pepper-hot"></i> Choix de la sauce</h4>
+                        <div class="sauce-options" id="sauceOptions">
+                            <!-- Sauce options will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Kids Options (for Crêpe Kids Salée) -->
+                    <div class="modal-kids-options hidden" id="modalKidsOptions">
+                        <h4><i class="fas fa-utensils"></i> Choix de la crêpe</h4>
+                        <div class="kids-crepe-options" id="kidsCrepeOptions">
+                            <!-- Crepe type options will be injected -->
+                        </div>
+
+                        <h4 style="margin-top: 16px;"><i class="fas fa-pepper-hot"></i> Choix de la sauce</h4>
+                        <div class="kids-sauce-options" id="kidsSauceOptions">
+                            <!-- Sauce options will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Viennoiserie Options -->
+                    <div class="modal-viennoiserie hidden" id="modalViennoiserie">
+                        <h4><i class="fas fa-croissant"></i> Choisissez votre viennoiserie</h4>
+                        <div class="viennoiserie-options" id="viennoiserieOptions">
+                            <!-- Viennoiserie options will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Pâtisserie Options -->
+                    <div class="modal-patisserie hidden" id="modalPatisserie">
+                        <h4><i class="fas fa-birthday-cake"></i> Choisissez votre pâtisserie</h4>
+                        <div class="patisserie-options" id="patisserieOptions">
+                            <!-- Pâtisserie options will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Beverage Options (Soda, Jus, etc.) -->
+                    <div class="modal-beverage hidden" id="modalBeverage">
+                        <h4><i class="fas fa-glass-water"></i> <span id="beverageTitle">Choisissez</span></h4>
+                        <div class="beverage-options" id="beverageOptions">
+                            <!-- Beverage options will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Accompaniment Options -->
+                    <div class="modal-accompagnement hidden" id="modalAccompagnement">
+                        <h4><i class="fas fa-leaf"></i> Accompagnement</h4>
+                        <div class="accompagnement-options" id="accompagnementOptions">
+                            <!-- Accompaniment options will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Add Supplements -->
+                    <div class="modal-supplements" id="modalSupplements">
+                        <h4><i class="fas fa-plus-circle"></i> Ajouter des suppléments</h4>
+                        <div class="supplements-list" id="supplementsList">
+                            <!-- Supplements will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Menu Drink Selection -->
+                    <div class="modal-drinks hidden" id="modalDrinks">
+                        <h4><i class="fas fa-glass-cheers"></i> Choisir votre boisson</h4>
+                        <div class="drinks-list" id="drinksList">
+                            <!-- Drinks will be injected -->
+                        </div>
+                    </div>
+
+                    <!-- Quantity & Add to Cart -->
+                    <div class="modal-actions">
+                        <div class="quantity-selector">
+                            <button class="qty-btn" id="qtyMinus" aria-label="Diminuer la quantité"><i class="fas fa-minus"></i></button>
+                            <span class="qty-value" id="qtyValue">1</span>
+                            <button class="qty-btn" id="qtyPlus" aria-label="Augmenter la quantité"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <button class="btn-add-cart" id="addToCartBtn">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Ajouter</span>
+                            <span class="btn-price" id="addToCartPrice">0 DA</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Cart Drawer (for quick view) -->
+    <div class="mini-cart" id="miniCart">
+        <div class="mini-cart-header">
+            <h3><i class="fas fa-shopping-bag"></i> Votre commande</h3>
+            <div class="mini-cart-header-actions">
+                <button class="mini-cart-clear-btn" onclick="Cart.clear(); Cart.updateUI();">Vider</button>
+                <button class="mini-cart-close" id="miniCartClose" aria-label="Fermer le panier"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div class="mini-cart-items" id="miniCartItems">
+            <!-- Cart items preview -->
+        </div>
+        <div class="mini-cart-footer">
+            <div class="mini-cart-total">
+                <span>Total</span>
+                <strong id="miniCartTotal">0 DA</strong>
+            </div>
+            <a href="cart.html" class="btn-view-cart">
+                Voir le panier <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- WhatsApp Floating Button (Mobile Only) -->
+    <a href="https://wa.me/213556782194"
+       target="_blank"
+       class="whatsapp-float"
+       aria-label="Contactez-nous sur WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Scripts - defer pour performance SEO -->
+    <script src="js/config.js" defer></script>
+    <script src="js/cart.js" defer></script>
+    <script src="js/products.js" defer></script>
+    <script src="js/reviews.js" defer></script>
+    <script src="js/app.js" defer></script>
+</body>
+</html>

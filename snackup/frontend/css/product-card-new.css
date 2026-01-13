@@ -1,0 +1,169 @@
+/* ========================================
+   NOUVEAU DESIGN CARTE PRODUIT - MOBILE FIRST
+   Structure propre sans wrapper contraignant
+   ======================================== */
+
+.product-card-new {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.product-card-new:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Image - pleine largeur */
+.product-image-new {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+/* Badge (Signature, Épicé, etc.) */
+.product-badge-new {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #14b8a6;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 20px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Contenu de la carte */
+.product-content-new {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Nom du produit */
+.product-name-new {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.3;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Description */
+.product-desc-new {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.4;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Footer (prix + bouton) */
+.product-footer-new {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+/* Prix */
+.product-price-new {
+    font-size: 17px;
+    font-weight: 800;
+    color: #16a34a;
+    flex-shrink: 0;
+}
+
+/* Bouton Ajouter */
+.product-btn-new {
+    background: #14b8a6;
+    color: #ffffff;
+    border: none;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-btn-new:active {
+    transform: scale(0.95);
+    background: #0d9488;
+}
+
+/* État indisponible */
+.product-card-new.unavailable {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.product-card-new.unavailable::after {
+    content: 'Indisponible';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 20;
+}
+
+/* ========================================
+   RESPONSIVE - Desktop
+   ======================================== */
+
+@media (min-width: 769px) {
+    .product-card-new:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .product-name-new {
+        font-size: 16px;
+    }
+
+    .product-desc-new {
+        font-size: 13px;
+    }
+
+    .product-price-new {
+        font-size: 18px;
+    }
+
+    .product-btn-new:hover {
+        background: #0d9488;
+        transform: scale(1.02);
+    }
+}
