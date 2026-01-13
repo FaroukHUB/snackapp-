@@ -30,8 +30,8 @@ class Database {
      */
     private static function connect(): void {
         $host = self::$config['host'] ?? 'localhost';
-        $dbname = self::$config['dbname'] ?? 'snackapp';
-        $username = self::$config['username'] ?? 'root';
+        $dbname = self::$config['name'] ?? self::$config['dbname'] ?? 'snackapp';  // Support 'name' et 'dbname'
+        $username = self::$config['user'] ?? self::$config['username'] ?? 'root';  // Support 'user' et 'username'
         $password = self::$config['password'] ?? '';
         $charset = self::$config['charset'] ?? 'utf8mb4';
         $port = self::$config['port'] ?? 3306;
