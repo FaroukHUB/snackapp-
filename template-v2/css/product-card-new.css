@@ -20,10 +20,12 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* Image - pleine largeur, hauteur auto, JAMAIS coupée */
+/* Image - pleine largeur, ratio carré, réserve l'espace */
 .product-image-new {
     width: 100%;
     height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
     display: block;
     background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
 }

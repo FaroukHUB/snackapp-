@@ -1753,6 +1753,8 @@
                     return `
                     <div class="cart-item" data-key="${encodedKey}">
                         <img src="../${item.image}" alt="${item.name}" class="cart-item-image"
+                             width="80"
+                             height="80"
                              loading="lazy"
                              onerror="this.style.display='none'">
                         <div class="cart-item-details">
@@ -1859,7 +1861,7 @@
 
                     return `
                         <div class="upsell-card" onclick="CartPage.quickAddUpsell('${safeId}')">
-                            ${hasImage ? `<img src="../${safeImage}" alt="${safeName}" loading="lazy" onerror="this.style.display='none'">` : '<div class="upsell-placeholder"><i class="fas fa-utensils"></i></div>'}
+                            ${hasImage ? `<img src="../${safeImage}" alt="${safeName}" width="60" height="60" loading="lazy" onerror="this.style.display='none'">` : '<div class="upsell-placeholder"><i class="fas fa-utensils"></i></div>'}
                             <div class="upsell-card-name">${product.name}</div>
                             <div class="upsell-card-price">${priceText}</div>
                         </div>
@@ -1931,7 +1933,7 @@
                                     <button type="button" class="upsell-option-card ${index === 0 ? 'selected' : ''}"
                                             data-option-type="beverage" data-option-id="${opt.id}"
                                             onclick="CartPage.selectUpsellOption('beverage', '${opt.id}', '${opt.name}', ${opt.price || 0}, event)">
-                                        ${opt.image ? `<img src="../${opt.image}" alt="${opt.name}" loading="lazy" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" onerror="this.style.display='none'">` : ''}
+                                        ${opt.image ? `<img src="../${opt.image}" alt="${opt.name}" width="120" height="80" loading="lazy" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" onerror="this.style.display='none'">` : ''}
                                         <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">${opt.name}</div>
                                         <div style="color: var(--primary); font-weight: 700;">${Config.formatPrice(opt.price || 0)}</div>
                                     </button>
@@ -1970,7 +1972,7 @@
                                     <button type="button" class="upsell-option-card ${index === 0 ? 'selected' : ''}"
                                             data-option-type="patisserie" data-option-id="${opt.id}"
                                             onclick="CartPage.selectUpsellOption('patisserie', '${opt.id}', '${opt.name}', ${opt.price || 0}, event)">
-                                        ${opt.image ? `<img src="../${opt.image}" alt="${opt.name}" loading="lazy" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" onerror="this.style.display='none'">` : ''}
+                                        ${opt.image ? `<img src="../${opt.image}" alt="${opt.name}" width="120" height="80" loading="lazy" style="width: 100%; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" onerror="this.style.display='none'">` : ''}
                                         <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">${opt.name}</div>
                                         <div style="color: var(--primary); font-weight: 700;">${Config.formatPrice(opt.price || 0)}</div>
                                     </button>
