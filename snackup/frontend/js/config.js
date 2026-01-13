@@ -358,10 +358,12 @@ const Config = {
     },
 
     /**
-     * Format price for display (DA = Dinar Algérien)
+     * Format price for display
+     * Currency is configured per instance (DA, EUR, USD, etc.)
      */
     formatPrice(price) {
-        return Math.round(price) + ' DA';
+        const currency = window.SNACK_CONFIG?.currency || 'DA';
+        return Math.round(price) + ' ' + currency;
     },
 
     /**

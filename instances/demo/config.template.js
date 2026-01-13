@@ -4,6 +4,7 @@ window.SNACK_CONFIG = {
     "name": "Votre Restaurant",
     "slug": "votre-restaurant",
     "legalName": "Votre Restaurant SARL",
+    "currency": "EUR",  // Devise à afficher (DA, EUR, USD, MAD, TND, etc.)
 
     "branding": {
         "primaryColor": "#e63946",

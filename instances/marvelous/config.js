@@ -8,6 +8,7 @@ window.SNACK_CONFIG = {
   legalName: "Le Marvelous",
   brandTagline: "Diner 50's · Crêpes, Gaufres & Coffee",
   priceRange: "DA",
+  currency: "DA",  // Currency symbol (DA, EUR, USD, etc.)
   isHalal: true,
   hideFooterAddress: false,
 
