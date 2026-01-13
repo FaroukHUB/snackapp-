@@ -1211,7 +1211,7 @@ if (isset($_GET['export'])) {
                         <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #3b82f6;">
                             <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Mode</div>
                             <div style="font-size: 14px; color: white; font-weight: 600;">
-                                ${order.notes && order.notes.includes('LIVRAISON') ? '<i class="fas fa-motorcycle" style="color: #3b82f6;"></i> Livraison' : order.notes && order.notes.includes('SUR PLACE') ? '<i class="fas fa-utensils" style="color: #f59e0b;"></i> Sur place' : '<i class="fas fa-shopping-bag" style="color: #10b981;"></i> À emporter'}
+                                ${order.mode_notes ? order.mode_notes.replace('📦', '<i class="fas fa-shopping-bag" style="color: #10b981;"></i>').replace('🏠', '<i class="fas fa-utensils" style="color: #f59e0b;"></i>').replace('🚗', '<i class="fas fa-motorcycle" style="color: #3b82f6;"></i>') : order.notes && order.notes.includes('LIVRAISON') ? '<i class="fas fa-motorcycle" style="color: #3b82f6;"></i> Livraison' : order.notes && order.notes.includes('SUR PLACE') ? '<i class="fas fa-utensils" style="color: #f59e0b;"></i> Sur place' : '<i class="fas fa-shopping-bag" style="color: #10b981;"></i> À emporter'}
                             </div>
                         </div>
                         <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #10b981;">
@@ -1223,8 +1223,37 @@ if (isset($_GET['export'])) {
                     </div>
                 `;
 
+                // Précommande (date/heure) pour "À emporter"
+                if (order.preorder_date || order.preorder_time) {
+                    let preorderDisplay = '';
+                    if (order.preorder_date && order.preorder_time) {
+                        const dateObj = new Date(order.preorder_date);
+                        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                        const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
+                        preorderDisplay = `<strong style="color: #10b981;">${formattedDate}</strong> à <strong style="color: #10b981;">${order.preorder_time}</strong>`;
+                    } else if (order.preorder_date) {
+                        const dateObj = new Date(order.preorder_date);
+                        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                        const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
+                        preorderDisplay = `<strong style="color: #10b981;">${formattedDate}</strong>`;
+                    } else if (order.preorder_time) {
+                        preorderDisplay = `<strong style="color: #10b981;">${order.preorder_time}</strong>`;
+                    }
+
+                    html += `
+                        <div style="padding: 14px; background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.05) 100%); border: 2px solid #10b981; border-radius: 10px; margin-bottom: 20px;">
+                            <div style="font-size: 11px; color: #6ee7b7; margin-bottom: 6px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+                                <i class="fas fa-clock"></i> ⏰ PRÉCOMMANDE
+                            </div>
+                            <div style="font-size: 14px; color: white; font-weight: 600;">
+                                ${preorderDisplay}
+                            </div>
+                        </div>
+                    `;
+                }
+
                 // Salle et Table pour "Sur place"
-                if (order.notes && order.notes.includes('SUR PLACE')) {
+                if (order.mode_notes && order.mode_notes.includes('SUR PLACE') || order.notes && order.notes.includes('SUR PLACE')) {
                     const salleMatch = order.notes.match(/Salle (Famille|Femme)/);
                     const tableMatch = order.notes.match(/Table ([A-Z0-9]+)/i);
 

@@ -381,7 +381,11 @@ function addOrder(bool $useMySQL) {
                 'pickup_time' => $requestData['pickup_time'] ?? null,
                 // ⚡ NOUVEAU: Transmettre l'adresse de livraison
                 'delivery_address' => $requestData['delivery_address'] ?? null,
-                'delivery_instructions' => $requestData['delivery_instructions'] ?? null
+                'delivery_instructions' => $requestData['delivery_instructions'] ?? null,
+                // ⚡ NOUVEAU: Précommande et mode séparés
+                'preorder_date' => $requestData['preorder_date'] ?? null,
+                'preorder_time' => $requestData['preorder_time'] ?? null,
+                'mode_notes' => $requestData['mode_notes'] ?? null
             ]);
 
             // ✅ Créer ou récupérer le client avec son adresse

@@ -2738,32 +2738,20 @@
                 let modeNotes = '';
                 let deliveryAddress = null;
                 let deliveryInstructions = null;
+                let preorderDate = null;
+                let preorderTime = null;
 
                 if (this.mode === 'dinein') {
                     const tableNumber = document.getElementById('tableNumber').value.trim();
                     const salleName = this.room === 'famille' ? 'Salle Famille' : 'Salle Femme';
                     modeNotes = `🏠 SUR PLACE - ${salleName} - Table ${tableNumber}`;
                 } else if (this.mode === 'pickup') {
-                    // Collecter les informations de précommande
-                    const preorderDate = document.getElementById('preorderDate').value;
-                    const preorderTime = document.getElementById('preorderTime').value;
+                    // Collecter les informations de précommande SÉPARÉMENT
+                    preorderDate = document.getElementById('preorderDate').value || null;
+                    preorderTime = document.getElementById('preorderTime').value || null;
 
-                    if (preorderDate && preorderTime) {
-                        // Format de la date pour affichage plus lisible
-                        const dateObj = new Date(preorderDate);
-                        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                        const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
-                        modeNotes = `📦 À EMPORTER - ⏰ PRÉCOMMANDE\nDate: ${formattedDate}\nHeure: ${preorderTime}`;
-                    } else if (preorderDate) {
-                        const dateObj = new Date(preorderDate);
-                        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                        const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
-                        modeNotes = `📦 À EMPORTER - ⏰ PRÉCOMMANDE\nDate: ${formattedDate}`;
-                    } else if (preorderTime) {
-                        modeNotes = `📦 À EMPORTER - ⏰ PRÉCOMMANDE\nHeure: ${preorderTime}`;
-                    } else {
-                        modeNotes = '📦 À EMPORTER';
-                    }
+                    // Mode simple sans précommande dans les notes
+                    modeNotes = '📦 À EMPORTER';
                 } else if (this.mode === 'delivery') {
                     const deliveryType = this.deliveryType || 'libre';
 
@@ -2822,10 +2810,14 @@
                     delivery_fee: deliveryFee,
                     loyalty_reward_id: this.selectedReward || null,
                     loyalty_customer_id: this.loyaltyCustomer?.id || null,
-                    notes: [modeNotes, note].filter(Boolean).join(' | '),
+                    notes: note || null, // Notes propres du client uniquement
+                    mode_notes: modeNotes, // Mode séparé
                     // ⚡ NOUVEAU: Envoyer l'adresse de livraison séparément
                     delivery_address: deliveryAddress,
                     delivery_instructions: deliveryInstructions,
+                    // ⚡ NOUVEAU: Précommande séparée
+                    preorder_date: preorderDate,
+                    preorder_time: preorderTime,
                     ...paymentInfo
                 };
 
