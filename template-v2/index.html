@@ -188,7 +188,18 @@
             <!-- Hero Section -->
             <section class="hero-section" id="heroSection">
                 <div class="hero-image-wrapper">
-                    <img src="../images/hero.webp" alt="Le Marvelous Diner 50's Ouled Moussa" class="hero-image" id="heroImage">
+                    <img src="../images/hero-800w.webp"
+                         srcset="../images/hero-400w.webp 400w,
+                                 ../images/hero-800w.webp 800w,
+                                 ../images/hero.webp 1536w"
+                         sizes="(max-width: 768px) 100vw, 1400px"
+                         alt="Le Marvelous Diner 50's Ouled Moussa"
+                         class="hero-image"
+                         id="heroImage"
+                         width="1536"
+                         height="992"
+                         fetchpriority="high"
+                         loading="eager">
                     <div class="hero-overlay"></div>
                 </div>
                 <div class="hero-content">
