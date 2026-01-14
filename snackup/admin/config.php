@@ -29,6 +29,7 @@ define('RESTAURANT_ID', $instanceConfig['app']['restaurant_id']);
 define('APP_NAME', $instanceConfig['app']['name']);
 define('APP_SLUG', $instanceConfig['app']['instance_id']);
 define('TIMEZONE', $instanceConfig['app']['timezone']);
+define('CURRENCY', $instanceConfig['app']['currency'] ?? 'DA');
 
 // Chemins
 define('UPLOADS_DIR', __DIR__ . '/../../images/');

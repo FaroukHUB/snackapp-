@@ -28,6 +28,7 @@ if ($useMySQL) {
     $restaurant = getCurrentRestaurant();
     $restaurantName = $restaurant['name'] ?? 'Restaurant';
     $primaryColor = $restaurant['primary_color'] ?? '#c58a3a';
+    $currency = CURRENCY;
 
     // Mode MySQL: pas besoin de restaurant.json
     $restaurantSettings = [];
@@ -335,7 +336,7 @@ $action = $_POST['action'];
                                 SNACK_RESTAURANT_ID,
                                 $pointsEarned,
                                 $order['id'],
-                                'Commande #' . ($order['order_number'] ?? $order['id']) . ' - ' . number_format($orderTotal, 0) . ' DA'
+                                'Commande #' . ($order['order_number'] ?? $order['id']) . ' - ' . number_format($orderTotal, 0) . ' ' . $currency
                             );
                         }
                     }
@@ -1024,7 +1025,7 @@ if (isset($_GET['export'])) {
                     <!-- Total + Fidélité -->
                     <div style="margin-bottom: 12px; padding: 12px; background: #0f172a; border-radius: 12px; border: 2px solid <?php echo $primaryColor; ?>;">
                         <div style="font-size: 22px; font-weight: 800; color: <?php echo $primaryColor; ?>; text-align: center;">
-                            <i class="fas fa-coins" style="font-size: 18px; margin-right: 4px;"></i><?php echo number_format($order['total'] ?? 0, 0); ?> DA
+                            <i class="fas fa-coins" style="font-size: 18px; margin-right: 4px;"></i><?php echo number_format($order['total'] ?? 0, 0); ?> <?= CURRENCY ?>
                         </div>
                         <?php if (!empty($order['loyalty_reward_id']) || !empty($order['loyalty_code'])): ?>
                             <div style="text-align: center; margin-top: 6px; font-size: 11px; color: #f59e0b; font-weight: 700; background: rgba(245,158,11,0.1); padding: 4px 8px; border-radius: 6px; display: inline-block; width: 100%;">
@@ -1165,6 +1166,7 @@ if (isset($_GET['export'])) {
                 const statusIcon = isCompleted ? 'check-circle' : 'clock';
                 const statusText = isCompleted ? 'Terminée' : 'En attente';
                 const primaryColor = '<?php echo $primaryColor; ?>';
+                const currency = '<?= CURRENCY ?>';
 
                 let html = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1249,9 +1251,9 @@ if (isset($_GET['export'])) {
                                             if (order.delivery_instructions.includes('monnaie exacte')) {
                                                 extraInfo = '<br><span style="color: #10b981; font-size: 12px;"><i class="fas fa-check-circle"></i> J\'ai l\'appoint</span>';
                                             } else {
-                                                const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) DA/);
+                                                const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) (DA|EUR)/);
                                                 if (changeMatch) {
-                                                    extraInfo = `<br><span style="color: #fbbf24; font-size: 12px;"><i class="fas fa-coins"></i> Prévoir ${changeMatch[1]} DA</span>`;
+                                                    extraInfo = `<br><span style="color: #fbbf24; font-size: 12px;"><i class="fas fa-coins"></i> Prévoir ${changeMatch[1]} ${currency}</span>`;
                                                 }
                                             }
                                         }
@@ -1433,15 +1435,15 @@ if (isset($_GET['export'])) {
                         <div style="background: #1e293b; padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #374151;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #9ca3af; font-size: 14px;">
                                 <span><i class="fas fa-receipt" style="font-size: 12px;"></i> Sous-total:</span>
-                                <span style="color: white; font-weight: 600;">${subtotal.toLocaleString('fr-FR')} DA</span>
+                                <span style="color: white; font-weight: 600;">${subtotal.toLocaleString('fr-FR')} ${currency}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #f59e0b; font-size: 14px; font-weight: 600;">
                                 <span><i class="fas fa-motorcycle"></i> Frais de livraison:</span>
-                                <span>+${deliveryFee.toLocaleString('fr-FR')} DA</span>
+                                <span>+${deliveryFee.toLocaleString('fr-FR')} ${currency}</span>
                             </div>
                             <div style="border-top: 2px dashed #374151; margin: 12px 0; padding-top: 12px; display: flex; justify-content: space-between; font-size: 18px; font-weight: 800;">
                                 <span style="color: white;"><i class="fas fa-coins"></i> Total:</span>
-                                <span style="color: ${primaryColor};">${order.total.toLocaleString('fr-FR')} DA</span>
+                                <span style="color: ${primaryColor};">${order.total.toLocaleString('fr-FR')} ${currency}</span>
                             </div>
                         </div>
                     `;
@@ -1451,7 +1453,7 @@ if (isset($_GET['export'])) {
                         <div style="text-align: center; padding: 20px; background: ${primaryColor}22; border: 2px solid ${primaryColor}; border-radius: 12px; margin-bottom: 20px;">
                             <div style="font-size: 14px; color: #9ca3af; margin-bottom: 8px;"><i class="fas fa-hand-holding-usd"></i> Total</div>
                             <div style="font-size: 32px; font-weight: 800; color: ${primaryColor};">
-                                <i class="fas fa-coins" style="font-size: 28px;"></i> ${order.total.toLocaleString('fr-FR')} DA
+                                <i class="fas fa-coins" style="font-size: 28px;"></i> ${order.total.toLocaleString('fr-FR')} ${currency}
                             </div>
                         </div>
                     `;
@@ -1796,7 +1798,7 @@ if (isset($_GET['export'])) {
                                     <?php endif; ?>
                                 </td>
                                 <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: <?= $primaryColor ?>;"><?= $ordersCount ?></td>
-                                <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: #10b981;"><?= number_format($totalSpent, 0) ?> DA</td>
+                                <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: #10b981;"><?= number_format($totalSpent, 0) ?> <?= CURRENCY ?></td>
                                 <td style="padding: 10px 15px; text-align: center; font-weight: 600; color: #f59e0b;"><?= $loyaltyPoints ?></td>
                                 <td style="padding: 10px 15px;"><?= $badge ?></td>
                                 <td style="padding: 10px 15px;">
@@ -1883,7 +1885,7 @@ if (isset($_GET['export'])) {
                 <select id="rewardType" onchange="toggleRewardValue()" required
                        style="width: 100%; padding: 12px; border: 1px solid #374151; border-radius: 10px; font-size: 1em; box-sizing: border-box; background: #1e293b; color: white;">
                     <option value="discount_percent">Réduction en %</option>
-                    <option value="discount_amount">Réduction en DA</option>
+                    <option value="discount_amount">Réduction en <?= CURRENCY ?></option>
                     <option value="free_product">Produit gratuit</option>
                     <option value="free_delivery">Livraison gratuite</option>
                 </select>
@@ -2054,12 +2056,12 @@ if (isset($_GET['export'])) {
                     </div>
                     <div class="stat-card" style="border-left: 4px solid <?php echo $primaryColor; ?>;">
                         <div style="color: <?php echo $primaryColor; ?>;"><i class="fas fa-coins"></i></div>
-                        <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($archiveTotal, 0); ?> DA</div>
+                        <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($archiveTotal, 0); ?> <?= CURRENCY ?></div>
                         <div style="color: #9ca3af; font-size: 11px;">CA Total</div>
                     </div>
                     <div class="stat-card" style="border-left: 4px solid #10b981;">
                         <div style="color: #10b981;"><i class="fas fa-shopping-basket"></i></div>
-                        <div class="stat-number" style="color: #10b981;"><?php echo $archiveCount > 0 ? number_format($archiveTotal / $archiveCount, 0) : 0; ?> DA</div>
+                        <div class="stat-number" style="color: #10b981;"><?php echo $archiveCount > 0 ? number_format($archiveTotal / $archiveCount, 0) : 0; ?> <?= CURRENCY ?></div>
                         <div style="color: #9ca3af; font-size: 11px;">Panier moyen</div>
                     </div>
                 </div>
@@ -2092,7 +2094,7 @@ if (isset($_GET['export'])) {
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-size: 18px; font-weight: bold; color: <?php echo $primaryColor; ?>;"><?php echo number_format($dayTotal, 0); ?> DA</div>
+                            <div style="font-size: 18px; font-weight: bold; color: <?php echo $primaryColor; ?>;"><?php echo number_format($dayTotal, 0); ?> <?= CURRENCY ?></div>
                         </div>
                     </div>
 
@@ -2119,7 +2121,7 @@ if (isset($_GET['export'])) {
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>; font-size: 14px;"><?php echo number_format($order['total'] ?? 0, 0); ?> DA</div>
+                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>; font-size: 14px;"><?php echo number_format($order['total'] ?? 0, 0); ?> <?= CURRENCY ?></div>
                             <span style="background: #10b98122; color: #10b981; padding: 2px 8px; border-radius: 10px; font-size: 9px;"><i class="fas fa-check"></i> Terminée</span>
                         </div>
                     </div>
@@ -2620,19 +2622,19 @@ if (isset($_GET['export'])) {
             <div class="stats" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
                 <div class="stat-card" style="border-left: 4px solid #10b981;">
                     <div style="color: #10b981;"><i class="fas fa-calendar-day"></i></div>
-                    <div class="stat-number" style="color: #10b981;"><?php echo number_format($stats['revenue'] ?? 0, 0); ?> DA</div>
+                    <div class="stat-number" style="color: #10b981;"><?php echo number_format($stats['revenue'] ?? 0, 0); ?> <?= CURRENCY ?></div>
                     <div style="color: #9ca3af; font-size: 11px;">Aujourd'hui</div>
                     <div style="color: #6b7280; font-size: 10px; margin-top: 4px;"><?php echo $stats['today'] ?? 0; ?> commandes</div>
                 </div>
                 <div class="stat-card" style="border-left: 4px solid #3b82f6;">
                     <div style="color: #3b82f6;"><i class="fas fa-calendar-week"></i></div>
-                    <div class="stat-number" style="color: #3b82f6;"><?php echo number_format($weekStats['revenue'] ?? 0, 0); ?> DA</div>
+                    <div class="stat-number" style="color: #3b82f6;"><?php echo number_format($weekStats['revenue'] ?? 0, 0); ?> <?= CURRENCY ?></div>
                     <div style="color: #9ca3af; font-size: 11px;">Semaine</div>
                     <div style="color: #6b7280; font-size: 10px; margin-top: 4px;"><?php echo $weekStats['orders'] ?? 0; ?> commandes</div>
                 </div>
                 <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
                     <div style="color: #8b5cf6;"><i class="fas fa-calendar-alt"></i></div>
-                    <div class="stat-number" style="color: #8b5cf6;"><?php echo number_format($monthStats['revenue'] ?? 0, 0); ?> DA</div>
+                    <div class="stat-number" style="color: #8b5cf6;"><?php echo number_format($monthStats['revenue'] ?? 0, 0); ?> <?= CURRENCY ?></div>
                     <div style="color: #9ca3af; font-size: 11px;">Mois</div>
                     <div style="color: #6b7280; font-size: 10px; margin-top: 4px;"><?php echo $monthStats['orders'] ?? 0; ?> commandes</div>
                 </div>
@@ -2642,7 +2644,7 @@ if (isset($_GET['export'])) {
             <div class="stats" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 20px;">
                 <div class="stat-card" style="border-left: 4px solid <?php echo $primaryColor; ?>;">
                     <div style="color: <?php echo $primaryColor; ?>;"><i class="fas fa-shopping-basket"></i></div>
-                    <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($monthStats['avg_order'] ?? 0, 0); ?> DA</div>
+                    <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($monthStats['avg_order'] ?? 0, 0); ?> <?= CURRENCY ?></div>
                     <div style="color: #9ca3af; font-size: 11px;">Panier moyen</div>
                 </div>
                 <div class="stat-card" style="border-left: 4px solid #f59e0b;">
@@ -2673,7 +2675,7 @@ if (isset($_GET['export'])) {
                         </div>
                         <div style="text-align: right;">
                             <div style="color: <?php echo $primaryColor; ?>; font-weight: bold; font-size: 14px;"><?php echo $product['qty']; ?> vendus</div>
-                            <div style="color: #10b981; font-size: 12px;"><?php echo number_format($product['revenue'], 0); ?> DA</div>
+                            <div style="color: #10b981; font-size: 12px;"><?php echo number_format($product['revenue'], 0); ?> <?= CURRENCY ?></div>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -2722,7 +2724,7 @@ if (isset($_GET['export'])) {
                             $isToday = $day['date'] === date('Y-m-d');
                         ?>
                         <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
-                            <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#9ca3af'; ?>; margin-bottom: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo number_format($day['revenue'], 0); ?> DA</span>
+                            <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#9ca3af'; ?>; margin-bottom: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo number_format($day['revenue'], 0); ?> <?= CURRENCY ?></span>
                             <div style="width: 100%; background: <?php echo $isToday ? 'linear-gradient(180deg, #10b981, #059669)' : '#374151'; ?>; height: <?php echo max($height, 4); ?>px; border-radius: 4px 4px 0 0;"></div>
                             <span style="font-size: 10px; color: <?php echo $isToday ? '#10b981' : '#6b7280'; ?>; margin-top: 4px; font-weight: <?php echo $isToday ? 'bold' : 'normal'; ?>;"><?php echo $dayName; ?></span>
                         </div>
@@ -2754,7 +2756,7 @@ if (isset($_GET['export'])) {
                         </label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <label style="color: #9ca3af;">Points par 100 DA :</label>
+                        <label style="color: #9ca3af;">Points par 100 <?= CURRENCY ?> :</label>
                         <input type="number" id="pointsPerEuro" value="<?= $loyaltyConfig['points_per_euro'] ?? 1 ?>" min="1" max="100" onchange="updateLoyaltyConfig()" style="width: 70px; padding: 8px; background: #1e293b; border: 1px solid #374151; border-radius: 8px; color: white; text-align: center;">
                     </div>
                 </div>
@@ -2795,7 +2797,7 @@ if (isset($_GET['export'])) {
                         <?php foreach ($loyaltyRewards as $reward):
                             $typeLabels = [
                                 'discount_percent' => 'Réduction %',
-                                'discount_amount' => 'Réduction DA',
+                                'discount_amount' => 'Réduction ' . CURRENCY,
                                 'free_product' => 'Produit gratuit',
                                 'free_delivery' => 'Livraison gratuite'
                             ];
@@ -2812,7 +2814,7 @@ if (isset($_GET['export'])) {
                                     <span style="background: #374151; color: #d1d5db; padding: 3px 10px; border-radius: 20px; font-size: 11px; margin-left: 5px;">
                                         <?= $typeLabel ?>
                                         <?php if ($reward['reward_type'] !== 'free_product' && $reward['reward_type'] !== 'free_delivery'): ?>
-                                            : <?= $reward['reward_value'] ?><?= $reward['reward_type'] === 'discount_percent' ? '%' : ' DA' ?>
+                                            : <?= $reward['reward_value'] ?><?= $reward['reward_type'] === 'discount_percent' ? '%' : ' ' . CURRENCY ?>
                                         <?php endif; ?>
                                     </span>
                                 </div>
@@ -2876,7 +2878,7 @@ if (isset($_GET['export'])) {
                 <?php foreach ($category['items'] ?? [] as $item): ?>
                 <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #374151;">
                     <span><?php echo htmlspecialchars($item['name'] ?? ''); ?></span>
-                    <span style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($item['priceSolo'] ?? $item['price'] ?? 0, 0); ?> DA</span>
+                    <span style="color: <?php echo $primaryColor; ?>;"><?php echo number_format($item['priceSolo'] ?? $item['price'] ?? 0, 0); ?> <?= CURRENCY ?></span>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -4428,6 +4430,7 @@ const ESC_POS = {
 function createTicketData(order) {
     const data = [];
     const encoder = new TextEncoder();
+    const currency = '<?= CURRENCY ?>';
 
     // Fonction helper pour ajouter du texte
     function addText(text) {
@@ -4512,7 +4515,7 @@ function createTicketData(order) {
         addCommand(ESC_POS.BOLD_ON);
         addText(qty + 'x ' + name + '\n');
         addCommand(ESC_POS.BOLD_OFF);
-        addText('   ' + price.toFixed(0) + ' DA x ' + qty + ' = ' + total.toFixed(0) + ' DA\n');
+        addText('   ' + price.toFixed(0) + ' ' + currency + ' x ' + qty + ' = ' + total.toFixed(0) + ' ' + currency + '\n');
 
         // Options
         if (item.options && item.options.length > 0) {
@@ -4526,7 +4529,7 @@ function createTicketData(order) {
     // === TOTAL ===
     addText(ESC_POS.LINE);
     addCommand(ESC_POS.SIZE_DOUBLE, ESC_POS.BOLD_ON);
-    addText('TOTAL: ' + (order.total || 0).toFixed(0) + ' DA\n');
+    addText('TOTAL: ' + (order.total || 0).toFixed(0) + ' ' + currency + '\n');
     addCommand(ESC_POS.SIZE_NORMAL, ESC_POS.BOLD_OFF);
     addText(ESC_POS.LINE);
 
@@ -4543,9 +4546,9 @@ function createTicketData(order) {
         if (order.delivery_instructions.includes('monnaie exacte')) {
             addText('Client a l\'appoint\n');
         } else {
-            const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) DA/);
+            const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) (DA|EUR)/);
             if (changeMatch) {
-                addText('Monnaie pour: ' + changeMatch[1] + ' DA\n');
+                addText('Monnaie pour: ' + changeMatch[1] + ' ' + currency + '\n');
             }
         }
     }
