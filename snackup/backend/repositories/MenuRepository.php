@@ -15,11 +15,11 @@ class MenuRepository {
     public static function getAllCategories() {
         $pdo = Database::getInstance();
 
-        // Récupérer catégories actives (non supprimées)
+        // Récupérer catégories actives
         $stmt = $pdo->prepare("
             SELECT id, slug, name, description, icon, flavor, sort_order
             FROM categories
-            WHERE restaurant_id = ? AND deleted_at IS NULL
+            WHERE restaurant_id = ? AND is_active = 1
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([self::$restaurantId]);
@@ -44,7 +44,7 @@ class MenuRepository {
                    price_solo as priceSolo, price_menu as priceMenu,
                    status, sort_order
             FROM products
-            WHERE category_id = ? AND deleted_at IS NULL
+            WHERE category_id = ?
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([$categoryId]);
