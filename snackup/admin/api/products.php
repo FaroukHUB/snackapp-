@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 
+// Définir le restaurant ID pour MenuRepository dès le départ
+if (!SNACK_USE_JSON && defined('SNACK_RESTAURANT_ID')) {
+    MenuRepository::$restaurantId = SNACK_RESTAURANT_ID;
+}
+
 header('Content-Type: application/json');
 header('Cache-Control: no-cache, must-revalidate');
 
@@ -205,9 +210,8 @@ function regenerateMenuJson(): void {
    MODE MySQL ou JSON
    ========================= */
 
-// ⚠️ MODE MYSQL DÉSACTIVÉ - Retour au mode JSON
-// MySQL contient données incomplètes, on utilise menu.json
-$useMySQL = false;
+// Utiliser MySQL si la constante SNACK_USE_JSON est false
+$useMySQL = !SNACK_USE_JSON;
 
 /* =========================
    GET: Retourner le menu complet
