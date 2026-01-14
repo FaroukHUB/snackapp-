@@ -29,8 +29,8 @@ if ($useMySQL) {
     $restaurantName = $restaurant['name'] ?? 'Restaurant';
     $primaryColor = $restaurant['primary_color'] ?? '#c58a3a';
 
-    // Toujours charger les settings depuis restaurant.json (source de vérité)
-    $restaurantSettings = json_decode(file_get_contents(__DIR__ . '/../config/restaurant.json'), true) ?? [];
+    // Mode MySQL: pas besoin de restaurant.json
+    $restaurantSettings = [];
 
     // ⚡ PAGINATION: 10 commandes par page
     $ordersPage = isset($_GET['orders_page']) ? (int)$_GET['orders_page'] : 1;
@@ -56,13 +56,8 @@ if ($useMySQL) {
         $o['id'] = $o['order_number'] ?? $o['id'];
     }
 
-    // Menu categories (mode JSON - lecture depuis menu.json)
-    $menuJsonPath = SNACK_ROOT . '/config/menu.json';
-    $menuData = [];
-    if (file_exists($menuJsonPath)) {
-        $menuData = json_decode(file_get_contents($menuJsonPath), true) ?: [];
-    }
-    $products = $menuData['menu']['categories'] ?? [];
+    // Menu depuis MySQL
+    $products = MenuRepository::getCategories(SNACK_RESTAURANT_ID);
 
     // Settings pour les formulaires
     $settings = RestaurantRepository::getSettings(SNACK_RESTAURANT_ID);
