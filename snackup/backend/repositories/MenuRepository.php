@@ -7,7 +7,7 @@
 require_once __DIR__ . '/../Database.php';
 
 class MenuRepository {
-    private static $restaurantId = 2; // Le Marvelous
+    public static $restaurantId = 2; // Par défaut Le Marvelous, peut être changé
 
     /**
      * Récupère toutes les catégories actives avec leurs produits

@@ -56,8 +56,9 @@ if ($useMySQL) {
         $o['id'] = $o['order_number'] ?? $o['id'];
     }
 
-    // Menu depuis MySQL
-    $products = MenuRepository::getCategories(SNACK_RESTAURANT_ID);
+    // Menu depuis MySQL - getAllCategories() existe (pas getCategories)
+    MenuRepository::$restaurantId = SNACK_RESTAURANT_ID;
+    $products = MenuRepository::getAllCategories();
 
     // Settings pour les formulaires
     $settings = RestaurantRepository::getSettings(SNACK_RESTAURANT_ID);
