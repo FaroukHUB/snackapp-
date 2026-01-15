@@ -85,24 +85,34 @@ class MenuRepository {
     public static function getCategorySupplements() {
         $pdo = Database::getInstance();
 
-        $stmt = $pdo->prepare("
-            SELECT c.slug as category_slug, s.slug as supplement_slug
-            FROM category_supplements cs
-            JOIN categories c ON cs.category_id = c.id
-            JOIN supplements s ON cs.supplement_id = s.id
-            WHERE c.restaurant_id = ?
-        ");
-        $stmt->execute([self::$restaurantId]);
+        try {
+            $stmt = $pdo->prepare("
+                SELECT cs.category_id, cs.supplement_id
+                FROM category_supplements cs
+                WHERE EXISTS (
+                    SELECT 1 FROM categories c
+                    WHERE c.id = cs.category_id AND c.restaurant_id = ?
+                )
+            ");
+            $stmt->execute([self::$restaurantId]);
 
-        $associations = [];
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            if (!isset($associations[$row['category_slug']])) {
-                $associations[$row['category_slug']] = [];
+            $associations = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $catId = $row['category_id'];
+                if (!isset($associations[$catId])) {
+                    $associations[$catId] = [];
+                }
+                $associations[$catId][] = $row['supplement_id'];
             }
-            $associations[$row['category_slug']][] = $row['supplement_slug'];
-        }
 
-        return $associations;
+            return $associations;
+        } catch (PDOException $e) {
+            // Si la table n'existe pas encore, retourner un tableau vide
+            if ($e->getCode() === '42S02') { // Table doesn't exist
+                return [];
+            }
+            throw $e;
+        }
     }
 
     /**
