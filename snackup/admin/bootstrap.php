@@ -44,6 +44,11 @@ require_once __DIR__ . '/../backend/repositories/LoyaltyRepository.php';
 define('SNACK_USE_JSON', false);
 define('SNACK_RESTAURANT_ID', RESTAURANT_ID);
 
+// Définir le restaurant ID pour MenuRepository (CRITIQUE pour multi-instance)
+if (!SNACK_USE_JSON && defined('SNACK_RESTAURANT_ID')) {
+    MenuRepository::$restaurantId = SNACK_RESTAURANT_ID;
+}
+
 /**
  * Helper: Récupérer le restaurant actuel
  */
