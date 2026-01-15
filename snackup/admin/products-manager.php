@@ -671,7 +671,7 @@ $csrfToken = getCsrfToken();
               <option value="prime">Prime</option>
             </optgroup>
           </select>
-          <input id="supPrice" name="price" class="input" type="number" step="0.01" min="0" placeholder="Prix DA" style="width:90px;" required />
+          <input id="supPrice" name="price" class="input" type="number" step="0.01" min="0" placeholder="Prix <?= CURRENCY ?>" style="width:90px;" required />
           <button class="btn btn-good" type="submit">+ Ajouter</button>
         </form>
 
@@ -803,7 +803,7 @@ $csrfToken = getCsrfToken();
             <input id="patOptionName" class="input" type="text" placeholder="Ex: Tarte au Citron" required />
           </div>
           <div class="field">
-            <label for="patOptionPrice">Prix (DA)</label>
+            <label for="patOptionPrice">Prix (<?= CURRENCY ?>)</label>
             <input id="patOptionPrice" class="input" type="number" step="1" min="0" placeholder="300" required />
           </div>
           <div class="field">
@@ -839,7 +839,7 @@ $csrfToken = getCsrfToken();
             <input id="bevOptionName" class="input" type="text" placeholder="Ex: Coca Cola, Orange, etc." required />
           </div>
           <div class="field">
-            <label for="bevOptionPrice">Prix (DA)</label>
+            <label for="bevOptionPrice">Prix (<?= CURRENCY ?>)</label>
             <input id="bevOptionPrice" class="input" type="number" step="1" min="0" placeholder="100" required />
           </div>
           <div class="field">
@@ -880,7 +880,7 @@ $csrfToken = getCsrfToken();
 
           <div class="two">
             <div class="field">
-              <label for="formulePrice">Prix (DA)</label>
+              <label for="formulePrice">Prix (<?= CURRENCY ?>)</label>
               <input id="formulePrice" name="price" class="input" type="number" step="0.01" min="0" placeholder="12.90" required />
             </div>
             <div class="field">
@@ -997,6 +997,7 @@ $csrfToken = getCsrfToken();
     "use strict";
 
     const API = "api/products.php";
+    const CURRENCY = "<?= CURRENCY ?>";
 
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -1207,7 +1208,7 @@ $csrfToken = getCsrfToken();
         const checked = selectedIds.includes(sup.id) ? "checked" : "";
         label.innerHTML = `
           <input type="checkbox" name="supplements[]" value="${escapeHtml(sup.id)}" ${checked} style="width:16px;height:16px;" />
-          ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} DA)</span>
+          ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} ${CURRENCY})</span>
         `;
         container.appendChild(label);
       });
@@ -1368,7 +1369,7 @@ $csrfToken = getCsrfToken();
       div.innerHTML = `
         <div style="flex:1;">
           <strong style="font-size:13px;">${escapeHtml(sup.name)}</strong>
-          <span style="color:var(--muted);margin-left:8px;">${sup.price.toFixed(0)} DA</span>
+          <span style="color:var(--muted);margin-left:8px;">${sup.price.toFixed(0)} ${CURRENCY}</span>
           <span class="status" data-status="${sup.status ?? 'available'}" style="margin-left:8px;padding:4px 8px;">
             <span class="dot"></span>${sup.status === 'available' ? 'Dispo' : 'Indispo'}
           </span>
@@ -1444,7 +1445,7 @@ $csrfToken = getCsrfToken();
           ${imgHtml}
           <div style="flex:1;opacity:${isAvailable ? '1' : '0.6'}">
             <strong style="font-size:13px;">${escapeHtml(opt.name)}</strong>
-            <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} DA</div>
+            <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} ${CURRENCY}</div>
           </div>
           <button class="btn" type="button" data-toggle-status-pat="${idx}" style="padding:6px 12px;font-size:12px;font-weight:600;${isAvailable ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
             ${isAvailable ? '✓ Disponible' : '✕ Indisponible'}
@@ -1567,7 +1568,7 @@ $csrfToken = getCsrfToken();
           ${imgHtml}
           <div style="flex:1;opacity:${isAvailable ? '1' : '0.6'}">
             <strong style="font-size:13px;">${escapeHtml(opt.name)}</strong>
-            <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} DA</div>
+            <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} ${CURRENCY}</div>
           </div>
           <button class="btn" type="button" data-toggle-status-bev="${idx}" style="padding:6px 12px;font-size:12px;font-weight:600;${isAvailable ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
             ${isAvailable ? '✓ Disponible' : '✕ Indisponible'}
@@ -1987,7 +1988,7 @@ $csrfToken = getCsrfToken();
     function money(v){
       const n = Number(v);
       if (!Number.isFinite(n)) return "—";
-      return n.toFixed(0) + " DA";
+      return n.toFixed(0) + " " + CURRENCY;
     }
 
     function getCategories(){
@@ -2403,8 +2404,8 @@ $csrfToken = getCsrfToken();
             </div>
             <p style="margin:0 0 6px;color:var(--muted);font-size:12px;line-height:1.3;">${escapeHtml(f.description ?? '')}</p>
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:15px;font-weight:600;">${f.price?.toFixed(0) ?? '—'} DA</span>
-              ${f.originalPrice ? `<span style="color:var(--muted);text-decoration:line-through;font-size:12px;">${f.originalPrice.toFixed(0)} DA</span>` : ''}
+              <span style="font-size:15px;font-weight:600;">${f.price?.toFixed(0) ?? '—'} ${CURRENCY}</span>
+              ${f.originalPrice ? `<span style="color:var(--muted);text-decoration:line-through;font-size:12px;">${f.originalPrice.toFixed(0)} ${CURRENCY}</span>` : ''}
               <span class="status" data-status="${f.status ?? 'available'}" style="margin-left:auto;padding:4px 8px;">
                 <span class="dot"></span>${(f.status ?? 'available') === 'available' ? 'Dispo' : 'Indispo'}
               </span>
@@ -2475,7 +2476,7 @@ $csrfToken = getCsrfToken();
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
-            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${(product.priceSolo || product.price || 0).toFixed(0)} DA</div>
+            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
           </div>
           <button type="button" class="btn btn-danger" style="padding:6px 10px;font-size:11px;position:absolute;top:6px;right:6px;" data-remove="${index}">✕</button>
         `;
@@ -2522,7 +2523,7 @@ $csrfToken = getCsrfToken();
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
           </div>
-          <div style="font-size:13px;font-weight:600;color:var(--brand);">${(product.priceSolo || product.price || 0).toFixed(0)} DA</div>
+          <div style="font-size:13px;font-weight:600;color:var(--brand);">${(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
           <button type="button" class="btn btn-good" style="padding:6px 12px;font-size:11px;">+ Ajouter</button>
         `;
 
