@@ -1481,7 +1481,7 @@ if (isset($_GET['export'])) {
                 }
 
                 // Bouton "Envoyer au livreur" (seulement pour livraisons)
-                const isDelivery = order.notes && order.notes.includes('LIVRAISON');
+                const isDelivery = order.notes && order.notes.toLowerCase().includes('livraison');
                 if (isDelivery) {
                     html += `
                         <button onclick="openSendToDeliveryModal('${order.id}')" style="padding: 14px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
