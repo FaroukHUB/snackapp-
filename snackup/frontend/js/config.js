@@ -362,7 +362,11 @@ const Config = {
      * Currency is configured per instance (DA, EUR, USD, etc.)
      */
     formatPrice(price) {
-        const currency = window.SNACK_CONFIG?.currency || 'DA';
+        // Récupérer la devise depuis les données du restaurant ou du menu
+        const currency = this.restaurant?._jsConfig?.currency ||
+                        this.menu?._meta?.currency ||
+                        window.SNACK_CONFIG?.currency ||
+                        'EUR';
         return Math.round(price) + ' ' + currency;
     },
 

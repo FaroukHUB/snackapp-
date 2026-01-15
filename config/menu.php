@@ -1,31 +1,101 @@
 <?php
 /**
- * API publique : Retourne le menu FILTRÉ (avec deletedCategories appliqués)
+ * API publique : Retourne le menu depuis la base de données
+ * Détecte automatiquement l'instance selon le domaine
  */
+
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
-// Charger les fonctions runtime
-require_once __DIR__ . '/../admin-panel-v2/config.php';
+// Détecter quelle instance utiliser selon le domaine
+$host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
 
-// Lire menu.json de base
-$menuJsonPath = __DIR__ . '/menu.json';
-if (!file_exists($menuJsonPath)) {
-    echo json_encode(['error' => 'Menu introuvable']);
+if (strpos($host, 'atelierpizza') !== false) {
+    $instanceName = 'atelier-pizza';
+} elseif (strpos($host, 'marvelous') !== false || strpos($host, 'fabrik') !== false) {
+    $instanceName = 'marvelous';
+} else {
+    $instanceName = 'marvelous'; // Par défaut
+}
+
+// Charger la configuration de l'instance
+$instanceConfigPath = __DIR__ . '/instances/' . $instanceName . '/backend-config.php';
+
+if (!file_exists($instanceConfigPath)) {
+    echo json_encode([
+        'error' => 'Instance configuration not found',
+        'instance' => $instanceName
+    ]);
     exit;
 }
 
-$menuData = json_decode(file_get_contents($menuJsonPath), true);
+$instanceConfig = require $instanceConfigPath;
 
-if (!$menuData) {
-    echo json_encode(['error' => 'Erreur lecture menu']);
-    exit;
+// Charger la base de données et les repositories
+require_once __DIR__ . '/snackup/backend/Database.php';
+Database::init($instanceConfig['database']);
+
+require_once __DIR__ . '/snackup/backend/repositories/MenuRepository.php';
+
+// Définir le restaurant ID
+$restaurantId = $instanceConfig['app']['restaurant_id'];
+MenuRepository::$restaurantId = $restaurantId;
+
+try {
+    // Récupérer les données du menu depuis MySQL
+    $categories = MenuRepository::getAllCategories();
+    $supplements = MenuRepository::getAllSupplements();
+    $categorySupplements = MenuRepository::getCategorySupplements();
+
+    // Formater le menu pour le frontend
+    $menu = ['categories' => $categories];
+
+    // Formater les suppléments
+    $supplementsFormatted = [
+        'catalog' => $supplements,
+        'defaultForCategories' => $categorySupplements
+    ];
+
+    // Charger formules depuis menu.json si existant (fallback temporaire)
+    $menuJsonPath = __DIR__ . '/menu.json';
+    $formules = [];
+    $featured = [
+        'enabled' => true,
+        'title' => 'Sélection pour vous',
+        'subtitle' => 'Nos produits les plus appréciés',
+        'items' => []
+    ];
+    $categoryIcons = [];
+
+    if (file_exists($menuJsonPath)) {
+        $menuData = json_decode(file_get_contents($menuJsonPath), true);
+        if ($menuData) {
+            $formules = $menuData['formules'] ?? [];
+            $featured = $menuData['featured'] ?? $featured;
+            $categoryIcons = $menuData['categoryIcons'] ?? [];
+        }
+    }
+
+    // Construire la réponse complète
+    $response = [
+        'menu' => $menu,
+        'supplements' => $supplementsFormatted,
+        'formules' => $formules,
+        'featured' => $featured,
+        'categoryIcons' => $categoryIcons,
+        '_meta' => [
+            'currency' => $instanceConfig['app']['currency'],
+            'restaurantId' => $restaurantId,
+            'loadedFrom' => 'database'
+        ]
+    ];
+
+    echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'error' => 'Erreur lors du chargement du menu',
+        'message' => $e->getMessage()
+    ]);
 }
-
-// ✅ Charger runtime et appliquer les filtres (deletedCategories, etc.)
-$runtime = loadMenuRuntime();
-$menuDataFiltered = applyRuntimeToConfig($menuData, $runtime);
-
-// Retourner le menu filtré (catégories supprimées invisibles)
-echo json_encode($menuDataFiltered, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
