@@ -20,7 +20,7 @@ if (strpos($host, 'atelierpizza') !== false) {
 }
 
 // Charger la configuration de l'instance
-$instanceConfigPath = __DIR__ . '/instances/' . $instanceName . '/backend-config.php';
+$instanceConfigPath = __DIR__ . '/../instances/' . $instanceName . '/backend-config.php';
 
 if (!file_exists($instanceConfigPath)) {
     echo json_encode([
@@ -34,10 +34,10 @@ if (!file_exists($instanceConfigPath)) {
 $instanceConfig = require $instanceConfigPath;
 
 // Charger la base de données
-require_once __DIR__ . '/snackup/backend/Database.php';
+require_once __DIR__ . '/../snackup/backend/Database.php';
 Database::init($instanceConfig['database']);
 
-require_once __DIR__ . '/snackup/backend/repositories/RestaurantRepository.php';
+require_once __DIR__ . '/../snackup/backend/repositories/RestaurantRepository.php';
 
 // Récupérer les données du restaurant depuis la base
 $restaurantId = $instanceConfig['app']['restaurant_id'];
