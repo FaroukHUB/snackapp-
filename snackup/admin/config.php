@@ -32,6 +32,7 @@ define('TIMEZONE', $instanceConfig['app']['timezone']);
 define('CURRENCY', $instanceConfig['app']['currency'] ?? 'DA');
 
 // Chemins
+define('SNACK_ROOT', __DIR__ . '/../..');  // Racine du projet (2 niveaux au-dessus de admin/)
 define('UPLOADS_DIR', __DIR__ . '/../../images/');
 define('DATA_DIR', __DIR__ . '/data/');
 
