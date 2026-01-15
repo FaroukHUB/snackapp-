@@ -10,12 +10,13 @@ header('Access-Control-Allow-Origin: *');
 // Détecter quelle instance utiliser selon le domaine
 $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
 
-if (strpos($host, 'atelierpizza') !== false) {
-    $instanceName = 'atelier-pizza';
-} elseif (strpos($host, 'marvelous') !== false || strpos($host, 'fabrik') !== false) {
+if (strpos($host, 'marvelous') !== false || strpos($host, 'fabrik') !== false) {
     $instanceName = 'marvelous';
+} elseif (strpos($host, 'atelierpizza') !== false) {
+    $instanceName = 'atelier-pizza';
 } else {
-    $instanceName = 'marvelous'; // Par défaut
+    // Fallback : Pour le développement local, utiliser atelier-pizza
+    $instanceName = 'atelier-pizza'; // Par défaut
 }
 
 // Charger la configuration de l'instance
