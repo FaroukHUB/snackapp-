@@ -99,9 +99,9 @@
 
 /* Bouton Ajouter */
 .product-btn-new {
-    background: var(--primary);
-    color: #ffffff;
-    border: 2px solid var(--accent);
+    background: var(--primary) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--accent) !important;
     padding: 9px 18px;
     font-size: 13px;
     font-weight: 600;
