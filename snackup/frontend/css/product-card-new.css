@@ -99,7 +99,7 @@
 
 /* Bouton Ajouter */
 .product-btn-new {
-    background: #14b8a6;
+    background: var(--primary);
     color: #ffffff;
     border: none;
     padding: 9px 18px;
@@ -116,7 +116,7 @@
 
 .product-btn-new:active {
     transform: scale(0.95);
-    background: #0d9488;
+    background: var(--primary-dark);
 }
 
 /* État indisponible */
