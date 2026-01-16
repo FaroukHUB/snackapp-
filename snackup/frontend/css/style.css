@@ -3137,8 +3137,8 @@ ul {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
 }
 
-.category-icon-circle.color-pink {
-    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+.category-icon-circle.color-black {
+    background: linear-gradient(135deg, var(--gray-900) 0%, var(--black) 100%);
 }
 
 .category-icon-name {

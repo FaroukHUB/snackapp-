@@ -102,7 +102,7 @@ const Products = {
         // Add category icons with alternating colors
         nonEmptyCategories.forEach((cat, index) => {
             const icon = icons[cat.id] || 'fa-utensils';
-            const colorClass = index % 2 === 0 ? 'color-primary' : 'color-pink';
+            const colorClass = index % 2 === 0 ? 'color-primary' : 'color-black';
 
             html += `
                 <div class="category-icon-item" data-category="${cat.id}" onclick="Products.filterByCategory('${cat.id}')">
