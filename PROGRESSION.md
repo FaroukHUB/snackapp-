@@ -36,6 +36,129 @@ Modifier `Config.getProduct()` pour supporter :
 
 ## Sessions
 
+### [EN COURS] Session 2026-01-16 - Phase 3 : Script de Migration JSON → MySQL
+**Objectif** : Créer le script CLI de migration des données JSON vers MySQL
+
+**Statut** : ✅ SCRIPT CRÉÉ — PRÊT À TESTER
+
+#### Livrables Produits
+**Fichiers créés** :
+1. `database/migrate-json-to-mysql.php` - Script CLI de migration
+2. `README_MIGRATION.md` - Documentation complète d'utilisation
+
+#### Fonctionnalités Implémentées
+
+**Script de Migration** :
+- Mode `--dry-run` : test sans écriture en BDD
+- Mode production : migration réelle avec backup automatique
+- Mode `--force` : écrasement des données existantes
+- Option `--restaurant-id` : migration pour un restaurant spécifique
+- Backup automatique : `backup/menu_{timestamp}.json` et `backup/menu.runtime_{timestamp}.json`
+
+**Étapes de Migration** :
+1. **Backup** : Sauvegarde automatique des fichiers JSON
+2. **Lecture** : Parsing de `menu.json` et `menu.runtime.json`
+3. **Catégories** : Migration vers table `categories` (12 catégories)
+4. **Produits** : Migration vers table `products` (47 produits)
+5. **Suppléments** : Migration vers table `supplements` (40 suppléments)
+6. **Liaisons** : Migration des associations `product_supplements`
+7. **Vérifications** : Comptage final et validation
+
+**Idempotence** :
+- ✅ Vérifie l'existence par slug avant création
+- ✅ Skip les doublons avec log warning
+- ✅ Relançable sans créer de doublons
+- ✅ Conservation des IDs MySQL existants
+
+**Logging Détaillé** :
+- Couleurs terminales (vert/jaune/rouge/bleu)
+- Logs par étape avec numérotation
+- Résumé final avec statistiques
+- Affichage prix en euros (conversion automatique)
+
+**Gestion des Erreurs** :
+- Try/catch sur chaque création
+- Logs d'erreur détaillés avec stack trace
+- Continue sur erreur (pas d'arrêt brutal)
+- Mode dry-run sans connexion MySQL
+
+#### Validation Mode Dry-Run
+
+**Test réussi** : `php database/migrate-json-to-mysql.php --dry-run`
+
+Résultat :
+```
+Catégories créées   : 12
+Produits créés      : 47
+Suppléments créés   : 40
+Liaisons créées     : 0
+```
+
+#### Structure des Données
+
+**Conversion des Prix** :
+- JSON : centimes (ex: 550)
+- MySQL : euros décimaux (ex: 5.50)
+- Automatique : `priceSolo / 100`
+
+**Options Spéciales** :
+- `viennoiserieOptions` → `options_config` JSON
+- `beverageOptions` → `options_config` JSON
+- `sauceOptions` → `options_config` JSON
+- `accompagnementOptions` → `options_config` JSON
+
+**Repositories Utilisés** :
+- `CategoryRepository::create()` - Création catégories
+- `CategoryRepository::getBySlug()` - Vérification doublons
+- `ProductRepository::create()` - Création produits
+- `ProductRepository::getBySlug()` - Vérification doublons
+- `SupplementRepository::create()` - Création suppléments
+- `SupplementRepository::getAll()` - Vérification doublons par nom
+- `SupplementRepository::attachToProduct()` - Liaisons
+
+#### Documentation
+
+**README_MIGRATION.md** :
+- 📋 Vue d'ensemble et objectifs
+- ⚙️ Prérequis et configuration
+- 🚀 Modes d'utilisation (dry-run, production, force)
+- 📊 Exemples de résultats attendus
+- 🔒 Sécurité et backups
+- ⚠️ Cas particuliers et conversions
+- 🐛 Dépannage complet
+- 📈 Prochaines étapes
+- ⚡ Commandes rapides
+
+#### Règles Respectées
+- ✅ Utilise UNIQUEMENT les repositories (pas de PDO direct)
+- ✅ Aucun changement admin/frontend
+- ✅ Aucune écriture JSON
+- ✅ Aucune activation $useMySQL
+- ✅ Script idempotent et relançable
+- ✅ Backup automatique avant migration
+- ✅ Mode dry-run sans connexion BDD
+
+#### Prochaines Actions
+
+1. **Test en production** (à faire par l'utilisateur) :
+   ```bash
+   php database/migrate-json-to-mysql.php
+   ```
+
+2. **Vérification BDD** :
+   ```sql
+   SELECT COUNT(*) FROM categories;  -- Attendu: 12
+   SELECT COUNT(*) FROM products;    -- Attendu: 47
+   SELECT COUNT(*) FROM supplements; -- Attendu: 40
+   ```
+
+3. **Phase 4** (future) :
+   - Modifier les APIs pour lire depuis MySQL
+   - Connecter le frontend aux repositories
+   - Tester l'admin panel avec données MySQL
+
+---
+
 ### [TERMINÉE] Session 2026-01-16 - Phase 2 : Repositories MySQL Complets
 **Objectif** : Créer les repositories CRUD pour categories, products, supplements
 
