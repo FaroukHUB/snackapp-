@@ -32,10 +32,26 @@
 - `PROGRESSION-ATELIER-PIZZA.md` → Documentation (NOUVEAU)
 
 **PROCHAINE ÉTAPE:**
-1. Commiter et pusher les changements
-2. Se connecter en SSH à atelierpizza.mon-agenceweb.fr
-3. Exécuter `bash DEPLOIEMENT-ATELIER-PIZZA.sh`
-4. Vérifier que le menu s'affiche sur le site
+1. ✅ Commiter et pusher les changements
+2. ✅ Se connecter en SSH à atelierpizza.mon-agenceweb.fr
+3. ✅ Exécuter `bash DEPLOIEMENT-ATELIER-PIZZA.sh`
+4. ❌ **PROBLÈME: Menu ne s'affiche toujours pas**
+
+### 🔴 Erreur persistante (2026-01-16 11:05)
+**Symptôme:** "Erreur de chargement veuillez raffraichir la page"
+
+**Actions de diagnostic créées:**
+- `DIAGNOSTIC-ATELIER-PIZZA.php` → Test complet config/DB/tables
+- `TEST-API-ATELIER-PIZZA.sh` → Test rapide des APIs en production
+
+**À exécuter sur le serveur:**
+```bash
+# Test rapide
+bash TEST-API-ATELIER-PIZZA.sh
+
+# Diagnostic complet
+php DIAGNOSTIC-ATELIER-PIZZA.php
+```
 
 ---
 
