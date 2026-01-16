@@ -36,7 +36,138 @@ Modifier `Config.getProduct()` pour supporter :
 
 ## Sessions
 
-### [EN COURS] Session 2026-01-16 - Phase 3 : Script de Migration JSON → MySQL
+### [TERMINÉE] Session 2026-01-16 - Phase 3.1 : Validation Sécurité Avant Migration
+**Objectif** : Produire les documents de validation et checks de sécurité avant migration production
+
+**Statut** : ✅ VALIDATION COMPLÈTE — PRÊT POUR MIGRATION PROD
+
+#### Livrables Produits
+**Fichiers créés** :
+1. `CHECK_MIGRATION.sql` - Checks PRÉ et POST migration (12 checks)
+2. `RUNBOOK_MIGRATION.md` - Procédure opérationnelle complète
+
+#### Analyse de Sécurité
+
+**1. Restaurant ID** :
+- Défaut : `1` (ligne 40 du script)
+- Paramètre CLI : `--restaurant-id=X`
+- Utilisation : Passé à TOUS les repositories
+- Validation : Check 1.1 vérifie l'existence du restaurant
+
+**2. Idempotence** :
+
+| Table | Méthode | Clé unique | Contrainte MySQL |
+|-------|---------|------------|------------------|
+| categories | `getBySlug(restaurant_id, slug)` | (restaurant_id, slug) | ✅ UNIQUE KEY |
+| products | `getBySlug(restaurant_id, slug)` | (restaurant_id, slug) | ✅ UNIQUE KEY |
+| supplements | `getAll()` + comparaison par nom | (restaurant_id, name) | ⚠️ PAS DE CONTRAINTE |
+
+**⚠️ RISQUE IDENTIFIÉ** :
+- Les suppléments n'ont PAS de contrainte UNIQUE sur `(restaurant_id, name)`
+- Idempotence repose sur comparaison PHP (ligne 383-390)
+- Si doublons de noms → 2ème sera skipped (acceptable)
+
+**3. Conversion Prix** :
+- JSON : centimes (ex: 550, 700, 1250)
+- Conversion : `priceSolo / 100` (ligne 346) et `price / 100` (ligne 404)
+- MySQL : `DECIMAL(8,2)` → stockage en euros (5.50, 7.00, 12.50)
+- Validation : Checks 2.7 et 2.9
+
+#### CHECK_MIGRATION.sql (12 Checks)
+
+**PRÉ-MIGRATION** :
+1. Restaurant existe (CRITICAL)
+2. Comptage tables état initial
+3. Doublons slug categories (CRITICAL)
+4. Doublons slug products (CRITICAL)
+5. Doublons name supplements (WARNING)
+6. Validité JSON options_config
+
+**POST-MIGRATION** :
+1. Comptage tables final (12 cat, 47 prod, 40 supp)
+2. Absence doublons categories
+3. Absence doublons products
+4. Intégrité products → categories
+5. Intégrité liaisons → products
+6. Intégrité liaisons → supplements
+7. Validité prix (> 0, cohérents)
+8. Validité JSON options_config
+9. Plage prix raisonnable (0.01€ - 999.99€)
+10. Liste catégories migrées (visuel)
+11. Échantillon produits (visuel)
+12. Échantillon suppléments (visuel)
+
+#### RUNBOOK_MIGRATION.md
+
+**Procédure en 5 Phases** :
+1. **PRÉ-VÉRIFICATIONS** : Checks SQL + validation critères GO/NO-GO
+2. **DRY-RUN** : Test sans connexion BDD + vérification counts
+3. **MIGRATION PROD** : Exécution réelle (10-30s) avec backup automatique
+4. **POST-VÉRIFICATIONS** : Checks SQL + validation intégrité
+5. **VALIDATION FONCTIONNELLE** : Requêtes manuelles + vérification visuelle
+
+**3 Scénarios de Rollback** :
+- Scénario 1 : Erreur pendant migration → DELETE + correction + relance
+- Scénario 2 : Checks POST échouent → DELETE + analyse + relance
+- Scénario 3 : Corruption tardive → Correction ciblée OU rollback complet
+
+**Critères GO/NO-GO** :
+- ✅ GO : Restaurant existe, 0 doublons, dry-run OK, migration OK, checks OK
+- ❌ NO-GO : Restaurant inexistant, doublons PRÉ, erreur migration, checks échouent
+- ⚠️ WARN : Doublons supplements (skipped), données existantes (idempotence)
+
+#### Commandes Rapides
+
+```bash
+# PRÉ-CHECKS
+mysql -u zajr1824_marvelous -p zajr1824_marvelous < CHECK_MIGRATION.sql | grep "PRE:"
+
+# DRY-RUN
+php database/migrate-json-to-mysql.php --dry-run --restaurant-id=1
+
+# MIGRATION PROD
+php database/migrate-json-to-mysql.php --restaurant-id=1
+
+# POST-CHECKS
+mysql -u zajr1824_marvelous -p zajr1824_marvelous < CHECK_MIGRATION.sql | grep "POST:"
+
+# ROLLBACK
+mysql -u zajr1824_marvelous -p zajr1824_marvelous << 'EOF'
+DELETE FROM product_supplements WHERE product_id IN (SELECT id FROM products WHERE restaurant_id = 1);
+DELETE FROM products WHERE restaurant_id = 1;
+DELETE FROM categories WHERE restaurant_id = 1;
+DELETE FROM supplements WHERE restaurant_id = 1;
+EOF
+```
+
+#### Règles Respectées
+- ✅ Aucun code modifié
+- ✅ Aucune migration lancée
+- ✅ Validation complète de sécurité
+- ✅ Plans de rollback documentés
+- ✅ Checks automatisés PRÉ/POST
+
+#### Prochaines Actions
+
+**AVANT MIGRATION** :
+1. Exécuter PRÉ-CHECKS : `CHECK_MIGRATION.sql`
+2. Vérifier critères GO (restaurant existe, 0 doublons)
+3. Dry-run : vérifier counts attendus
+
+**MIGRATION** :
+4. Exécuter : `php database/migrate-json-to-mysql.php --restaurant-id=1`
+5. Observer logs (backup, création, succès)
+
+**APRÈS MIGRATION** :
+6. Exécuter POST-CHECKS : `CHECK_MIGRATION.sql`
+7. Vérifier tous les checks (0 erreur, counts OK)
+8. Validation fonctionnelle manuelle
+
+**SI ERREUR** : Suivre plan de rollback (RUNBOOK_MIGRATION.md)
+
+---
+
+### [TERMINÉE] Session 2026-01-16 - Phase 3 : Script de Migration JSON → MySQL
 **Objectif** : Créer le script CLI de migration des données JSON vers MySQL
 
 **Statut** : ✅ SCRIPT CRÉÉ — PRÊT À TESTER
