@@ -1,0 +1,30 @@
+{
+  "instances": {
+    "marvelous": {
+      "name": "Le Marvelous",
+      "domains": [
+        "marvelous.mon-agenceweb.fr",
+        "fabrik.com",
+        "www.marvelous.mon-agenceweb.fr"
+      ],
+      "config_path": "instances/marvelous/backend-config.php",
+      "enabled": true
+    },
+    "atelier-pizza": {
+      "name": "L'Atelier Pizza",
+      "domains": [
+        "atelierpizza.fr",
+        "www.atelierpizza.fr",
+        "atelierpizza.com",
+        "atelierpizza.mon-agenceweb.fr"
+      ],
+      "config_path": "instances/atelier-pizza/backend-config.php",
+      "enabled": true
+    }
+  },
+  "default": "atelier-pizza",
+  "settings": {
+    "cache_enabled": false,
+    "strict_domain_matching": false
+  }
+}

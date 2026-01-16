@@ -1,48 +1,42 @@
 <?php
 /**
  * API publique : Retourne les infos du restaurant depuis la base de données
- * Détecte automatiquement l'instance selon le domaine
+ * Détecte automatiquement l'instance selon le domaine via InstanceManager
+ *
+ * @version 2.0.0 - Architecture scalable multi-instance
  */
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
-// Détecter quelle instance utiliser selon le domaine
-$host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
+// Charger le gestionnaire d'instances
+require_once __DIR__ . '/../snackup/backend/InstanceManager.php';
 
-if (strpos($host, 'marvelous') !== false || strpos($host, 'fabrik') !== false) {
-    $instanceName = 'marvelous';
-} elseif (strpos($host, 'atelierpizza') !== false) {
-    $instanceName = 'atelier-pizza';
-} else {
-    // Fallback : Pour le développement local, utiliser atelier-pizza
-    $instanceName = 'atelier-pizza'; // Par défaut
-}
+try {
+    // Détecter et charger automatiquement la configuration de l'instance
+    $instanceConfig = InstanceManager::loadConfig();
+    $instanceName = InstanceManager::getCurrentInstance();
+    $restaurantId = InstanceManager::getRestaurantId();
 
-// Charger la configuration de l'instance
-$instanceConfigPath = __DIR__ . '/../instances/' . $instanceName . '/backend-config.php';
+    // Charger la base de données
+    require_once __DIR__ . '/../snackup/backend/Database.php';
+    Database::init(InstanceManager::getDatabaseConfig());
 
-if (!file_exists($instanceConfigPath)) {
+    require_once __DIR__ . '/../snackup/backend/repositories/RestaurantRepository.php';
+
+    // Récupérer les données du restaurant depuis la base
+    $restaurant = RestaurantRepository::getById($restaurantId);
+    $settings = RestaurantRepository::getSettings($restaurantId);
+
+} catch (Exception $e) {
+    http_response_code(500);
     echo json_encode([
-        'error' => 'Instance configuration not found',
-        'instance' => $instanceName,
-        'host' => $host
+        'error' => 'Instance initialization failed',
+        'message' => $e->getMessage(),
+        'debug' => InstanceManager::getDebugInfo()
     ]);
     exit;
 }
-
-$instanceConfig = require $instanceConfigPath;
-
-// Charger la base de données
-require_once __DIR__ . '/../snackup/backend/Database.php';
-Database::init($instanceConfig['database']);
-
-require_once __DIR__ . '/../snackup/backend/repositories/RestaurantRepository.php';
-
-// Récupérer les données du restaurant depuis la base
-$restaurantId = $instanceConfig['app']['restaurant_id'];
-$restaurant = RestaurantRepository::getById($restaurantId);
-$settings = RestaurantRepository::getSettings($restaurantId);
 
 if (!$restaurant) {
     echo json_encode([
@@ -53,20 +47,22 @@ if (!$restaurant) {
 }
 
 // Construire la réponse JSON avec les données DB + config instance
+$themeConfig = InstanceManager::getThemeConfig() ?? [];
+
 $response = [
-    'id' => $instanceConfig['app']['instance_id'],
+    'id' => InstanceManager::getInstanceId(),
     'name' => $restaurant['name'],
     'legalName' => $restaurant['legal_name'] ?? $restaurant['name'],
     'slug' => $restaurant['slug'],
     'brandTagline' => $settings['brand_tagline'] ?? '',
-    'priceRange' => $instanceConfig['app']['currency'],
+    'priceRange' => InstanceManager::getCurrency(),
     'isHalal' => (bool)($settings['is_halal'] ?? true),
 
     'theme' => [
-        'primary' => $instanceConfig['theme']['primary'] ?? '#e63946',
-        'primaryDark' => $instanceConfig['theme']['primary_dark'] ?? '#d62839',
-        'secondary' => $instanceConfig['theme']['secondary'] ?? '#1a1a2e',
-        'accent' => $instanceConfig['theme']['accent'] ?? '#ff6fae',
+        'primary' => $themeConfig['primary'] ?? '#e63946',
+        'primaryDark' => $themeConfig['primary_dark'] ?? '#d62839',
+        'secondary' => $themeConfig['secondary'] ?? '#1a1a2e',
+        'accent' => $themeConfig['accent'] ?? '#ff6fae',
         'background' => '#f5f5f5',
         'cardBackground' => '#ffffff',
         'textPrimary' => '#111111',
@@ -95,7 +91,7 @@ $response = [
 
     'branding' => [
         'logo' => $restaurant['logo_url'] ?? '',
-        'primaryColor' => $instanceConfig['theme']['primary'] ?? '#e63946'
+        'primaryColor' => $themeConfig['primary'] ?? '#e63946'
     ],
 
     'social' => json_decode($settings['social_links'] ?? '{}', true)
@@ -103,9 +99,10 @@ $response = [
 
 // Injecter la config JavaScript pour le frontend
 $response['_jsConfig'] = [
-    'currency' => $instanceConfig['app']['currency'],
+    'currency' => InstanceManager::getCurrency(),
     'restaurantId' => $restaurantId,
-    'instanceId' => $instanceConfig['app']['instance_id']
+    'instanceId' => InstanceManager::getInstanceId(),
+    'instanceName' => $instanceName
 ];
 
 echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
