@@ -36,6 +36,168 @@ Modifier `Config.getProduct()` pour supporter :
 
 ## Sessions
 
+### [TERMINÉE] Session 2026-01-16 - Phase 2 : Repositories MySQL Complets
+**Objectif** : Créer les repositories CRUD pour categories, products, supplements
+
+**Statut** : ✅ TERMINÉE
+
+#### Livrables Produits
+**Fichiers créés** :
+1. `database/repositories/CategoryRepository.php`
+2. `database/repositories/ProductRepository.php`
+3. `database/repositories/SupplementRepository.php`
+
+#### Méthodes Implémentées
+
+**CategoryRepository (16 méthodes)** :
+- `getAll()` - Toutes les catégories (avec filtre deleted_at)
+- `getById()` - Catégorie par ID
+- `getBySlug()` - Catégorie par slug
+- `create()` - Création avec validation unicité slug
+- `update()` - Mise à jour avec validation
+- `softDelete()` - Soft delete (deleted_at)
+- `restore()` - Restauration
+- `hardDelete()` - Suppression définitive
+- `countProducts()` - Nombre de produits dans catégorie
+- `reorder()` - Réorganisation sort_order
+- `toggleActive()` - Active/désactive catégorie
+- `getStats()` - Statistiques catégories
+- Paramètre `$includeDeleted` partout
+
+**ProductRepository (18 méthodes)** :
+- `getAll()` - Tous les produits
+- `getByCategory()` - Produits par catégorie
+- `getById()` - Produit par ID
+- `getBySlug()` - Produit par slug
+- `create()` - Création avec options_config JSON
+- `update()` - Mise à jour avec validation
+- `softDelete()` - Soft delete
+- `restore()` - Restauration
+- `hardDelete()` - Suppression définitive
+- `setStatus()` - Change statut (available/unavailable)
+- `reorder()` - Réorganisation dans catégorie
+- `search()` - Recherche par nom
+- `getAvailable()` - Produits disponibles uniquement
+- `getStats()` - Statistiques produits
+- `updateOptions()` - Met à jour options_config
+- `getSupplements()` - Suppléments d'un produit
+- `attachSupplements()` - Associe suppléments
+- `decodeOptionsConfig()` - Helper JSON decode automatique
+
+**SupplementRepository (21 méthodes)** :
+- `getAll()` - Tous les suppléments
+- `getById()` - Supplément par ID
+- `getByStatus()` - Suppléments par statut
+- `create()` - Création
+- `update()` - Mise à jour
+- `softDelete()` - Soft delete
+- `restore()` - Restauration
+- `hardDelete()` - Suppression définitive
+- `setStatus()` - Change statut
+- `reorder()` - Réorganisation
+- `getStats()` - Statistiques suppléments
+- `getProducts()` - Produits utilisant le supplément
+- `countProducts()` - Nombre de produits
+- `attachToProduct()` - Associe à 1 produit
+- `detachFromProduct()` - Dissocie 1 produit
+- `hardDetachFromProduct()` - Suppression définitive liaison
+- `attachToProducts()` - Associe à plusieurs produits
+- `detachFromProducts()` - Dissocie plusieurs produits
+- `syncProducts()` - Synchronise toutes les associations
+- `getAllProductSupplements()` - Toutes les liaisons actives
+
+#### Fonctionnalités Clés
+
+**1. Soft Delete Généralisé**
+```php
+// Paramètre $includeDeleted sur toutes les méthodes get
+getAll($restaurantId, $includeDeleted = false)
+getById($id, $includeDeleted = false)
+
+// Soft delete avec date
+softDelete($id) // SET deleted_at = NOW()
+
+// Restauration
+restore($id) // SET deleted_at = NULL
+```
+
+**2. Gestion options_config JSON (Products)**
+```php
+// Encode automatique à l'insertion/update
+create($restaurantId, $categoryId, ['options_config' => [...]])
+
+// Decode automatique à la lecture
+$product = getById($id);
+// $product['options_config'] est un array, pas une string JSON
+```
+
+**3. Liaisons product_supplements**
+```php
+// Association simple
+attachToProduct($supplementId, $productId)
+
+// Association multiple
+attachToProducts($supplementId, [1, 2, 3])
+
+// Synchronisation (supprime anciennes + crée nouvelles)
+syncProducts($supplementId, [1, 2, 3])
+
+// Soft delete des liaisons
+detachFromProduct($supplementId, $productId)
+```
+
+**4. Validations**
+- Unicité slug (categories, products)
+- Vérification statut ENUM (available/unavailable)
+- Transactions pour opérations multiples (reorder, sync)
+
+**5. Statistiques**
+```php
+// Exemples
+CategoryRepository::getStats($restaurantId)
+// => total_categories, active_categories, deleted_categories
+
+ProductRepository::getStats($restaurantId)
+// => total_products, available_products, products_with_options, etc.
+
+SupplementRepository::getStats($restaurantId)
+// => total_supplements, avg_price, etc.
+```
+
+#### Structure Code
+
+**Pattern utilisé** :
+- Classes statiques (pas d'instanciation)
+- Utilisation Database::fetchAll(), fetchOne(), insert(), update(), delete()
+- Transactions pour opérations atomiques
+- Commentaires PHPDoc
+- Gestion erreurs avec Exceptions
+- Filtres deleted_at IS NULL partout
+
+**Organisation** :
+```
+database/repositories/
+├── CategoryRepository.php   (16 méthodes, 215 lignes)
+├── ProductRepository.php    (18 méthodes, 340 lignes)
+├── SupplementRepository.php (21 méthodes, 350 lignes)
+├── CustomerRepository.php   (existant)
+├── OrderRepository.php      (existant)
+├── MenuRepository.php       (existant)
+├── LoyaltyRepository.php    (existant)
+├── PromoCodeRepository.php  (existant)
+└── RestaurantRepository.php (existant)
+```
+
+#### Règles Respectées
+- ✅ Aucun frontend/admin touché
+- ✅ Aucune migration de données
+- ✅ Aucune activation $useMySQL
+- ✅ CRUD complet avec soft delete
+- ✅ Structures alignées avec schema.sql
+- ✅ Pas de logique métier UI
+
+---
+
 ### [TERMINÉE] Session 2026-01-16 - Phase 1 : Schéma MySQL Complet
 **Objectif** : Implémenter le schéma MySQL cible avec toutes les tables et soft delete
 
