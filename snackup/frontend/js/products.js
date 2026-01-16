@@ -202,7 +202,7 @@ const Products = {
                 return `
                     <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
                         ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
-                        <img src="../${escapeHtml(product.image)}"
+                        <img src="../../${escapeHtml(product.image)}"
                              alt="${escapeHtml(product.name)}"
                              class="product-image-new"
                              width="300"
@@ -238,7 +238,7 @@ const Products = {
             return `
                 <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
                     ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
-                    <img src="../${escapeHtml(product.image)}"
+                    <img src="../../${escapeHtml(product.image)}"
                          alt="${escapeHtml(product.name)}"
                          class="product-image-new"
                          width="300"
@@ -434,7 +434,7 @@ const Products = {
             const hasImage = formule.image && formule.image.trim() !== '';
             const imageHtml = hasImage
                 ? `<div class="formule-image-wrapper">
-                       <img src="../${formule.image}" alt="${formule.name}" class="formule-image"
+                       <img src="../../${formule.image}" alt="${formule.name}" class="formule-image"
                             loading="lazy"
                             onerror="this.parentElement.innerHTML='<div class=\\'formule-image-placeholder\\'><i class=\\'fas fa-box-open\\'></i></div>'">
                    </div>`
@@ -488,7 +488,7 @@ const Products = {
                 <div class="formule-card-v2" style="display: flex; flex-direction: column; align-items: center; text-align: center; background: ${color.bg}; border-radius: 16px; padding: 28px 20px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; overflow: hidden;" onclick="Products.openFormuleModal('${formule.id}')" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)';">
                     <div style="width: 70px; height: 70px; margin: 0 auto 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); flex-shrink: 0; overflow: hidden;">
                         ${hasImage
-                            ? `<img src="../${formule.image}" alt="${formule.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.outerHTML='<i class=\\'fas fa-fire\\' style=\\'font-size: 32px; color: white;\\'></i>'">`
+                            ? `<img src="../../${formule.image}" alt="${formule.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.outerHTML='<i class=\\'fas fa-fire\\' style=\\'font-size: 32px; color: white;\\'></i>'">`
                             : `<i class="fas fa-fire" style="font-size: 32px; color: white;"></i>`
                         }
                     </div>
@@ -604,7 +604,7 @@ const Products = {
             return `
                 <article class="product-card-new ${isUnavailable ? 'unavailable' : ''}" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
                     ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
-                    <img src="../${escapeHtml(product.image)}"
+                    <img src="../../${escapeHtml(product.image)}"
                          alt="${escapeHtml(product.name)}"
                          class="product-image-new"
                          width="300"
@@ -933,7 +933,7 @@ const Products = {
             // Update modal content
             const imgEl = document.getElementById('modalImage');
             if (product.image) {
-                imgEl.src = '../' + product.image;
+                imgEl.src = '../../' + product.image;
                 imgEl.style.display = '';
             } else {
                 imgEl.src = '';
@@ -1281,7 +1281,7 @@ const Products = {
                     patisserieOptions.innerHTML = availablePatisseries.map((patisserie, index) => `
                         <div class="patisserie-item ${index === 0 ? 'selected' : ''}" data-id="${patisserie.id}" onclick="Products.selectPatisserie('${patisserie.id}')">
                             <div class="patisserie-image-container">
-                                <img src="../${patisserie.image}" alt="${patisserie.name}" class="patisserie-image" loading="lazy" onerror="this.style.display='none'">
+                                <img src="../../${patisserie.image}" alt="${patisserie.name}" class="patisserie-image" loading="lazy" onerror="this.style.display='none'">
                             </div>
                             <div class="patisserie-divider"></div>
                             <div class="patisserie-name">${patisserie.name}</div>
@@ -1317,7 +1317,7 @@ const Products = {
                         <div class="beverage-item ${index === 0 ? 'selected' : ''}" data-id="${beverage.id}" onclick="Products.selectBeverage('${beverage.id}')">
                             ${beverage.image ? `
                                 <div class="beverage-image-container">
-                                    <img src="../${beverage.image}" alt="${beverage.name}" class="beverage-image" loading="lazy" onerror="this.style.display='none'">
+                                    <img src="../../${beverage.image}" alt="${beverage.name}" class="beverage-image" loading="lazy" onerror="this.style.display='none'">
                                 </div>
                             ` : ''}
                             <div class="beverage-divider"></div>
@@ -1648,7 +1648,7 @@ const Products = {
         // Set image with fallback
         const modalImage = document.getElementById('modalImage');
         if (formule.image) {
-            modalImage.src = '../' + formule.image;
+            modalImage.src = '../../' + formule.image;
             modalImage.onerror = () => { modalImage.style.display = 'none'; };
         } else {
             modalImage.style.display = 'none';
