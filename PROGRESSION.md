@@ -36,6 +36,185 @@ Modifier `Config.getProduct()` pour supporter :
 
 ## Sessions
 
+### [EN COURS] Session 2026-01-16 - Phase 4 : Plan de Switch MySQL
+**Objectif** : Planifier le switch complet vers MySQL après migration validée
+
+**Statut** : ✅ PLAN COMPLET — PRÊT POUR IMPLÉMENTATION
+
+#### Livrables Produits
+**Fichiers créés** :
+1. `SWITCH_PLAN.md` - Plan complet de switch en 3 étapes
+2. `PHASE4_MODIFICATIONS.md` - Liste précise des 5 modifications à faire
+
+#### Analyse Complète du Code
+
+**1. État actuel (post-migration Phase 3)** :
+
+| Composant | Source | Statut |
+|-----------|--------|--------|
+| **config/menu.php** | MenuRepository (MySQL) | ✅ 100% MySQL |
+| **admin-panel-v2/api/products.php** | JSON (menu.runtime.json) | ❌ Mode JSON actif |
+| **menu.runtime.json** | Écritures admin actives | ❌ Modifié à chaque changement |
+| **menu.json** | Regénéré par admin | ❌ Réécriture automatique |
+
+**2. Localisation $useMySQL** :
+
+**Définition** :
+- `snackup/admin/bootstrap.php` ligne 44 : `define('SNACK_USE_JSON', false);`
+- Dérivation : `$useMySQL = !SNACK_USE_JSON && !defined('SNACK_DB_ERROR');`
+
+**Utilisation** :
+- `admin-panel-v2/api/products.php` ligne 210 : `$useMySQL = false;` ⚠️ **HARDCODÉ**
+- `admin-panel-v2/index.php` : Dérive de SNACK_USE_JSON ✅
+- `admin-panel-v2/api/orders.php` : Dérive de SNACK_USE_JSON ✅
+- `snackup/admin/webhook.php` : Dérive de SNACK_USE_JSON ✅
+
+**⚠️ PROBLÈME IDENTIFIÉ** :
+- `products.php` a `$useMySQL = false` en dur → ignore SNACK_USE_JSON
+- Conséquence : Admin écrit toujours en JSON même si MySQL actif ailleurs
+
+**3. Écritures JSON Runtime** :
+
+**Fonctions principales** (`admin-panel-v2/config.php`) :
+- `saveMenuRuntime($runtime, $autoSync)` ligne 200 : Écrit menu.runtime.json
+- `generatePublicMenuJson($runtime)` ligne 247 : Écrit menu.json
+
+**Appels dans products.php** : 14 occurrences
+- Lignes : 635, 709, 774, 834, 934, 972, 1016, 1085, 1122, 1167, 1258, 1333, 1374
+
+**Impact** :
+- Chaque modification admin → écriture menu.runtime.json
+- Si `$autoSync = true` → écriture menu.json également
+
+#### Plan de Switch en 3 Étapes
+
+**ÉTAPE 1 : Activer MySQL dans l'admin (Phase 4.1)**
+- Fichier : `admin-panel-v2/api/products.php` ligne 210
+- Changement : `$useMySQL = false;` → `$useMySQL = true;`
+- Impact : Admin lit/écrit MySQL via MenuRepository
+- Risque : ⚠️ MOYEN (changement comportement admin)
+
+**ÉTAPE 2 : Désactiver écritures JSON (Phase 4.2)**
+- Fichier : `admin-panel-v2/config.php` lignes 200 et 247
+- Changement : Ajouter check `if (!SNACK_USE_JSON) return true;`
+- Impact : menu.runtime.json et menu.json en READ-ONLY
+- Risque : ⚠️ FAIBLE (aucune écriture, préserve lecture)
+
+**ÉTAPE 3 : Implémenter SAFE SWITCH (Phase 4.3)**
+- Fichiers : `config/.env` (nouveau) + `admin-panel-v2/bootstrap.php`
+- Changement : Variable `MENU_MODE` (mysql | json_ro)
+- Impact : Rollback instantané vers JSON read-only
+- Risque : ✅ AUCUN (mode secours uniquement)
+
+#### Modifications Minimales (5 fichiers)
+
+**Phase 4.1** :
+1. `admin-panel-v2/api/products.php` ligne 210 : `$useMySQL = true;`
+
+**Phase 4.2** :
+2. `admin-panel-v2/config.php` ligne 200 : `saveMenuRuntime()` → check read-only
+3. `admin-panel-v2/config.php` ligne 247 : `generatePublicMenuJson()` → check read-only
+
+**Phase 4.3** :
+4. `config/.env` : Créer avec `MENU_MODE=mysql`
+5. `admin-panel-v2/bootstrap.php` : Charger .env + définir SNACK_USE_JSON selon mode
+
+#### Mode SAFE SWITCH
+
+**Principe** :
+- Variable d'environnement `MENU_MODE` dans `.env`
+- Valeurs : `mysql` (normal) ou `json_ro` (rollback temporaire)
+- Écritures **TOUJOURS désactivées** (même en mode json_ro)
+
+**Rollback en 1 commande** :
+```bash
+# Incident MySQL
+echo "MENU_MODE=json_ro" > config/.env
+
+# Admin lit menu.json au lieu de MySQL
+# Aucune écriture possible
+
+# Correction problème + retour normal
+echo "MENU_MODE=mysql" > config/.env
+```
+
+**Garanties** :
+- Lecture : Configurable (MySQL ou JSON)
+- Écriture : Désactivée en production
+- Rollback : Instantané sans perte de données
+
+#### Risques & Mitigations
+
+**Risque 1 : MenuRepository incomplet**
+- Mitigation : Vérifier TOUTES les méthodes utilisées par products.php (mode $useMySQL)
+- Test : Chaque endpoint admin après switch
+
+**Risque 2 : Données corrompues**
+- Mitigation : CHECK_MIGRATION.sql AVANT Phase 4.1
+- Rollback : Mode SAFE SWITCH (`json_ro`)
+
+**Risque 3 : Performance MySQL**
+- Mitigation : Index déjà en place (Phase 1), prepared statements
+- Monitoring : Temps de réponse API admin
+
+**Risque 4 : Permissions fichiers**
+- Mitigation : Vérifier `chmod 644 config/.env`
+- Alternative : Variable d'environnement système
+
+#### Ordre d'Exécution Recommandé
+
+1. **Backup complet** : `cp -r /home/user/snackapp- /home/user/snackapp-backup-phase4`
+2. **Phase 4.1** : Modification 1 uniquement → TESTER
+3. **Phase 4.2** : Modifications 2 et 3 → TESTER
+4. **Phase 4.3** : Modifications 4 et 5 → TESTER rollback
+5. **Validation finale** : Checklist complète
+
+#### Tests de Validation
+
+**Phase 4.1** :
+- [ ] Admin affiche données MySQL
+- [ ] Créer/modifier/supprimer catégorie → MySQL
+- [ ] Aucune erreur console navigateur
+- [ ] Vérifier BDD : `SELECT * FROM categories ORDER BY id DESC LIMIT 1;`
+
+**Phase 4.2** :
+- [ ] Noter date `menu.runtime.json` avant modification
+- [ ] Modifier produit dans admin
+- [ ] Vérifier date `menu.runtime.json` INCHANGÉE
+- [ ] Vérifier BDD : `SELECT * FROM products ORDER BY updated_at DESC LIMIT 1;`
+
+**Phase 4.3** :
+- [ ] Créer `.env` avec `MENU_MODE=mysql`
+- [ ] Tester rollback : `MENU_MODE=json_ro`
+- [ ] Admin lit menu.json (pas MySQL)
+- [ ] Tentative modification → échec silencieux
+- [ ] Retour : `MENU_MODE=mysql`
+
+#### Prochaines Actions (Phase 4.2 - Implémentation)
+
+**⚠️ À FAIRE PAR L'UTILISATEUR** :
+1. Exécuter CHECK_MIGRATION.sql (vérifier migration OK)
+2. Backup complet avant modifications
+3. Appliquer Phase 4.1 (1 modification)
+4. Tester admin complet
+5. Appliquer Phase 4.2 (2 modifications)
+6. Tester désactivation écritures JSON
+7. Appliquer Phase 4.3 (2 modifications)
+8. Tester mode SAFE SWITCH
+
+**Documentation** :
+- `SWITCH_PLAN.md` : Analyse complète + plan détaillé
+- `PHASE4_MODIFICATIONS.md` : Modifications exactes ligne par ligne
+
+**Règles Respectées** :
+- ✅ Aucun code modifié (analyse seulement)
+- ✅ Aucune migration lancée
+- ✅ Plan complet documenté
+- ✅ Modifications minimales identifiées
+- ✅ Mode SAFE SWITCH pour rollback
+
+---
+
 ### [TERMINÉE] Session 2026-01-16 - Phase 3.1 : Validation Sécurité Avant Migration
 **Objectif** : Produire les documents de validation et checks de sécurité avant migration production
 
