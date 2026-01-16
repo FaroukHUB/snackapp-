@@ -9,7 +9,7 @@ return [
         'host' => 'localhost',
         'name' => 'zajr1824_atelierpizza',
         'user' => 'zajr1824_atelierpizza',
-        'password' => 'VOTRE_MOT_DE_PASSE_ICI', // À remplacer par le vrai mot de passe
+        'password' => 'Mariagor6!',
         'charset' => 'utf8mb4'
     ],
 
