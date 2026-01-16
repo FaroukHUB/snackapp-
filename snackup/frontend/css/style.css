@@ -4,13 +4,13 @@
 
 /* CSS Variables for easy theming */
 :root {
-    /* Brand Colors - Pizzeria Theme (Rouge, Noir, Vert) */
-    --primary: #dc2626;        /* Rouge pizzeria vif */
-    --primary-dark: #991b1b;   /* Rouge foncé */
-    --primary-light: #fecaca;  /* Rouge clair pour backgrounds */
-    --accent: #16a34a;         /* Vert basilic/italien */
-    --accent-dark: #15803d;    /* Vert foncé */
-    --accent-light: #dcfce7;   /* Vert clair */
+    /* Brand Colors - Pizzeria Theme (Rouge, Noir, Vert) - VERSION TEST */
+    --primary: #ff0000;        /* ROUGE VIF TEST */
+    --primary-dark: #cc0000;   /* Rouge très foncé */
+    --primary-light: #ffcccc;  /* Rouge très clair */
+    --accent: #00ff00;         /* VERT VIF TEST */
+    --accent-dark: #00cc00;    /* Vert foncé */
+    --accent-light: #ccffcc;   /* Vert clair */
 
     /* Neutral Colors */
     --white: #ffffff;
