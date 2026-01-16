@@ -591,12 +591,12 @@ $csrfToken = getCsrfToken();
 
           <div class="two">
             <div class="field">
-              <label for="priceSolo">Prix (solo)</label>
-              <input id="priceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" placeholder="11.00" required />
+              <label for="priceSolo">Prix Solo 26cm</label>
+              <input id="priceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" placeholder="7.50" required />
             </div>
             <div class="field">
-              <label for="priceMenu">Prix (menu) (optionnel)</label>
-              <input id="priceMenu" name="priceMenu" class="input" type="number" step="0.01" min="0" placeholder="14.00" />
+              <label for="priceMenu">Prix Duo 31cm (optionnel)</label>
+              <input id="priceMenu" name="priceMenu" class="input" type="number" step="0.01" min="0" placeholder="9.00" />
             </div>
           </div>
 
@@ -703,11 +703,11 @@ $csrfToken = getCsrfToken();
           </div>
           <div class="two">
             <div class="field">
-              <label for="editPriceSolo">Prix (solo) <span class="muted">(optionnel pour produits avec options)</span></label>
+              <label for="editPriceSolo">Prix Solo 26cm <span class="muted">(optionnel pour produits avec options)</span></label>
               <input id="editPriceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" />
             </div>
             <div class="field">
-              <label for="editPriceMenu">Prix (menu)</label>
+              <label for="editPriceMenu">Prix Duo 31cm</label>
               <input id="editPriceMenu" name="priceMenu" class="input" type="number" step="0.01" min="0" />
             </div>
           </div>
