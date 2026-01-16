@@ -125,6 +125,21 @@
     function hideWrongReviews() {
         console.log('🔍 [Dynamic Content] Vérification des avis...');
 
+        const reviewsSection = document.querySelector('.reviews-section');
+        if (!reviewsSection) {
+            console.log('ℹ️ Pas de section avis trouvée');
+            return;
+        }
+
+        // Si on n'est PAS Le Marvelous, cacher toute la section Google Reviews
+        // Car tous ces avis sont pour Le Marvelous à Ouled Moussa
+        if (!restaurant.name.includes('Marvelous')) {
+            reviewsSection.style.display = 'none';
+            console.log('❌ Section Google Reviews cachée (avis pour un autre restaurant)');
+            return;
+        }
+
+        // Si on EST Le Marvelous, vérifier quand même chaque avis
         const reviewCards = document.querySelectorAll('.review-card');
         let hiddenCount = 0;
 
@@ -137,21 +152,12 @@
                 hiddenCount++;
                 console.log('❌ Avis caché (Ouled Moussa)');
             }
-            // Si l'avis mentionne Marvelous mais qu'on n'est PAS Le Marvelous
-            else if (text.includes('Marvelous') && !restaurant.name.includes('Marvelous')) {
-                card.style.display = 'none';
-                hiddenCount++;
-                console.log('❌ Avis caché (Marvelous)');
-            }
         });
 
-        // Si on a caché des avis, masquer toute la section
+        // Si tous les avis sont cachés, masquer toute la section
         if (hiddenCount > 0 && hiddenCount === reviewCards.length) {
-            const reviewsSection = document.querySelector('.reviews-section');
-            if (reviewsSection) {
-                reviewsSection.style.display = 'none';
-                console.log('❌ Section avis entièrement cachée');
-            }
+            reviewsSection.style.display = 'none';
+            console.log('❌ Section avis entièrement cachée (tous les avis cachés)');
         }
 
         console.log(`✅ ${hiddenCount} avis cachés`);
