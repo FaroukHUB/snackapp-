@@ -36,6 +36,94 @@ Modifier `Config.getProduct()` pour supporter :
 
 ## Sessions
 
+### [TERMINÉE] Session 2026-01-16 - Phase 1 : Schéma MySQL Complet
+**Objectif** : Implémenter le schéma MySQL cible avec toutes les tables et soft delete
+
+**Statut** : ✅ TERMINÉE
+
+#### Livrable Produit
+**Fichier mis à jour** : `database/schema.sql`
+
+#### Tables Créées / Mises à Jour (20 tables)
+
+**Tables existantes mises à jour** (17) :
+1. `restaurants` - ajout deleted_at
+2. `restaurant_settings` - ajout deleted_at
+3. `opening_hours` - ajout deleted_at
+4. `categories` - ajout deleted_at
+5. `products` - ajout deleted_at + options_config (JSON)
+6. `supplements` - ajout deleted_at
+7. `product_supplements` - ajout deleted_at
+8. `customers` - ajout deleted_at + addresses (JSON) + preferences (JSON) + admin_notes (TEXT)
+9. `customer_tags` - ajout deleted_at (NOUVELLE TABLE)
+10. `loyalty_rewards` - ajout deleted_at
+11. `loyalty_transactions` - ajout deleted_at
+12. `orders` - ajout deleted_at
+13. `order_items` - ajout deleted_at
+14. `order_item_supplements` - ajout deleted_at
+15. `promo_codes` - ajout deleted_at (NOUVELLE TABLE)
+16. `admin_users` - ajout deleted_at
+17. `faq` - ajout deleted_at
+
+**Nouvelles tables créées** (3) :
+18. `delivery_persons` - Livreurs (livreurs.json)
+19. `tgtg_baskets` - Paniers Too Good To Go (tgtg.json)
+20. `admin_pins` - Codes PIN admin (admin-pin.json)
+
+**Vues mises à jour** (2) :
+- `v_dashboard_stats` - ajout filtre deleted_at IS NULL
+- `v_top_products` - ajout filtre deleted_at IS NULL
+
+#### Fonctionnalités Ajoutées
+
+**1. Soft Delete Généralisé**
+- Colonne `deleted_at` TIMESTAMP NULL sur TOUTES les tables
+- Index `idx_deleted` sur deleted_at pour performance
+- Filtres dans les vues pour exclure les enregistrements supprimés
+
+**2. Extensions Clients**
+- `addresses` JSON : adresses multiples (home, work) avec is_default
+- `preferences` JSON : allergies, favoris, instructions livraison
+- `admin_notes` TEXT : notes privées admin
+
+**3. Extensions Produits**
+- `options_config` JSON : variants, viennoiserie, boissons, sauces, accompagnements
+- Support capsuleColors[], capsuleNumbers[], etc.
+
+**4. Gestion Livreurs**
+- Table complète : vehicle_type (ENUM), rating, current_orders_count
+- Index optimisés pour attribution automatique
+
+**5. TGTG Integration**
+- external_id pour API TGTG
+- quantity_available décrémenté
+- expires_at avec index composite
+
+**6. Sécurité Admin**
+- admin_pins avec pin_hash (password_hash)
+- Liaison last_changed_by vers admin_users
+- UNIQUE constraint par restaurant
+
+#### Structure Finale
+
+```
+20 tables + 2 vues
+- 8 sections thématiques
+- Toutes les contraintes FK (CASCADE, SET NULL)
+- Tous les index essentiels
+- Soft delete partout
+- Commentaires SQL explicites
+```
+
+#### Règles Respectées
+- ✅ Aucun code PHP créé
+- ✅ Aucun script de migration de données
+- ✅ Aucune logique métier
+- ✅ Aucun frontend/admin touché
+- ✅ Schéma SQL pur uniquement
+
+---
+
 ### [TERMINÉE] Session 2026-01-16 - Phase 0 : Cadrage Migration MySQL
 **Objectif** : Cadrage complet de la migration JSON → MySQL
 
