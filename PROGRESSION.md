@@ -36,6 +36,91 @@ Modifier `Config.getProduct()` pour supporter :
 
 ## Sessions
 
+### [TERMINÉE] Session 2026-01-16 - Phase 0 : Cadrage Migration MySQL
+**Objectif** : Cadrage complet de la migration JSON → MySQL
+
+**Statut** : ✅ TERMINÉE
+
+#### Livrable Produit
+**Fichier créé** : `MIGRATION.md`
+
+#### Contenu du Document
+1. **Inventaire complet** : 21 entités métier identifiées
+   - 17 tables existantes (déjà en MySQL)
+   - 3 nouvelles tables à créer (delivery_persons, tgtg_baskets, admin_pins)
+   - 1 extension optionnelle (product_options)
+
+2. **Schéma MySQL cible** :
+   - Structure complète des 21 tables
+   - Relations et contraintes (CASCADE, SET NULL, UNIQUE)
+   - 2 vues matérialisées (stats, top products)
+
+3. **Règles métier critiques** :
+   - Gestion commandes (statuts, calculs)
+   - Système fidélité (points, transactions, codes)
+   - Codes promo (validation, calcul réduction)
+   - Produits et variantes (prix, options spéciales)
+   - Clients (identification, adresses JSON, préférences)
+   - Tags automatiques (VIP, Régulier, Nouveau)
+   - TGTG baskets (disponibilité, expiration)
+   - Livreurs (attribution automatique)
+
+4. **Phases de migration** :
+   - Phase 1 : Préparation BDD ✅ FAIT
+   - Phase 2 : Migration nouvelles entités ⏳ EN ATTENTE
+   - Phase 3 : Extensions produits (options) ⏳ EN ATTENTE
+   - Phase 4 : Refactoring frontend ⏳ EN ATTENTE
+   - Phase 5 : Suppression JSON ⏳ EN ATTENTE
+   - Phase 6 : Optimisations ⏳ EN ATTENTE
+
+5. **Entités analysées** :
+   - Restaurants (multi-tenant ready)
+   - Paramètres restaurant
+   - Horaires d'ouverture
+   - Catégories produits (crepes-salees, sucres-sales, crepes-sucrees, gaufres, bubble-waffle, boissons-chaudes, sodas-eaux)
+   - Produits (prix solo/menu, statuts, options spéciales)
+   - Suppléments (liaison N:N avec produits)
+   - Clients (7 clients existants dans JSON)
+   - Tags clients (segmentation VIP/Régulier/Nouveau)
+   - Commandes (structure items + supplements)
+   - Système fidélité (transactions, récompenses)
+   - Codes promo (validation complexe)
+   - FAQ
+   - Utilisateurs admin
+   - Livreurs (JSON vide actuellement)
+   - TGTG baskets (1 panier test)
+   - PIN admin (à hacher)
+
+6. **Risques et métriques** :
+   - Perte de données : backup obligatoire
+   - Downtime : 2-5 minutes estimé
+   - Cohérence : scripts de validation
+   - Performance : indexes optimisés
+   - Métriques succès : intégrité 100%, requêtes < 200ms
+
+#### Fichiers Analysés
+- `admin-panel-v2/data/customers.json` (7 clients)
+- `admin-panel-v2/data/orders.json` (structure complète)
+- `config/menu.json` (7 catégories, ~50 produits)
+- `admin-panel-v2/data/loyalty_points.json` (vide)
+- `admin-panel-v2/data/livreurs.json` (vide)
+- `admin-panel-v2/data/restaurant-status.json`
+- `admin-panel-v2/data/settings.json`
+- `config/restaurant.json` (config complète)
+- `admin-panel-v2/data/tgtg.json` (1 panier test)
+- `admin-panel-v2/data/admin-pin.json`
+- `database/schema.sql` (schéma existant)
+- `database/migrations/*.sql` (4 migrations)
+- `database/repositories/*.php` (5 repositories)
+
+#### Règles Respectées
+- ✅ Aucun code écrit
+- ✅ Aucun fichier existant modifié
+- ✅ Aucune question ouverte
+- ✅ Document complet et actionnable
+
+---
+
 ### [TERMINÉE] Session 2026-01-16 - Correction Lookup Produit
 **Objectif** : Correction lookup produit (ID vs SLUG)
 
