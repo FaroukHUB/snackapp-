@@ -1,0 +1,136 @@
+/**
+ * THEME PIZZERIA - L'Atelier Pizza
+ * Touches de vert italien pour accent
+ */
+
+/* Badges et labels avec accent vert */
+.badge-new,
+.badge-popular,
+.product-badge {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    color: white;
+}
+
+/* Icônes de catégories avec touche verte */
+.category-icon {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.category-icon.active {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+/* Boutons secondaires avec vert */
+.btn-secondary,
+.service-card--fidelite .service-icon {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, var(--accent-dark) 0%, #166534 100%);
+    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+}
+
+/* Prix avec accent vert subtil */
+.product-price {
+    color: var(--gray-900);
+}
+
+.price-old {
+    color: var(--gray-400);
+}
+
+.price-badge {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    border: 1px solid var(--accent);
+}
+
+/* Stars et ratings avec vert */
+.rating-stars .fa-star {
+    color: var(--accent);
+}
+
+/* Success states */
+.toast.success,
+.alert-success,
+.status-success {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    border-left: 4px solid var(--accent);
+}
+
+/* Checkboxes et radio avec vert */
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* Liens et textes accent */
+a.text-accent,
+.link-accent {
+    color: var(--accent);
+}
+
+a.text-accent:hover,
+.link-accent:hover {
+    color: var(--accent-dark);
+}
+
+/* Bordures accent pour cards spéciales */
+.featured-card,
+.promo-card {
+    border-top: 3px solid var(--accent);
+}
+
+/* Progress bars */
+.progress-bar,
+.loyalty-progress {
+    background: var(--accent);
+}
+
+/* WhatsApp button - garder le vert WhatsApp */
+.whatsapp-float {
+    background: #25d366 !important;
+}
+
+.whatsapp-float:hover {
+    background: #1da851 !important;
+}
+
+/* Dots de carousel avec accent */
+.slider-dot.active {
+    background: var(--accent);
+}
+
+/* Badges disponibilité */
+.badge-available,
+.badge-open {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+}
+
+.badge-unavailable,
+.badge-closed {
+    background: var(--gray-100);
+    color: var(--gray-500);
+}
+
+/* Hover effects avec vert subtil */
+.product-card:hover {
+    border-color: var(--accent-light);
+    box-shadow: 0 8px 24px rgba(22, 163, 74, 0.08), 0 4px 12px rgba(220, 38, 38, 0.12);
+}
+
+/* Footer avec touches vertes */
+footer a:hover {
+    color: var(--accent);
+}
+
+/* Séparateurs avec gradient rouge-vert */
+.divider-gradient {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+    height: 2px;
+}

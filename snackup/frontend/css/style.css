@@ -4,13 +4,17 @@
 
 /* CSS Variables for easy theming */
 :root {
-    /* Brand Colors - Override per restaurant */
-    --primary: #e63946;
-    --primary-dark: #c1121f;
-    --primary-light: #ffeaec;
+    /* Brand Colors - Pizzeria Theme (Rouge, Noir, Vert) */
+    --primary: #dc2626;        /* Rouge pizzeria vif */
+    --primary-dark: #991b1b;   /* Rouge foncé */
+    --primary-light: #fecaca;  /* Rouge clair pour backgrounds */
+    --accent: #16a34a;         /* Vert basilic/italien */
+    --accent-dark: #15803d;    /* Vert foncé */
+    --accent-light: #dcfce7;   /* Vert clair */
 
     /* Neutral Colors */
     --white: #ffffff;
+    --black: #000000;
     --gray-50: #f9fafb;
     --gray-100: #f3f4f6;
     --gray-200: #e5e7eb;
@@ -23,9 +27,9 @@
     --gray-900: #111827;
 
     /* Semantic Colors */
-    --success: #10b981;
+    --success: #16a34a;        /* Vert (même que accent) */
     --warning: #f59e0b;
-    --error: #ef4444;
+    --error: #dc2626;          /* Rouge (même que primary) */
     --info: #3b82f6;
 
     /* Layout */
