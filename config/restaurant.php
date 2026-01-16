@@ -74,11 +74,11 @@ $response = [
     ],
 
     'contact' => [
-        'phone' => $restaurant['phone'],
-        'phoneDisplay' => $restaurant['phone'],
-        'allowWhatsAppOrders' => !empty($settings['whatsapp_orders_number']),
-        'whatsappOrdersNumber' => $settings['whatsapp_orders_number'] ?? '',
-        'email' => $restaurant['email'] ?? ''
+        'phone' => $instanceConfig['contact']['phone'] ?? $restaurant['phone'],
+        'phoneDisplay' => $instanceConfig['contact']['phoneDisplay'] ?? $restaurant['phone'],
+        'allowWhatsAppOrders' => !empty($instanceConfig['contact']['whatsappOrdersNumber']) || !empty($settings['whatsapp_orders_number']),
+        'whatsappOrdersNumber' => $instanceConfig['contact']['whatsappOrdersNumber'] ?? $settings['whatsapp_orders_number'] ?? '',
+        'email' => $instanceConfig['contact']['email'] ?? $restaurant['email'] ?? ''
     ],
 
     'location' => [
@@ -86,7 +86,9 @@ $response = [
         'city' => $restaurant['city'] ?? '',
         'postalCode' => $restaurant['postal_code'] ?? '',
         'latitude' => (float)($restaurant['latitude'] ?? 0),
-        'longitude' => (float)($restaurant['longitude'] ?? 0)
+        'longitude' => (float)($restaurant['longitude'] ?? 0),
+        'googleMapsUrl' => $instanceConfig['location']['googleMapsUrl'] ?? '',
+        'googleMapsEmbed' => $instanceConfig['location']['googleMapsEmbed'] ?? ''
     ],
 
     'branding' => [
