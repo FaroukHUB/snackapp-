@@ -101,7 +101,7 @@
 .product-btn-new {
     background: var(--primary);
     color: #ffffff;
-    border: none;
+    border: 2px solid var(--accent);
     padding: 9px 18px;
     font-size: 13px;
     font-weight: 600;
