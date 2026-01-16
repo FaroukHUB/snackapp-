@@ -154,10 +154,11 @@ class MenuRepository {
 
             $categoryId = $pdo->lastInsertId();
 
-            // Auto-assignment suppléments selon flavor
-            if ($flavor === 'sale' || $flavor === 'sucre') {
-                self::assignSupplementsByFlavor($categoryId, $flavor);
-            }
+            // ⚠️ DÉSACTIVÉ : Auto-assignment suppléments (colonne 'type' n'existe pas en BDD)
+            // Les suppléments doivent être assignés manuellement via l'admin
+            // if ($flavor === 'sale' || $flavor === 'sucre') {
+            //     self::assignSupplementsByFlavor($categoryId, $flavor);
+            // }
 
             $pdo->commit();
 
@@ -177,28 +178,16 @@ class MenuRepository {
     }
 
     /**
-     * Assigne automatiquement les suppléments selon le flavor
+     * ⚠️ DÉSACTIVÉ : Assigne automatiquement les suppléments selon le flavor
+     *
+     * Cette méthode utilisait la colonne 'type' qui n'existe pas dans la table 'supplements'.
+     * L'auto-assignment des suppléments doit être fait manuellement via l'admin panel.
+     *
+     * @deprecated Colonne 'type' inexistante - provoquait erreur SQL
      */
     private static function assignSupplementsByFlavor($categoryId, $flavor) {
-        $pdo = Database::getInstance();
-
-        // Récupérer les suppléments du type correspondant
-        $stmt = $pdo->prepare("
-            SELECT id FROM supplements
-            WHERE restaurant_id = ? AND (type = ? OR type = 'both')
-        ");
-        $stmt->execute([self::$restaurantId, $flavor]);
-        $supplements = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-        // Créer les associations
-        $stmt = $pdo->prepare("
-            INSERT INTO category_supplements (category_id, supplement_id)
-            VALUES (?, ?)
-        ");
-
-        foreach ($supplements as $suppId) {
-            $stmt->execute([$categoryId, $suppId]);
-        }
+        // DÉSACTIVÉ - Colonne 'type' n'existe pas dans schema.sql
+        return;
     }
 
     /**

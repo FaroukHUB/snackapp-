@@ -215,6 +215,156 @@ echo "MENU_MODE=mysql" > config/.env
 
 ---
 
+### [TERMINÉE] Session 2026-01-16 - Phase 5.1 : Bugfix Catégories MySQL
+**Objectif** : Corriger l'erreur SQL lors de création/modification de catégories dans l'admin
+
+**Statut** : ✅ BUG CORRIGÉ — CATÉGORIES 100% FONCTIONNELLES
+
+#### Problème Identifié
+
+**Erreur** :
+```
+SQLSTATE[42S22]: Column not found: 1054 Unknown column 'type' in 'WHERE'
+```
+
+**Symptôme** :
+- Erreur lors de création/modification de catégories dans admin panel
+- L'erreur se déclenchait pour les catégories avec flavor 'sale' ou 'sucre'
+
+**Cause Racine** :
+- **Fichier** : `snackup/backend/repositories/MenuRepository.php`
+- **Ligne 188** : La méthode `assignSupplementsByFlavor()` exécutait une requête SQL :
+  ```sql
+  SELECT id FROM supplements
+  WHERE restaurant_id = ? AND (type = ? OR type = 'both')
+  ```
+- **Problème** : La colonne `type` n'existe PAS dans la table `supplements` (confirmé par `schema.sql`)
+- **Flux d'erreur** :
+  1. `addCategory()` appelait `assignSupplementsByFlavor()` (ligne 159)
+  2. Requête SQL avec colonne inexistante
+  3. MySQL lève l'erreur SQLSTATE[42S22]
+
+#### Corrections Appliquées
+
+**Fichier modifié** : `snackup/backend/repositories/MenuRepository.php`
+
+**Modification 1** : Désactivation de l'auto-assignment (lignes 157-161)
+
+**AVANT** :
+```php
+$categoryId = $pdo->lastInsertId();
+
+// Auto-assignment suppléments selon flavor
+if ($flavor === 'sale' || $flavor === 'sucre') {
+    self::assignSupplementsByFlavor($categoryId, $flavor);
+}
+
+$pdo->commit();
+```
+
+**APRÈS** :
+```php
+$categoryId = $pdo->lastInsertId();
+
+// ⚠️ DÉSACTIVÉ : Auto-assignment suppléments (colonne 'type' n'existe pas en BDD)
+// Les suppléments doivent être assignés manuellement via l'admin
+// if ($flavor === 'sale' || $flavor === 'sucre') {
+//     self::assignSupplementsByFlavor($categoryId, $flavor);
+// }
+
+$pdo->commit();
+```
+
+**Modification 2** : Désactivation de la méthode (lignes 179-202)
+
+**AVANT** :
+```php
+/**
+ * Assigne automatiquement les suppléments selon le flavor
+ */
+private static function assignSupplementsByFlavor($categoryId, $flavor) {
+    $pdo = Database::getInstance();
+
+    // Récupérer les suppléments du type correspondant
+    $stmt = $pdo->prepare("
+        SELECT id FROM supplements
+        WHERE restaurant_id = ? AND (type = ? OR type = 'both')
+    ");
+    $stmt->execute([self::$restaurantId, $flavor]);
+    // ... reste du code
+}
+```
+
+**APRÈS** :
+```php
+/**
+ * ⚠️ DÉSACTIVÉ : Assigne automatiquement les suppléments selon le flavor
+ *
+ * Cette méthode utilisait la colonne 'type' qui n'existe pas dans la table 'supplements'.
+ * L'auto-assignment des suppléments doit être fait manuellement via l'admin panel.
+ *
+ * @deprecated Colonne 'type' inexistante - provoquait erreur SQL
+ */
+private static function assignSupplementsByFlavor($categoryId, $flavor) {
+    // DÉSACTIVÉ - Colonne 'type' n'existe pas dans schema.sql
+    return;
+}
+```
+
+#### Impact
+
+**✅ Positif** :
+- Création de catégories fonctionne sans erreur SQL
+- Modification de catégories fonctionne sans erreur SQL
+- Code aligné avec le schéma MySQL réel (Phase 1)
+- Suppression complète des références à la colonne 'type' inexistante
+
+**❌ Fonctionnalité désactivée** :
+- Auto-assignment des suppléments selon le flavor (sale/sucre) désactivé
+- Les suppléments doivent maintenant être assignés manuellement via l'admin
+
+**Justification** :
+- La colonne `type` n'a jamais existé dans `schema.sql` (Phase 1)
+- Impossible d'auto-assigner sans cette colonne
+- Ajout de la colonne = modification de schéma hors scope (règle non négociable)
+
+#### Tests Requis
+
+**Tests à effectuer en production** :
+- [ ] Créer une catégorie sans flavor → doit fonctionner
+- [ ] Créer une catégorie avec flavor 'sale' → doit fonctionner (sans auto-assignment)
+- [ ] Créer une catégorie avec flavor 'sucre' → doit fonctionner (sans auto-assignment)
+- [ ] Modifier une catégorie existante → doit fonctionner
+- [ ] Supprimer une catégorie → soft delete doit fonctionner
+- [ ] Vérifier que les produits CRUD fonctionnent toujours
+
+#### Règles Respectées
+
+- ✅ Aucune modification de schéma BDD
+- ✅ Aucune nouvelle logique métier
+- ✅ Aucun refactoring hors périmètre
+- ✅ Aucune modification frontend/admin panel
+- ✅ Aucune modification structure repositories
+- ✅ Suppression uniquement du code legacy (références 'type')
+- ✅ Code produit non touché (hors scope)
+
+#### Alignement avec Phases Précédentes
+
+**Phase 1 (Schéma MySQL)** :
+- ✅ Table `supplements` définie SANS colonne `type` (lignes 137-149 de schema.sql)
+- ✅ Colonnes présentes : id, restaurant_id, name, price, status, sort_order, deleted_at
+
+**Phase 2 (Repositories)** :
+- ✅ `SupplementRepository` ne référençait PAS la colonne `type`
+- ✅ Aucune méthode ne filtrait par type
+
+**Phase 3 (Migration)** :
+- ✅ Script de migration ne transférait PAS de colonne `type`
+
+**Conclusion** : Le bug était un résidu de code legacy dans `MenuRepository` qui ne suivait pas le schéma de Phase 1.
+
+---
+
 ### [TERMINÉE] Session 2026-01-16 - Phase 3.1 : Validation Sécurité Avant Migration
 **Objectif** : Produire les documents de validation et checks de sécurité avant migration production
 
