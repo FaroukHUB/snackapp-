@@ -201,11 +201,30 @@ const Config = {
     },
 
     /**
-     * Find product by ID
+     * Find product by ID or SLUG
+     * Supports:
+     * - Numeric ID lookup: getProduct(123) or getProduct("123")
+     * - Slug lookup: getProduct("margherita-26cm")
      */
     getProduct(productId) {
+        // Détecter si on cherche par ID numérique ou par slug
+        const isNumericLookup = typeof productId === 'number' ||
+                                (typeof productId === 'string' && /^\d+$/.test(productId));
+
+        // Convertir en nombre si c'est un string numérique
+        const numericId = isNumericLookup ? Number(productId) : null;
+
         for (const category of (this.menu?.categories || [])) {
-            const product = category.items?.find(p => p.id === productId);
+            let product;
+
+            if (isNumericLookup) {
+                // Lookup par ID numérique (strict)
+                product = category.items?.find(p => p.id === numericId);
+            } else {
+                // Lookup par slug (strict)
+                product = category.items?.find(p => p.slug === productId);
+            }
+
             if (product) {
                 return { ...product, categoryId: category.id, categoryName: category.name };
             }
