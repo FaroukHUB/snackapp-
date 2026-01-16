@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug - Modal Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #eee; }
+        .log { padding: 10px; margin: 10px 0; background: #16213e; border-left: 3px solid #0f3460; }
+        .error { border-left-color: #e94560; }
+        .success { border-left-color: #27ae60; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Modal - L'Atelier Pizza</h1>
+    <div id="output"></div>
+
+    <hr>
+    <button onclick="testConfig()">1️⃣ Test Config</button>
+    <button onclick="testMenu()">2️⃣ Test Menu</button>
+    <button onclick="testProducts()">3️⃣ Test Products Object</button>
+    <button onclick="testModal()">4️⃣ Test Modal</button>
+
+    <!-- Scripts dans le même ordre que index.html -->
+    <script src="js/init-meta.js"></script>
+    <script src="js/dynamic-content.js"></script>
+    <script src="js/config.js" defer></script>
+    <script src="js/cart.js" defer></script>
+    <script src="js/products.js" defer></script>
+    <script src="js/app.js" defer></script>
+
+    <script>
+        function log(message, type = 'log') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = message;
+            document.getElementById('output').appendChild(div);
+        }
+
+        function testConfig() {
+            log('=== TEST CONFIG ===');
+            log(`Config exists: ${typeof Config !== 'undefined'}`);
+            log(`Config.restaurant: ${Config?.restaurant?.name || 'NOT LOADED'}`);
+            log(`Config.menu: ${Config?.menu ? 'LOADED' : 'NOT LOADED'}`);
+            if (Config?.menu?.categories) {
+                log(`Categories count: ${Config.menu.categories.length}`);
+            }
+        }
+
+        function testMenu() {
+            log('=== TEST MENU ===');
+            if (!Config?.menu?.categories) {
+                log('Menu not loaded!', 'error');
+                return;
+            }
+            Config.menu.categories.forEach(cat => {
+                log(`Category: ${cat.name} (${cat.items?.length || 0} items)`);
+                if (cat.items && cat.items.length > 0) {
+                    log(`  First item: ${cat.items[0].name} (ID: ${cat.items[0].id})`);
+                }
+            });
+        }
+
+        function testProducts() {
+            log('=== TEST PRODUCTS OBJECT ===');
+            log(`Products exists: ${typeof Products !== 'undefined'}`);
+            log(`Products.openProductModal: ${typeof Products?.openProductModal}`);
+            log(`Products.init: ${typeof Products?.init}`);
+        }
+
+        function testModal() {
+            log('=== TEST MODAL ===');
+
+            // Trouver le premier produit
+            if (!Config?.menu?.categories) {
+                log('Cannot test: Menu not loaded', 'error');
+                return;
+            }
+
+            let firstProduct = null;
+            for (const cat of Config.menu.categories) {
+                if (cat.items && cat.items.length > 0) {
+                    firstProduct = cat.items[0];
+                    break;
+                }
+            }
+
+            if (!firstProduct) {
+                log('No product found!', 'error');
+                return;
+            }
+
+            log(`Trying to open modal for: ${firstProduct.name} (ID: ${firstProduct.id})`);
+
+            try {
+                if (typeof Products !== 'undefined' && Products.openProductModal) {
+                    Products.openProductModal(firstProduct.id);
+                    log('Modal opened successfully!', 'success');
+                } else {
+                    log('Products.openProductModal not available!', 'error');
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-test après chargement
+        setTimeout(() => {
+            log('🚀 Auto-testing after 2 seconds...');
+            testConfig();
+            testMenu();
+            testProducts();
+        }, 2000);
+    </script>
+</body>
+</html>
