@@ -11,280 +11,284 @@
 (function() {
     'use strict';
 
-    // Attendre que RESTAURANT_DATA soit chargé par init-meta.js
-    window.addEventListener('DOMContentLoaded', function() {
-        // Si les données sont déjà là, on démarre
+    let restaurant = null;
+
+    // Attendre que le DOM soit prêt
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    function init() {
+        console.log('🔄 [Dynamic Content] Initialisation...');
+
+        // Essayer plusieurs sources de données
         if (window.RESTAURANT_DATA) {
-            initDynamicContent();
+            console.log('✅ [Dynamic Content] Données trouvées dans window.RESTAURANT_DATA');
+            restaurant = window.RESTAURANT_DATA;
+            applyContent();
+        } else if (window.Config && window.Config.restaurant) {
+            console.log('✅ [Dynamic Content] Données trouvées dans window.Config.restaurant');
+            restaurant = window.Config.restaurant;
+            applyContent();
         } else {
-            // Sinon on attend l'event de init-meta.js
+            // Écouter l'event de init-meta.js
+            console.log('⏳ [Dynamic Content] En attente des données...');
             window.addEventListener('restaurant-data-loaded', function(e) {
-                initDynamicContent();
+                console.log('✅ [Dynamic Content] Event reçu');
+                restaurant = e.detail || window.RESTAURANT_DATA;
+                applyContent();
             });
+
+            // Fallback: charger directement
+            setTimeout(loadAndApply, 1000);
         }
-    });
+    }
 
-    async function initDynamicContent() {
-        console.log('🔄 Initialisation du contenu dynamique...');
+    async function loadAndApply() {
+        if (restaurant) return; // Déjà chargé
 
-        // Si pas de données, les charger
-        if (!window.RESTAURANT_DATA) {
-            window.RESTAURANT_DATA = await loadRestaurantData();
+        console.log('📥 [Dynamic Content] Chargement direct des données...');
+        try {
+            const response = await fetch('../../config/restaurant.php');
+            if (response.ok) {
+                restaurant = await response.json();
+                console.log('✅ [Dynamic Content] Données chargées:', restaurant);
+                applyContent();
+            }
+        } catch (error) {
+            console.error('❌ [Dynamic Content] Erreur chargement:', error);
         }
+    }
 
-        const restaurant = window.RESTAURANT_DATA;
-        if (!restaurant) {
-            console.error('❌ Impossible de charger les données du restaurant');
+    function applyContent() {
+        if (!restaurant || !restaurant.name) {
+            console.error('❌ [Dynamic Content] Données invalides');
             return;
         }
 
-        // Remplacer le contenu selon la page
+        console.log('🎨 [Dynamic Content] Application du contenu pour:', restaurant.name);
+
+        // Appliquer selon la page
         const path = window.location.pathname;
 
-        if (path.includes('index.html') || path.endsWith('/') || path.endsWith('/snackup/frontend/')) {
-            updateHomePage(restaurant);
+        if (path.includes('index.html') || path.endsWith('/') || path.endsWith('/frontend/')) {
+            updateHomePage();
         } else if (path.includes('a-propos')) {
-            updateAboutPage(restaurant);
+            updateAboutPage();
         } else if (path.includes('fidelite')) {
-            updateLoyaltyPage(restaurant);
+            updateLoyaltyPage();
         } else if (path.includes('click-collect')) {
-            updateClickCollectPage(restaurant);
+            updateClickCollectPage();
         }
 
-        // Contenu commun à toutes les pages
-        updateCommonContent(restaurant);
+        // Contenu commun
+        updateCommonContent();
 
-        console.log('✅ Contenu dynamique initialisé');
-    }
-
-    /**
-     * Charge les données du restaurant
-     */
-    async function loadRestaurantData() {
-        try {
-            const response = await fetch('../config/restaurant.php');
-            if (!response.ok) throw new Error('Failed to load restaurant data');
-            return await response.json();
-        } catch (error) {
-            console.error('❌ Erreur chargement restaurant:', error);
-            return null;
-        }
-    }
-
-    /**
-     * Met à jour le contenu commun (header, footer, contact)
-     */
-    function updateCommonContent(restaurant) {
-        // Logo et nom dans le header
-        const logoTexts = document.querySelectorAll('[data-restaurant-name]');
-        logoTexts.forEach(el => el.textContent = restaurant.name);
-
-        // Téléphone
-        const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
-        phoneLinks.forEach(link => {
-            link.href = `tel:${restaurant.contact.phone}`;
-            if (link.textContent.includes('+') || link.textContent.match(/\d/)) {
-                link.textContent = restaurant.contact.phoneDisplay || restaurant.contact.phone;
-            }
-        });
-
-        // WhatsApp
-        const whatsappLinks = document.querySelectorAll('a[href*="wa.me"], a[href*="whatsapp"]');
-        if (restaurant.contact.whatsappOrdersNumber) {
-            whatsappLinks.forEach(link => {
-                link.href = `https://wa.me/${restaurant.contact.whatsappOrdersNumber}`;
-            });
-        }
-
-        // Adresse
-        const addressElements = document.querySelectorAll('[data-restaurant-address]');
-        addressElements.forEach(el => {
-            el.textContent = restaurant.location.address;
-        });
-
-        // Ville
-        const cityElements = document.querySelectorAll('[data-restaurant-city]');
-        cityElements.forEach(el => {
-            el.textContent = restaurant.location.city;
-        });
-
-        // Email
-        const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
-        if (restaurant.contact.email) {
-            emailLinks.forEach(link => {
-                link.href = `mailto:${restaurant.contact.email}`;
-                if (link.textContent.includes('@')) {
-                    link.textContent = restaurant.contact.email;
-                }
-            });
-        }
-
-        // Footer - nom du restaurant
-        const footerName = document.querySelector('footer h3, footer .footer-brand');
-        if (footerName && footerName.textContent.includes('Marvelous')) {
-            footerName.textContent = restaurant.name;
-        }
-
-        // Copyright
-        const copyrightElements = document.querySelectorAll('[data-copyright], .copyright');
-        copyrightElements.forEach(el => {
-            const year = new Date().getFullYear();
-            el.textContent = `© ${year} ${restaurant.name}. Tous droits réservés.`;
-        });
+        console.log('✅ [Dynamic Content] Terminé');
     }
 
     /**
      * Met à jour la page d'accueil
      */
-    function updateHomePage(restaurant) {
-        // Hero - Titre principal
-        const heroTitle = document.querySelector('.hero h1, .hero-title, h1');
-        if (heroTitle && heroTitle.textContent.includes('Marvelous')) {
+    function updateHomePage() {
+        console.log('🏠 [Dynamic Content] Mise à jour page accueil');
+
+        // Hero - utiliser les IDs spécifiques
+        const heroTitle = document.getElementById('heroTitle');
+        const heroSubtitle = document.getElementById('heroSubtitle');
+
+        if (heroTitle) {
             heroTitle.textContent = restaurant.name;
+            console.log('✅ Hero title mis à jour:', restaurant.name);
         }
 
-        // Hero - Tagline
-        const heroTagline = document.querySelector('.hero .tagline, .hero p, .hero-subtitle');
-        if (heroTagline && restaurant.brandTagline) {
-            heroTagline.textContent = restaurant.brandTagline;
+        if (heroSubtitle && restaurant.brandTagline) {
+            heroSubtitle.textContent = restaurant.brandTagline;
+            console.log('✅ Hero subtitle mis à jour:', restaurant.brandTagline);
         }
 
-        // Remplacer les avis Google si présents
-        // Les avis seront chargés depuis la base de données si disponibles
-        // Pour l'instant on les cache s'ils sont hardcodés pour Marvelous
-        const reviewCards = document.querySelectorAll('.review-card, .testimonial');
+        // IMPORTANT: Masquer les avis Google si contiennent Ouled Moussa ou Marvelous
+        hideWrongReviews();
+
+        // Alt de l'image hero
+        const heroImage = document.getElementById('heroImage');
+        if (heroImage) {
+            heroImage.alt = `${restaurant.name} ${restaurant.brandTagline || ''}`;
+        }
+    }
+
+    /**
+     * Masquer les avis qui ne correspondent pas à ce restaurant
+     */
+    function hideWrongReviews() {
+        console.log('🔍 [Dynamic Content] Vérification des avis...');
+
+        const reviewCards = document.querySelectorAll('.review-card');
+        let hiddenCount = 0;
+
         reviewCards.forEach(card => {
-            const reviewText = card.textContent || card.innerHTML;
-            if (reviewText.includes('Marvelous') || reviewText.includes('Ouled Moussa')) {
-                // Masquer les avis hardcodés de Marvelous
+            const text = card.textContent || '';
+
+            // Si l'avis mentionne Ouled Moussa mais qu'on n'est PAS à Ouled Moussa
+            if (text.includes('Ouled Moussa') && restaurant.location.city !== 'Ouled Moussa') {
                 card.style.display = 'none';
+                hiddenCount++;
+                console.log('❌ Avis caché (Ouled Moussa)');
+            }
+            // Si l'avis mentionne Marvelous mais qu'on n'est PAS Le Marvelous
+            else if (text.includes('Marvelous') && !restaurant.name.includes('Marvelous')) {
+                card.style.display = 'none';
+                hiddenCount++;
+                console.log('❌ Avis caché (Marvelous)');
             }
         });
 
-        // Section "À propos" sur la home
-        const aboutSection = document.querySelector('.about-section, #about');
-        if (aboutSection) {
-            const aboutTitle = aboutSection.querySelector('h2');
-            if (aboutTitle && aboutTitle.textContent.includes('Marvelous')) {
-                aboutTitle.textContent = `À propos de ${restaurant.name}`;
-            }
-
-            const aboutText = aboutSection.querySelector('p');
-            if (aboutText && aboutText.textContent.includes('Marvelous')) {
-                aboutText.textContent = `Découvrez ${restaurant.name}, votre ${restaurant.brandTagline || 'restaurant'} situé à ${restaurant.location.city}.`;
+        // Si on a caché des avis, masquer toute la section
+        if (hiddenCount > 0 && hiddenCount === reviewCards.length) {
+            const reviewsSection = document.querySelector('.reviews-section');
+            if (reviewsSection) {
+                reviewsSection.style.display = 'none';
+                console.log('❌ Section avis entièrement cachée');
             }
         }
+
+        console.log(`✅ ${hiddenCount} avis cachés`);
     }
 
     /**
      * Met à jour la page À Propos
      */
-    function updateAboutPage(restaurant) {
-        // Titre principal
-        const mainTitle = document.querySelector('h1, .page-title');
-        if (mainTitle) {
-            mainTitle.textContent = `À propos de ${restaurant.name}`;
-        }
+    function updateAboutPage() {
+        console.log('📖 [Dynamic Content] Mise à jour page À Propos');
 
-        // Remplacer TOUS les "Marvelous" par le vrai nom
+        // Remplacer tous les "Le Marvelous" et "Marvelous"
         replaceTextInPage('Le Marvelous', restaurant.name);
         replaceTextInPage('Marvelous', restaurant.name);
 
-        // Remplacer "Ouled Moussa" par la vraie ville
+        // Remplacer Ouled Moussa
         if (restaurant.location.city !== 'Ouled Moussa') {
             replaceTextInPage('Ouled Moussa', restaurant.location.city);
         }
 
-        // Tagline
-        const taglines = document.querySelectorAll('.tagline, .subtitle, .lead');
-        taglines.forEach(el => {
-            if (restaurant.brandTagline && el.textContent.includes('Diner')) {
-                el.textContent = restaurant.brandTagline;
-            }
-        });
-
-        // Section "Bienvenue"
-        const welcomeSection = document.querySelector('.welcome-section, .intro');
-        if (welcomeSection && restaurant.brandTagline) {
-            const welcomeText = welcomeSection.querySelector('p');
-            if (welcomeText) {
-                welcomeText.textContent = `Au cœur de ${restaurant.location.city}, ${restaurant.name} est bien plus qu'un simple restaurant. C'est un lieu où se mêlent ${restaurant.brandTagline || 'passion culinaire'} et convivialité.`;
-            }
-        }
+        console.log('✅ Page À Propos mise à jour');
     }
 
     /**
      * Met à jour la page Fidélité
      */
-    function updateLoyaltyPage(restaurant) {
-        // Titre
-        const title = document.querySelector('h1, .page-title');
-        if (title) {
-            title.textContent = `Programme Fidélité ${restaurant.name}`;
-        }
+    function updateLoyaltyPage() {
+        console.log('⭐ [Dynamic Content] Mise à jour page Fidélité');
 
-        // Remplacer tous les "Marvelous"
         replaceTextInPage('Le Marvelous', restaurant.name);
         replaceTextInPage('Marvelous', restaurant.name);
+        replaceTextInPage('Fabrik Burger', restaurant.name);
 
-        // Description
-        const description = document.querySelector('.program-description, .intro p');
-        if (description) {
-            description.textContent = `Rejoignez le programme de fidélité ${restaurant.name} et profitez d'avantages exclusifs à chaque commande !`;
-        }
+        console.log('✅ Page Fidélité mise à jour');
     }
 
     /**
      * Met à jour la page Click & Collect
      */
-    function updateClickCollectPage(restaurant) {
-        // Titre
-        const title = document.querySelector('h1, .page-title');
-        if (title) {
-            title.textContent = `Click & Collect - ${restaurant.name}`;
-        }
+    function updateClickCollectPage() {
+        console.log('🛍️ [Dynamic Content] Mise à jour page Click & Collect');
 
-        // Remplacer tous les "Marvelous"
         replaceTextInPage('Le Marvelous', restaurant.name);
         replaceTextInPage('Marvelous', restaurant.name);
+        replaceTextInPage('Fabrik Burger', restaurant.name);
 
-        // Adresse de récupération
-        const addressInfo = document.querySelector('.pickup-address, .address-info');
-        if (addressInfo) {
-            addressInfo.innerHTML = `
-                <strong>Adresse de récupération :</strong><br>
-                ${restaurant.name}<br>
-                ${restaurant.location.address}<br>
-                ${restaurant.location.postalCode || ''} ${restaurant.location.city}
-            `;
-        }
+        console.log('✅ Page Click & Collect mise à jour');
+    }
 
-        // Téléphone pour questions
-        const contactInfo = document.querySelector('.contact-info');
-        if (contactInfo && restaurant.contact.phone) {
-            const phoneText = contactInfo.querySelector('p, span');
-            if (phoneText) {
-                phoneText.textContent = `Des questions ? Appelez-nous au ${restaurant.contact.phoneDisplay || restaurant.contact.phone}`;
+    /**
+     * Met à jour le contenu commun (header, footer, meta)
+     */
+    function updateCommonContent() {
+        console.log('🔧 [Dynamic Content] Mise à jour contenu commun');
+
+        // Logo et nom dans le header
+        const logoSpans = document.querySelectorAll('.logo span, .logo-text');
+        logoSpans.forEach(span => {
+            if (span.textContent.includes('Marvelous') || span.textContent.includes('Fabrik')) {
+                span.textContent = restaurant.name;
             }
+        });
+
+        // Footer
+        const footerHeading = document.querySelector('footer h3');
+        if (footerHeading && (footerHeading.textContent.includes('Marvelous') || footerHeading.textContent.includes('Fabrik'))) {
+            footerHeading.textContent = restaurant.name;
         }
+
+        // Copyright
+        const year = new Date().getFullYear();
+        const copyrightPara = document.querySelector('footer p:last-child');
+        if (copyrightPara && copyrightPara.textContent.includes('©')) {
+            copyrightPara.textContent = `© ${year} ${restaurant.name}. Tous droits réservés.`;
+        }
+
+        // Téléphones
+        document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+            if (restaurant.contact.phone) {
+                link.href = `tel:${restaurant.contact.phone}`;
+                const text = link.textContent.trim();
+                if (text.match(/^[\d\s\+\(\)]+$/)) {
+                    link.textContent = restaurant.contact.phoneDisplay || restaurant.contact.phone;
+                }
+            }
+        });
+
+        // WhatsApp
+        if (restaurant.contact.whatsappOrdersNumber) {
+            document.querySelectorAll('a[href*="wa.me"]').forEach(link => {
+                const whatsappNum = restaurant.contact.whatsappOrdersNumber.replace(/[^0-9]/g, '');
+                link.href = `https://wa.me/${whatsappNum}`;
+            });
+        }
+
+        // Adresses
+        const addressParagraphs = document.querySelectorAll('footer p, .address, .location');
+        addressParagraphs.forEach(p => {
+            const text = p.textContent;
+            if (text.includes('Riad City') || text.includes('Ouled Moussa')) {
+                if (restaurant.location.city !== 'Ouled Moussa') {
+                    p.textContent = p.textContent
+                        .replace(/Riad City.*Ouled Moussa/g, restaurant.location.address)
+                        .replace('Ouled Moussa', restaurant.location.city);
+                }
+            }
+        });
+
+        console.log('✅ Contenu commun mis à jour');
     }
 
     /**
      * Remplace un texte dans toute la page
      */
     function replaceTextInPage(oldText, newText) {
+        if (oldText === newText) return;
+
         const walker = document.createTreeWalker(
             document.body,
             NodeFilter.SHOW_TEXT,
-            null,
-            false
+            {
+                acceptNode: function(node) {
+                    // Ignorer les scripts et styles
+                    if (node.parentElement.tagName === 'SCRIPT' ||
+                        node.parentElement.tagName === 'STYLE') {
+                        return NodeFilter.FILTER_REJECT;
+                    }
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            }
         );
 
         const nodesToReplace = [];
         let node;
 
         while (node = walker.nextNode()) {
-            if (node.nodeValue.includes(oldText)) {
+            if (node.nodeValue && node.nodeValue.includes(oldText)) {
                 nodesToReplace.push(node);
             }
         }
@@ -292,15 +296,8 @@
         nodesToReplace.forEach(node => {
             node.nodeValue = node.nodeValue.replace(new RegExp(oldText, 'g'), newText);
         });
-    }
 
-    /**
-     * Utilitaire : Échapper le HTML
-     */
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        console.log(`🔄 Remplacé "${oldText}" par "${newText}" (${nodesToReplace.length} occurrences)`);
     }
 
 })();
