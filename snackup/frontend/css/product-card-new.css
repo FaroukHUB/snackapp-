@@ -93,7 +93,7 @@
 .product-price-new {
     font-size: 17px;
     font-weight: 800;
-    color: var(--gray-900);
+    color: var(--primary);
     flex-shrink: 0;
 }
 
