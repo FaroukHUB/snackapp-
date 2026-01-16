@@ -824,7 +824,7 @@ ul {
 .product-add-btn {
     padding: 10px 20px;
     border-radius: 10px;
-    background: #14b8a6;
+    background: var(--primary);
     color: #ffffff;
     font-size: 14px;
     font-weight: 600;
@@ -1250,22 +1250,22 @@ ul {
 /* Deliveroo - Clean card with teal accent */
 .platform-card.deliveroo {
     background: var(--white);
-    border-color: #00CCBC;
+    border-color: var(--primary);
 }
 
 .platform-card.deliveroo:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 30px rgba(0, 204, 188, 0.2);
-    border-color: #00CCBC;
+    border-color: var(--primary);
 }
 
 .platform-card.deliveroo .platform-cta {
-    background: #00CCBC;
+    background: var(--primary);
     color: white;
 }
 
 .platform-card.deliveroo:hover .platform-cta {
-    background: #00a89d;
+    background: var(--primary-dark);
 }
 
 /* Just Eat - Clean card with orange accent */
@@ -2796,7 +2796,7 @@ ul {
     }
 
     .product-add-btn {
-        background: #14b8a6 !important;
+        background: var(--primary) !important;
         color: #ffffff !important;
         border: none !important;
         padding: 8px 16px !important;
