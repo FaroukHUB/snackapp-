@@ -40,18 +40,34 @@
 ### 🔴 Erreur persistante (2026-01-16 11:05)
 **Symptôme:** "Erreur de chargement veuillez raffraichir la page"
 
-**Actions de diagnostic créées:**
-- `DIAGNOSTIC-ATELIER-PIZZA.php` → Test complet config/DB/tables
-- `TEST-API-ATELIER-PIZZA.sh` → Test rapide des APIs en production
-
-**À exécuter sur le serveur:**
-```bash
-# Test rapide
-bash TEST-API-ATELIER-PIZZA.sh
-
-# Diagnostic complet
-php DIAGNOSTIC-ATELIER-PIZZA.php
+**Diagnostic effectué:**
 ```
+✅ APIs retournent du JSON (restaurant.php + menu.php)
+✅ MySQL connecté
+✅ Restaurant ID 3 existe
+✅ 59 produits + 8 catégories
+```
+
+**Cause identifiée:** Frontend avec contenu hardcodé Marvelous
+- `snackup/frontend/index.html` contient meta tags Marvelous
+- Devise "DA" hardcodée au lieu de "EUR"
+- WhatsApp hardcodé pour Marvelous
+
+### ✅ CORRECTION APPLIQUÉE (2026-01-16 11:20)
+
+**Fichiers créés:**
+- `snackup/frontend/js/init-meta.js` → Charge métadonnées dynamiquement depuis API
+
+**Fichiers modifiés:**
+- `snackup/frontend/js/config.js` → Fonction `applyCurrency()` remplace "DA" par devise API
+- `snackup/frontend/index.html` → Charge `init-meta.js` en premier
+
+**Solution:**
+1. `init-meta.js` s'exécute en PREMIER (sans defer)
+2. Charge `/config/restaurant.php`
+3. Met à jour title, meta tags, Schema.org dynamiquement
+4. Stocke `window.CURRENCY` pour utilisation globale
+5. `config.js` remplace tous les "DA" hardcodés par la devise correcte
 
 ---
 
@@ -103,5 +119,6 @@ php DIAGNOSTIC-ATELIER-PIZZA.php
 
 ---
 
-**Dernière mise à jour:** 2026-01-16 11:00
+**Dernière mise à jour:** 2026-01-16 11:25
 **Mis à jour par:** Claude (session U4j8i)
+**Commits:** 6 (backend-config + déploiement + diagnostic + frontend fix)

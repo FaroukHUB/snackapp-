@@ -32,6 +32,7 @@ const Config = {
             ]);
             this.isLoaded = true;
             this.applyTheme();
+            this.applyCurrency(); // Remplacer devise hardcodée
             console.log('Config loaded successfully');
             return true;
         } catch (error) {
@@ -108,6 +109,43 @@ const Config = {
         document.title = `Commander | ${this.restaurant.name}`;
 
         console.log('Theme applied:', theme);
+    },
+
+    /**
+     * Apply currency to hardcoded elements
+     * Remplace "DA" hardcodé par la vraie devise
+     */
+    applyCurrency() {
+        // Récupérer la devise depuis l'API
+        const currency = this.restaurant?._jsConfig?.currency ||
+                        this.menu?._meta?.currency ||
+                        'EUR';
+
+        // Stocker globalement
+        window.CURRENCY = currency;
+
+        // Remplacer tous les "DA" hardcodés dans le HTML
+        const elementsToUpdate = [
+            { id: 'cartTotal', selector: null },
+            { id: 'miniCartTotal', selector: null },
+            { id: 'addToCartPrice', selector: null }
+        ];
+
+        elementsToUpdate.forEach(({ id, selector }) => {
+            const element = id ? document.getElementById(id) : document.querySelector(selector);
+            if (element && element.textContent) {
+                element.textContent = element.textContent.replace(/\bDA\b/g, currency);
+            }
+        });
+
+        // Mettre à jour le bouton WhatsApp si présent
+        const whatsappButton = document.querySelector('.whatsapp-float');
+        if (whatsappButton && this.restaurant?.contact?.allowWhatsAppOrders) {
+            const whatsappNumber = this.getWhatsAppNumber();
+            whatsappButton.href = `https://wa.me/${whatsappNumber}`;
+        }
+
+        console.log('Currency applied:', currency);
     },
 
     /**
