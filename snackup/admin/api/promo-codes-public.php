@@ -9,12 +9,27 @@ require_once __DIR__ . '/../bootstrap.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // CORS pour permettre les appels depuis le frontend
+// Charger dynamiquement tous les domaines de toutes les instances
+require_once __DIR__ . '/../../backend/InstanceManager.php';
+InstanceManager::init();
+$allInstances = InstanceManager::getAllInstances();
+
 $allowed_origins = [
-    'https://marvelous.mon-agenceweb.fr',
-    'https://www.marvelous.mon-agenceweb.fr',
-    'http://localhost:3000', // Pour développement local
-    'http://localhost:8000'
+    'http://localhost:3000', // Développement local
+    'http://localhost:8000',
+    'http://localhost'
 ];
+
+// Ajouter tous les domaines de toutes les instances
+foreach ($allInstances as $instanceData) {
+    if (isset($instanceData['domains']) && is_array($instanceData['domains'])) {
+        foreach ($instanceData['domains'] as $domain) {
+            $allowed_origins[] = 'https://' . $domain;
+            $allowed_origins[] = 'https://www.' . $domain;
+            $allowed_origins[] = 'http://' . $domain;
+        }
+    }
+}
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $allowed_origins, true)) {

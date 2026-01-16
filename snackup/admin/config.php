@@ -6,19 +6,19 @@
 
 session_start();
 
-// Déterminer quelle instance utiliser
-// Pour l'instant on hardcode Atelier Pizza, mais on pourrait détecter depuis l'URL
-define('INSTANCE_NAME', 'atelier-pizza');
-define('INSTANCE_CONFIG_PATH', __DIR__ . '/../../instances/' . INSTANCE_NAME . '/backend-config.php');
+// Charger le gestionnaire d'instances (architecture scalable)
+require_once __DIR__ . '/../backend/InstanceManager.php';
 
-// Charger la configuration de l'instance
-if (!file_exists(INSTANCE_CONFIG_PATH)) {
-    die('❌ Erreur: Fichier de configuration instance introuvable: ' . INSTANCE_CONFIG_PATH);
+// Détecter automatiquement l'instance selon le domaine
+try {
+    $instanceConfig = InstanceManager::loadConfig();
+    $instanceName = InstanceManager::getCurrentInstance();
+} catch (Exception $e) {
+    die('❌ Erreur: Impossible de charger la configuration de l\'instance: ' . $e->getMessage());
 }
 
-$instanceConfig = require INSTANCE_CONFIG_PATH;
-
 // Définir les constantes depuis la config
+define('INSTANCE_NAME', $instanceName);
 define('DB_HOST', $instanceConfig['database']['host']);
 define('DB_NAME', $instanceConfig['database']['name']);
 define('DB_USER', $instanceConfig['database']['user']);
