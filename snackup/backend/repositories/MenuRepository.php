@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../Database.php';
+require_once __DIR__ . '/../InstanceManager.php';
 
 class MenuRepository {
     public static $restaurantId = 2; // Par défaut Le Marvelous, peut être changé
@@ -178,8 +179,23 @@ class MenuRepository {
 
     /**
      * Assigne automatiquement les suppléments selon le flavor
+     * Feature désactivable via config instance (auto_category_supplements)
      */
     private static function assignSupplementsByFlavor($categoryId, $flavor) {
+        // Vérifier si la feature est activée pour cette instance
+        try {
+            $config = InstanceManager::loadConfig();
+            $featureEnabled = $config['features']['auto_category_supplements'] ?? true;
+
+            if (!$featureEnabled) {
+                // Feature désactivée pour cette instance (ex: pizzerias)
+                return;
+            }
+        } catch (Exception $e) {
+            // En cas d'erreur de chargement config, continuer (backward compatibility)
+            error_log('[MenuRepository] Impossible de charger config instance: ' . $e->getMessage());
+        }
+
         $pdo = Database::getInstance();
 
         // Récupérer les suppléments du type correspondant

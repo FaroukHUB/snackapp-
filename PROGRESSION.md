@@ -154,6 +154,56 @@ DESCRIBE supplements;
 - ✅ Position : après colonne `name`
 - ✅ Index `idx_restaurant_flavor` créé (à vérifier)
 
+#### Bug Secondaire Identifié et Résolu
+
+**Erreur lors test création catégorie** :
+```
+SQLSTATE[42S02]: Base table or view not found: 1146
+Table 'zajr1824_atelierpizza.category_supplements' doesn't exist
+```
+
+**Analyse** :
+- ✅ Migration `flavor` a fonctionné (plus d'erreur "Unknown column 'type'")
+- ❌ Table `category_supplements` manquante (jamais créée)
+- ℹ️ Cette table sert à l'auto-assignment des suppléments par flavor (feature Marvelous)
+- ℹ️ Pour Atelier Pizza (pizzeria), cette feature n'est pas pertinente
+
+**Cause Racine** :
+- Migration officielle `add_menu_features.sql` (2026-01-06) jamais appliquée
+- Cette migration crée la table `category_supplements`
+- Conflit : elle ajoute `supplements.type` alors que `supplements.flavor` existe déjà
+
+**Solution Appliquée** :
+
+**1) Migration de rattrapage minimale** :
+- Fichier : `database/migrations/2026_01_17_create_category_supplements.sql`
+- Action : Crée UNIQUEMENT la table `category_supplements`
+- Structure : category_id, supplement_id, created_at, PK composite, FK CASCADE
+- Idempotente : `CREATE TABLE IF NOT EXISTS`
+- **NE TOUCHE PAS** aux colonnes `supplements` (flavor reste inchangé)
+
+**2) Désactivation feature pour Atelier Pizza** :
+- Fichier : `instances/atelier-pizza/backend-config.php`
+- Ajout section :
+  ```php
+  'features' => [
+      'auto_category_supplements' => false
+  ]
+  ```
+- Justification : Pizzerias n'ont pas besoin d'auto-assign suppléments par flavor
+
+**3) Protection dans le code** :
+- Fichier : `snackup/backend/repositories/MenuRepository.php`
+- Méthode : `assignSupplementsByFlavor()`
+- Ajout check du flag `auto_category_supplements`
+- Si `false` → return early (pas d'insertion dans `category_supplements`)
+- Backward compatible : si flag absent, feature active par défaut
+
+**Prévention** :
+- Toute instance de type "pizzeria" doit avoir `auto_category_supplements = false`
+- La table existe pour éviter erreurs SQL, mais n'est pas utilisée
+- Feature reste active pour instances type "crêperie" (Marvelous)
+
 #### Tests Fonctionnels (En cours par l'utilisateur)
 
 **Prérequis** :
@@ -200,10 +250,12 @@ DESCRIBE supplements;
 - Aucune perte de données
 
 **Comportement Métier** :
-- Auto-assignment suppléments **CONSERVÉ**
-- Catégories `flavor='sale'` → suppléments salés + both
-- Catégories `flavor='sucre'` → suppléments sucrés + both
+- Auto-assignment suppléments **DÉSACTIVÉ pour Atelier Pizza** (pizzeria)
+- Auto-assignment **ACTIF pour Marvelous** (crêperie) :
+  - Catégories `flavor='sale'` → suppléments salés + both
+  - Catégories `flavor='sucre'` → suppléments sucrés + both
 - Catégories sans flavor → pas d'auto-assignment
+- Contrôle via flag `features.auto_category_supplements` dans config instance
 
 **Performance** :
 - Index `idx_restaurant_flavor` optimise les requêtes WHERE
@@ -234,17 +286,19 @@ DESCRIBE supplements;
 
 #### Livrables
 
-**Fichiers créés** (5) :
-1. `database/migrations/2026_01_17_add_flavor_to_supplements.sql` - Migration
-2. `database/test_flavor_fix.php` - Script test automatisé
-3. `database/migrations/TEST_FLAVOR_FIX.md` - Documentation tests
+**Fichiers créés** (6) :
+1. `database/migrations/2026_01_17_add_flavor_to_supplements.sql` - Migration colonne flavor
+2. `database/migrations/2026_01_17_create_category_supplements.sql` - Migration table category_supplements
+3. `database/test_flavor_fix.php` - Script test automatisé
+4. `database/migrations/TEST_FLAVOR_FIX.md` - Documentation tests
 
-**Fichiers modifiés** (2) :
-4. `database/schema.sql` - Ajout colonne flavor + index
-5. `snackup/backend/repositories/MenuRepository.php` - type → flavor
+**Fichiers modifiés** (4) :
+5. `database/schema.sql` - Ajout colonne flavor + index
+6. `snackup/backend/repositories/MenuRepository.php` - type → flavor + check flag auto_category_supplements
+7. `instances/atelier-pizza/backend-config.php` - Ajout flag features.auto_category_supplements=false
 
 **Documentation** :
-6. `PROGRESSION.md` - Cette section
+8. `PROGRESSION.md` - Cette section
 
 ---
 

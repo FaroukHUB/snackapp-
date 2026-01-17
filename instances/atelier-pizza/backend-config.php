@@ -29,6 +29,12 @@ return [
         'currency' => 'EUR'
     ],
 
+    'features' => [
+        // Désactiver l'auto-assignment des suppléments par flavor/type
+        // Feature Marvelous (crêperie salé/sucré) non applicable aux pizzerias
+        'auto_category_supplements' => false
+    ],
+
     'email' => [
         'from' => 'atelierpizzaroubaix@gmail.com',
         'from_name' => "L'Atelier Pizza Roubaix",
