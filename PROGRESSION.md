@@ -298,37 +298,44 @@ $useMySQL = true;
 grep -n "useMySQL = true" admin-panel-v2/api/products.php
 ```
 
-**État** : ✅ CORRIGÉ - Mode MySQL activé
+**État** : ⏳ EN COURS DE DÉPLOIEMENT
 
-#### Tests Fonctionnels (En cours par l'utilisateur)
+**Statut déploiement** :
+- ✅ Modification appliquée EN LOCAL (git commit 7b108ec)
+- ⏳ EN ATTENTE : Déploiement sur serveur de production
+- ❌ Git push impossible (erreur 403 - session ID mismatch)
+- 🔧 Solution : Déploiement manuel via SSH
 
-**Prérequis** :
+**Commandes de déploiement** (sur le serveur) :
 ```bash
-# 1. Appliquer la migration
-mysql -u zajr1824_marvelous -p zajr1824_marvelous < \
-  database/migrations/2026_01_17_add_flavor_to_supplements.sql
+# Étape 1 : Localiser le fichier products.php
+# Le chemin exact dépend de la structure du serveur
+# Probablement : ~/atelierpizza.mon-agenceweb.fr/admin-panel-v2/api/products.php
 
-# 2. Vérifier la colonne
-DESCRIBE supplements;
+# Étape 2 : Appliquer le patch (remplacer CHEMIN par le bon chemin)
+sed -i 's/\$useMySQL = false;/\$useMySQL = true;/' CHEMIN/admin-panel-v2/api/products.php
+
+# Étape 3 : Vérifier
+sed -n '210p' CHEMIN/admin-panel-v2/api/products.php
+# Doit afficher : $useMySQL = true;
 ```
 
-**Test 1 : Création catégorie salée** :
-- ✅ Critère : Pas d'erreur "Unknown column 'type'"
-- ✅ Critère : Catégorie créée avec ID
-- ✅ Critère : Suppléments `flavor='sale'` et `flavor='both'` auto-assignés
-- Commande : Voir `database/migrations/TEST_FLAVOR_FIX.md`
+**Fichier de référence** : `PATCH_useMySQL_true.txt` (contient toutes les instructions)
 
-**Test 2 : Création catégorie sucrée** :
-- ✅ Critère : Pas d'erreur SQL
-- ✅ Critère : Catégorie créée avec ID
-- ✅ Critère : Suppléments `flavor='sucre'` et `flavor='both'` auto-assignés
-- Commande : Voir `database/migrations/TEST_FLAVOR_FIX.md`
+#### Tests Fonctionnels Post-Déploiement
 
-**Test 3 : CRUD Produits (non-régression)** :
-- ✅ Critère : Création produit fonctionne
-- ✅ Critère : Modification produit fonctionne
-- ✅ Critère : Suppression produit fonctionne
-- ✅ Critère : Aucune erreur liée à `flavor`
+**Test 1 : Édition catégorie existante** :
+- ⏳ Critère : Pas d'erreur "Catégorie introuvable"
+- ⏳ Critère : Modification du nom/description fonctionne
+- ⏳ Critère : Sauvegarde réussie
+
+**Test 2 : Affichage des 9 catégories existantes** :
+- ⏳ Critère : Admin panel affiche les 9 catégories MySQL
+- ⏳ Critère : Produits associés visibles (60 produits)
+
+**Test 3 : Création nouvelle catégorie** :
+- ⏳ Critère : Création réussie sans erreur
+- ⏳ Critère : Catégorie visible après ajout de produits
 
 #### Règles Respectées
 
@@ -359,42 +366,66 @@ DESCRIBE supplements;
 
 #### Prochaines Actions
 
-**EN COURS** (par l'utilisateur) :
-1. ✅ Appliquer migration : FAIT
-2. ✅ Vérifier colonne : FAIT
-3. ⏳ Vérifier index : `SHOW INDEX FROM supplements WHERE Key_name = 'idx_restaurant_flavor';`
-4. ⏳ Tester création catégorie salée (via admin panel)
-5. ⏳ Tester création catégorie sucrée (via admin panel)
-6. ⏳ Vérifier CRUD produits inchangé
+**EN COURS IMMÉDIAT** :
+1. ⏳ Localiser le chemin exact du fichier products.php sur le serveur
+   - Commande : `ls -la admin-panel-v2/api/products.php` (depuis ~/atelierpizza.mon-agenceweb.fr)
+   - Ou : `find ~ -name "products.php" | grep admin`
+
+2. ⏳ Appliquer le patch sur le serveur
+   - Fichier : `admin-panel-v2/api/products.php` ligne 210
+   - Changement : `$useMySQL = false;` → `$useMySQL = true;`
+   - Méthode : `sed -i` ou éditeur de fichiers
+
+3. ⏳ Tester dans l'admin panel
+   - Recharger l'admin
+   - Essayer d'éditer une catégorie existante
+   - Vérifier : pas d'erreur "Catégorie introuvable"
+
+**APRÈS DÉPLOIEMENT** :
+1. ✅ Migration flavor : FAIT (colonne ajoutée)
+2. ✅ Table category_supplements : FAIT (créée)
+3. ✅ Feature auto_category_supplements : FAIT (désactivée pour Atelier Pizza)
+4. ✅ MenuRepository.php : FAIT (check feature flag)
+5. ⏳ Mode MySQL activé : EN ATTENTE DÉPLOIEMENT SERVEUR
 
 **SI TESTS OK** :
-- Marquer session comme TERMINÉE
-- Commit et push des changements (PROGRESSION.md mis à jour)
-- Retour à Phase 4 (Plan de Switch MySQL)
+- Marquer bug tertiaire comme RÉSOLU
+- Mettre à jour PROGRESSION.md
+- Session 2026-01-17 TERMINÉE avec succès
 
 **SI TESTS KO** :
 - Analyser l'erreur
-- Exécuter rollback si nécessaire :
-  ```sql
-  DROP INDEX idx_restaurant_flavor ON supplements;
+- Rollback si nécessaire :
+  ```bash
+  sed -i 's/\$useMySQL = true;/\$useMySQL = false;/'
   ALTER TABLE supplements DROP COLUMN flavor;
   ```
 
 #### Livrables
 
-**Fichiers créés** (6) :
+**Fichiers créés** (9) :
 1. `database/migrations/2026_01_17_add_flavor_to_supplements.sql` - Migration colonne flavor
 2. `database/migrations/2026_01_17_create_category_supplements.sql` - Migration table category_supplements
 3. `database/test_flavor_fix.php` - Script test automatisé
 4. `database/migrations/TEST_FLAVOR_FIX.md` - Documentation tests
+5. `PATCH_assignSupplementsByFlavor.txt` - Instructions patch MenuRepository
+6. `PATCH_useMySQL_true.txt` - Instructions activation mode MySQL
+7. `deploy_fix_categories.sh` - Script automatisé de déploiement
 
-**Fichiers modifiés** (4) :
-5. `database/schema.sql` - Ajout colonne flavor + index
-6. `snackup/backend/repositories/MenuRepository.php` - type → flavor + check flag auto_category_supplements
-7. `instances/atelier-pizza/backend-config.php` - Ajout flag features.auto_category_supplements=false
+**Fichiers modifiés** (5) :
+8. `database/schema.sql` - Ajout colonne flavor + index
+9. `snackup/backend/repositories/MenuRepository.php` - type → flavor + check flag auto_category_supplements
+10. `instances/atelier-pizza/backend-config.php` - Ajout flag features.auto_category_supplements=false
+11. `admin-panel-v2/api/products.php` - $useMySQL = true (⏳ déploiement serveur en attente)
 
 **Documentation** :
-8. `PROGRESSION.md` - Cette section
+12. `PROGRESSION.md` - Cette section + bug tertiaire documenté
+
+**Commits Git** (4, non pushés - erreur 403) :
+- `7b108ec` - fix: Activation mode MySQL dans admin panel
+- `fcab668` - chore: Ajout scripts de déploiement
+- `c08c2bd` - fix: Création table category_supplements + désactivation auto-assign
+- `f1f4216` - docs: Mise à jour PROGRESSION.md - migration flavor appliquée
 
 ---
 
