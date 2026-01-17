@@ -39,7 +39,7 @@ Modifier `Config.getProduct()` pour supporter :
 ### [EN COURS] Session 2026-01-17 - Correction Bug CRUD Catégories
 **Objectif** : Corriger l'erreur "Unknown column 'type'" lors CRUD catégories MySQL
 
-**Statut** : ✅ CORRIGÉ — TESTS REQUIS
+**Statut** : ✅ MIGRATION APPLIQUÉE — TESTS EN COURS
 
 #### Problème Identifié
 
@@ -114,7 +114,47 @@ WHERE restaurant_id = ? AND (flavor = ? OR flavor = 'both')
 ✅ TOUS LES TESTS STATIQUES PASSÉS
 ```
 
-#### Tests Requis (À faire par l'utilisateur)
+#### Migration Appliquée sur Production
+
+**Date** : 2026-01-17
+**Base de données** : `zajr1824_atelierpizza`
+**Instance** : Atelier Pizza (restaurant_id = 3)
+**Utilisateur MySQL** : `zajr1824_atelierpizza`
+
+**Commande exécutée** :
+```bash
+mariadb -u zajr1824_atelierpizza -p'Mariagor6!' zajr1824_atelierpizza < \
+  database/migrations/2026_01_17_add_flavor_to_supplements.sql
+```
+
+**Vérification structure** :
+```sql
+DESCRIBE supplements;
+```
+
+**Résultat** :
+```
++---------------+---------------------------------+------+-----+-----------+----------------+
+| Field         | Type                            | Null | Key | Default   | Extra          |
++---------------+---------------------------------+------+-----+-----------+----------------+
+| id            | int(10) unsigned                | NO   | PRI | NULL      | auto_increment |
+| restaurant_id | int(10) unsigned                | NO   | MUL | NULL      |                |
+| name          | varchar(100)                    | NO   |     | NULL      |                |
+| flavor        | enum('sale','sucre','both')     | NO   |     | both      |                |
+| price         | decimal(8,2)                    | NO   |     | 0.00      |                |
+| status        | enum('available','unavailable') | YES  |     | available |                |
+| sort_order    | int(11)                         | YES  |     | 0         |                |
++---------------+---------------------------------+------+-----+-----------+----------------+
+```
+
+**État** :
+- ✅ Migration exécutée sans erreur
+- ✅ Colonne `flavor` ajoutée (type ENUM('sale','sucre','both'))
+- ✅ Valeur par défaut : `both`
+- ✅ Position : après colonne `name`
+- ✅ Index `idx_restaurant_flavor` créé (à vérifier)
+
+#### Tests Fonctionnels (En cours par l'utilisateur)
 
 **Prérequis** :
 ```bash
@@ -171,19 +211,22 @@ DESCRIBE supplements;
 
 #### Prochaines Actions
 
-**IMMÉDIAT** (par l'utilisateur) :
-1. Appliquer migration : `mysql ... < 2026_01_17_add_flavor_to_supplements.sql`
-2. Vérifier colonne : `DESCRIBE supplements;`
-3. Tester création catégorie salée (TEST_FLAVOR_FIX.md)
-4. Tester création catégorie sucrée (TEST_FLAVOR_FIX.md)
-5. Vérifier CRUD produits inchangé
+**EN COURS** (par l'utilisateur) :
+1. ✅ Appliquer migration : FAIT
+2. ✅ Vérifier colonne : FAIT
+3. ⏳ Vérifier index : `SHOW INDEX FROM supplements WHERE Key_name = 'idx_restaurant_flavor';`
+4. ⏳ Tester création catégorie salée (via admin panel)
+5. ⏳ Tester création catégorie sucrée (via admin panel)
+6. ⏳ Vérifier CRUD produits inchangé
 
 **SI TESTS OK** :
 - Marquer session comme TERMINÉE
+- Commit et push des changements (PROGRESSION.md mis à jour)
 - Retour à Phase 4 (Plan de Switch MySQL)
 
 **SI TESTS KO** :
-- Exécuter rollback :
+- Analyser l'erreur
+- Exécuter rollback si nécessaire :
   ```sql
   DROP INDEX idx_restaurant_flavor ON supplements;
   ALTER TABLE supplements DROP COLUMN flavor;
