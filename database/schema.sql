@@ -138,11 +138,13 @@ CREATE TABLE IF NOT EXISTS `supplements` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `restaurant_id` INT UNSIGNED NOT NULL,
   `name` VARCHAR(100) NOT NULL,
+  `flavor` ENUM('sale', 'sucre', 'both') NOT NULL DEFAULT 'both' COMMENT 'Type de plat compatible',
   `price` DECIMAL(8,2) NOT NULL DEFAULT 0.00,
   `status` ENUM('available', 'unavailable') DEFAULT 'available',
   `sort_order` INT DEFAULT 0,
   `deleted_at` TIMESTAMP NULL DEFAULT NULL,
   INDEX `idx_restaurant` (`restaurant_id`),
+  INDEX `idx_restaurant_flavor` (`restaurant_id`, `flavor`),
   INDEX `idx_deleted` (`deleted_at`),
   FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

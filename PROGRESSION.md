@@ -36,7 +36,176 @@ Modifier `Config.getProduct()` pour supporter :
 
 ## Sessions
 
-### [EN COURS] Session 2026-01-16 - Phase 4 : Plan de Switch MySQL
+### [EN COURS] Session 2026-01-17 - Correction Bug CRUD Catégories
+**Objectif** : Corriger l'erreur "Unknown column 'type'" lors CRUD catégories MySQL
+
+**Statut** : ✅ CORRIGÉ — TESTS REQUIS
+
+#### Problème Identifié
+
+**Erreur** :
+```
+SQLSTATE[42S22]: Unknown column 'type' in 'WHERE'
+```
+
+**Localisation** :
+- Fichier : `snackup/backend/repositories/MenuRepository.php`
+- Méthode : `assignSupplementsByFlavor()` (ligne 188)
+- Requête problématique :
+  ```sql
+  SELECT id FROM supplements
+  WHERE restaurant_id = ? AND (type = ? OR type = 'both')
+  ```
+
+**Cause Racine** :
+- La table `supplements` n'avait **aucune colonne** `type` ou `flavor`
+- Le code attendait une colonne pour filtrer les suppléments selon le type de plat (salé/sucré)
+- Erreur SQL lors de la création de catégories avec flavor='sale' ou 'sucre'
+
+#### Solution Implémentée
+
+**1. Ajout colonne `flavor` dans table `supplements`** :
+- Type : `ENUM('sale', 'sucre', 'both')`
+- Défaut : `'both'` (compatible avec tous les types de plats)
+- Index : `idx_restaurant_flavor` pour performance
+
+**2. Fichiers Modifiés** :
+
+| Fichier | Action | Changement |
+|---------|--------|------------|
+| `database/migrations/2026_01_17_add_flavor_to_supplements.sql` | ✅ CRÉÉ | Migration ajout colonne + index |
+| `database/schema.sql` | ✅ MODIFIÉ | Ajout `flavor` ligne 141 + index ligne 147 |
+| `snackup/backend/repositories/MenuRepository.php` | ✅ MODIFIÉ | `type` → `flavor` ligne 188 |
+| `database/test_flavor_fix.php` | ✅ CRÉÉ | Script de test automatisé |
+| `database/migrations/TEST_FLAVOR_FIX.md` | ✅ CRÉÉ | Documentation tests manuels |
+
+**3. Détails Techniques** :
+
+**Migration SQL** :
+```sql
+ALTER TABLE `supplements`
+ADD COLUMN `flavor` ENUM('sale', 'sucre', 'both') NOT NULL DEFAULT 'both'
+COMMENT 'Type de plat compatible: salé, sucré, ou les deux'
+AFTER `name`;
+
+CREATE INDEX `idx_restaurant_flavor` ON `supplements` (`restaurant_id`, `flavor`);
+```
+
+**Correction Code** :
+```php
+// AVANT (ligne 188)
+WHERE restaurant_id = ? AND (type = ? OR type = 'both')
+
+// APRÈS (ligne 188)
+WHERE restaurant_id = ? AND (flavor = ? OR flavor = 'both')
+```
+
+#### Tests Effectués
+
+**Tests Statiques (automatisés)** :
+- ✅ Syntaxe PHP : MenuRepository.php valide
+- ✅ Migration SQL : fichier présent et complet
+- ✅ Schema.sql : colonne `flavor` présente
+- ✅ Code corrigé : utilise `flavor` au lieu de `type`
+- ✅ Pas de régression : aucune référence à `type` restante
+
+**Résultat** :
+```
+✅ TOUS LES TESTS STATIQUES PASSÉS
+```
+
+#### Tests Requis (À faire par l'utilisateur)
+
+**Prérequis** :
+```bash
+# 1. Appliquer la migration
+mysql -u zajr1824_marvelous -p zajr1824_marvelous < \
+  database/migrations/2026_01_17_add_flavor_to_supplements.sql
+
+# 2. Vérifier la colonne
+DESCRIBE supplements;
+```
+
+**Test 1 : Création catégorie salée** :
+- ✅ Critère : Pas d'erreur "Unknown column 'type'"
+- ✅ Critère : Catégorie créée avec ID
+- ✅ Critère : Suppléments `flavor='sale'` et `flavor='both'` auto-assignés
+- Commande : Voir `database/migrations/TEST_FLAVOR_FIX.md`
+
+**Test 2 : Création catégorie sucrée** :
+- ✅ Critère : Pas d'erreur SQL
+- ✅ Critère : Catégorie créée avec ID
+- ✅ Critère : Suppléments `flavor='sucre'` et `flavor='both'` auto-assignés
+- Commande : Voir `database/migrations/TEST_FLAVOR_FIX.md`
+
+**Test 3 : CRUD Produits (non-régression)** :
+- ✅ Critère : Création produit fonctionne
+- ✅ Critère : Modification produit fonctionne
+- ✅ Critère : Suppression produit fonctionne
+- ✅ Critère : Aucune erreur liée à `flavor`
+
+#### Règles Respectées
+
+- ✅ Périmètre strict : bug "Unknown column type" uniquement
+- ✅ Feature métier conservée : auto-assign suppléments ACTIVÉ
+- ✅ Correction propre : colonne + index + code
+- ✅ Migration réversible : rollback documenté
+- ✅ Tests automatisés : script PHP validation
+- ✅ Documentation complète : PROGRESSION.md + TEST_FLAVOR_FIX.md
+
+#### Impact & Garanties
+
+**Données Existantes** :
+- Tous les suppléments existants auront `flavor='both'` (compatible partout)
+- Aucune perte de données
+
+**Comportement Métier** :
+- Auto-assignment suppléments **CONSERVÉ**
+- Catégories `flavor='sale'` → suppléments salés + both
+- Catégories `flavor='sucre'` → suppléments sucrés + both
+- Catégories sans flavor → pas d'auto-assignment
+
+**Performance** :
+- Index `idx_restaurant_flavor` optimise les requêtes WHERE
+- Pas d'impact négatif sur CRUD produits
+
+#### Prochaines Actions
+
+**IMMÉDIAT** (par l'utilisateur) :
+1. Appliquer migration : `mysql ... < 2026_01_17_add_flavor_to_supplements.sql`
+2. Vérifier colonne : `DESCRIBE supplements;`
+3. Tester création catégorie salée (TEST_FLAVOR_FIX.md)
+4. Tester création catégorie sucrée (TEST_FLAVOR_FIX.md)
+5. Vérifier CRUD produits inchangé
+
+**SI TESTS OK** :
+- Marquer session comme TERMINÉE
+- Retour à Phase 4 (Plan de Switch MySQL)
+
+**SI TESTS KO** :
+- Exécuter rollback :
+  ```sql
+  DROP INDEX idx_restaurant_flavor ON supplements;
+  ALTER TABLE supplements DROP COLUMN flavor;
+  ```
+
+#### Livrables
+
+**Fichiers créés** (5) :
+1. `database/migrations/2026_01_17_add_flavor_to_supplements.sql` - Migration
+2. `database/test_flavor_fix.php` - Script test automatisé
+3. `database/migrations/TEST_FLAVOR_FIX.md` - Documentation tests
+
+**Fichiers modifiés** (2) :
+4. `database/schema.sql` - Ajout colonne flavor + index
+5. `snackup/backend/repositories/MenuRepository.php` - type → flavor
+
+**Documentation** :
+6. `PROGRESSION.md` - Cette section
+
+---
+
+### [TERMINÉE] Session 2026-01-16 - Phase 4 : Plan de Switch MySQL
 **Objectif** : Planifier le switch complet vers MySQL après migration validée
 
 **Statut** : ✅ PLAN COMPLET — PRÊT POUR IMPLÉMENTATION

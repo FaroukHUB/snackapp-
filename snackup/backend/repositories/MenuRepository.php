@@ -185,7 +185,7 @@ class MenuRepository {
         // Récupérer les suppléments du type correspondant
         $stmt = $pdo->prepare("
             SELECT id FROM supplements
-            WHERE restaurant_id = ? AND (type = ? OR type = 'both')
+            WHERE restaurant_id = ? AND (flavor = ? OR flavor = 'both')
         ");
         $stmt->execute([self::$restaurantId, $flavor]);
         $supplements = $stmt->fetchAll(PDO::FETCH_COLUMN);
