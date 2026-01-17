@@ -207,7 +207,7 @@ function regenerateMenuJson(): void {
 
 // ⚠️ MODE MYSQL DÉSACTIVÉ - Retour au mode JSON
 // MySQL contient données incomplètes, on utilise menu.json
-$useMySQL = false;
+$useMySQL = true;
 
 /* =========================
    GET: Retourner le menu complet
