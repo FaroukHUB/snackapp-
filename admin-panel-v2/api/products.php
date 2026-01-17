@@ -205,9 +205,9 @@ function regenerateMenuJson(): void {
    MODE MySQL ou JSON
    ========================= */
 
-// ⚠️ MODE MYSQL DÉSACTIVÉ - Retour au mode JSON
-// MySQL contient données incomplètes, on utilise menu.json
-$useMySQL = false;
+// ✅ MODE MYSQL ACTIVÉ - Données migrées vers MySQL
+// Les catégories et produits sont désormais gérés via MenuRepository
+$useMySQL = true;
 
 /* =========================
    GET: Retourner le menu complet

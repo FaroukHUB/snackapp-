@@ -204,6 +204,102 @@ Table 'zajr1824_atelierpizza.category_supplements' doesn't exist
 - La table existe pour éviter erreurs SQL, mais n'est pas utilisée
 - Feature reste active pour instances type "crêperie" (Marvelous)
 
+#### Bug Tertiaire : Édition Catégories Impossibles ("Catégorie introuvable")
+
+**Date** : 2026-01-17 (après migration)
+
+**Symptômes rapportés par l'utilisateur** :
+1. Nouvelle catégorie créée mais n'apparaît pas sur le site
+2. Tentative d'édition de catégories existantes → erreur "Catégorie introuvable"
+
+**Diagnostic** :
+
+**Étape 1 - Vérification données MySQL** :
+```bash
+# Vérifier les catégories pour restaurant_id=3
+SELECT id, slug, name, is_active FROM categories WHERE restaurant_id = 3;
+```
+
+Résultat : ✅ **9 catégories actives** dans MySQL pour Atelier Pizza (restaurant_id=3)
+- Catégories existantes bien présentes en base de données
+- 60 produits associés répartis sur 8 catégories
+
+**Étape 2 - Analyse du code products.php** :
+
+Fichier `admin-panel-v2/api/products.php` contient **DEUX blocs switch** :
+1. **Bloc MySQL** (lignes 345-391) : Utilise `MenuRepository` pour CRUD
+2. **Bloc JSON** (lignes 527-714+) : Utilise `loadMenuRuntime()` et `customCategories`
+
+**Ligne 210** : Variable de contrôle
+```php
+// ⚠️ MODE MYSQL DÉSACTIVÉ - Retour au mode JSON
+// MySQL contient données incomplètes, on utilise menu.json
+$useMySQL = false; // ❌ CAUSE DU BUG
+```
+
+**Ligne 340** : Sélection du bloc
+```php
+if ($useMySQL) {
+    // Bloc MySQL (lignes 345-391)
+} else {
+    // Bloc JSON (lignes 527-714+) ← EXÉCUTÉ PAR ERREUR
+}
+```
+
+**Ligne 656-658** : Erreur dans le bloc JSON
+```php
+case 'edit_category':
+    // ...
+    $runtime = loadMenuRuntime(); // Charge menu-runtime.json
+    if (!isset($runtime['customCategories'][$categoryId])) {
+        jsonError('Catégorie introuvable'); // ❌ ERREUR ICI
+    }
+```
+
+**Cause Racine** :
+- `$useMySQL = false` force l'utilisation du mode JSON
+- Les catégories sont dans MySQL, pas dans `customCategories` (runtime.json)
+- Le bloc JSON ne trouve pas les catégories → "Catégorie introuvable"
+
+**Pourquoi nouvelle catégorie n'apparaît pas** :
+- Catégorie créée avec 0 produits
+- Frontend filtre les catégories vides (comportement normal)
+- PAS un bug, juste une catégorie vide
+
+**Solution Appliquée** :
+
+Fichier : `admin-panel-v2/api/products.php`
+Ligne : 208-210
+
+**AVANT** :
+```php
+// ⚠️ MODE MYSQL DÉSACTIVÉ - Retour au mode JSON
+// MySQL contient données incomplètes, on utilise menu.json
+$useMySQL = false;
+```
+
+**APRÈS** :
+```php
+// ✅ MODE MYSQL ACTIVÉ - Données migrées vers MySQL
+// Les catégories et produits sont désormais gérés via MenuRepository
+$useMySQL = true;
+```
+
+**Impact** :
+- ✅ GET `/api/products.php` → Charge catégories depuis `MenuRepository::getAllCategories()`
+- ✅ POST action=`edit_category` → Utilise `MenuRepository::editCategory()`
+- ✅ POST action=`add_category` → Utilise `MenuRepository::addCategory()`
+- ✅ POST action=`delete_category` → Utilise `MenuRepository::deleteCategory()`
+- ✅ Les 9 catégories existantes en MySQL sont maintenant éditables
+
+**Vérification** :
+```bash
+# Ligne 210 doit contenir :
+grep -n "useMySQL = true" admin-panel-v2/api/products.php
+```
+
+**État** : ✅ CORRIGÉ - Mode MySQL activé
+
 #### Tests Fonctionnels (En cours par l'utilisateur)
 
 **Prérequis** :
