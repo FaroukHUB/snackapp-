@@ -298,29 +298,31 @@ $useMySQL = true;
 grep -n "useMySQL = true" admin-panel-v2/api/products.php
 ```
 
-**État** : ⏳ EN COURS DE DÉPLOIEMENT
+**État** : ✅ CORRIGÉ EN LOCAL - En attente déploiement
+
+**Problème architectural identifié** :
+- Le bloc JSON "Fallback Mode" (lignes 512-1810) s'exécutait TOUJOURS
+- Même avec `$useMySQL = true`, le bloc JSON pouvait interférer
+- Pas de `else`, pas de protection conditionnelle
+
+**Correction appliquée** (2026-01-18) :
+- **Ligne 515** : Ajout `if (!$useMySQL) {` avant le bloc JSON
+- **Ligne 1812** : Fermeture `} // Fin du if (!$useMySQL)`
+- Syntaxe PHP validée : ✅ Aucune erreur
+
+**Résultat** :
+- Mode MySQL ($useMySQL = true) : Bloc JSON TOTALEMENT IGNORÉ
+- Mode JSON ($useMySQL = false) : Bloc JSON actif (backward compatibility)
+- Plus aucune vérification `customCategories` en mode MySQL
+- Plus aucune erreur "Catégorie introuvable" issue du bloc JSON
 
 **Statut déploiement** :
-- ✅ Modification appliquée EN LOCAL (git commit 7b108ec)
+- ✅ Modifications appliquées EN LOCAL (2 commits)
+  - Commit 7b108ec : $useMySQL = true
+  - Commit nouveau : Encapsulation bloc JSON
 - ⏳ EN ATTENTE : Déploiement sur serveur de production
 - ❌ Git push impossible (erreur 403 - session ID mismatch)
-- 🔧 Solution : Déploiement manuel via SSH
-
-**Commandes de déploiement** (sur le serveur) :
-```bash
-# Étape 1 : Localiser le fichier products.php
-# Le chemin exact dépend de la structure du serveur
-# Probablement : ~/atelierpizza.mon-agenceweb.fr/admin-panel-v2/api/products.php
-
-# Étape 2 : Appliquer le patch (remplacer CHEMIN par le bon chemin)
-sed -i 's/\$useMySQL = false;/\$useMySQL = true;/' CHEMIN/admin-panel-v2/api/products.php
-
-# Étape 3 : Vérifier
-sed -n '210p' CHEMIN/admin-panel-v2/api/products.php
-# Doit afficher : $useMySQL = true;
-```
-
-**Fichier de référence** : `PATCH_useMySQL_true.txt` (contient toutes les instructions)
+- 🔧 Solution : Déploiement manuel via SSH (fichier complet à copier)
 
 #### Tests Fonctionnels Post-Déploiement
 

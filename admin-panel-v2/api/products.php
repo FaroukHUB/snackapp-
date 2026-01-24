@@ -510,8 +510,11 @@ if ($useMySQL) {
 }
 
 /* ===== Fallback JSON Mode ===== */
-require_once __DIR__ . '/../config.php';
-$runtime = loadMenuRuntime();
+// ⚠️ IMPORTANT: Ce bloc ne s'exécute QUE si MySQL est désactivé
+// En mode MySQL ($useMySQL = true), le bloc ci-dessus gère tout et fait exit via jsonSuccess/jsonError
+if (!$useMySQL) {
+    require_once __DIR__ . '/../config.php';
+    $runtime = loadMenuRuntime();
 
 // ⚠️ Initialiser supplements structure pour éviter les erreurs
 // generatePublicMenuJson() vérifiera si c'est vide et utilisera menu.json existant
@@ -1805,3 +1808,5 @@ function syncFormulesToMenu(array $runtime): void {
 
     file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
+
+} // Fin du if (!$useMySQL) - Fallback JSON Mode
