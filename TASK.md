@@ -45,44 +45,53 @@ Corriger le bug CRUD catégories pour permettre l'édition des catégories exist
 
 ## ⏳ Tâches En Cours
 
-### URGENT : Déployer le fix $useMySQL = true sur le serveur
+### URGENT : Déployer le fichier products.php corrigé sur le serveur
 
-**Objectif** : Modifier `admin-panel-v2/api/products.php` ligne 210 sur le serveur de production
+**Objectif** : Remplacer `admin-panel-v2/api/products.php` sur le serveur de production
 
-**Bloqueur actuel** : Chemin du fichier introuvable
-- ❌ Tenté : `/var/www/clients/client1/web6/web/admin-panel-v2/api/products.php` → No such file
-- ❌ Git push : Impossible (erreur 403 - session ID mismatch)
-- 🔍 **Action immédiate** : Localiser le bon chemin du fichier
+**Corrections appliquées EN LOCAL** :
+1. ✅ Ligne 210 : `$useMySQL = true` (commit 7b108ec)
+2. ✅ Ligne 515 : `if (!$useMySQL) {` - encapsulation bloc JSON (commit 495a096)
+3. ✅ Ligne 1812 : `}` - fermeture du if
 
-**Commandes à exécuter sur le serveur SSH** :
+**Problème résolu** :
+- Bloc JSON "Fallback Mode" complètement isolé
+- Plus de vérifications `customCategories` en mode MySQL
+- Plus d'erreur "Catégorie introuvable" issue du JSON
 
+**Méthode de déploiement recommandée** :
 ```bash
-# Option 1 : Depuis le répertoire actuel (si dans ~/atelierpizza.mon-agenceweb.fr)
-ls -la admin-panel-v2/api/products.php
+# Sur le serveur SSH
+cd ~/atelierpizza.mon-agenceweb.fr
 
-# Option 2 : Recherche depuis home
+# Backup
+cp admin-panel-v2/api/products.php admin-panel-v2/api/products.php.bak_$(date +%Y%m%d_%H%M%S)
+
+# Copier le fichier corrigé depuis le repo local
+# (ou utiliser scp/sftp pour transférer le fichier)
+```
+
+**Alternative si chemin différent** :
+```bash
+# Localiser le fichier
 find ~ -name "products.php" | grep admin
-
-# Option 3 : Vérifier le répertoire courant
 pwd
-ls -la
+ls -la admin-panel-v2/api/products.php
 ```
 
-**Une fois le chemin trouvé** :
-
+**Validation après déploiement** :
 ```bash
-# Backup (sécurité)
-cp CHEMIN/admin-panel-v2/api/products.php CHEMIN/admin-panel-v2/api/products.php.bak
-
-# Appliquer le patch
-sed -i 's/\$useMySQL = false;/\$useMySQL = true;/' CHEMIN/admin-panel-v2/api/products.php
-
-# Vérifier
-sed -n '210p' CHEMIN/admin-panel-v2/api/products.php
+# Vérifier ligne 210
+sed -n '210p' admin-panel-v2/api/products.php
 # Doit afficher : $useMySQL = true;
-```
 
-**Référence** : Voir `PATCH_useMySQL_true.txt` pour instructions détaillées
+# Vérifier ligne 515
+sed -n '515p' admin-panel-v2/api/products.php
+# Doit afficher : if (!$useMySQL) {
+
+# Vérifier syntaxe PHP
+php -l admin-panel-v2/api/products.php
+```
 
 ---
 
@@ -129,11 +138,15 @@ sed -n '210p' CHEMIN/admin-panel-v2/api/products.php
 |-----|--------|--------|---------|
 | Unknown column 'type' | ✅ RÉSOLU | f1f4216 | ✅ OUI (migration appliquée) |
 | Table category_supplements | ✅ RÉSOLU | c08c2bd | ✅ OUI (migration appliquée) |
-| $useMySQL = false | ⏳ EN COURS | 7b108ec | ❌ NON (en attente) |
+| Admin mode JSON au lieu MySQL | ✅ CORRIGÉ | 7b108ec + 495a096 | ❌ NON (en attente) |
 
-**Commits locaux non pushés** : 4 (erreur 403 git push)
+**Corrections appliquées** :
+- Commit 7b108ec : $useMySQL = true
+- Commit 495a096 : Encapsulation bloc JSON dans if (!$useMySQL)
 
-**Déploiement manuel nécessaire** : 1 fichier (`admin-panel-v2/api/products.php`)
+**Commits locaux non pushés** : 7 (erreur 403 git push)
+
+**Déploiement manuel nécessaire** : 1 fichier (`admin-panel-v2/api/products.php` complet)
 
 ---
 
