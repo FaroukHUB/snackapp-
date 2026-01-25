@@ -82,7 +82,6 @@ const Products = {
         if (!container) return;
 
         const categories = Config.getCategories();
-        const icons = Config.categoryIcons;
 
         // Filter non-empty categories
         const nonEmptyCategories = categories.filter(cat => cat.items && cat.items.length > 0);
@@ -101,13 +100,14 @@ const Products = {
 
         // Add category icons with alternating colors
         nonEmptyCategories.forEach((cat, index) => {
-            const icon = icons[cat.id] || 'fa-utensils';
+            const icon = cat.icon || 'fa-utensils';
             const colorClass = index % 2 === 0 ? 'color-primary' : 'color-black';
+            const iconHtml = icon.startsWith("fa-") ? `<i class="fas ${icon}"></i>` : icon;
 
             html += `
                 <div class="category-icon-item" data-category="${cat.id}" onclick="Products.filterByCategory('${cat.id}')">
                     <div class="category-icon-circle ${colorClass}">
-                        <i class="fas ${icon}"></i>
+                        ${iconHtml}
                     </div>
                     <span class="category-icon-name">${cat.name}</span>
                 </div>
@@ -312,7 +312,6 @@ const Products = {
         if (!nav) return;
 
         const categories = Config.getCategories();
-        const icons = Config.categoryIcons;
 
         let html = '';
 
@@ -331,13 +330,14 @@ const Products = {
 
         // Add category links
         categories.forEach(cat => {
-            const icon = icons[cat.id] || 'fa-utensils';
+            const icon = cat.icon || 'fa-utensils';
             // Only add if category has items
             if (cat.items && cat.items.length > 0) {
+                const iconHtml = icon.startsWith("fa-") ? `<i class="fas ${icon}"></i>` : icon;
                 html += `
                     <li>
                         <a href="#${cat.id}" data-section="${cat.id}" onclick="Products.scrollToSection('${cat.id}', event)">
-                            <i class="fas ${icon}"></i>
+                            ${iconHtml}
                             ${cat.name}
                         </a>
                     </li>
