@@ -2610,10 +2610,9 @@ $currencySymbol = ($currency === 'EUR') ? '€' : $currency;
     }
 
     boot().catch((err)=>{
-      }
+      console.error("Erreur au démarrage:", err);
     });
 
-    });
   </script>
 </body>
 </html>
