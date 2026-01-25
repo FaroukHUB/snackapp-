@@ -3,6 +3,10 @@
 require_once __DIR__ . '/bootstrap.php';
 requireAdmin();
 $csrfToken = getCsrfToken();
+
+// Charger la devise depuis la config de l'instance
+$currency = InstanceManager::getCurrency(); // EUR, DA, USD, etc.
+$currencySymbol = ($currency === 'EUR') ? '€' : $currency;
 ?><!doctype html>
 <html lang="fr">
 <head>
@@ -591,11 +595,11 @@ $csrfToken = getCsrfToken();
 
           <div class="two">
             <div class="field">
-              <label for="priceSolo">Prix (solo)</label>
+              <label for="priceSolo" id="labelPriceSolo">Prix (solo)</label>
               <input id="priceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" placeholder="11.00" required />
             </div>
             <div class="field">
-              <label for="priceMenu">Prix (menu) (optionnel)</label>
+              <label for="priceMenu" id="labelPriceMenu">Prix (menu) (optionnel)</label>
               <input id="priceMenu" name="priceMenu" class="input" type="number" step="0.01" min="0" placeholder="14.00" />
             </div>
           </div>
@@ -671,7 +675,7 @@ $csrfToken = getCsrfToken();
               <option value="prime">Prime</option>
             </optgroup>
           </select>
-          <input id="supPrice" name="price" class="input" type="number" step="0.01" min="0" placeholder="Prix DA" style="width:90px;" required />
+          <input id="supPrice" name="price" class="input" type="number" step="0.01" min="0" placeholder="Prix <?= $currencySymbol ?>" style="width:90px;" required />
           <button class="btn btn-good" type="submit">+ Ajouter</button>
         </form>
 
@@ -703,11 +707,11 @@ $csrfToken = getCsrfToken();
           </div>
           <div class="two">
             <div class="field">
-              <label for="editPriceSolo">Prix (solo) <span class="muted">(optionnel pour produits avec options)</span></label>
+              <label for="editPriceSolo" id="labelEditPriceSolo">Prix (solo) <span class="muted">(optionnel pour produits avec options)</span></label>
               <input id="editPriceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" />
             </div>
             <div class="field">
-              <label for="editPriceMenu">Prix (menu)</label>
+              <label for="editPriceMenu" id="labelEditPriceMenu">Prix (menu)</label>
               <input id="editPriceMenu" name="priceMenu" class="input" type="number" step="0.01" min="0" />
             </div>
           </div>
@@ -890,7 +894,6 @@ $csrfToken = getCsrfToken();
           </div>
 
           <div class="field">
-            <label for="formuleBadge">Badge (optionnel)</label>
             <input id="formuleBadge" name="badge" class="input" type="text" placeholder="Ex : Populaire, -20%, Best Value" />
           </div>
 
@@ -994,6 +997,7 @@ $csrfToken = getCsrfToken();
   <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
 
   <script>
+    const CURRENCY = <?= json_encode($currencySymbol) ?>;
     "use strict";
 
     const API = "api/products.php";
@@ -1114,9 +1118,10 @@ $csrfToken = getCsrfToken();
     });
 
     function openEditCategoryModal(categoryId){
-      currentEditCategoryId = categoryId;
+      categoryId = parseInt(categoryId, 10);
+      currentEditCategoryId = parseInt(categoryId, 10);
       const cats = getCategories();
-      const cat = cats.find(c => c.id === categoryId);
+      const cat = cats.find(c => c.id === currentEditCategoryId);
       if (!cat) {
         toast("error", "Erreur", "Catégorie introuvable.");
         return;
@@ -1143,6 +1148,7 @@ $csrfToken = getCsrfToken();
 
     async function deleteCategory(categoryId){
       const cats = getCategories();
+      categoryId = parseInt(categoryId, 10);
       const cat = cats.find(c => c.id === categoryId);
       if (!cat) return;
 
@@ -1207,7 +1213,7 @@ $csrfToken = getCsrfToken();
         const checked = selectedIds.includes(sup.id) ? "checked" : "";
         label.innerHTML = `
           <input type="checkbox" name="supplements[]" value="${escapeHtml(sup.id)}" ${checked} style="width:16px;height:16px;" />
-          ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} DA)</span>
+          ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} ${CURRENCY})</span>
         `;
         container.appendChild(label);
       });
@@ -1216,6 +1222,26 @@ $csrfToken = getCsrfToken();
         container.innerHTML = '<span class="muted">Aucun supplément disponible pour cette catégorie.</span>';
       }
     }
+    // === Adaptation labels Prix selon type catégorie (pizza vs standard) ===
+    function updatePriceLabels(categoryId) {
+      const cats = getCategories();
+      const cat = cats.find(c => c.id == categoryId);
+      const isPizza = cat?.product_type === "pizza";
+      
+      // Labels modal AJOUT
+      const labelSolo = document.getElementById("labelPriceSolo");
+      const labelMenu = document.getElementById("labelPriceMenu");
+      if (labelSolo) labelSolo.childNodes[0].nodeValue = isPizza ? "Prix Solo 26cm" : "Prix (solo)";
+      if (labelMenu) labelMenu.childNodes[0].nodeValue = isPizza ? "Prix Duo 31cm (optionnel)" : "Prix (menu) (optionnel)";
+      
+      // Labels modal EDIT
+      const labelEditSolo = document.getElementById("labelEditPriceSolo");
+      const labelEditMenu = document.getElementById("labelEditPriceMenu");
+      if (labelEditSolo) labelEditSolo.childNodes[0].nodeValue = isPizza ? "Prix Solo 26cm" : "Prix (solo)";
+      if (labelEditMenu) labelEditMenu.childNodes[0].nodeValue = isPizza ? "Prix Duo 31cm" : "Prix (menu)";
+    }
+    
+
 
     function openProductModal(prefCatId=null){
       $("#formProduct").reset();
@@ -1225,6 +1251,7 @@ $csrfToken = getCsrfToken();
       // Suppléments : Affichage automatique selon le flavor (plus de checkboxes)
       // Les suppléments s'affichent automatiquement côté frontend
 
+      if (prefCatId) updatePriceLabels(prefCatId);
       openModal("#modalProduct");
     }
 
@@ -1232,7 +1259,7 @@ $csrfToken = getCsrfToken();
     $("#btnAddProductInline").addEventListener("click", () => openProductModal(state.selectedCategoryId));
 
     // Suppléments : Affichage automatique (plus besoin de mettre à jour les checkboxes)
-    // $("#prodCategory").addEventListener("change", ...) - Désactivé
+    $("#prodCategory").addEventListener("change", function() { updatePriceLabels(this.value); });
 
     $("#imageFile").addEventListener("change", (e)=>{
       const file = e.target.files && e.target.files[0];
@@ -1368,7 +1395,7 @@ $csrfToken = getCsrfToken();
       div.innerHTML = `
         <div style="flex:1;">
           <strong style="font-size:13px;">${escapeHtml(sup.name)}</strong>
-          <span style="color:var(--muted);margin-left:8px;">${sup.price.toFixed(0)} DA</span>
+          <span style="color:var(--muted);margin-left:8px;">${sup.price.toFixed(0)} ${CURRENCY}</span>
           <span class="status" data-status="${sup.status ?? 'available'}" style="margin-left:8px;padding:4px 8px;">
             <span class="dot"></span>${sup.status === 'available' ? 'Dispo' : 'Indispo'}
           </span>
@@ -1444,7 +1471,7 @@ $csrfToken = getCsrfToken();
           ${imgHtml}
           <div style="flex:1;opacity:${isAvailable ? '1' : '0.6'}">
             <strong style="font-size:13px;">${escapeHtml(opt.name)}</strong>
-            <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} DA</div>
+            <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} ${CURRENCY}</div>
           </div>
           <button class="btn" type="button" data-toggle-status-pat="${idx}" style="padding:6px 12px;font-size:12px;font-weight:600;${isAvailable ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
             ${isAvailable ? '✓ Disponible' : '✕ Indisponible'}
@@ -1567,7 +1594,7 @@ $csrfToken = getCsrfToken();
           ${imgHtml}
           <div style="flex:1;opacity:${isAvailable ? '1' : '0.6'}">
             <strong style="font-size:13px;">${escapeHtml(opt.name)}</strong>
-            <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} DA</div>
+            <div style="color:var(--muted);font-size:12px;margin-top:2px;">${opt.price} ${CURRENCY}</div>
           </div>
           <button class="btn" type="button" data-toggle-status-bev="${idx}" style="padding:6px 12px;font-size:12px;font-weight:600;${isAvailable ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
             ${isAvailable ? '✓ Disponible' : '✕ Indisponible'}
@@ -1710,6 +1737,7 @@ $csrfToken = getCsrfToken();
         capsuleColorsField.style.display = "none";
       }
 
+      updatePriceLabels(categoryId);
       openModal("#modalEditProduct");
     }
 
@@ -1987,7 +2015,7 @@ $csrfToken = getCsrfToken();
     function money(v){
       const n = Number(v);
       if (!Number.isFinite(n)) return "—";
-      return n.toFixed(0) + " DA";
+      return n.toFixed(0) + " " + CURRENCY;
     }
 
     function getCategories(){
@@ -2019,6 +2047,7 @@ $csrfToken = getCsrfToken();
         btn.setAttribute("aria-selected", String(c.id === state.selectedCategoryId));
         btn.innerHTML = `
           <div style="min-width:0;text-align:left">
+            <span style="font-size:18px;margin-right:8px;">${c.icon?.startsWith("fa-") ? `<i class="fas ${c.icon}"></i>` : c.icon}</span>
             <strong>${escapeHtml(c.name ?? "")}</strong>
             <small>${escapeHtml(c.description ?? "")}</small>
           </div>
@@ -2403,8 +2432,8 @@ $csrfToken = getCsrfToken();
             </div>
             <p style="margin:0 0 6px;color:var(--muted);font-size:12px;line-height:1.3;">${escapeHtml(f.description ?? '')}</p>
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:15px;font-weight:600;">${f.price?.toFixed(0) ?? '—'} DA</span>
-              ${f.originalPrice ? `<span style="color:var(--muted);text-decoration:line-through;font-size:12px;">${f.originalPrice.toFixed(0)} DA</span>` : ''}
+              <span style="font-size:15px;font-weight:600;">${f.price?.toFixed(0) ?? '—'} ${CURRENCY}</span>
+              ${f.originalPrice ? `<span style="color:var(--muted);text-decoration:line-through;font-size:12px;">${f.originalPrice.toFixed(0)} ${CURRENCY}</span>` : ''}
               <span class="status" data-status="${f.status ?? 'available'}" style="margin-left:auto;padding:4px 8px;">
                 <span class="dot"></span>${(f.status ?? 'available') === 'available' ? 'Dispo' : 'Indispo'}
               </span>
@@ -2475,7 +2504,7 @@ $csrfToken = getCsrfToken();
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
-            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${(product.priceSolo || product.price || 0).toFixed(0)} DA</div>
+            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
           </div>
           <button type="button" class="btn btn-danger" style="padding:6px 10px;font-size:11px;position:absolute;top:6px;right:6px;" data-remove="${index}">✕</button>
         `;
@@ -2522,7 +2551,7 @@ $csrfToken = getCsrfToken();
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
           </div>
-          <div style="font-size:13px;font-weight:600;color:var(--brand);">${(product.priceSolo || product.price || 0).toFixed(0)} DA</div>
+          <div style="font-size:13px;font-weight:600;color:var(--brand);">${(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
           <button type="button" class="btn btn-good" style="padding:6px 12px;font-size:11px;">+ Ajouter</button>
         `;
 
@@ -2581,8 +2610,9 @@ $csrfToken = getCsrfToken();
     }
 
     boot().catch((err)=>{
-      toast("error","Chargement impossible", err?.message ?? "API indisponible.");
-      $("#catMeta").textContent = "Erreur";
+      }
+    });
+
     });
   </script>
 </body>

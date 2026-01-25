@@ -6,10 +6,9 @@
 require_once __DIR__ . '/../InstanceManager.php';
 
 require_once __DIR__ . '/../Database.php';
-require_once __DIR__ . '/../InstanceManager.php';
 
 class MenuRepository {
-    public static $restaurantId = 3; // Par défaut Le Marvelous, peut être changé
+    public static $restaurantId = 2; // Par défaut Le Marvelous, peut être changé
 
     /**
      * Récupère toutes les catégories actives avec leurs produits
@@ -19,7 +18,7 @@ class MenuRepository {
 
         // Récupérer catégories actives
         $stmt = $pdo->prepare("
-            SELECT id, slug, name, description, icon, flavor, product_type, sort_order
+            SELECT id, slug, name, description, icon, flavor, sort_order
             FROM categories
             WHERE restaurant_id = ? AND is_active = 1
             ORDER BY sort_order ASC, id ASC
@@ -180,11 +179,6 @@ class MenuRepository {
 
     /**
      * Assigne automatiquement les suppléments selon le flavor
-     * Feature désactivable via config instance (auto_category_supplements)
-     */
-    /**
-     * Assigne automatiquement les suppléments selon le flavor
-     * Feature désactivable via config instance (auto_category_supplements)
      */
     /**
      * Assigne automatiquement les suppléments selon le flavor
@@ -256,7 +250,7 @@ class MenuRepository {
 
         $stmt = $pdo->prepare("
             UPDATE categories
-            SET is_active = 0
+            SET deleted_at = NOW(), is_active = 0
             WHERE id = ? AND restaurant_id = ?
         ");
 

@@ -2,15 +2,14 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-echo "=== TEST API PRODUCTS ===\n";
+echo "=== TEST BOOTSTRAP ===\n";
 
 try {
     require_once __DIR__ . '/bootstrap.php';
     echo "✅ Bootstrap chargé\n";
-    
-    require_once __DIR__ . '/api/products.php';
-    echo "✅ API products.php chargé\n";
+    echo "Restaurant ID: " . SNACK_RESTAURANT_ID . "\n";
+    echo "MenuRepository restaurantId: " . MenuRepository::$restaurantId . "\n";
 } catch (Exception $e) {
     echo "❌ ERREUR: " . $e->getMessage() . "\n";
-    echo "File: " . $e->getFile() . ":" . $e->getLine() . "\n";
+    echo "Trace: " . $e->getTraceAsString() . "\n";
 }

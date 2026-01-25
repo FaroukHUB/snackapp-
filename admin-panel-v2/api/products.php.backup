@@ -510,7 +510,6 @@ if ($useMySQL) {
 }
 
 /* ===== Fallback JSON Mode ===== */
-if (!$useMySQL) {
 require_once __DIR__ . '/../config.php';
 $runtime = loadMenuRuntime();
 
@@ -1806,5 +1805,3 @@ function syncFormulesToMenu(array $runtime): void {
 
     file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
-
-} // Fin du if (!$useMySQL) - Fallback JSON Mode

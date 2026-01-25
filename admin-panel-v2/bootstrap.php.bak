@@ -39,26 +39,12 @@ define('SNACK_ADMIN_PATH', __DIR__);
 require_once __DIR__ . '/config.php';
 
 // Charger les classes database
-
-// Charger InstanceManager pour récupérer la config de l'instance
-require_once SNACK_ROOT . '/snackup/backend/InstanceManager.php';
-
-// Récupérer le restaurant_id depuis InstanceManager
-try {
-    $restaurantId = InstanceManager::getRestaurantId();
-} catch (Exception $e) {
-    // Fallback Le Marvelous si erreur
-    $restaurantId = 2;
-}
-require_once SNACK_ROOT . '/snackup/backend/Database.php';
-require_once SNACK_ROOT . '/snackup/backend/repositories/RestaurantRepository.php';
-require_once SNACK_ROOT . '/snackup/backend/repositories/MenuRepository.php';
-require_once SNACK_ROOT . '/snackup/backend/repositories/OrderRepository.php';
-require_once SNACK_ROOT . '/snackup/backend/repositories/CustomerRepository.php';
-require_once SNACK_ROOT . '/snackup/backend/repositories/PromoCodeRepository.php';
-
-// Initialiser MenuRepository avec le restaurant_id de l'instance
-MenuRepository::$restaurantId = $restaurantId;
+require_once SNACK_DB_PATH . '/Database.php';
+require_once SNACK_DB_PATH . '/repositories/RestaurantRepository.php';
+require_once SNACK_DB_PATH . '/repositories/MenuRepository.php';
+require_once SNACK_DB_PATH . '/repositories/OrderRepository.php';
+require_once SNACK_DB_PATH . '/repositories/CustomerRepository.php';
+require_once SNACK_DB_PATH . '/repositories/PromoCodeRepository.php';
 
 // Charger la config database
 $dbConfigFile = SNACK_DB_PATH . '/config.php';
@@ -88,7 +74,7 @@ if (!defined('SNACK_RESTAURANT_ID')) {
         define('SNACK_RESTAURANT_ID', $_SESSION['restaurant_id']);
     } else {
         // Le Marvelous = restaurant ID 2
-        define('SNACK_RESTAURANT_ID', $restaurantId);
+        define('SNACK_RESTAURANT_ID', 2);
     }
 }
 
