@@ -1,0 +1,11 @@
+--- a/admin-panel-v2/products-manager.php
++++ b/admin-panel-v2/products-manager.php
+@@ -1116,7 +1116,8 @@
+     function openEditCategoryModal(categoryId){
+-      currentEditCategoryId = categoryId;
++      // Convertir en nombre pour comparaison stricte
++      currentEditCategoryId = parseInt(categoryId, 10);
+       const cats = getCategories();
+-      const cat = cats.find(c => c.id === categoryId);
++      const cat = cats.find(c => c.id === currentEditCategoryId);
+       if (!cat) {

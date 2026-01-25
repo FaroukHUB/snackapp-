@@ -37,9 +37,9 @@
         "countryCode": "DZ",
         "latitude": 36.7053937,
         "longitude": 3.3693709,
-        "googleMapsUrl": "https://maps.app.goo.gl/yCGHBfEXKbhBqsaSA",
-        "googleMapsEmbed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3198.7146774777384!2d3.3667959758340036!3d36.70539367227425!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128e5df9ea007565%3A0x61e9a9aae68c8648!2sLe%20MARVELOUS!5e0!3m2!1sfr!2sdz!4v1768232143312!5m2!1sfr!2sdz",
-        "googleReviewsUrl": "https://www.google.com/search?sca_esv=b243d552b696475b&rlz=1C5CHFA_enDZ1142DZ1143&sxsrf=ANbL-n7MnzELJzxRRAuob8C08vW8BOmpGw:1768232073160&q=marvelous+ouled+moussa&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOR7_uxVy-zhzsx0dTVqPMUUKZRSWYDZl1XaHwxiwgJkvZ_TqgPMTm9n81Gw7rU9-44pz8vEwedj_WqguvxavQLeqSMY2&sa=X&ved=2ahUKEwiatefkqYaSAxWmTqQEHTV4B_gQrrQLegQIHBAA&biw=1584&bih=877&dpr=2&aic=0"
+        "googleMapsUrl": "https:\/\/maps.app.goo.gl\/yCGHBfEXKbhBqsaSA",
+        "googleMapsEmbed": "https:\/\/www.google.com\/maps\/embed?pb=!1m18!1m12!1m3!1d3198.7146774777384!2d3.3667959758340036!3d36.70539367227425!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128e5df9ea007565%3A0x61e9a9aae68c8648!2sLe%20MARVELOUS!5e0!3m2!1sfr!2sdz!4v1768232143312!5m2!1sfr!2sdz",
+        "googleReviewsUrl": "https:\/\/www.google.com\/search?sca_esv=b243d552b696475b&rlz=1C5CHFA_enDZ1142DZ1143&sxsrf=ANbL-n7MnzELJzxRRAuob8C08vW8BOmpGw:1768232073160&q=marvelous+ouled+moussa&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOR7_uxVy-zhzsx0dTVqPMUUKZRSWYDZl1XaHwxiwgJkvZ_TqgPMTm9n81Gw7rU9-44pz8vEwedj_WqguvxavQLeqSMY2&sa=X&ved=2ahUKEwiatefkqYaSAxWmTqQEHTV4B_gQrrQLegQIHBAA&biw=1584&bih=877&dpr=2&aic=0"
     },
     "openingHours": [
         {
@@ -121,8 +121,8 @@
         }
     ],
     "social": {
-        "facebook": "https://web.facebook.com/groups/449713125180099/user/100069026982226/",
-        "instagram": "https://www.instagram.com/lemarvelous.50/",
+        "facebook": "https:\/\/web.facebook.com\/groups\/449713125180099\/user\/100069026982226\/",
+        "instagram": "https:\/\/www.instagram.com\/lemarvelous.50\/",
         "tiktok": "@lemarvelous",
         "snapchat": "@lemarvelous",
         "extra": []
@@ -138,7 +138,7 @@
         {
             "id": "ber-ats",
             "name": "Uber Eats",
-            "url": "https://www.ubereats.com/fr/store/oms-food/NWYjvCMHW5qL5mAdBLj5UA",
+            "url": "https:\/\/www.ubereats.com\/fr\/store\/oms-food\/NWYjvCMHW5qL5mAdBLj5UA",
             "enabled": true
         }
     ],

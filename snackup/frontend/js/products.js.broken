@@ -107,7 +107,7 @@ const Products = {
             html += `
                 <div class="category-icon-item" data-category="${cat.id}" onclick="Products.filterByCategory('${cat.id}')">
                     <div class="category-icon-circle ${colorClass}">
-                        ${iconHtml}
+                        ${icon.startsWith("fa-") ? `${iconHtml}` : icon}
                     </div>
                     <span class="category-icon-name">${cat.name}</span>
                 </div>
@@ -333,11 +333,11 @@ const Products = {
             const icon = cat.icon || 'fa-utensils';
             // Only add if category has items
             if (cat.items && cat.items.length > 0) {
-                const iconHtml = icon.startsWith("fa-") ? `<i class="fas ${icon}"></i>` : icon;
                 html += `
                     <li>
                         <a href="#${cat.id}" data-section="${cat.id}" onclick="Products.scrollToSection('${cat.id}', event)">
                             ${iconHtml}
+                            const iconHtml = icon.startsWith("fa-") ? `${iconHtml}` : icon;
                             ${cat.name}
                         </a>
                     </li>
