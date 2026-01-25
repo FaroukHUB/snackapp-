@@ -44,14 +44,25 @@ class MenuRepository {
         $stmt = $pdo->prepare("
             SELECT id, slug, name, description, image,
                    price_solo as priceSolo, price_menu as priceMenu,
-                   status, sort_order
+                   status, sort_order, base_ingredients as baseIngredients
             FROM products
             WHERE category_id = ?
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([$categoryId]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Parse base_ingredients JSON string to array
+        foreach ($products as &$product) {
+            if (!empty($product['baseIngredients'])) {
+                $product['baseIngredients'] = json_decode($product['baseIngredients'], true) ?: [];
+            } else {
+                $product['baseIngredients'] = [];
+            }
+        }
+
+        return $products;
     }
 
     /**
