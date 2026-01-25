@@ -1,5 +1,21 @@
 # PROGRESSION DU PROJET SNACKAPP
 
+---
+## ⚠️ BRANCHE VERROUILLÉE - NE JAMAIS CHANGER
+
+**Branche active** : `claude/review-progress-continue-U4j8i`
+
+**RÈGLE ABSOLUE** :
+- ❌ NE JAMAIS changer de branche
+- ❌ NE JAMAIS créer de nouvelle branche
+- ✅ TOUS les commits sur `claude/review-progress-continue-U4j8i`
+
+**Vérification** : Exécuter `./verify-branch.sh` au début de chaque session
+
+**Fichier de verrouillage** : `.claude-branch-lock`
+
+---
+
 ## État Initial - 2026-01-16
 
 ### Contexte
