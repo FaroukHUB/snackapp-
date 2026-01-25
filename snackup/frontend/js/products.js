@@ -1086,24 +1086,10 @@ const Products = {
                 supplementsContainer.style.display = 'none';
             }
 
-            // Render drinks selection (for menu option)
+            // Drinks selection désactivée (plus de boisson avec menu/duo)
             const drinksContainer = document.getElementById('modalDrinks');
-            const drinksList = document.getElementById('drinksList');
-            const drinks = Config.getDrinks();
-
-            if (hasMenuOption && drinks.length > 0) {
-                drinksList.innerHTML = drinks.map(drink => `
-                    <div class="drink-item" data-id="${drink.id}" onclick="Products.selectDrink('${drink.id}')">
-                        ${drink.name}
-                    </div>
-                `).join('');
-                // Hide by default (shown when menu is selected)
-                drinksContainer.classList.add('hidden');
-                drinksContainer.style.display = 'none';
-            } else {
-                drinksContainer.classList.add('hidden');
-                drinksContainer.style.display = 'none';
-            }
+            drinksContainer.classList.add('hidden');
+            drinksContainer.style.display = 'none';
 
             // Render sauce options (for Crousti)
             const sauceContainer = document.getElementById('modalSauce');
@@ -1398,19 +1384,12 @@ const Products = {
     setMenuType(type) {
         this.menuType = type;
 
-        // Show/hide drinks section
+        // Drinks section désactivée (plus de boisson avec menu/duo)
         const drinksContainer = document.getElementById('modalDrinks');
-        if (type === 'menu') {
-            drinksContainer.classList.remove('hidden');
-            drinksContainer.style.display = '';
-        } else {
-            drinksContainer.classList.add('hidden');
-            drinksContainer.style.display = 'none';
-            this.selectedDrink = null;
-            document.querySelectorAll('.drink-item').forEach(item => {
-                item.classList.remove('selected');
-            });
-        }
+        // Toujours masquer les boissons
+        drinksContainer.classList.add('hidden');
+        drinksContainer.style.display = 'none';
+        this.selectedDrink = null;
 
         document.querySelectorAll('.menu-option').forEach(opt => {
             opt.classList.toggle('active', opt.dataset.type === type);

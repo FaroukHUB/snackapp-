@@ -707,7 +707,7 @@ $currencySymbol = ($currency === 'EUR') ? '€' : $currency;
           </div>
           <div class="two">
             <div class="field">
-              <label for="editPriceSolo" id="labelEditPriceSolo">Prix (solo) <span class="muted">(optionnel pour produits avec options)</span></label>
+              <label for="editPriceSolo" id="labelEditPriceSolo">Prix (solo)</label>
               <input id="editPriceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" />
             </div>
             <div class="field">
