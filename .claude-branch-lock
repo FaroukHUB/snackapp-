@@ -1,0 +1,20 @@
+BRANCHE VERROUILLÉE - NE JAMAIS CHANGER
+==========================================
+
+Branche active : claude/review-progress-continue-U4j8i
+
+RÈGLE ABSOLUE :
+- Cette branche NE DOIT JAMAIS être changée
+- Aucune création de nouvelle branche autorisée
+- Tous les commits doivent être sur cette branche
+
+Si erreur 403 au push : C'EST NORMAL
+- Le push échoue à cause du session ID mismatch
+- On déploie manuellement sur le serveur
+- On NE force PAS le push
+
+Instance : Atelier Pizza
+Base de données : zajr1824_atelierpizza
+Chemin serveur : /home/zajr1824/atelierpizza.mon-agenceweb.fr
+
+Dernière vérification : 2026-01-18
