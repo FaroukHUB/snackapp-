@@ -397,14 +397,28 @@ if ($useMySQL) {
             break;
 
         case 'edit_category':
-            $categoryId = (int)($input['category_id'] ?? 0);
+            $categoryIdRaw = $input['category_id'] ?? null;
+
+            if (!$categoryIdRaw) {
+                jsonError('ID catégorie manquant');
+            }
+
+            // Détecter si c'est un ID numérique (MySQL) ou string (JSON)
+            $isNumericId = is_numeric($categoryIdRaw);
+
+            if (!$isNumericId) {
+                // ID string: c'est une catégorie JSON/custom, laisser le fallback JSON le gérer
+                break;
+            }
+
+            $categoryId = (int)$categoryIdRaw;
             $name = trim((string)($input['name'] ?? ''));
             $description = trim((string)($input['description'] ?? ''));
             $icon = trim((string)($input['icon'] ?? 'fa-utensils'));
             $flavor = trim((string)($input['flavor'] ?? ''));
 
-            if (!$categoryId || $name === '') {
-                jsonError('Paramètres manquants');
+            if ($name === '') {
+                jsonError('Nom manquant');
             }
 
             try {
@@ -418,11 +432,21 @@ if ($useMySQL) {
             break;
 
         case 'delete_category':
-            $categoryId = (int)($input['category_id'] ?? 0);
+            $categoryIdRaw = $input['category_id'] ?? null;
 
-            if (!$categoryId) {
+            if (!$categoryIdRaw) {
                 jsonError('ID manquant');
             }
+
+            // Détecter si c'est un ID numérique (MySQL) ou string (JSON)
+            $isNumericId = is_numeric($categoryIdRaw);
+
+            if (!$isNumericId) {
+                // ID string: c'est une catégorie JSON/custom, laisser le fallback JSON le gérer
+                break;
+            }
+
+            $categoryId = (int)$categoryIdRaw;
 
             try {
                 MenuRepository::deleteCategory($categoryId);
