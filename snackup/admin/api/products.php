@@ -770,7 +770,6 @@ if ($useMySQL) {
             $description = trim((string)($input['description'] ?? ''));
             $price = (float)($input['price'] ?? 0);
             $originalPrice = isset($input['originalPrice']) && $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
-            $badge = isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null;
             $status = $input['status'] ?? 'available';
 
             if ($name === '' || $price <= 0) {
@@ -808,7 +807,6 @@ if ($useMySQL) {
             $description = trim((string)($input['description'] ?? ''));
             $price = (float)($input['price'] ?? 0);
             $originalPrice = isset($input['originalPrice']) && $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
-            $badge = isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null;
             $status = $input['status'] ?? 'available';
 
             if ($name === '' || $price <= 0) {
@@ -1777,7 +1775,6 @@ switch ($action) {
             $description = trim((string)($input['description'] ?? ''));
             $price = normalizePrice($input['price'] ?? 0);
             $originalPrice = isset($input['originalPrice']) && $input['originalPrice'] !== '' ? normalizePrice($input['originalPrice']) : null;
-            $badge = isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null;
             $status = $input['status'] ?? 'available';
 
             error_log("[PRODUCTS API JSON MODE] name: {$name}, price: {$price}");
@@ -1846,7 +1843,6 @@ switch ($action) {
                 'price' => $price,
                 'originalPrice' => $originalPrice,
                 'savings' => $savings,
-                'badge' => $badge,
                 'image' => $imagePath,
                 'includes' => $includes,
                 'status' => $status
@@ -1900,9 +1896,6 @@ switch ($action) {
             if (isset($input['price'])) $patch['price'] = normalizePrice($input['price']);
             if (isset($input['originalPrice'])) {
                 $patch['originalPrice'] = $input['originalPrice'] !== '' ? normalizePrice($input['originalPrice']) : null;
-            }
-            if (isset($input['badge'])) {
-                $patch['badge'] = $input['badge'] !== '' ? trim($input['badge']) : null;
             }
             if (isset($input['status'])) $patch['status'] = $input['status'];
             if (isset($input['includes'])) {
