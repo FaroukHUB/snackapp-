@@ -72,7 +72,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, name, price, status
+            SELECT id, name, flavor, category, price, status
             FROM supplements
             WHERE restaurant_id = ?
             ORDER BY sort_order ASC
@@ -84,6 +84,8 @@ class MenuRepository {
             $supplements[$supp['id']] = [
                 'id' => $supp['id'],
                 'name' => $supp['name'],
+                'flavor' => $supp['flavor'],
+                'category' => $supp['category'],
                 'price' => (float)$supp['price'],
                 'status' => $supp['status']
             ];
