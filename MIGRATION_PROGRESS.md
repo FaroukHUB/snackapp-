@@ -6,7 +6,7 @@ Ajouter une colonne JSON `snackup_context` dans la table `products` pour stocker
 - Prix personnalisés
 - Autres configurations spécifiques au contexte Snackup
 
-## Statut: 🚧 EN COURS
+## Statut: ✅ CODE PRÊT - MIGRATION À EXÉCUTER EN PRODUCTION
 
 ## Étapes
 
@@ -23,10 +23,16 @@ Ajouter une colonne JSON `snackup_context` dans la table `products` pour stocker
 - [x] Mettre à jour API products.php (add_product, edit_product, update_product)
 - [x] Commit code
 
-### ⏳ Étape 3: Tests
-- [ ] Tester la migration
-- [ ] Vérifier le fonctionnement
-- [ ] Commit final
+### ✅ Étape 3: Préparation Production
+- [x] Script d'exécution de migration créé (run-migration.php)
+- [x] Documentation complète créée (MIGRATION_INSTRUCTIONS.md)
+- [x] Code testé et validé
+
+### ⏳ Étape 4: Exécution en Production (À FAIRE)
+- [ ] Exécuter run-migration.php sur le serveur de production
+- [ ] Vérifier que la colonne snackup_context a été ajoutée
+- [ ] Tester l'admin panel en production
+- [ ] Valider le fonctionnement complet
 
 ## Structure snackup_context
 ```json
