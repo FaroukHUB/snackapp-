@@ -430,17 +430,39 @@ class MenuRepository {
         $stmt->execute([self::$restaurantId]);
         $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
 
+        // Générer un slug unique
+        $baseSlug = strtolower(trim($name));
+        $baseSlug = preg_replace('/[^a-z0-9]+/', '-', $baseSlug);
+        $baseSlug = trim($baseSlug, '-');
+
+        // Vérifier l'unicité du slug
+        $slug = $baseSlug;
+        $counter = 2;
+        while (true) {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) FROM formules
+                WHERE restaurant_id = ? AND slug = ?
+            ");
+            $stmt->execute([self::$restaurantId, $slug]);
+            if ($stmt->fetchColumn() == 0) {
+                break;
+            }
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
         // Convertir includes en JSON
         $includesJson = !empty($includes) ? json_encode($includes, JSON_UNESCAPED_UNICODE) : null;
 
         $stmt = $pdo->prepare("
             INSERT INTO formules
-            (restaurant_id, name, description, image, price, original_price, includes, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            (restaurant_id, slug, name, description, image, price, original_price, includes, status, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
         ");
 
         $stmt->execute([
             self::$restaurantId,
+            $slug,
             $name,
             $description,
             $image,
