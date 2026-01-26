@@ -1,0 +1,1387 @@
+{
+    "version": 2,
+    "lastUpdated": "2026-01-05T18:25:11+01:00",
+    "menu": {
+        "categories": [
+            {
+                "id": "crepes-salees-signature",
+                "name": "Crêpes Salées Signature",
+                "description": "Nos créations maison",
+                "hasAccompagnement": true,
+                "accompagnementOptions": [
+                    "salade"
+                ],
+                "items": [
+                    {
+                        "id": "lyonnaise",
+                        "name": "La Lyonnaise",
+                        "description": "Oignons, lardons, crème fraîche, fromage.",
+                        "priceSolo": 550,
+                        "image": "images/uploads/lyonnaise-453a2160.webp",
+                        "baseIngredients": [
+                            "oignons",
+                            "lardons",
+                            "crème fraîche",
+                            "fromage"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "parisienne",
+                        "name": "La Parisienne",
+                        "description": "Jambon, champignons, fromage, crème.",
+                        "priceSolo": 550,
+                        "image": "images/uploads/parisienne-29372258.webp",
+                        "baseIngredients": [
+                            "jambon",
+                            "champignons",
+                            "fromage",
+                            "crème"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "fromagere",
+                        "name": "La Fromagère",
+                        "description": "Mix de fromages fondants.",
+                        "priceSolo": 650,
+                        "image": "images/uploads/fromagere-cc86a524.webp",
+                        "baseIngredients": [
+                            "mix fromages"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "fumee",
+                        "name": "La Fumée",
+                        "description": "Saumon fumé, crème fraîche, aneth.",
+                        "priceSolo": 650,
+                        "image": "images/uploads/fumee-0e517794.webp",
+                        "baseIngredients": [
+                            "saumon fumé",
+                            "crème fraîche",
+                            "aneth"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "boisee",
+                        "name": "La Boisée",
+                        "description": "Champignons, fromage, crème forestière.",
+                        "priceSolo": 650,
+                        "image": "images/uploads/boisee-86294324.webp",
+                        "baseIngredients": [
+                            "champignons",
+                            "fromage",
+                            "crème"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "mexicaine",
+                        "name": "La Mexicaine",
+                        "description": "Poulet épicé, poivrons, oignons, cheddar, sauce piquante.",
+                        "priceSolo": 700,
+                        "image": "images/uploads/mexicaine-bca4a810.webp",
+                        "baseIngredients": [
+                            "poulet",
+                            "poivrons",
+                            "oignons",
+                            "cheddar"
+                        ],
+                        "status": "available",
+                        "badge": "Épicé 🌶️"
+                    },
+                    {
+                        "id": "la-dz",
+                        "name": "La DZ",
+                        "description": "Viande hachée épicée, chakchouka, fromage, épices algériennes.",
+                        "priceSolo": 700,
+                        "image": "images/uploads/la-dz-2241c0a9.webp",
+                        "baseIngredients": [
+                            "viande hachée",
+                            "chakchouka",
+                            "fromage"
+                        ],
+                        "isSignature": true,
+                        "status": "available",
+                        "badge": "Spécialité 🇩🇿"
+                    },
+                    {
+                        "id": "la-marvelous",
+                        "name": "La Marvelous",
+                        "description": "Notre signature! Viande hachée, mix fromages, oignons confits, poivrons, sauce maison.",
+                        "priceSolo": 850,
+                        "image": "images/uploads/la-marvelous-285461ea.webp",
+                        "baseIngredients": [
+                            "viande hachée",
+                            "mix fromages",
+                            "oignons confits",
+                            "poivrons",
+                            "sauce maison"
+                        ],
+                        "isSignature": true,
+                        "status": "available",
+                        "badge": "Signature ⭐"
+                    },
+                    {
+                        "id": "la-crousti",
+                        "name": "La Crousti",
+                        "description": "Mix fromages, tenders maison croustillants, sauce maison, oignons crispy, sauce thaï.",
+                        "priceSolo": 800,
+                        "image": "images/uploads/la-crousti-21722201.webp",
+                        "baseIngredients": [
+                            "mix fromages",
+                            "tenders maison",
+                            "sauce maison",
+                            "oignons crispy",
+                            "sauce thaï"
+                        ],
+                        "isSignature": true,
+                        "status": "available",
+                        "badge": "Nouveau 🆕",
+                        "hasSpecialSauce": true,
+                        "sauceOptions": [
+                            {
+                                "id": "sauce-epicee",
+                                "name": "Sauce Épicée",
+                                "price": 0
+                            },
+                            {
+                                "id": "sauce-douce",
+                                "name": "Sauce Douce",
+                                "price": 0
+                            },
+                            {
+                                "id": "sauce-mix",
+                                "name": "Mix des 2",
+                                "price": 0
+                            }
+                        ],
+                        "hasSpecialAccompagnement": true,
+                        "accompagnementOptions": [
+                            "riz",
+                            "salade"
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "sucres-sales",
+                "name": "Nos Sucrés et Salés",
+                "description": "Viennoiseries, sandwichs et plus",
+                "items": [
+                    {
+                        "id": "viennoiseries",
+                        "name": "Viennoiseries Pur Beurre",
+                        "description": "Choisissez votre viennoiserie.",
+                        "price": 150,
+                        "image": "images/uploads/viennoiseries-1a242d05.webp",
+                        "status": "available",
+                        "hasViennoiserieOptions": true,
+                        "viennoiserieOptions": [
+                            {
+                                "id": "croissant",
+                                "name": "Croissant"
+                            },
+                            {
+                                "id": "pain-chocolat",
+                                "name": "Pain au Chocolat"
+                            }
+                        ],
+                        "priceSolo": 150,
+                        "supplements": []
+                    },
+                    {
+                        "id": "patisserie",
+                        "name": "Pâtisserie",
+                        "description": "Choisissez votre pâtisserie.",
+                        "image": "images/uploads/patisserie-1d91431b.webp",
+                        "status": "available",
+                        "hasPâtisserieOptions": true,
+                        "pâtisserieOptions": [
+                            {
+                                "id": "tarte-citron",
+                                "name": "Tarte au Citron",
+                                "price": 300,
+                                "image": "assets/images/patisserie/tarte-citron.jpg"
+                            },
+                            {
+                                "id": "tarte-fraises",
+                                "name": "Tarte aux Fraises",
+                                "price": 300,
+                                "image": "assets/images/patisserie/tarte-fraises.jpg"
+                            },
+                            {
+                                "id": "tiramisu",
+                                "name": "Tiramisu",
+                                "price": 350,
+                                "image": "assets/images/patisserie/tiramisu.jpg"
+                            }
+                        ],
+                        "priceSolo": 0
+                    },
+                    {
+                        "id": "croque-monsieur",
+                        "name": "Croque-Monsieur",
+                        "description": "Pain de mie, jambon, fromage gratiné.",
+                        "price": 300,
+                        "image": "images/uploads/croque-monsieur-82c66930.webp",
+                        "baseIngredients": [
+                            "pain de mie",
+                            "jambon",
+                            "fromage"
+                        ],
+                        "status": "available",
+                        "priceSolo": 300,
+                        "supplements": []
+                    },
+                    {
+                        "id": "salade-composee",
+                        "name": "Salade Composée",
+                        "description": "Salade fraîche du jour.",
+                        "price": 0,
+                        "image": "images/uploads/salade-composee-20d72835.webp",
+                        "status": "available",
+                        "priceSolo": 0,
+                        "hasBeverageOptions": true,
+                        "beverageOptions": [
+                            {
+                                "id": "salade-composee-saladethoncrudites",
+                                "name": "Salade thon crudités",
+                                "price": 450,
+                                "image": "assets/images/beverages/saladecompose_1768123966.png"
+                            },
+                            {
+                                "id": "salade-composee-saladecrispy",
+                                "name": "salade crispy",
+                                "price": 600,
+                                "image": "assets/images/beverages/saladecompose_1768128802.png"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "sandwich-thon",
+                        "name": "Sandwich Thon/Crudités",
+                        "description": "Thon, crudités fraîches, sauce.",
+                        "price": 400,
+                        "image": "images/uploads/sandwich-thon-051ac668.webp",
+                        "baseIngredients": [
+                            "thon",
+                            "crudités",
+                            "sauce"
+                        ],
+                        "status": "available",
+                        "priceSolo": 0
+                    },
+                    {
+                        "id": "sandwich-poulet-fume",
+                        "name": "Sandwich Poulet crispy",
+                        "description": "Poulet crispy, crudités, sauce.",
+                        "price": 400,
+                        "image": "images/uploads/sandwich-poulet-fume-2bf5f85f.webp",
+                        "baseIngredients": [
+                            "poulet fumé",
+                            "crudités",
+                            "sauce"
+                        ],
+                        "status": "available",
+                        "priceSolo": 0
+                    },
+                    {
+                        "id": "sandwich-poulet-marine",
+                        "name": "Sandwich Poulet Mariné",
+                        "description": "Poulet mariné aux épices, crudités.",
+                        "price": 400,
+                        "image": "images/uploads/sandwich-poulet-marine-6868166b.webp",
+                        "baseIngredients": [
+                            "poulet mariné",
+                            "crudités"
+                        ],
+                        "status": "available",
+                        "priceSolo": 0
+                    },
+                    {
+                        "id": "wraps-poulet",
+                        "name": "Wraps Poulet",
+                        "description": "Tortilla, poulet, crudités, sauce.",
+                        "price": 400,
+                        "image": "images/uploads/wraps-poulet-f514117b.webp",
+                        "baseIngredients": [
+                            "tortilla",
+                            "poulet",
+                            "crudités",
+                            "sauce"
+                        ],
+                        "status": "available",
+                        "priceSolo": 0
+                    }
+                ]
+            },
+            {
+                "id": "crepes-sucrees",
+                "name": "Crêpes Sucrées",
+                "description": "Pour les gourmands",
+                "items": [
+                    {
+                        "id": "crepe-nature",
+                        "name": "Crêpe Nature",
+                        "description": "Crêpe simple avec sucre.",
+                        "priceSolo": 200,
+                        "image": "images/uploads/crepe-nature-836fe0cf.webp",
+                        "baseIngredients": [],
+                        "status": "available"
+                    },
+                    {
+                        "id": "crepe-chocolat",
+                        "name": "Crêpe Chocolat",
+                        "description": "Sauce chocolat maison.",
+                        "priceSolo": 300,
+                        "image": "images/uploads/crepe-chocolat-593fec4d.webp",
+                        "baseIngredients": [
+                            "chocolat"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "crepe-nutella",
+                        "name": "Crêpe Nutella",
+                        "description": "Nutella généreux.",
+                        "priceSolo": 400,
+                        "image": "images/uploads/crepe-nutella-b6cb54ff.webp",
+                        "baseIngredients": [
+                            "nutella"
+                        ],
+                        "status": "available",
+                        "note": "+200 DA"
+                    },
+                    {
+                        "id": "crepe-confiture",
+                        "name": "Crêpe Confiture",
+                        "description": "Confiture au choix.",
+                        "priceSolo": 300,
+                        "image": "images/uploads/crepe-confiture-f31b52fe.webp",
+                        "baseIngredients": [
+                            "confiture"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "crepe-creme-noisette",
+                        "name": "Crêpe Crème Noisette",
+                        "description": "Crème de noisette onctueuse.",
+                        "priceSolo": 300,
+                        "image": "images/uploads/crepe-creme-noisette-96039249.webp",
+                        "baseIngredients": [
+                            "crème noisette"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "crepe-miel",
+                        "name": "Crêpe Miel",
+                        "description": "Miel naturel.",
+                        "priceSolo": 300,
+                        "image": "images/uploads/crepe-miel-29089ffa.webp",
+                        "baseIngredients": [
+                            "miel"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "crepe-beurre-cacahuete",
+                        "name": "Crêpe Beurre de Cacahuète",
+                        "description": "Beurre de cacahuète onctueux.",
+                        "priceSolo": 300,
+                        "image": "images/uploads/crepe-beurre-cacahuete-278f5025.webp",
+                        "baseIngredients": [
+                            "beurre cacahuète"
+                        ],
+                        "status": "available"
+                    }
+                ]
+            },
+            {
+                "id": "gaufres",
+                "name": "Gaufres",
+                "description": "Gaufres maison",
+                "items": [
+                    {
+                        "id": "gaufre-nature",
+                        "name": "Gaufre Nature",
+                        "description": "Sucre glace.",
+                        "priceSolo": 250,
+                        "image": "",
+                        "baseIngredients": [],
+                        "status": "available"
+                    },
+                    {
+                        "id": "gaufre-nutella",
+                        "name": "Gaufre Nutella",
+                        "description": "Nutella généreux.",
+                        "priceSolo": 450,
+                        "image": "",
+                        "baseIngredients": [
+                            "nutella"
+                        ],
+                        "status": "available"
+                    },
+                    {
+                        "id": "gaufre-complete",
+                        "name": "Gaufre Complète",
+                        "description": "Nutella, banane, chantilly, toppings.",
+                        "priceSolo": 500,
+                        "image": "",
+                        "baseIngredients": [
+                            "nutella",
+                            "banane",
+                            "chantilly"
+                        ],
+                        "status": "available",
+                        "badge": "Best-seller 🏆"
+                    }
+                ]
+            },
+            {
+                "id": "bubble-waffle",
+                "name": "Bubble Waffle",
+                "description": "Gaufre bulle tendance",
+                "items": [
+                    {
+                        "id": "bubble-nature",
+                        "name": "Bubble Waffle Nature",
+                        "description": "Bubble waffle avec sucre glace.",
+                        "priceSolo": 250,
+                        "image": "",
+                        "baseIngredients": [],
+                        "status": "available"
+                    },
+                    {
+                        "id": "bubble-garni",
+                        "name": "Bubble Waffle Garni",
+                        "description": "Bubble waffle avec garniture au choix.",
+                        "priceSolo": 400,
+                        "image": "",
+                        "baseIngredients": [],
+                        "status": "available",
+                        "badge": "Tendance 🔥"
+                    }
+                ]
+            },
+            {
+                "id": "boissons-chaudes",
+                "name": "Nos Boissons Chaudes",
+                "description": "Café, thé et chocolat",
+                "items": [
+                    {
+                        "id": "cafe-caps",
+                        "name": "Café Caps",
+                        "description": "Café capsule.",
+                        "price": 100,
+                        "status": "available",
+                        "priceSolo": 0,
+                        "variants": [
+                            {
+                                "id": "court",
+                                "name": "Court",
+                                "price": 100
+                            },
+                            {
+                                "id": "long",
+                                "name": "Long",
+                                "price": 150
+                            }
+                        ],
+                        "image": "images/uploads/cafe-caps-353f92e0.webp",
+                        "capsuleColors": []
+                    },
+                    {
+                        "id": "the-infusion",
+                        "name": "Thé Infusion",
+                        "description": "Thé ou infusion au choix.",
+                        "price": 100,
+                        "status": "available",
+                        "priceSolo": 0,
+                        "image": "images/uploads/the-infusion-30f6a5fd.webp"
+                    },
+                    {
+                        "id": "cafe-au-lait",
+                        "name": "Café au Lait",
+                        "description": "Café avec lait chaud.",
+                        "price": 150,
+                        "status": "available",
+                        "priceSolo": 0,
+                        "image": "images/uploads/cafe-au-lait-8747be8e.webp"
+                    },
+                    {
+                        "id": "cafe-lor",
+                        "name": "Café l'Or",
+                        "description": "Café premium L'Or.",
+                        "price": 200,
+                        "status": "available",
+                        "priceSolo": 0,
+                        "variants": [
+                            {
+                                "id": "court",
+                                "name": "Court",
+                                "price": 200
+                            },
+                            {
+                                "id": "long",
+                                "name": "Long",
+                                "price": 250
+                            }
+                        ],
+                        "capsuleNumbers": [
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13
+                        ],
+                        "image": "images/uploads/cafe-lor-2ee0f6cb.webp"
+                    },
+                    {
+                        "id": "cappuccino",
+                        "name": "Cappuccino",
+                        "description": "Café, lait mousseux, cacao.",
+                        "price": 250,
+                        "status": "available",
+                        "priceSolo": 0,
+                        "image": "images/uploads/cappuccino-f41941f6.webp"
+                    },
+                    {
+                        "id": "chocolat-chaud",
+                        "name": "Chocolat Chaud",
+                        "description": "Chocolat onctueux.",
+                        "price": 250,
+                        "status": "available",
+                        "priceSolo": 0,
+                        "image": "images/uploads/chocolat-chaud-6f06d1e8.webp"
+                    }
+                ]
+            },
+            {
+                "id": "sodas-eaux",
+                "name": "Sodas & Eaux",
+                "description": "Boissons fraîches",
+                "items": [
+                    {
+                        "id": "soda",
+                        "name": "Soda",
+                        "description": "Choisissez votre soda.",
+                        "price": 100,
+                        "status": "available",
+                        "hasBeverageOptions": true,
+                        "beverageOptions": [
+                            {
+                                "id": "soda-ifri",
+                                "name": "Ifri"
+                            },
+                            {
+                                "id": "soda-hamoud",
+                                "name": "Hamoud"
+                            },
+                            {
+                                "id": "soda-coca",
+                                "name": "Coca"
+                            }
+                        ],
+                        "priceSolo": 0
+                    },
+                    {
+                        "id": "jus",
+                        "name": "Jus",
+                        "description": "Choisissez votre jus.",
+                        "price": 100,
+                        "status": "available",
+                        "hasBeverageOptions": true,
+                        "beverageOptions": [
+                            {
+                                "id": "jus-rouiba",
+                                "name": "Rouiba"
+                            },
+                            {
+                                "id": "jus-ifri",
+                                "name": "Ifri"
+                            }
+                        ],
+                        "priceSolo": 0
+                    },
+                    {
+                        "id": "eau-minerale",
+                        "name": "Eau Minérale",
+                        "description": "Eau plate.",
+                        "price": 50,
+                        "status": "available",
+                        "priceSolo": 0
+                    },
+                    {
+                        "id": "eau-petillante",
+                        "name": "Eau Pétillante",
+                        "description": "Eau gazeuse.",
+                        "price": 50,
+                        "status": "available",
+                        "priceSolo": 0
+                    }
+                ]
+            },
+            {
+                "id": "jus-cocktails",
+                "name": "Jus Frais & Cocktails",
+                "description": "Jus frais et smoothies",
+                "items": [
+                    {
+                        "id": "jus-frais",
+                        "name": "Jus Frais",
+                        "description": "Choisissez votre jus frais.",
+                        "price": 200,
+                        "status": "available",
+                        "hasBeverageOptions": true,
+                        "beverageOptions": [
+                            {
+                                "id": "jus-frais-orange",
+                                "name": "Orange",
+                                "price": 350,
+                                "image": "assets/images/beverages/caf_1767886491.webp"
+                            },
+                            {
+                                "id": "jus-frais-fraise",
+                                "name": "Fraise",
+                                "price": 450
+                            }
+                        ],
+                        "priceSolo": 0,
+                        "image": "images/uploads/jus-frais-14a2cdec.webp"
+                    },
+                    {
+                        "id": "smoothie",
+                        "name": "Smoothie",
+                        "description": "Choisissez votre smoothie.",
+                        "price": 300,
+                        "status": "available",
+                        "hasBeverageOptions": true,
+                        "beverageOptions": [
+                            {
+                                "id": "smoothie-fraise",
+                                "name": "Fraise",
+                                "price": 300,
+                                "image": "assets/images/beverages/caf_1767886450.webp"
+                            },
+                            {
+                                "id": "smoothie-banane",
+                                "name": "Banane",
+                                "price": 450
+                            }
+                        ],
+                        "priceSolo": 0,
+                        "image": "images/uploads/smoothie-b58cf619.webp"
+                    },
+                    {
+                        "id": "cocktail-maison",
+                        "name": "Cocktail Maison",
+                        "description": "Citron ou Mojito (sans alcool).",
+                        "price": 350,
+                        "status": "available",
+                        "note": "À partir de",
+                        "hasBeverageOptions": true,
+                        "beverageOptions": [
+                            {
+                                "id": "cocktail-maison-mojito",
+                                "name": "Mojito",
+                                "price": 350,
+                                "image": "assets/images/beverages/caf_1767886410.webp"
+                            },
+                            {
+                                "id": "cocktail-maison-fraisecitron",
+                                "name": "Fraise citron",
+                                "price": 450
+                            }
+                        ],
+                        "priceSolo": 0,
+                        "image": "images/uploads/cocktail-maison-4a35a464.webp"
+                    }
+                ]
+            },
+            {
+                "id": "menu-enfant",
+                "name": "Menu Enfant",
+                "description": "Pour les petits",
+                "items": [
+                    {
+                        "id": "crepe-kids-salee",
+                        "name": "Crêpe Kids Salée",
+                        "description": "1 Crêpe Fumée ou poulet, pomme de terre, mayonnaise ou ketchup, +1 jus Daily",
+                        "price": 400,
+                        "isKids": true,
+                        "status": "available",
+                        "badge": "Mini",
+                        "hasKidsOptions": true,
+                        "kidsOptions": {
+                            "crepeTypes": [
+                                {
+                                    "id": "crepe-fumee",
+                                    "name": "Crêpe Fumée",
+                                    "price": 0
+                                },
+                                {
+                                    "id": "crepe-poulet",
+                                    "name": "Crêpe Poulet",
+                                    "price": 0
+                                }
+                            ],
+                            "sauces": [
+                                {
+                                    "id": "mayonnaise",
+                                    "name": "Mayonnaise",
+                                    "price": 0
+                                },
+                                {
+                                    "id": "ketchup",
+                                    "name": "Ketchup",
+                                    "price": 0
+                                }
+                            ]
+                        },
+                        "priceSolo": 0,
+                        "image": "images/uploads/crepe-kids-salee-3e482977.webp"
+                    },
+                    {
+                        "id": "crepe-kids-sucree",
+                        "name": "Crêpe Kids Sucrée",
+                        "description": "1 crêpe au chocolat et 1 jus daily",
+                        "price": 250,
+                        "isKids": true,
+                        "status": "available",
+                        "priceSolo": 0,
+                        "image": "images/uploads/crepe-kids-sucree-a153d49a.webp"
+                    }
+                ]
+            },
+            {
+                "id": "lat-maison",
+                "name": "Plat maison",
+                "description": "",
+                "items": [
+                    {
+                        "id": "hakhchoukha",
+                        "categoryId": "lat-maison",
+                        "name": "Chakhchoukha",
+                        "description": "",
+                        "priceSolo": 1200,
+                        "priceMenu": null,
+                        "badge": "harra 🔥",
+                        "image": "images/uploads/hakhchoukha-1c5ca555.webp",
+                        "status": "available",
+                        "supplements": [],
+                        "baseIngredients": []
+                    }
+                ]
+            },
+            {
+                "id": "lats-pic-s",
+                "name": "Plats épicés",
+                "description": "",
+                "items": [
+                    {
+                        "id": "g-ahal",
+                        "categoryId": "lats-pic-s",
+                        "name": "TAgMahal",
+                        "description": "",
+                        "priceSolo": 800,
+                        "priceMenu": null,
+                        "badge": null,
+                        "image": "images/uploads/g-ahal-5f82693a.webp",
+                        "status": "available",
+                        "supplements": [],
+                        "baseIngredients": []
+                    }
+                ]
+            },
+            {
+                "id": "iz",
+                "name": "Riz",
+                "description": "",
+                "items": [
+                    {
+                        "id": "rousty",
+                        "categoryId": "iz",
+                        "name": "Crousty",
+                        "description": "",
+                        "priceSolo": 700,
+                        "priceMenu": null,
+                        "badge": null,
+                        "image": "images/uploads/rousty-7406eb2b.webp",
+                        "status": "available",
+                        "supplements": [],
+                        "baseIngredients": []
+                    }
+                ]
+            }
+        ]
+    },
+    "supplements": {
+        "catalog": {
+            "sup-mix-fromages": {
+                "id": "sup-mix-fromages",
+                "name": "Mix Fromages",
+                "price": 150,
+                "status": "available",
+                "category": "fromage",
+                "flavor": "sale"
+            },
+            "sup-camembert": {
+                "id": "sup-camembert",
+                "name": "Camembert",
+                "price": 150,
+                "status": "available",
+                "category": "fromage",
+                "flavor": "sale"
+            },
+            "sup-chakchouka": {
+                "id": "sup-chakchouka",
+                "name": "Chakchouka",
+                "price": 100,
+                "status": "available",
+                "category": "legume",
+                "flavor": "sale"
+            },
+            "sup-cheddar": {
+                "id": "sup-cheddar",
+                "name": "Cheddar",
+                "price": 80,
+                "status": "available",
+                "category": "fromage",
+                "flavor": "sale"
+            },
+            "sup-pomme-terre": {
+                "id": "sup-pomme-terre",
+                "name": "Pomme de Terre",
+                "price": 80,
+                "status": "available",
+                "category": "legume",
+                "flavor": "sale"
+            },
+            "sup-oignons-confits": {
+                "id": "sup-oignons-confits",
+                "name": "Oignons Confits",
+                "price": 60,
+                "status": "available",
+                "category": "legume",
+                "flavor": "sale"
+            },
+            "sup-oeuf": {
+                "id": "sup-oeuf",
+                "name": "Oeuf",
+                "price": 60,
+                "status": "available",
+                "category": "autre",
+                "flavor": "sale"
+            },
+            "sup-viande-hachee": {
+                "id": "sup-viande-hachee",
+                "name": "Viande Hachée",
+                "price": 250,
+                "status": "available",
+                "category": "viande",
+                "flavor": "sale"
+            },
+            "sup-escalope-poulet": {
+                "id": "sup-escalope-poulet",
+                "name": "Escalope Poulet",
+                "price": 200,
+                "status": "available",
+                "category": "viande",
+                "flavor": "sale"
+            },
+            "sup-jambon": {
+                "id": "sup-jambon",
+                "name": "Jambon Fumé/Blanc",
+                "price": 150,
+                "status": "available",
+                "category": "viande",
+                "flavor": "sale"
+            },
+            "sup-nutella": {
+                "id": "sup-nutella",
+                "name": "Nutella",
+                "price": 200,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-chocolat": {
+                "id": "sup-chocolat",
+                "name": "Chocolat",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-confiture": {
+                "id": "sup-confiture",
+                "name": "Confiture",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-creme-noisette": {
+                "id": "sup-creme-noisette",
+                "name": "Crème de Noisette",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-miel": {
+                "id": "sup-miel",
+                "name": "Miel",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-beurre-cacahuete": {
+                "id": "sup-beurre-cacahuete",
+                "name": "Beurre de Cacahuète",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-sucre": {
+                "id": "sup-sucre",
+                "name": "Sucre",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-chantilly": {
+                "id": "sup-chantilly",
+                "name": "Chantilly",
+                "price": 100,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-pistache": {
+                "id": "sup-coulis-pistache",
+                "name": "Coulis Pistache",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-noisettes": {
+                "id": "sup-coulis-noisettes",
+                "name": "Coulis Noisettes",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-chocolat": {
+                "id": "sup-coulis-chocolat",
+                "name": "Coulis Chocolat",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-caramel": {
+                "id": "sup-coulis-caramel",
+                "name": "Coulis Caramel",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-coulis-fruits": {
+                "id": "sup-coulis-fruits",
+                "name": "Coulis aux Fruits",
+                "price": 50,
+                "status": "available",
+                "category": "base",
+                "flavor": "sucre"
+            },
+            "sup-cacahuetes": {
+                "id": "sup-cacahuetes",
+                "name": "Cacahuètes",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-amandes": {
+                "id": "sup-amandes",
+                "name": "Amandes",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-palet-breton": {
+                "id": "sup-palet-breton",
+                "name": "Palet Breton",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-cookies": {
+                "id": "sup-cookies",
+                "name": "Cookies",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-noix-coco": {
+                "id": "sup-noix-coco",
+                "name": "Noix de Coco",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-maxon-oreo": {
+                "id": "sup-maxon-oreo",
+                "name": "Maxon Oreo",
+                "price": 200,
+                "status": "available",
+                "category": "croquant",
+                "flavor": "sucre"
+            },
+            "sup-fraise": {
+                "id": "sup-fraise",
+                "name": "Fraise",
+                "price": 200,
+                "status": "available",
+                "category": "fruit",
+                "flavor": "sucre"
+            },
+            "sup-ananas": {
+                "id": "sup-ananas",
+                "name": "Ananas",
+                "price": 200,
+                "status": "available",
+                "category": "fruit",
+                "flavor": "sucre"
+            },
+            "sup-banane": {
+                "id": "sup-banane",
+                "name": "Banane",
+                "price": 200,
+                "status": "available",
+                "category": "fruit",
+                "flavor": "sucre"
+            },
+            "sup-peche": {
+                "id": "sup-peche",
+                "name": "Pêche",
+                "price": 200,
+                "status": "available",
+                "category": "fruit",
+                "flavor": "sucre"
+            },
+            "sup-mms": {
+                "id": "sup-mms",
+                "name": "M&M's",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-snickers": {
+                "id": "sup-snickers",
+                "name": "Snickers",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-kitkat": {
+                "id": "sup-kitkat",
+                "name": "KitKat",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-kinder-bueno": {
+                "id": "sup-kinder-bueno",
+                "name": "Kinder Bueno",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-raffaello": {
+                "id": "sup-raffaello",
+                "name": "Raffaello",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-kinder-country": {
+                "id": "sup-kinder-country",
+                "name": "Kinder Country",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            },
+            "sup-ferrero": {
+                "id": "sup-ferrero",
+                "name": "Ferrero Rocher",
+                "price": 200,
+                "status": "available",
+                "category": "prime",
+                "flavor": "sucre"
+            }
+        },
+        "defaultForCategories": {
+            "crepes-salees-signature": [
+                "sup-mix-fromages",
+                "sup-cheddar",
+                "sup-camembert",
+                "sup-chakchouka",
+                "sup-pomme-terre",
+                "sup-oignons-confits",
+                "sup-oeuf",
+                "sup-viande-hachee",
+                "sup-escalope-poulet",
+                "sup-jambon"
+            ],
+            "sucres-sales": [],
+            "crepes-sucrees": [
+                "sup-nutella",
+                "sup-chocolat",
+                "sup-confiture",
+                "sup-creme-noisette",
+                "sup-miel",
+                "sup-beurre-cacahuete",
+                "sup-sucre",
+                "sup-chantilly",
+                "sup-coulis-pistache",
+                "sup-coulis-noisettes",
+                "sup-coulis-chocolat",
+                "sup-coulis-caramel",
+                "sup-coulis-fruits",
+                "sup-cacahuetes",
+                "sup-amandes",
+                "sup-palet-breton",
+                "sup-cookies",
+                "sup-noix-coco",
+                "sup-maxon-oreo",
+                "sup-fraise",
+                "sup-ananas",
+                "sup-banane",
+                "sup-peche",
+                "sup-mms",
+                "sup-snickers",
+                "sup-kitkat",
+                "sup-kinder-bueno",
+                "sup-raffaello",
+                "sup-kinder-country",
+                "sup-ferrero"
+            ],
+            "gaufres": [
+                "sup-nutella",
+                "sup-chocolat",
+                "sup-confiture",
+                "sup-creme-noisette",
+                "sup-miel",
+                "sup-beurre-cacahuete",
+                "sup-sucre",
+                "sup-chantilly",
+                "sup-coulis-pistache",
+                "sup-coulis-noisettes",
+                "sup-coulis-chocolat",
+                "sup-coulis-caramel",
+                "sup-coulis-fruits",
+                "sup-cacahuetes",
+                "sup-amandes",
+                "sup-palet-breton",
+                "sup-cookies",
+                "sup-noix-coco",
+                "sup-maxon-oreo",
+                "sup-fraise",
+                "sup-ananas",
+                "sup-banane",
+                "sup-peche",
+                "sup-mms",
+                "sup-snickers",
+                "sup-kitkat",
+                "sup-kinder-bueno",
+                "sup-raffaello",
+                "sup-kinder-country",
+                "sup-ferrero"
+            ],
+            "bubble-waffle": [
+                "sup-nutella",
+                "sup-chocolat",
+                "sup-confiture",
+                "sup-creme-noisette",
+                "sup-miel",
+                "sup-beurre-cacahuete",
+                "sup-sucre",
+                "sup-chantilly",
+                "sup-coulis-pistache",
+                "sup-coulis-noisettes",
+                "sup-coulis-chocolat",
+                "sup-coulis-caramel",
+                "sup-coulis-fruits",
+                "sup-cacahuetes",
+                "sup-amandes",
+                "sup-palet-breton",
+                "sup-cookies",
+                "sup-noix-coco",
+                "sup-maxon-oreo",
+                "sup-fraise",
+                "sup-ananas",
+                "sup-banane",
+                "sup-peche",
+                "sup-mms",
+                "sup-snickers",
+                "sup-kitkat",
+                "sup-kinder-bueno",
+                "sup-raffaello",
+                "sup-kinder-country",
+                "sup-ferrero"
+            ],
+            "boissons-chaudes": [],
+            "sodas-eaux": [],
+            "jus-cocktails": [],
+            "menu-enfant": [],
+            "ouscous": [
+                "sup-mix-fromages",
+                "sup-cheddar",
+                "sup-camembert",
+                "sup-chakchouka",
+                "sup-pomme-terre",
+                "sup-oignons-confits",
+                "sup-oeuf",
+                "sup-viande-hachee",
+                "sup-escalope-poulet",
+                "sup-jambon"
+            ]
+        }
+    },
+    "featured": {
+        "enabled": true,
+        "title": "Sélection pour vous",
+        "subtitle": "Nos produits les plus appréciés",
+        "items": [
+            "fromagere",
+            "parisienne",
+            "lyonnaise",
+            "la-marvelous"
+        ]
+    },
+    "accompagnements": {
+        "salade": {
+            "id": "acc-salade",
+            "name": "Accompagnement Salade",
+            "price": 0,
+            "status": "available"
+        },
+        "riz": {
+            "id": "acc-riz",
+            "name": "Accompagnement Riz",
+            "price": 0,
+            "status": "available"
+        }
+    },
+    "formules": [
+        {
+            "id": "formule-formule-midi",
+            "name": "formule midi",
+            "description": "poulet frite boisson",
+            "price": 450,
+            "originalPrice": 700,
+            "savings": 250,
+            "badge": null,
+            "image": "images/formules/formule-formule-midi-2b7d9071.jpg",
+            "includes": [],
+            "status": "available"
+        },
+        {
+            "id": "formule-formule-walou",
+            "name": "formule walou",
+            "description": "walou + walou = walou",
+            "price": 250,
+            "originalPrice": null,
+            "savings": null,
+            "badge": null,
+            "image": "images/formules/formule-formule-walou-24fc4b39.webp",
+            "includes": [],
+            "status": "available"
+        }
+    ],
+    "upsellRules": [
+        {
+            "when": [
+                "crepes-salees-signature"
+            ],
+            "suggest": [
+                "soda",
+                "jus-frais",
+                {
+                    "category": "sucres-sales",
+                    "max": 2
+                },
+                "cafe-caps"
+            ],
+            "message": "Envie d'une petite douceur pour compléter ?",
+            "priority": 1
+        },
+        {
+            "when": [
+                "crepes-sucrees",
+                "gaufres",
+                "bubble-waffle"
+            ],
+            "suggest": [
+                "chocolat-chaud",
+                "cafe-caps",
+                "cappuccino",
+                "jus-frais"
+            ],
+            "message": "Une boisson gourmande pour accompagner votre dessert ?",
+            "priority": 2
+        },
+        {
+            "when": [
+                "boissons-chaudes",
+                "sodas-eaux",
+                "jus-cocktails"
+            ],
+            "suggest": [
+                "sucres-sales"
+            ],
+            "message": "Craquez pour une gourmandise sucrée !",
+            "priority": 3
+        }
+    ],
+    "categoryIcons": {
+        "crepes-salees-signature": "fa-star",
+        "sucres-sales": "fa-bread-slice",
+        "crepes-sucrees": "fa-cookie-bite",
+        "gaufres": "fa-stroopwafel",
+        "bubble-waffle": "fa-circle",
+        "boissons-chaudes": "fa-mug-hot",
+        "sodas-eaux": "fa-bottle-water",
+        "jus-cocktails": "fa-glass-water",
+        "menu-enfant": "fa-child",
+        "urgers": "fa-burger",
+        "ouscous": "fa-bowl-food"
+    }
+}

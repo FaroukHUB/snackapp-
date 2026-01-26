@@ -29,6 +29,16 @@ function readInput(): array {
 }
 
 /**
+ * Retourne le chemin du fichier menu.json spécifique à l'instance
+ *
+ * @return string Chemin vers menu.<instanceId>.json
+ */
+function getMenuJsonPath(): string {
+    $instanceId = InstanceManager::getInstanceId();
+    return SNACK_ROOT . "/config/menu.$instanceId.json";
+}
+
+/**
  * ⚡ OPTIMISATION: Convertir et optimiser une image en WebP
  *
  * @param string $sourcePath Chemin du fichier source (JPG/PNG/WebP)
@@ -234,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             ];
 
             // Charger formules depuis menu.json (temporaire - pas encore migré)
-            $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+            $menuJsonPath = getMenuJsonPath();
             $formules = [];
             $featured = [
                 'enabled' => true,
@@ -268,7 +278,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     // ✅ MODE JSON - Charger menu.json + appliquer runtime (filtre deletedCategories)
-    $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+    $menuJsonPath = getMenuJsonPath();
 
     if (!file_exists($menuJsonPath)) {
         jsonError('menu.json introuvable');
@@ -574,7 +584,7 @@ if ($useMySQL) {
                 $baseId = trim($baseId, '-');
 
                 $existingIds = array_keys($runtime['customFormules'] ?? []);
-                $menuData = json_decode(file_get_contents(SNACK_ROOT . '/config/menu.json'), true);
+                $menuData = json_decode(file_get_contents(getMenuJsonPath()), true);
                 foreach (($menuData['formules'] ?? []) as $f) {
                     if (isset($f['id'])) $existingIds[] = $f['id'];
                 }
@@ -725,7 +735,7 @@ if ($useMySQL) {
             ];
 
             // Sauvegarder dans menu.json
-            $menuPath = SNACK_ROOT . '/config/menu.json';
+            $menuPath = getMenuJsonPath();
             if (file_exists($menuPath)) {
                 $menuData = json_decode(file_get_contents($menuPath), true);
                 if ($menuData) {
@@ -852,7 +862,7 @@ switch ($action) {
         }
 
         // Sauvegarder l'icône dans menu.json
-        $menuPath = SNACK_ROOT . '/config/menu.json';
+        $menuPath = getMenuJsonPath();
         if (file_exists($menuPath)) {
             clearstatcache(true, $menuPath);
             $menuData = json_decode(file_get_contents($menuPath), true);
@@ -917,7 +927,7 @@ switch ($action) {
         $runtime = loadMenuRuntime();
 
         // ✅ FIX: Vérifier que la catégorie existe dans menu.json OU dans customCategories
-        $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+        $menuJsonPath = getMenuJsonPath();
         $categoryExists = false;
 
         // Vérifier dans customCategories
@@ -956,7 +966,7 @@ switch ($action) {
         }
 
         // Supprimer l'icône du menu.json si elle existe
-        $menuPath = SNACK_ROOT . '/config/menu.json';
+        $menuPath = getMenuJsonPath();
         if (file_exists($menuPath)) {
             clearstatcache(true, $menuPath);
             $menuData = json_decode(file_get_contents($menuPath), true);
@@ -1308,7 +1318,7 @@ switch ($action) {
 
         // Si le supplément n'existe pas dans runtime, le copier depuis menu.json
         if (!isset($runtime['supplements']['catalog'][$id])) {
-            $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+            $menuJsonPath = getMenuJsonPath();
             if (file_exists($menuJsonPath)) {
                 $menuData = json_decode(file_get_contents($menuJsonPath), true);
                 if (isset($menuData['supplements']['catalog'][$id])) {
@@ -1345,7 +1355,7 @@ switch ($action) {
 
         // Si le supplément n'existe pas dans runtime, le copier depuis menu.json
         if (!isset($runtime['supplements']['catalog'][$id])) {
-            $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+            $menuJsonPath = getMenuJsonPath();
             if (file_exists($menuJsonPath)) {
                 $menuData = json_decode(file_get_contents($menuJsonPath), true);
                 if (isset($menuData['supplements']['catalog'][$id])) {
@@ -1414,7 +1424,7 @@ switch ($action) {
         }
 
         // IDs du menu.json
-        $menuData = json_decode(file_get_contents(SNACK_ROOT . '/config/menu.json'), true);
+        $menuData = json_decode(file_get_contents(getMenuJsonPath()), true);
         foreach (($menuData['formules'] ?? []) as $f) {
             if (isset($f['id'])) {
                 $existingIds[] = $f['id'];
@@ -1607,7 +1617,7 @@ switch ($action) {
         ];
 
         // Sauvegarder dans menu.json
-        $menuPath = SNACK_ROOT . '/config/menu.json';
+        $menuPath = getMenuJsonPath();
         if (file_exists($menuPath)) {
             $menuData = json_decode(file_get_contents($menuPath), true);
             if ($menuData) {
@@ -1657,7 +1667,7 @@ switch ($action) {
         }
 
         // Trouver le produit pâtisserie dans menu.json
-        $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+        $menuJsonPath = getMenuJsonPath();
         $menuData = json_decode(file_get_contents($menuJsonPath), true);
 
         $found = false;
@@ -1699,7 +1709,7 @@ switch ($action) {
         $index = intval($input['index'] ?? -1);
         if ($index < 0) jsonError('Index invalide');
 
-        $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+        $menuJsonPath = getMenuJsonPath();
         $menuData = json_decode(file_get_contents($menuJsonPath), true);
 
         $found = false;
@@ -1752,7 +1762,7 @@ switch ($action) {
             $imagePath = 'assets/images/beverages/' . $newName;
         }
 
-        $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+        $menuJsonPath = getMenuJsonPath();
         $menuData = json_decode(file_get_contents($menuJsonPath), true);
 
         $found = false;
@@ -1791,7 +1801,7 @@ switch ($action) {
         $index = intval($input['index'] ?? -1);
         if ($index < 0 || !$bevType) jsonError('Paramètres invalides');
 
-        $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+        $menuJsonPath = getMenuJsonPath();
         $menuData = json_decode(file_get_contents($menuJsonPath), true);
 
         $found = false;
@@ -1820,7 +1830,7 @@ switch ($action) {
             jsonError('Paramètres invalides');
         }
 
-        $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+        $menuJsonPath = getMenuJsonPath();
         $menuData = json_decode(file_get_contents($menuJsonPath), true);
 
         $found = false;
@@ -1852,7 +1862,7 @@ switch ($action) {
             jsonError('Paramètres invalides');
         }
 
-        $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+        $menuJsonPath = getMenuJsonPath();
         $menuData = json_decode(file_get_contents($menuJsonPath), true);
 
         $found = false;
@@ -1967,7 +1977,7 @@ function handleFormuleImageUpload(string $baseId): ?string {
    HELPER: Sync formules to menu.json
    ========================= */
 function syncFormulesToMenu(array $runtime): void {
-    $menuPath = SNACK_ROOT . '/config/menu.json';
+    $menuPath = getMenuJsonPath();
     if (!file_exists($menuPath)) return;
 
     $menuData = json_decode(file_get_contents($menuPath), true);

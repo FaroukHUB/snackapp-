@@ -53,7 +53,8 @@ try {
     ];
 
     // Charger formules depuis menu.json si existant (fallback temporaire)
-    $menuJsonPath = __DIR__ . '/menu.json';
+    $instanceId = InstanceManager::getInstanceId();
+    $menuJsonPath = __DIR__ . "/menu.$instanceId.json";
     $formules = [];
     $featured = [
         'enabled' => true,
