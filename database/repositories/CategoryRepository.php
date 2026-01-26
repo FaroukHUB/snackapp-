@@ -12,11 +12,9 @@ class CategoryRepository {
      * Récupère toutes les catégories actives d'un restaurant
      */
     public static function getAll(int $restaurantId, bool $includeDeleted = false): array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         return Database::fetchAll(
             "SELECT * FROM categories
-             WHERE restaurant_id = ? {$deletedFilter}
+             WHERE restaurant_id = ?
              ORDER BY sort_order ASC, id ASC",
             [$restaurantId]
         );
@@ -26,10 +24,8 @@ class CategoryRepository {
      * Récupère une catégorie par ID
      */
     public static function getById(int $id, bool $includeDeleted = false): ?array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         return Database::fetchOne(
-            "SELECT * FROM categories WHERE id = ? {$deletedFilter}",
+            "SELECT * FROM categories WHERE id = ?",
             [$id]
         );
     }
@@ -38,11 +34,9 @@ class CategoryRepository {
      * Récupère une catégorie par slug
      */
     public static function getBySlug(int $restaurantId, string $slug, bool $includeDeleted = false): ?array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         return Database::fetchOne(
             "SELECT * FROM categories
-             WHERE restaurant_id = ? AND slug = ? {$deletedFilter}",
+             WHERE restaurant_id = ? AND slug = ?",
             [$restaurantId, $slug]
         );
     }
@@ -108,24 +102,24 @@ class CategoryRepository {
     }
 
     /**
-     * Soft delete d'une catégorie
+     * Désactive une catégorie
      */
     public static function softDelete(int $id): bool {
         $rowsAffected = Database::update(
             'categories',
-            ['deleted_at' => date('Y-m-d H:i:s')],
+            ['is_active' => 0],
             ['id' => $id]
         );
         return $rowsAffected > 0;
     }
 
     /**
-     * Restaure une catégorie supprimée
+     * Restaure une catégorie (réactive)
      */
     public static function restore(int $id): bool {
         $rowsAffected = Database::update(
             'categories',
-            ['deleted_at' => null],
+            ['is_active' => 1],
             ['id' => $id]
         );
         return $rowsAffected > 0;
@@ -143,11 +137,9 @@ class CategoryRepository {
      * Compte le nombre de produits dans une catégorie
      */
     public static function countProducts(int $categoryId, bool $includeDeleted = false): int {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         $result = Database::fetchOne(
             "SELECT COUNT(*) as count FROM products
-             WHERE category_id = ? {$deletedFilter}",
+             WHERE category_id = ?",
             [$categoryId]
         );
 
@@ -197,7 +189,7 @@ class CategoryRepository {
             "SELECT
                 COUNT(*) as total_categories,
                 SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_categories,
-                SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END) as deleted_categories
+                SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as deleted_categories
              FROM categories
              WHERE restaurant_id = ?",
             [$restaurantId]

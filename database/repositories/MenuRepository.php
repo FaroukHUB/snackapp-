@@ -15,11 +15,11 @@ class MenuRepository {
     public static function getAllCategories() {
         $pdo = Database::getInstance();
 
-        // Récupérer catégories actives (non supprimées)
+        // Récupérer catégories actives
         $stmt = $pdo->prepare("
             SELECT id, slug, name, description, icon, flavor, sort_order
             FROM categories
-            WHERE restaurant_id = ? AND deleted_at IS NULL
+            WHERE restaurant_id = ?
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([self::$restaurantId]);
@@ -44,7 +44,7 @@ class MenuRepository {
                    price_solo as priceSolo, price_menu as priceMenu,
                    status, sort_order, base_ingredients
             FROM products
-            WHERE category_id = ? AND deleted_at IS NULL
+            WHERE category_id = ?
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([$categoryId]);
@@ -228,14 +228,14 @@ class MenuRepository {
     }
 
     /**
-     * Supprime une catégorie (soft delete)
+     * Supprime une catégorie (désactivation)
      */
     public static function deleteCategory($categoryId) {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
             UPDATE categories
-            SET deleted_at = NOW(), is_active = 0
+            SET is_active = 0
             WHERE id = ? AND restaurant_id = ?
         ");
 
@@ -319,14 +319,14 @@ class MenuRepository {
     }
 
     /**
-     * Supprime un produit (soft delete)
+     * Supprime un produit (désactivation)
      */
     public static function deleteProduct($productId) {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
             UPDATE products
-            SET deleted_at = NOW()
+            SET status = 'unavailable'
             WHERE id = ? AND restaurant_id = ?
         ");
 

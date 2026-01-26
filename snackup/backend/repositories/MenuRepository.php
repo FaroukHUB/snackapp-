@@ -367,14 +367,14 @@ class MenuRepository {
     }
 
     /**
-     * Supprime un produit (soft delete)
+     * Supprime un produit (désactivation)
      */
     public static function deleteProduct($productId) {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
             UPDATE products
-            SET deleted_at = NOW()
+            SET status = 'unavailable'
             WHERE id = ? AND restaurant_id = ?
         ");
 
@@ -392,7 +392,7 @@ class MenuRepository {
                    price, original_price as originalPrice,
                    includes, status, sort_order
             FROM formules
-            WHERE restaurant_id = ? AND deleted_at IS NULL
+            WHERE restaurant_id = ?
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([self::$restaurantId]);
@@ -552,14 +552,14 @@ class MenuRepository {
     }
 
     /**
-     * Supprime une formule (soft delete)
+     * Supprime une formule (désactivation)
      */
     public static function deleteFormule($formuleId) {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
             UPDATE formules
-            SET deleted_at = NOW()
+            SET status = 'unavailable'
             WHERE id = ? AND restaurant_id = ?
         ");
 

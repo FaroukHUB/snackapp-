@@ -12,11 +12,9 @@ class SupplementRepository {
      * Récupère tous les suppléments d'un restaurant
      */
     public static function getAll(int $restaurantId, bool $includeDeleted = false): array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         return Database::fetchAll(
             "SELECT * FROM supplements
-             WHERE restaurant_id = ? {$deletedFilter}
+             WHERE restaurant_id = ?
              ORDER BY sort_order ASC, id ASC",
             [$restaurantId]
         );
@@ -26,10 +24,8 @@ class SupplementRepository {
      * Récupère un supplément par ID
      */
     public static function getById(int $id, bool $includeDeleted = false): ?array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         return Database::fetchOne(
-            "SELECT * FROM supplements WHERE id = ? {$deletedFilter}",
+            "SELECT * FROM supplements WHERE id = ?",
             [$id]
         );
     }
@@ -38,15 +34,13 @@ class SupplementRepository {
      * Récupère les suppléments par statut
      */
     public static function getByStatus(int $restaurantId, string $status, bool $includeDeleted = false): array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         if (!in_array($status, ['available', 'unavailable'])) {
             throw new Exception("Statut invalide");
         }
 
         return Database::fetchAll(
             "SELECT * FROM supplements
-             WHERE restaurant_id = ? AND status = ? {$deletedFilter}
+             WHERE restaurant_id = ? AND status = ?
              ORDER BY sort_order ASC",
             [$restaurantId, $status]
         );
@@ -90,24 +84,24 @@ class SupplementRepository {
     }
 
     /**
-     * Soft delete d'un supplément
+     * Désactive un supplément
      */
     public static function softDelete(int $id): bool {
         $rowsAffected = Database::update(
             'supplements',
-            ['deleted_at' => date('Y-m-d H:i:s')],
+            ['status' => 'unavailable'],
             ['id' => $id]
         );
         return $rowsAffected > 0;
     }
 
     /**
-     * Restaure un supplément supprimé
+     * Restaure un supplément (réactive)
      */
     public static function restore(int $id): bool {
         $rowsAffected = Database::update(
             'supplements',
-            ['deleted_at' => null],
+            ['status' => 'available'],
             ['id' => $id]
         );
         return $rowsAffected > 0;
@@ -163,7 +157,7 @@ class SupplementRepository {
                 COUNT(*) as total_supplements,
                 SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available_supplements,
                 SUM(CASE WHEN status = 'unavailable' THEN 1 ELSE 0 END) as unavailable_supplements,
-                SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END) as deleted_supplements,
+                0 as deleted_supplements,
                 AVG(price) as avg_price
              FROM supplements
              WHERE restaurant_id = ?",
@@ -185,12 +179,10 @@ class SupplementRepository {
      * Récupère tous les produits associés à un supplément
      */
     public static function getProducts(int $supplementId, bool $includeDeleted = false): array {
-        $deletedFilter = $includeDeleted ? '' : 'AND p.deleted_at IS NULL AND ps.deleted_at IS NULL';
-
         return Database::fetchAll(
             "SELECT p.* FROM products p
              JOIN product_supplements ps ON p.id = ps.product_id
-             WHERE ps.supplement_id = ? {$deletedFilter}
+             WHERE ps.supplement_id = ?
              ORDER BY p.category_id ASC, p.sort_order ASC",
             [$supplementId]
         );
@@ -200,12 +192,10 @@ class SupplementRepository {
      * Compte le nombre de produits utilisant ce supplément
      */
     public static function countProducts(int $supplementId, bool $includeDeleted = false): int {
-        $deletedFilter = $includeDeleted ? '' : 'AND ps.deleted_at IS NULL';
-
         $result = Database::fetchOne(
             "SELECT COUNT(DISTINCT ps.product_id) as count
              FROM product_supplements ps
-             WHERE ps.supplement_id = ? {$deletedFilter}",
+             WHERE ps.supplement_id = ?",
             [$supplementId]
         );
 
@@ -223,14 +213,6 @@ class SupplementRepository {
         );
 
         if ($existing) {
-            // Si soft deleted, restaurer
-            if ($existing['deleted_at']) {
-                return Database::update(
-                    'product_supplements',
-                    ['deleted_at' => null],
-                    ['product_id' => $productId, 'supplement_id' => $supplementId]
-                ) > 0;
-            }
             return true; // Déjà associé
         }
 
@@ -247,12 +229,11 @@ class SupplementRepository {
     }
 
     /**
-     * Dissocie un supplément d'un produit (soft delete)
+     * Dissocie un supplément d'un produit
      */
     public static function detachFromProduct(int $supplementId, int $productId): bool {
-        $rowsAffected = Database::update(
+        $rowsAffected = Database::delete(
             'product_supplements',
-            ['deleted_at' => date('Y-m-d H:i:s')],
             ['product_id' => $productId, 'supplement_id' => $supplementId]
         );
 
@@ -301,11 +282,8 @@ class SupplementRepository {
      */
     public static function syncProducts(int $supplementId, array $productIds): bool {
         return Database::transaction(function() use ($supplementId, $productIds) {
-            // Soft delete toutes les anciennes associations
-            Database::query(
-                "UPDATE product_supplements SET deleted_at = NOW() WHERE supplement_id = ?",
-                [$supplementId]
-            );
+            // Supprimer toutes les anciennes associations
+            Database::delete('product_supplements', ['supplement_id' => $supplementId]);
 
             // Créer nouvelles associations
             foreach ($productIds as $productId) {
@@ -328,7 +306,7 @@ class SupplementRepository {
              FROM product_supplements ps
              JOIN products p ON ps.product_id = p.id
              JOIN supplements s ON ps.supplement_id = s.id
-             WHERE p.restaurant_id = ? AND ps.deleted_at IS NULL
+             WHERE p.restaurant_id = ?
              ORDER BY p.name ASC, s.name ASC",
             [$restaurantId]
         );
