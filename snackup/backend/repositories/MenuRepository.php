@@ -19,7 +19,7 @@ class MenuRepository {
 
         // Récupérer catégories actives
         $stmt = $pdo->prepare("
-            SELECT id, name, description, icon, flavor, sort_order
+            SELECT id, name, slug, description, icon, flavor, sort_order
             FROM categories
             WHERE restaurant_id = ? AND is_active = 1
             ORDER BY sort_order ASC, id ASC
@@ -46,10 +46,10 @@ class MenuRepository {
                    price_solo as priceSolo, price_menu as priceMenu,
                    status, sort_order, base_ingredients as baseIngredients
             FROM products
-            WHERE category_id = ?
+            WHERE category_id = ? AND restaurant_id = ?
             ORDER BY sort_order ASC, id ASC
         ");
-        $stmt->execute([$categoryId]);
+        $stmt->execute([$categoryId, self::$restaurantId]);
 
         $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

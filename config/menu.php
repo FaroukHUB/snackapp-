@@ -53,24 +53,21 @@ try {
         'defaultForCategories' => $categorySupplements
     ];
 
-    // Charger featured et categoryIcons depuis menu.json (configuration UI uniquement)
-    $instanceId = InstanceManager::getInstanceId();
-    $menuJsonPath = __DIR__ . "/menu.$instanceId.json";
-    $featured = [
-        'enabled' => true,
-        'title' => 'Sélection pour vous',
-        'subtitle' => 'Nos produits les plus appréciés',
-        'items' => []
-    ];
+    // Construire categoryIcons depuis la base de données (mapping slug → icon)
     $categoryIcons = [];
-
-    if (file_exists($menuJsonPath)) {
-        $menuData = json_decode(file_get_contents($menuJsonPath), true);
-        if ($menuData) {
-            $featured = $menuData['featured'] ?? $featured;
-            $categoryIcons = $menuData['categoryIcons'] ?? [];
+    foreach ($categories as $cat) {
+        if (!empty($cat['slug']) && !empty($cat['icon'])) {
+            $categoryIcons[$cat['slug']] = $cat['icon'];
         }
     }
+
+    // Featured: structure par défaut (pas de données JSON)
+    $featured = [
+        'enabled' => false,
+        'title' => '',
+        'subtitle' => '',
+        'items' => []
+    ];
 
     // Construire la réponse complète
     $response = [
