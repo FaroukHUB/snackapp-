@@ -695,48 +695,49 @@ switch ($action) {
         }
 
         $runtime = loadMenuRuntime();
+        $menuPath = SNACK_ROOT . '/config/menu.json';
+        $isMenuJsonCategory = false;
+        $categoryFound = false;
 
-        // Vérifier que la catégorie existe (dans customCategories OU dans menu.json)
-        $categoryExists = isset($runtime['customCategories'][$categoryId]);
-
-        if (!$categoryExists) {
-            // Chercher dans menu.json
-            $menuJsonPath = SNACK_ROOT . '/config/menu.json';
-            if (file_exists($menuJsonPath)) {
-                $menuData = json_decode(file_get_contents($menuJsonPath), true);
-                if ($menuData && isset($menuData['menu']['categories'])) {
-                    foreach ($menuData['menu']['categories'] as $cat) {
-                        if (($cat['id'] ?? '') === $categoryId) {
-                            $categoryExists = true;
-                            // Créer un override dans customCategories pour cette catégorie de menu.json
-                            if (!isset($runtime['customCategories'])) {
-                                $runtime['customCategories'] = [];
-                            }
-                            $runtime['customCategories'][$categoryId] = [
-                                'id' => $categoryId,
-                                'name' => $cat['name'] ?? '',
-                                'description' => $cat['description'] ?? ''
-                            ];
-                            break;
+        // Vérifier si c'est une catégorie de menu.json
+        if (file_exists($menuPath)) {
+            clearstatcache(true, $menuPath);
+            $menuData = json_decode(file_get_contents($menuPath), true);
+            if ($menuData && isset($menuData['menu']['categories'])) {
+                foreach ($menuData['menu']['categories'] as &$cat) {
+                    if (($cat['id'] ?? '') === $categoryId) {
+                        // Modifier directement dans menu.json
+                        $cat['name'] = $name;
+                        $cat['description'] = $description;
+                        if ($icon !== '') {
+                            $cat['icon'] = $icon;
                         }
+                        $isMenuJsonCategory = true;
+                        $categoryFound = true;
+                        break;
                     }
+                }
+                unset($cat);
+
+                // Sauvegarder menu.json si modifié
+                if ($isMenuJsonCategory) {
+                    file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                 }
             }
         }
 
-        if (!$categoryExists) {
-            jsonError('Catégorie introuvable dans menu.json et customCategories');
+        // Sinon vérifier dans customCategories
+        if (!$categoryFound && isset($runtime['customCategories'][$categoryId])) {
+            $runtime['customCategories'][$categoryId]['name'] = $name;
+            $runtime['customCategories'][$categoryId]['description'] = $description;
+            $categoryFound = true;
         }
 
-        $runtime['customCategories'][$categoryId]['name'] = $name;
-        $runtime['customCategories'][$categoryId]['description'] = $description;
-
-        // ✅ Stocker le flavor pour le site
-        if ($flavor !== '') {
-            $runtime['customCategories'][$categoryId]['flavor'] = $flavor;
+        if (!$categoryFound) {
+            jsonError('Catégorie introuvable');
         }
 
-        // Réassigner les suppléments si le flavor est fourni
+        // Gérer le flavor (toujours dans runtime)
         if ($flavor !== '') {
             $supplementsSales = [
                 'sup-mix-fromages', 'sup-cheddar', 'sup-camembert',
@@ -761,21 +762,6 @@ switch ($action) {
             }
         }
 
-        // Mettre à jour l'icône dans menu.json
-        $menuPath = SNACK_ROOT . '/config/menu.json';
-        if (file_exists($menuPath)) {
-            clearstatcache(true, $menuPath);
-            $menuData = json_decode(file_get_contents($menuPath), true);
-            if ($menuData) {
-                if (!isset($menuData['categoryIcons'])) {
-                    $menuData['categoryIcons'] = [];
-                }
-                $menuData['categoryIcons'][$categoryId] = $icon;
-                file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-            }
-        }
-
-        // ⚡ OPTIMISATION: Une seule synchronisation à la fin
         saveMenuRuntime($runtime, true);
 
         jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon]]);
