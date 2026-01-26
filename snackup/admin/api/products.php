@@ -611,8 +611,8 @@ if ($useMySQL) {
                     }
                     error_log('[PRODUCTS API] ✅ ID généré: ' . $id);
 
-                    // Upload image formule désactivé temporairement (fonction handleFormuleImageUpload undefined)
-                    $imagePath = null;
+                    // Upload image formule si présente
+    $imagePath = handleFormuleImageUpload($id);
                     error_log('[PRODUCTS API] imagePath: ' . ($imagePath ?? 'NULL'));
 
                     $includes = [];
@@ -696,8 +696,8 @@ if ($useMySQL) {
                     }
 
                     error_log('[PRODUCTS API] Tentative upload image...');
-                    // Upload image formule désactivé temporairement (fonction handleFormuleImageUpload undefined)
-                    $imagePath = null;
+                    // Upload image formule si présente
+    $imagePath = handleFormuleImageUpload($formuleId);
                     error_log('[PRODUCTS API] imagePath: ' . ($imagePath ?? 'NULL'));
 
                     if ($imagePath) {
@@ -1531,8 +1531,8 @@ switch ($action) {
 
             // Gérer l'upload d'image
             error_log('[PRODUCTS API JSON MODE] Tentative upload image...');
-            // Upload image formule désactivé temporairement (fonction handleFormuleImageUpload undefined)
-            $imagePath = null;
+            // Upload image formule si présente
+    $imagePath = handleFormuleImageUpload($id);
             error_log('[PRODUCTS API JSON MODE] imagePath: ' . ($imagePath ?? 'NULL'));
 
             // Décoder les includes
@@ -1630,8 +1630,8 @@ switch ($action) {
 
             // Gérer l'upload d'image
             error_log('[PRODUCTS API JSON MODE] Tentative upload image...');
-            // Upload image formule désactivé temporairement (fonction handleFormuleImageUpload undefined)
-            $imagePath = null;
+            // Upload image formule si présente
+    $imagePath = handleFormuleImageUpload($formuleId);
             error_log('[PRODUCTS API JSON MODE] imagePath: ' . ($imagePath ?? 'NULL'));
 
             if ($imagePath) {
