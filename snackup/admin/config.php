@@ -35,6 +35,7 @@ define('CURRENCY', $instanceConfig['app']['currency'] ?? 'DA');
 define('SNACK_ROOT', __DIR__ . '/../..');  // Racine du projet (2 niveaux au-dessus de admin/)
 define('UPLOADS_DIR', __DIR__ . '/../../images/');
 define('DATA_DIR', __DIR__ . '/data/');
+define('MENU_RUNTIME_FILE', __DIR__ . '/../config/menu.runtime.json');
 
 // Créer le dossier data s'il n'existe pas
 if (!is_dir(DATA_DIR)) {
@@ -163,6 +164,83 @@ function debug_log($message, $data = null) {
             error_log(print_r($data, true));
         }
     }
+}
+
+/**
+ * Charger le menu runtime (compatibilité avec ancien système JSON)
+ * Utilisé pendant la période de transition MySQL -> JSON
+ */
+function loadMenuRuntime() {
+    $path = MENU_RUNTIME_FILE;
+    if (!file_exists($path)) {
+        return [
+            'products' => [],
+            'categories' => [],
+            'customCategories' => [],
+            'customProducts' => [],
+            'deletedProducts' => [],
+            'deletedCategories' => []
+        ];
+    }
+    $raw = @file_get_contents($path);
+    $data = json_decode($raw ?: '{}', true);
+    if (!is_array($data)) $data = [];
+
+    // Normaliser la forme
+    $data['products'] = isset($data['products']) && is_array($data['products']) ? $data['products'] : [];
+    $data['categories'] = isset($data['categories']) && is_array($data['categories']) ? $data['categories'] : [];
+    $data['customCategories'] = isset($data['customCategories']) && is_array($data['customCategories']) ? $data['customCategories'] : [];
+    $data['customProducts'] = isset($data['customProducts']) && is_array($data['customProducts']) ? $data['customProducts'] : [];
+    $data['deletedProducts'] = isset($data['deletedProducts']) && is_array($data['deletedProducts']) ? $data['deletedProducts'] : [];
+    $data['deletedCategories'] = isset($data['deletedCategories']) && is_array($data['deletedCategories']) ? $data['deletedCategories'] : [];
+
+    return $data;
+}
+
+/**
+ * Sauvegarder le menu runtime (compatibilité avec ancien système JSON)
+ * Utilisé pendant la période de transition MySQL -> JSON
+ */
+function saveMenuRuntime($runtime, $autoSync = false) {
+    $runtime = is_array($runtime) ? $runtime : [];
+    $runtime['products'] = isset($runtime['products']) && is_array($runtime['products']) ? $runtime['products'] : [];
+    $runtime['categories'] = isset($runtime['categories']) && is_array($runtime['categories']) ? $runtime['categories'] : [];
+    $runtime['customCategories'] = isset($runtime['customCategories']) && is_array($runtime['customCategories']) ? $runtime['customCategories'] : [];
+    $runtime['customProducts'] = isset($runtime['customProducts']) && is_array($runtime['customProducts']) ? $runtime['customProducts'] : [];
+
+    $json = json_encode($runtime, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($json === false) {
+        throw new Exception('Impossible d\'encoder le runtime JSON');
+    }
+
+    $dir = dirname(MENU_RUNTIME_FILE);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
+
+    // Écriture atomique + lock
+    $tmp = MENU_RUNTIME_FILE . '.tmp';
+    $fp = fopen($tmp, 'wb');
+    if (!$fp) {
+        throw new Exception('Impossible d\'ouvrir le fichier temporaire runtime');
+    }
+
+    if (!flock($fp, LOCK_EX)) {
+        fclose($fp);
+        throw new Exception('Impossible de verrouiller le fichier runtime');
+    }
+
+    fwrite($fp, $json);
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+
+    if (!rename($tmp, MENU_RUNTIME_FILE)) {
+        @unlink($tmp);
+        throw new Exception('Impossible de déplacer le fichier runtime');
+    }
+
+    return true;
 }
 
 // Définir le timezone
