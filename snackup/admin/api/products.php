@@ -368,22 +368,35 @@ if ($useMySQL) {
             break;
 
         case 'edit_category':
+            // 🔍 DEBUG: Logger ce qui est reçu
+            error_log("=== EDIT_CATEGORY MySQL Mode ===");
+            error_log("Input brut category_id: " . var_export($input['category_id'] ?? 'NULL', true));
+
             $categoryId = (int)($input['category_id'] ?? 0);
             $name = trim((string)($input['name'] ?? ''));
             $description = trim((string)($input['description'] ?? ''));
             $icon = trim((string)($input['icon'] ?? 'fa-utensils'));
             $flavor = trim((string)($input['flavor'] ?? ''));
 
+            error_log("categoryId après (int): " . $categoryId);
+            error_log("name: " . $name);
+            error_log("icon: " . $icon);
+
             if (!$categoryId || $name === '') {
-                jsonError('Paramètres manquants');
+                error_log("❌ Paramètres manquants - categoryId: " . $categoryId . ", name: " . $name);
+                jsonError('Paramètres manquants (categoryId=' . $categoryId . ')');
             }
 
             try {
-                MenuRepository::editCategory($categoryId, $name, $description, $icon, $flavor);
+                error_log("🔄 Appel MenuRepository::editCategory avec ID: " . $categoryId);
+                $success = MenuRepository::editCategory($categoryId, $name, $description, $icon, $flavor);
+                error_log("✅ Résultat editCategory: " . var_export($success, true));
+
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
                 jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon, 'flavor' => $flavor]]);
             } catch (Exception $e) {
+                error_log("❌ Exception editCategory: " . $e->getMessage());
                 jsonError($e->getMessage());
             }
             break;
