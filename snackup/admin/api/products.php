@@ -567,7 +567,8 @@ if ($useMySQL) {
             if ($action === 'add_formule') {
                 $name = trim((string)($input['name'] ?? ''));
                 $price = (float)($input['price'] ?? 0);
-                if ($name === '' || $price <= 0) jsonError('Nom et prix requis');
+                if ($name === '') jsonError('Nom de formule requis');
+                if ($price < 0) jsonError('Prix invalide');
 
                 $baseId = 'formule-' . strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
                 $baseId = trim($baseId, '-');
@@ -706,6 +707,34 @@ if ($useMySQL) {
                 syncFormulesToMenu($runtime);
                 jsonSuccess();
             }
+            break;
+
+        // Featured products section
+        case 'update_featured':
+            $featuredData = $input['featured'] ?? null;
+
+            if (!$featuredData || !is_array($featuredData)) {
+                jsonError('Données featured invalides');
+            }
+
+            $featured = [
+                'enabled' => $featuredData['enabled'] ?? true,
+                'title' => trim($featuredData['title'] ?? 'Sélection pour vous'),
+                'subtitle' => trim($featuredData['subtitle'] ?? 'Nos produits les plus appréciés'),
+                'items' => $featuredData['items'] ?? []
+            ];
+
+            // Sauvegarder dans menu.json
+            $menuPath = SNACK_ROOT . '/config/menu.json';
+            if (file_exists($menuPath)) {
+                $menuData = json_decode(file_get_contents($menuPath), true);
+                if ($menuData) {
+                    $menuData['featured'] = $featured;
+                    file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                }
+            }
+
+            jsonSuccess(['featured' => $featured]);
             break;
 
         default:
