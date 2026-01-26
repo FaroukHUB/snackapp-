@@ -216,6 +216,91 @@ function handleImageUpload(string $baseId): ?string {
     }
 }
 
+/* =========================
+   HELPER: Upload image formule
+   ========================= */
+function handleFormuleImageUpload(string $baseId): ?string {
+    $fileKey = null;
+    if (!empty($_FILES['image'])) $fileKey = 'image';
+    if (!empty($_FILES['imageFile'])) $fileKey = 'imageFile';
+
+    if (!$fileKey) return null;
+
+    $file = $_FILES[$fileKey];
+
+    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        return null;
+    }
+
+    // ✅ SÉCURITÉ: Limite de taille (5MB max)
+    $maxSize = 5 * 1024 * 1024;
+    if ($file['size'] > $maxSize) {
+        jsonError('Image trop volumineuse (maximum 5MB)');
+    }
+
+    // ✅ SÉCURITÉ: Validation MIME type stricte
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $mime = mime_content_type($file['tmp_name']) ?: '';
+    if (!isset($allowed[$mime])) {
+        jsonError('Format image non supporté (jpg/png/webp uniquement)');
+    }
+
+    // 🔒 SÉCURITÉ: Vérification magic bytes (signature du fichier)
+    $handle = fopen($file['tmp_name'], 'rb');
+    $header = fread($handle, 12);
+    fclose($handle);
+
+    $isValid = false;
+    // JPEG: FF D8 FF
+    if (substr($header, 0, 3) === "\xFF\xD8\xFF") $isValid = true;
+    // PNG: 89 50 4E 47
+    if (substr($header, 0, 4) === "\x89PNG") $isValid = true;
+    // WEBP: RIFF...WEBP
+    if (substr($header, 0, 4) === "RIFF" && substr($header, 8, 4) === "WEBP") $isValid = true;
+
+    if (!$isValid) {
+        jsonError('Fichier image invalide (vérification magic bytes échouée)');
+    }
+
+    // ✅ SÉCURITÉ: Permissions sécurisées
+    $uploadsDir = SNACK_ROOT . '/images/formules';
+    if (!is_dir($uploadsDir)) {
+        mkdir($uploadsDir, 0755, true);
+    }
+
+    // ⚡ OPTIMISATION: Convertir en WebP optimisé avant sauvegarde
+    $webpTempFile = null;
+    try {
+        $webpTempFile = convertToOptimizedWebP($file['tmp_name'], 85, 800);
+
+        // ✅ SÉCURITÉ: Nom de fichier sécurisé - toujours .webp maintenant
+        $filename = $baseId . '-' . bin2hex(random_bytes(4)) . '.webp';
+
+        // Vérifier qu'il n'y a pas d'extensions dangereuses cachées
+        if (preg_match('/\.(php|phtml|php3|php4|php5|phps|phar|htaccess|exe|sh|bat|cmd)/i', $filename)) {
+            jsonError('Extension de fichier non autorisée détectée');
+        }
+
+        $dest = $uploadsDir . '/' . $filename;
+
+        if (!rename($webpTempFile, $dest)) {
+            jsonError('Échec sauvegarde image WebP formule');
+        }
+
+        // ✅ SÉCURITÉ: Permissions strictes sur le fichier uploadé
+        chmod($dest, 0644);
+
+        return 'images/formules/' . $filename;
+
+    } catch (Exception $e) {
+        // Nettoyer le fichier temporaire en cas d'erreur
+        if ($webpTempFile && file_exists($webpTempFile)) {
+            @unlink($webpTempFile);
+        }
+        jsonError('Échec conversion WebP formule: ' . $e->getMessage());
+    }
+}
+
 /**
  * Génère menu.json depuis MySQL après modification
  */
@@ -2058,91 +2143,6 @@ switch ($action) {
 
     default:
         jsonError('Action inconnue');
-}
-
-/* =========================
-   HELPER: Upload image formule
-   ========================= */
-function handleFormuleImageUpload(string $baseId): ?string {
-    $fileKey = null;
-    if (!empty($_FILES['image'])) $fileKey = 'image';
-    if (!empty($_FILES['imageFile'])) $fileKey = 'imageFile';
-
-    if (!$fileKey) return null;
-
-    $file = $_FILES[$fileKey];
-
-    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
-        return null;
-    }
-
-    // ✅ SÉCURITÉ: Limite de taille (5MB max)
-    $maxSize = 5 * 1024 * 1024;
-    if ($file['size'] > $maxSize) {
-        jsonError('Image trop volumineuse (maximum 5MB)');
-    }
-
-    // ✅ SÉCURITÉ: Validation MIME type stricte
-    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $mime = mime_content_type($file['tmp_name']) ?: '';
-    if (!isset($allowed[$mime])) {
-        jsonError('Format image non supporté (jpg/png/webp uniquement)');
-    }
-
-    // 🔒 SÉCURITÉ: Vérification magic bytes (signature du fichier)
-    $handle = fopen($file['tmp_name'], 'rb');
-    $header = fread($handle, 12);
-    fclose($handle);
-
-    $isValid = false;
-    // JPEG: FF D8 FF
-    if (substr($header, 0, 3) === "\xFF\xD8\xFF") $isValid = true;
-    // PNG: 89 50 4E 47
-    if (substr($header, 0, 4) === "\x89PNG") $isValid = true;
-    // WEBP: RIFF...WEBP
-    if (substr($header, 0, 4) === "RIFF" && substr($header, 8, 4) === "WEBP") $isValid = true;
-
-    if (!$isValid) {
-        jsonError('Fichier image invalide (vérification magic bytes échouée)');
-    }
-
-    // ✅ SÉCURITÉ: Permissions sécurisées
-    $uploadsDir = SNACK_ROOT . '/images/formules';
-    if (!is_dir($uploadsDir)) {
-        mkdir($uploadsDir, 0755, true);
-    }
-
-    // ⚡ OPTIMISATION: Convertir en WebP optimisé avant sauvegarde
-    $webpTempFile = null;
-    try {
-        $webpTempFile = convertToOptimizedWebP($file['tmp_name'], 85, 800);
-
-        // ✅ SÉCURITÉ: Nom de fichier sécurisé - toujours .webp maintenant
-        $filename = $baseId . '-' . bin2hex(random_bytes(4)) . '.webp';
-
-        // Vérifier qu'il n'y a pas d'extensions dangereuses cachées
-        if (preg_match('/\.(php|phtml|php3|php4|php5|phps|phar|htaccess|exe|sh|bat|cmd)/i', $filename)) {
-            jsonError('Extension de fichier non autorisée détectée');
-        }
-
-        $dest = $uploadsDir . '/' . $filename;
-
-        if (!rename($webpTempFile, $dest)) {
-            jsonError('Échec sauvegarde image WebP formule');
-        }
-
-        // ✅ SÉCURITÉ: Permissions strictes sur le fichier uploadé
-        chmod($dest, 0644);
-
-        return 'images/formules/' . $filename;
-
-    } catch (Exception $e) {
-        // Nettoyer le fichier temporaire en cas d'erreur
-        if ($webpTempFile && file_exists($webpTempFile)) {
-            @unlink($webpTempFile);
-        }
-        jsonError('Échec conversion WebP formule: ' . $e->getMessage());
-    }
 }
 
 /* =========================
