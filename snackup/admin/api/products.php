@@ -301,6 +301,103 @@ function handleFormuleImageUpload(string $baseId): ?string {
     }
 }
 
+/* =========================
+   HELPER: Sync formules to menu.json
+   ========================= */
+function syncFormulesToMenu(array $runtime): void {
+    error_log('[syncFormulesToMenu] ========== START ==========');
+
+    try {
+        $menuPath = getMenuJsonPath();
+        error_log('[syncFormulesToMenu] menuPath: ' . $menuPath);
+
+        if (!file_exists($menuPath)) {
+            error_log('[syncFormulesToMenu] ❌ menu.json introuvable');
+            return;
+        }
+
+        $menuContent = file_get_contents($menuPath);
+        if ($menuContent === false) {
+            error_log('[syncFormulesToMenu] ❌ Échec lecture menu.json');
+            throw new Exception('Échec lecture menu.json');
+        }
+
+        $menuData = json_decode($menuContent, true);
+        if (!$menuData) {
+            error_log('[syncFormulesToMenu] ❌ Échec décodage JSON');
+            return;
+        }
+
+        $formules = $menuData['formules'] ?? [];
+        error_log('[syncFormulesToMenu] Formules AVANT: ' . count($formules));
+
+        // Appliquer les patches
+        if (!empty($runtime['formules'])) {
+            error_log('[syncFormulesToMenu] Application de ' . count($runtime['formules']) . ' patches');
+            foreach ($runtime['formules'] as $id => $patch) {
+                foreach ($formules as &$f) {
+                    if ($f['id'] === $id) {
+                        $f = array_merge($f, $patch);
+                        error_log('[syncFormulesToMenu] Patch appliqué à ' . $id);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Ajouter les formules custom (éviter les doublons)
+        if (!empty($runtime['customFormules'])) {
+            error_log('[syncFormulesToMenu] Ajout de ' . count($runtime['customFormules']) . ' formules custom');
+            // Créer un index des IDs existants pour recherche rapide
+            $existingIds = array_column($formules, 'id');
+
+            foreach ($runtime['customFormules'] as $f) {
+                // Vérifier si elle n'existe pas déjà
+                if (!in_array($f['id'], $existingIds, true)) {
+                    $formules[] = $f;
+                    $existingIds[] = $f['id']; // Ajouter à l'index pour éviter duplicatas
+                    error_log('[syncFormulesToMenu] Formule ajoutée: ' . $f['id']);
+                } else {
+                    // Si elle existe, la mettre à jour avec les données du runtime
+                    foreach ($formules as &$existing) {
+                        if ($existing['id'] === $f['id']) {
+                            $existing = array_merge($existing, $f);
+                            error_log('[syncFormulesToMenu] Formule mise à jour: ' . $f['id']);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Supprimer les formules marquées comme supprimées
+        if (!empty($runtime['deletedFormules'])) {
+            $countBefore = count($formules);
+            $formules = array_filter($formules, fn($f) => !in_array($f['id'], $runtime['deletedFormules'], true));
+            $formules = array_values($formules);
+            $countAfter = count($formules);
+            error_log('[syncFormulesToMenu] Formules supprimées: ' . ($countBefore - $countAfter));
+        }
+
+        $menuData['formules'] = $formules;
+        error_log('[syncFormulesToMenu] Formules APRÈS: ' . count($formules));
+
+        $written = file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        if ($written === false) {
+            error_log('[syncFormulesToMenu] ❌ Échec écriture menu.json');
+            throw new Exception('Échec écriture menu.json');
+        }
+
+        error_log('[syncFormulesToMenu] ✅ Écriture réussie: ' . $written . ' bytes');
+        error_log('[syncFormulesToMenu] ========== END ==========');
+
+    } catch (Exception $e) {
+        error_log('[syncFormulesToMenu] ❌ ERREUR: ' . $e->getMessage());
+        error_log('[syncFormulesToMenu] Stack trace: ' . $e->getTraceAsString());
+        throw $e;
+    }
+}
+
 /**
  * Génère menu.json depuis MySQL après modification
  */
@@ -2143,103 +2240,6 @@ switch ($action) {
 
     default:
         jsonError('Action inconnue');
-}
-
-/* =========================
-   HELPER: Sync formules to menu.json
-   ========================= */
-function syncFormulesToMenu(array $runtime): void {
-    error_log('[syncFormulesToMenu] ========== START ==========');
-
-    try {
-        $menuPath = getMenuJsonPath();
-        error_log('[syncFormulesToMenu] menuPath: ' . $menuPath);
-
-        if (!file_exists($menuPath)) {
-            error_log('[syncFormulesToMenu] ❌ menu.json introuvable');
-            return;
-        }
-
-        $menuContent = file_get_contents($menuPath);
-        if ($menuContent === false) {
-            error_log('[syncFormulesToMenu] ❌ Échec lecture menu.json');
-            throw new Exception('Échec lecture menu.json');
-        }
-
-        $menuData = json_decode($menuContent, true);
-        if (!$menuData) {
-            error_log('[syncFormulesToMenu] ❌ Échec décodage JSON');
-            return;
-        }
-
-        $formules = $menuData['formules'] ?? [];
-        error_log('[syncFormulesToMenu] Formules AVANT: ' . count($formules));
-
-        // Appliquer les patches
-        if (!empty($runtime['formules'])) {
-            error_log('[syncFormulesToMenu] Application de ' . count($runtime['formules']) . ' patches');
-            foreach ($runtime['formules'] as $id => $patch) {
-                foreach ($formules as &$f) {
-                    if ($f['id'] === $id) {
-                        $f = array_merge($f, $patch);
-                        error_log('[syncFormulesToMenu] Patch appliqué à ' . $id);
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Ajouter les formules custom (éviter les doublons)
-        if (!empty($runtime['customFormules'])) {
-            error_log('[syncFormulesToMenu] Ajout de ' . count($runtime['customFormules']) . ' formules custom');
-            // Créer un index des IDs existants pour recherche rapide
-            $existingIds = array_column($formules, 'id');
-
-            foreach ($runtime['customFormules'] as $f) {
-                // Vérifier si elle n'existe pas déjà
-                if (!in_array($f['id'], $existingIds, true)) {
-                    $formules[] = $f;
-                    $existingIds[] = $f['id']; // Ajouter à l'index pour éviter duplicatas
-                    error_log('[syncFormulesToMenu] Formule ajoutée: ' . $f['id']);
-                } else {
-                    // Si elle existe, la mettre à jour avec les données du runtime
-                    foreach ($formules as &$existing) {
-                        if ($existing['id'] === $f['id']) {
-                            $existing = array_merge($existing, $f);
-                            error_log('[syncFormulesToMenu] Formule mise à jour: ' . $f['id']);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Supprimer les formules marquées comme supprimées
-        if (!empty($runtime['deletedFormules'])) {
-            $countBefore = count($formules);
-            $formules = array_filter($formules, fn($f) => !in_array($f['id'], $runtime['deletedFormules'], true));
-            $formules = array_values($formules);
-            $countAfter = count($formules);
-            error_log('[syncFormulesToMenu] Formules supprimées: ' . ($countBefore - $countAfter));
-        }
-
-        $menuData['formules'] = $formules;
-        error_log('[syncFormulesToMenu] Formules APRÈS: ' . count($formules));
-
-        $written = file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        if ($written === false) {
-            error_log('[syncFormulesToMenu] ❌ Échec écriture menu.json');
-            throw new Exception('Échec écriture menu.json');
-        }
-
-        error_log('[syncFormulesToMenu] ✅ Écriture réussie: ' . $written . ' bytes');
-        error_log('[syncFormulesToMenu] ========== END ==========');
-
-    } catch (Exception $e) {
-        error_log('[syncFormulesToMenu] ❌ ERREUR: ' . $e->getMessage());
-        error_log('[syncFormulesToMenu] Stack trace: ' . $e->getTraceAsString());
-        throw $e;
-    }
 }
 
 } // Fin du if (!$useMySQL) - Fallback JSON Mode
