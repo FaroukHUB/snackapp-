@@ -2541,7 +2541,7 @@ $csrfToken = getCsrfToken();
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
-            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${Number(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
           </div>
           <button type="button" class="btn btn-danger" style="padding:6px 10px;font-size:11px;position:absolute;top:6px;right:6px;" data-remove="${index}">✕</button>
         `;
