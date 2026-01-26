@@ -454,11 +454,21 @@ if ($useMySQL) {
                 }
             }
 
+            // Gérer snackupContext (peut être une chaîne JSON depuis FormData)
+            $snackupContext = null;
+            if (isset($input['snackupContext'])) {
+                $snackupCtx = $input['snackupContext'];
+                if (is_string($snackupCtx)) {
+                    $snackupCtx = json_decode($snackupCtx, true) ?? null;
+                }
+                $snackupContext = is_array($snackupCtx) ? $snackupCtx : null;
+            }
+
             $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
             $imagePath = handleImageUpload($baseSlug);
 
             try {
-                $result = MenuRepository::addProduct($categoryId, $name, $description, $imagePath, $priceSolo, $priceMenu, $baseIngredients);
+                $result = MenuRepository::addProduct($categoryId, $name, $description, $imagePath, $priceSolo, $priceMenu, $baseIngredients, $snackupContext);
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
                 jsonSuccess(['product' => $result]);
@@ -500,6 +510,16 @@ if ($useMySQL) {
                 $baseIngredients = is_array($baseIngData) ? array_values($baseIngData) : [];
             }
 
+            // Gérer snackupContext (peut être une chaîne JSON depuis FormData)
+            $snackupContext = null;
+            if (isset($input['snackupContext'])) {
+                $snackupCtx = $input['snackupContext'];
+                if (is_string($snackupCtx)) {
+                    $snackupCtx = json_decode($snackupCtx, true) ?? null;
+                }
+                $snackupContext = is_array($snackupCtx) ? $snackupCtx : null;
+            }
+
             // Gérer upload image si présent
             $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
             $imagePath = handleImageUpload($baseSlug);
@@ -508,7 +528,7 @@ if ($useMySQL) {
             }
 
             try {
-                MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status, $baseIngredients);
+                MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status, $baseIngredients, $snackupContext);
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
                 jsonSuccess(['product' => ['id' => $productId, 'name' => $name]]);
@@ -873,6 +893,14 @@ switch ($action) {
             }
         }
 
+        $snackupContext = null;
+        if (isset($input['snackupContext'])) {
+            $snackupCtxData = is_string($input['snackupContext']) ? json_decode($input['snackupContext'], true) : $input['snackupContext'];
+            if (is_array($snackupCtxData)) {
+                $snackupContext = $snackupCtxData;
+            }
+        }
+
         $runtime['customProducts'][$productId] = [
             'id' => $productId,
             'categoryId' => $categoryId,
@@ -885,7 +913,8 @@ switch ($action) {
             'image' => $imagePath,
             'status' => 'available',
             'supplements' => $supplements,
-            'baseIngredients' => $baseIngredients
+            'baseIngredients' => $baseIngredients,
+            'snackupContext' => $snackupContext
         ];
 
         // ⚡ OPTIMISATION: Une seule synchronisation à la fin
@@ -930,6 +959,15 @@ switch ($action) {
                 $baseIng = json_decode($baseIng, true) ?? [];
             }
             $patch['baseIngredients'] = is_array($baseIng) ? $baseIng : [];
+        }
+
+        // Gérer snackupContext (contexte Snackup: ingrédients custom, prix custom, etc.)
+        if (isset($input['snackupContext'])) {
+            $snackupCtx = $input['snackupContext'];
+            if (is_string($snackupCtx)) {
+                $snackupCtx = json_decode($snackupCtx, true) ?? null;
+            }
+            $patch['snackupContext'] = is_array($snackupCtx) ? $snackupCtx : null;
         }
 
         // Gérer les variants (Court/Long pour cafés)
