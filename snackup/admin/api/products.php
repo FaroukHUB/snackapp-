@@ -611,7 +611,8 @@ if ($useMySQL) {
                     }
                     error_log('[PRODUCTS API] ✅ ID généré: ' . $id);
 
-                    $imagePath = handleFormuleImageUpload($id);
+                    // Upload image formule désactivé temporairement (fonction handleFormuleImageUpload undefined)
+                    $imagePath = null;
                     error_log('[PRODUCTS API] imagePath: ' . ($imagePath ?? 'NULL'));
 
                     $includes = [];
@@ -695,7 +696,8 @@ if ($useMySQL) {
                     }
 
                     error_log('[PRODUCTS API] Tentative upload image...');
-                    $imagePath = handleFormuleImageUpload($formuleId);
+                    // Upload image formule désactivé temporairement (fonction handleFormuleImageUpload undefined)
+                    $imagePath = null;
                     error_log('[PRODUCTS API] imagePath: ' . ($imagePath ?? 'NULL'));
 
                     if ($imagePath) {
@@ -1529,7 +1531,8 @@ switch ($action) {
 
             // Gérer l'upload d'image
             error_log('[PRODUCTS API JSON MODE] Tentative upload image...');
-            $imagePath = handleFormuleImageUpload($id);
+            // Upload image formule désactivé temporairement (fonction handleFormuleImageUpload undefined)
+            $imagePath = null;
             error_log('[PRODUCTS API JSON MODE] imagePath: ' . ($imagePath ?? 'NULL'));
 
             // Décoder les includes
@@ -1627,7 +1630,8 @@ switch ($action) {
 
             // Gérer l'upload d'image
             error_log('[PRODUCTS API JSON MODE] Tentative upload image...');
-            $imagePath = handleFormuleImageUpload($formuleId);
+            // Upload image formule désactivé temporairement (fonction handleFormuleImageUpload undefined)
+            $imagePath = null;
             error_log('[PRODUCTS API JSON MODE] imagePath: ' . ($imagePath ?? 'NULL'));
 
             if ($imagePath) {
