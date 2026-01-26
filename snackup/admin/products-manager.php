@@ -553,6 +553,70 @@ $csrfToken = getCsrfToken();
                 <input type="radio" name="icon" value="fa-utensils">
                 <span><i class="fas fa-utensils"></i></span>
               </label>
+              <label class="icon-option" data-icon="fa-hamburger" title="Hamburger">
+                <input type="radio" name="icon" value="fa-hamburger">
+                <span><i class="fas fa-hamburger"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-fish" title="Poisson">
+                <input type="radio" name="icon" value="fa-fish">
+                <span><i class="fas fa-fish"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-cookie" title="Cookie">
+                <input type="radio" name="icon" value="fa-cookie">
+                <span><i class="fas fa-cookie"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-stroopwafel" title="Stroopwafel">
+                <input type="radio" name="icon" value="fa-stroopwafel">
+                <span><i class="fas fa-stroopwafel"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-apple-alt" title="Pomme">
+                <input type="radio" name="icon" value="fa-apple-alt">
+                <span><i class="fas fa-apple-alt"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-lemon" title="Citron">
+                <input type="radio" name="icon" value="fa-lemon">
+                <span><i class="fas fa-lemon"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-seedling" title="Végétal">
+                <input type="radio" name="icon" value="fa-seedling">
+                <span><i class="fas fa-seedling"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-coffee" title="Café">
+                <input type="radio" name="icon" value="fa-coffee">
+                <span><i class="fas fa-coffee"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-glass-martini-alt" title="Cocktail">
+                <input type="radio" name="icon" value="fa-glass-martini-alt">
+                <span><i class="fas fa-glass-martini-alt"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-wine-glass-alt" title="Vin">
+                <input type="radio" name="icon" value="fa-wine-glass-alt">
+                <span><i class="fas fa-wine-glass-alt"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-beer" title="Bière">
+                <input type="radio" name="icon" value="fa-beer">
+                <span><i class="fas fa-beer"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-blender" title="Blender">
+                <input type="radio" name="icon" value="fa-blender">
+                <span><i class="fas fa-blender"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-concierge-bell" title="Service">
+                <input type="radio" name="icon" value="fa-concierge-bell">
+                <span><i class="fas fa-concierge-bell"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-shopping-basket" title="Panier">
+                <input type="radio" name="icon" value="fa-shopping-basket">
+                <span><i class="fas fa-shopping-basket"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-shopping-bag" title="Sac">
+                <input type="radio" name="icon" value="fa-shopping-bag">
+                <span><i class="fas fa-shopping-bag"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-store" title="Boutique">
+                <input type="radio" name="icon" value="fa-store">
+                <span><i class="fas fa-store"></i></span>
+              </label>
             </div>
           </div>
           <p class="muted" style="margin:0">L'identifiant technique est généré automatiquement.</p>
