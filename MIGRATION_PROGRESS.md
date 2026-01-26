@@ -18,10 +18,10 @@ Ajouter une colonne JSON `snackup_context` dans la table `products` pour stocker
 - [x] Créer fichier migration SQL (2026-01-26-add-snackup-context.sql)
 - [x] Commit migration
 
-### ⏳ Étape 2: Mise à jour Code TypeScript
-- [ ] Mettre à jour database.types.ts
-- [ ] Mettre à jour useProducts.ts
-- [ ] Commit code
+### ✅ Étape 2: Mise à jour Code PHP
+- [x] Mettre à jour MenuRepository.php (getProductsByCategory, editProduct, addProduct)
+- [x] Mettre à jour API products.php (add_product, edit_product, update_product)
+- [x] Commit code
 
 ### ⏳ Étape 3: Tests
 - [ ] Tester la migration

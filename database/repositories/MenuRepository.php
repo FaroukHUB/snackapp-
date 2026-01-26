@@ -42,14 +42,35 @@ class MenuRepository {
         $stmt = $pdo->prepare("
             SELECT id, slug, name, description, image,
                    price_solo as priceSolo, price_menu as priceMenu,
-                   status, sort_order
+                   status, sort_order, base_ingredients, snackup_context
             FROM products
             WHERE category_id = ? AND deleted_at IS NULL
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([$categoryId]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Décoder les colonnes JSON
+        foreach ($products as &$product) {
+            // Décoder base_ingredients (array simple)
+            if (!empty($product['base_ingredients'])) {
+                $product['baseIngredients'] = json_decode($product['base_ingredients'], true) ?? [];
+            } else {
+                $product['baseIngredients'] = [];
+            }
+            unset($product['base_ingredients']); // Supprimer l'ancienne clé snake_case
+
+            // Décoder snackup_context (object JSON)
+            if (!empty($product['snackup_context'])) {
+                $product['snackupContext'] = json_decode($product['snackup_context'], true) ?? null;
+            } else {
+                $product['snackupContext'] = null;
+            }
+            unset($product['snackup_context']); // Supprimer l'ancienne clé snake_case
+        }
+
+        return $products;
     }
 
     /**
@@ -232,7 +253,7 @@ class MenuRepository {
     /**
      * Ajoute un produit
      */
-    public static function addProduct($categoryId, $name, $description, $image, $priceSolo, $priceMenu = null) {
+    public static function addProduct($categoryId, $name, $description, $image, $priceSolo, $priceMenu = null, $baseIngredients = null, $snackupContext = null) {
         $pdo = Database::getInstance();
 
         $slug = self::generateSlug($name);
@@ -246,10 +267,14 @@ class MenuRepository {
         $stmt->execute([$categoryId]);
         $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
 
+        // Encoder les données JSON si présentes
+        $baseIngredientsJson = $baseIngredients !== null ? json_encode($baseIngredients, JSON_UNESCAPED_UNICODE) : null;
+        $snackupContextJson = $snackupContext !== null ? json_encode($snackupContext, JSON_UNESCAPED_UNICODE) : null;
+
         $stmt = $pdo->prepare("
             INSERT INTO products
-            (restaurant_id, category_id, slug, name, description, image, price_solo, price_menu, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            (restaurant_id, category_id, slug, name, description, image, price_solo, price_menu, status, sort_order, base_ingredients, snackup_context)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?, ?, ?)
         ");
 
         $stmt->execute([
@@ -261,7 +286,9 @@ class MenuRepository {
             $image,
             $priceSolo,
             $priceMenu,
-            $sortOrder
+            $sortOrder,
+            $baseIngredientsJson,
+            $snackupContextJson
         ]);
 
         return [
@@ -274,13 +301,18 @@ class MenuRepository {
     /**
      * Modifie un produit
      */
-    public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status) {
+    public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status, $baseIngredients = null, $snackupContext = null) {
         $pdo = Database::getInstance();
+
+        // Encoder les données JSON si présentes
+        $baseIngredientsJson = $baseIngredients !== null ? json_encode($baseIngredients, JSON_UNESCAPED_UNICODE) : null;
+        $snackupContextJson = $snackupContext !== null ? json_encode($snackupContext, JSON_UNESCAPED_UNICODE) : null;
 
         $stmt = $pdo->prepare("
             UPDATE products
             SET name = ?, description = ?, image = ?,
-                price_solo = ?, price_menu = ?, status = ?
+                price_solo = ?, price_menu = ?, status = ?,
+                base_ingredients = ?, snackup_context = ?
             WHERE id = ? AND restaurant_id = ?
         ");
 
@@ -291,6 +323,8 @@ class MenuRepository {
             $priceSolo,
             $priceMenu,
             $status,
+            $baseIngredientsJson,
+            $snackupContextJson,
             $productId,
             self::$restaurantId
         ]);

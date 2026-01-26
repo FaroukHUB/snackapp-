@@ -419,8 +419,28 @@ if ($useMySQL) {
             $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
             $imagePath = handleImageUpload($baseSlug);
 
+            // Gérer baseIngredients (peut être une chaîne JSON depuis FormData)
+            $baseIngredients = null;
+            if (isset($input['baseIngredients'])) {
+                $baseIng = $input['baseIngredients'];
+                if (is_string($baseIng)) {
+                    $baseIng = json_decode($baseIng, true) ?? [];
+                }
+                $baseIngredients = is_array($baseIng) ? $baseIng : [];
+            }
+
+            // Gérer snackupContext (peut être une chaîne JSON depuis FormData)
+            $snackupContext = null;
+            if (isset($input['snackupContext'])) {
+                $snackupCtx = $input['snackupContext'];
+                if (is_string($snackupCtx)) {
+                    $snackupCtx = json_decode($snackupCtx, true) ?? null;
+                }
+                $snackupContext = is_array($snackupCtx) ? $snackupCtx : null;
+            }
+
             try {
-                $result = MenuRepository::addProduct($categoryId, $name, $description, $imagePath, $priceSolo, $priceMenu);
+                $result = MenuRepository::addProduct($categoryId, $name, $description, $imagePath, $priceSolo, $priceMenu, $baseIngredients, $snackupContext);
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
                 jsonSuccess(['product' => $result]);
@@ -449,8 +469,28 @@ if ($useMySQL) {
                 $imagePath = $input['image']; // Garder l'image existante
             }
 
+            // Gérer baseIngredients (peut être une chaîne JSON depuis FormData)
+            $baseIngredients = null;
+            if (isset($input['baseIngredients'])) {
+                $baseIng = $input['baseIngredients'];
+                if (is_string($baseIng)) {
+                    $baseIng = json_decode($baseIng, true) ?? [];
+                }
+                $baseIngredients = is_array($baseIng) ? $baseIng : [];
+            }
+
+            // Gérer snackupContext (peut être une chaîne JSON depuis FormData)
+            $snackupContext = null;
+            if (isset($input['snackupContext'])) {
+                $snackupCtx = $input['snackupContext'];
+                if (is_string($snackupCtx)) {
+                    $snackupCtx = json_decode($snackupCtx, true) ?? null;
+                }
+                $snackupContext = is_array($snackupCtx) ? $snackupCtx : null;
+            }
+
             try {
-                MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status);
+                MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status, $baseIngredients, $snackupContext);
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
                 jsonSuccess(['product' => ['id' => $productId, 'name' => $name]]);
@@ -816,6 +856,14 @@ switch ($action) {
             }
         }
 
+        $snackupContext = null;
+        if (isset($input['snackupContext'])) {
+            $snackupCtxData = is_string($input['snackupContext']) ? json_decode($input['snackupContext'], true) : $input['snackupContext'];
+            if (is_array($snackupCtxData)) {
+                $snackupContext = $snackupCtxData;
+            }
+        }
+
         $runtime['customProducts'][$productId] = [
             'id' => $productId,
             'categoryId' => $categoryId,
@@ -828,7 +876,8 @@ switch ($action) {
             'image' => $imagePath,
             'status' => 'available',
             'supplements' => $supplements,
-            'baseIngredients' => $baseIngredients
+            'baseIngredients' => $baseIngredients,
+            'snackupContext' => $snackupContext
         ];
 
         // ⚡ OPTIMISATION: Une seule synchronisation à la fin
@@ -873,6 +922,15 @@ switch ($action) {
                 $baseIng = json_decode($baseIng, true) ?? [];
             }
             $patch['baseIngredients'] = is_array($baseIng) ? $baseIng : [];
+        }
+
+        // Gérer snackupContext (contexte Snackup: ingrédients custom, prix custom, etc.)
+        if (isset($input['snackupContext'])) {
+            $snackupCtx = $input['snackupContext'];
+            if (is_string($snackupCtx)) {
+                $snackupCtx = json_decode($snackupCtx, true) ?? null;
+            }
+            $patch['snackupContext'] = is_array($snackupCtx) ? $snackupCtx : null;
         }
 
         // Gérer les variants (Court/Long pour cafés)
