@@ -696,7 +696,6 @@ switch ($action) {
 
         $runtime = loadMenuRuntime();
         $menuPath = SNACK_ROOT . '/config/menu.json';
-        $isMenuJsonCategory = false;
         $categoryFound = false;
 
         // Vérifier si c'est une catégorie de menu.json
@@ -709,18 +708,22 @@ switch ($action) {
                         // Modifier directement dans menu.json
                         $cat['name'] = $name;
                         $cat['description'] = $description;
-                        if ($icon !== '') {
-                            $cat['icon'] = $icon;
-                        }
-                        $isMenuJsonCategory = true;
                         $categoryFound = true;
                         break;
                     }
                 }
                 unset($cat);
 
+                // Mettre à jour l'icône dans categoryIcons
+                if ($categoryFound && $icon !== '') {
+                    if (!isset($menuData['categoryIcons'])) {
+                        $menuData['categoryIcons'] = [];
+                    }
+                    $menuData['categoryIcons'][$categoryId] = $icon;
+                }
+
                 // Sauvegarder menu.json si modifié
-                if ($isMenuJsonCategory) {
+                if ($categoryFound) {
                     file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                 }
             }
