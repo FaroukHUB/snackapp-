@@ -790,7 +790,7 @@ if ($useMySQL) {
             }
 
             try {
-                $result = MenuRepository::addFormule($name, $description, $price, $originalPrice, $badge, $imagePath, $includes);
+                $result = MenuRepository::addFormule($name, $description, $price, $originalPrice, $imagePath, $includes);
                 jsonSuccess(['formule' => $result]);
             } catch (Exception $e) {
                 jsonError('Erreur création formule: ' . $e->getMessage());
@@ -828,7 +828,7 @@ if ($useMySQL) {
             }
 
             try {
-                MenuRepository::editFormule($formuleId, $name, $description, $price, $originalPrice, $badge, $status, $imagePath, $includes);
+                MenuRepository::editFormule($formuleId, $name, $description, $price, $originalPrice, $status, $imagePath, $includes);
                 jsonSuccess(['formule' => ['id' => $formuleId, 'name' => $name]]);
             } catch (Exception $e) {
                 jsonError('Erreur modification formule: ' . $e->getMessage());

@@ -390,7 +390,7 @@ class MenuRepository {
         $stmt = $pdo->prepare("
             SELECT id, name, description, image,
                    price, original_price as originalPrice,
-                   badge, includes, status, sort_order
+                   includes, status, sort_order
             FROM formules
             WHERE restaurant_id = ? AND deleted_at IS NULL
             ORDER BY sort_order ASC, id ASC
@@ -418,7 +418,7 @@ class MenuRepository {
     /**
      * Ajoute une formule
      */
-    public static function addFormule($name, $description, $price, $originalPrice = null, $badge = null, $image = null, $includes = []) {
+    public static function addFormule($name, $description, $price, $originalPrice = null, $image = null, $includes = []) {
         $pdo = Database::getInstance();
 
         // Déterminer sort_order
@@ -435,8 +435,8 @@ class MenuRepository {
 
         $stmt = $pdo->prepare("
             INSERT INTO formules
-            (restaurant_id, name, description, image, price, original_price, badge, includes, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            (restaurant_id, name, description, image, price, original_price, includes, status, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)
         ");
 
         $stmt->execute([
@@ -446,7 +446,6 @@ class MenuRepository {
             $image,
             $price,
             $originalPrice,
-            $badge,
             $includesJson,
             $sortOrder
         ]);
@@ -462,7 +461,7 @@ class MenuRepository {
     /**
      * Modifie une formule
      */
-    public static function editFormule($formuleId, $name, $description, $price, $originalPrice, $badge, $status, $image = null, $includes = null) {
+    public static function editFormule($formuleId, $name, $description, $price, $originalPrice, $status, $image = null, $includes = null) {
         $pdo = Database::getInstance();
 
         // Si includes est fourni, le convertir en JSON
@@ -477,7 +476,7 @@ class MenuRepository {
                 $stmt = $pdo->prepare("
                     UPDATE formules
                     SET name = ?, description = ?, price = ?, original_price = ?,
-                        badge = ?, status = ?, image = ?, includes = ?
+                        status = ?, image = ?, includes = ?
                     WHERE id = ? AND restaurant_id = ?
                 ");
 
@@ -486,7 +485,6 @@ class MenuRepository {
                     $description,
                     $price,
                     $originalPrice,
-                    $badge,
                     $status,
                     $image,
                     $includesJson,
@@ -497,7 +495,7 @@ class MenuRepository {
                 $stmt = $pdo->prepare("
                     UPDATE formules
                     SET name = ?, description = ?, price = ?, original_price = ?,
-                        badge = ?, status = ?, image = ?
+                        status = ?, image = ?
                     WHERE id = ? AND restaurant_id = ?
                 ");
 
@@ -506,7 +504,6 @@ class MenuRepository {
                     $description,
                     $price,
                     $originalPrice,
-                    $badge,
                     $status,
                     $image,
                     $formuleId,
@@ -519,7 +516,7 @@ class MenuRepository {
                 $stmt = $pdo->prepare("
                     UPDATE formules
                     SET name = ?, description = ?, price = ?, original_price = ?,
-                        badge = ?, status = ?, includes = ?
+                        status = ?, includes = ?
                     WHERE id = ? AND restaurant_id = ?
                 ");
 
@@ -528,7 +525,6 @@ class MenuRepository {
                     $description,
                     $price,
                     $originalPrice,
-                    $badge,
                     $status,
                     $includesJson,
                     $formuleId,
@@ -538,7 +534,7 @@ class MenuRepository {
                 $stmt = $pdo->prepare("
                     UPDATE formules
                     SET name = ?, description = ?, price = ?, original_price = ?,
-                        badge = ?, status = ?
+                        status = ?
                     WHERE id = ? AND restaurant_id = ?
                 ");
 
@@ -547,7 +543,6 @@ class MenuRepository {
                     $description,
                     $price,
                     $originalPrice,
-                    $badge,
                     $status,
                     $formuleId,
                     self::$restaurantId
