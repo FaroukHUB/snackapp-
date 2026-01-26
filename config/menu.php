@@ -42,6 +42,7 @@ try {
     $categories = MenuRepository::getAllCategories();
     $supplements = MenuRepository::getAllSupplements();
     $categorySupplements = MenuRepository::getCategorySupplements();
+    $formules = MenuRepository::getAllFormules();
 
     // Formater le menu pour le frontend
     $menu = ['categories' => $categories];
@@ -52,10 +53,9 @@ try {
         'defaultForCategories' => $categorySupplements
     ];
 
-    // Charger formules depuis menu.json si existant (fallback temporaire)
+    // Charger featured et categoryIcons depuis menu.json (configuration UI uniquement)
     $instanceId = InstanceManager::getInstanceId();
     $menuJsonPath = __DIR__ . "/menu.$instanceId.json";
-    $formules = [];
     $featured = [
         'enabled' => true,
         'title' => 'Sélection pour vous',
@@ -67,7 +67,6 @@ try {
     if (file_exists($menuJsonPath)) {
         $menuData = json_decode(file_get_contents($menuJsonPath), true);
         if ($menuData) {
-            $formules = $menuData['formules'] ?? [];
             $featured = $menuData['featured'] ?? $featured;
             $categoryIcons = $menuData['categoryIcons'] ?? [];
         }

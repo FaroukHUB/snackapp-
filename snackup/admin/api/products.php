@@ -764,14 +764,102 @@ if ($useMySQL) {
         case 'delete_supplement':
             jsonError('Gestion suppléments non implémentée (migration en cours)');
 
-        // Endpoints formules (utilise menu.json temporairement)
+        // ===== FORMULES (DB-FIRST) =====
         case 'add_formule':
+            $name = trim((string)($input['name'] ?? ''));
+            $description = trim((string)($input['description'] ?? ''));
+            $price = (float)($input['price'] ?? 0);
+            $originalPrice = isset($input['originalPrice']) && $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
+            $badge = isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null;
+            $status = $input['status'] ?? 'available';
+
+            if ($name === '' || $price <= 0) {
+                jsonError('Nom et prix requis');
+            }
+
+            // Gérer l'upload d'image
+            $imagePath = handleFormuleImageUpload('formule-' . time());
+
+            // Décoder les includes
+            $includes = [];
+            if (isset($input['includes'])) {
+                $incData = is_string($input['includes']) ? json_decode($input['includes'], true) : $input['includes'];
+                if (is_array($incData)) {
+                    $includes = $incData;
+                }
+            }
+
+            try {
+                $result = MenuRepository::addFormule($name, $description, $price, $originalPrice, $badge, $imagePath, $includes);
+                jsonSuccess(['formule' => $result]);
+            } catch (Exception $e) {
+                jsonError('Erreur création formule: ' . $e->getMessage());
+            }
+            break;
+
         case 'update_formule':
+            $formuleId = (int)($input['formule_id'] ?? 0);
+
+            if (!$formuleId) {
+                jsonError('ID formule manquant');
+            }
+
+            $name = trim((string)($input['name'] ?? ''));
+            $description = trim((string)($input['description'] ?? ''));
+            $price = (float)($input['price'] ?? 0);
+            $originalPrice = isset($input['originalPrice']) && $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
+            $badge = isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null;
+            $status = $input['status'] ?? 'available';
+
+            if ($name === '' || $price <= 0) {
+                jsonError('Nom et prix requis');
+            }
+
+            // Gérer l'upload d'image
+            $imagePath = handleFormuleImageUpload('formule-' . $formuleId);
+
+            // Décoder les includes
+            $includes = null;
+            if (isset($input['includes'])) {
+                $incData = is_string($input['includes']) ? json_decode($input['includes'], true) : $input['includes'];
+                if (is_array($incData)) {
+                    $includes = $incData;
+                }
+            }
+
+            try {
+                MenuRepository::editFormule($formuleId, $name, $description, $price, $originalPrice, $badge, $status, $imagePath, $includes);
+                jsonSuccess(['formule' => ['id' => $formuleId, 'name' => $name]]);
+            } catch (Exception $e) {
+                jsonError('Erreur modification formule: ' . $e->getMessage());
+            }
+            break;
+
         case 'delete_formule':
+            $formuleId = (int)($input['formule_id'] ?? 0);
+
+            if (!$formuleId) {
+                jsonError('ID formule manquant');
+            }
+
+            try {
+                MenuRepository::deleteFormule($formuleId);
+                jsonSuccess();
+            } catch (Exception $e) {
+                jsonError('Erreur suppression formule: ' . $e->getMessage());
+            }
+            break;
+
+        // ANCIEN CODE JSON (GARDÉ POUR RÉFÉRENCE) :
+        // Si besoin de restaurer l'ancien comportement JSON, il est ci-dessous :
+        /*
+        case 'add_formule_json_mode':
+        case 'update_formule_json_mode':
+        case 'delete_formule_json_mode':
             require_once __DIR__ . '/../config.php';
             $runtime = loadMenuRuntime();
 
-            if ($action === 'add_formule') {
+            if ($action === 'add_formule_json_mode') {
                 error_log('[PRODUCTS API] ========== add_formule START ==========');
                 error_log('[PRODUCTS API] Input reçu: ' . json_encode($input));
 
@@ -977,6 +1065,7 @@ if ($useMySQL) {
                 jsonSuccess();
             }
             break;
+        */
 
         // Featured products section
         case 'update_featured':

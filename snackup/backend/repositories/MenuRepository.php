@@ -392,6 +392,213 @@ class MenuRepository {
     }
 
     /**
+     * Récupère toutes les formules actives
+     */
+    public static function getAllFormules() {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            SELECT id, slug, name, description, image,
+                   price, original_price as originalPrice, savings,
+                   badge, includes, status, sort_order
+            FROM formules
+            WHERE restaurant_id = ? AND deleted_at IS NULL
+            ORDER BY sort_order ASC, id ASC
+        ");
+        $stmt->execute([self::$restaurantId]);
+
+        $formules = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Parse includes JSON string to array
+        foreach ($formules as &$formule) {
+            if (!empty($formule['includes'])) {
+                $formule['includes'] = json_decode($formule['includes'], true) ?: [];
+            } else {
+                $formule['includes'] = [];
+            }
+
+            // Convert numeric strings to proper types
+            $formule['price'] = (float)$formule['price'];
+            $formule['originalPrice'] = !empty($formule['originalPrice']) ? (float)$formule['originalPrice'] : null;
+            $formule['savings'] = !empty($formule['savings']) ? (float)$formule['savings'] : null;
+        }
+
+        return $formules;
+    }
+
+    /**
+     * Ajoute une formule
+     */
+    public static function addFormule($name, $description, $price, $originalPrice = null, $badge = null, $image = null, $includes = []) {
+        $pdo = Database::getInstance();
+
+        $slug = self::generateSlug($name);
+
+        // Calculer l'économie
+        $savings = ($originalPrice && $originalPrice > $price) ? round($originalPrice - $price, 2) : null;
+
+        // Déterminer sort_order
+        $stmt = $pdo->prepare("
+            SELECT MAX(sort_order) as max_order
+            FROM formules
+            WHERE restaurant_id = ?
+        ");
+        $stmt->execute([self::$restaurantId]);
+        $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
+
+        // Convertir includes en JSON
+        $includesJson = !empty($includes) ? json_encode($includes, JSON_UNESCAPED_UNICODE) : null;
+
+        $stmt = $pdo->prepare("
+            INSERT INTO formules
+            (restaurant_id, slug, name, description, image, price, original_price, savings, badge, includes, status, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+        ");
+
+        $stmt->execute([
+            self::$restaurantId,
+            $slug,
+            $name,
+            $description,
+            $image,
+            $price,
+            $originalPrice,
+            $savings,
+            $badge,
+            $includesJson,
+            $sortOrder
+        ]);
+
+        return [
+            'id' => $pdo->lastInsertId(),
+            'slug' => $slug,
+            'name' => $name,
+            'price' => $price,
+            'originalPrice' => $originalPrice,
+            'savings' => $savings
+        ];
+    }
+
+    /**
+     * Modifie une formule
+     */
+    public static function editFormule($formuleId, $name, $description, $price, $originalPrice, $badge, $status, $image = null, $includes = null) {
+        $pdo = Database::getInstance();
+
+        // Calculer l'économie
+        $savings = ($originalPrice && $originalPrice > $price) ? round($originalPrice - $price, 2) : null;
+
+        // Si includes est fourni, le convertir en JSON
+        $includesJson = null;
+        if ($includes !== null) {
+            $includesJson = !empty($includes) ? json_encode($includes, JSON_UNESCAPED_UNICODE) : null;
+        }
+
+        // Si l'image est fournie, l'inclure dans l'UPDATE
+        if ($image !== null) {
+            if ($includes !== null) {
+                $stmt = $pdo->prepare("
+                    UPDATE formules
+                    SET name = ?, description = ?, price = ?, original_price = ?,
+                        savings = ?, badge = ?, status = ?, image = ?, includes = ?
+                    WHERE id = ? AND restaurant_id = ?
+                ");
+
+                return $stmt->execute([
+                    $name,
+                    $description,
+                    $price,
+                    $originalPrice,
+                    $savings,
+                    $badge,
+                    $status,
+                    $image,
+                    $includesJson,
+                    $formuleId,
+                    self::$restaurantId
+                ]);
+            } else {
+                $stmt = $pdo->prepare("
+                    UPDATE formules
+                    SET name = ?, description = ?, price = ?, original_price = ?,
+                        savings = ?, badge = ?, status = ?, image = ?
+                    WHERE id = ? AND restaurant_id = ?
+                ");
+
+                return $stmt->execute([
+                    $name,
+                    $description,
+                    $price,
+                    $originalPrice,
+                    $savings,
+                    $badge,
+                    $status,
+                    $image,
+                    $formuleId,
+                    self::$restaurantId
+                ]);
+            }
+        } else {
+            // Pas d'image, ne pas modifier le champ image
+            if ($includes !== null) {
+                $stmt = $pdo->prepare("
+                    UPDATE formules
+                    SET name = ?, description = ?, price = ?, original_price = ?,
+                        savings = ?, badge = ?, status = ?, includes = ?
+                    WHERE id = ? AND restaurant_id = ?
+                ");
+
+                return $stmt->execute([
+                    $name,
+                    $description,
+                    $price,
+                    $originalPrice,
+                    $savings,
+                    $badge,
+                    $status,
+                    $includesJson,
+                    $formuleId,
+                    self::$restaurantId
+                ]);
+            } else {
+                $stmt = $pdo->prepare("
+                    UPDATE formules
+                    SET name = ?, description = ?, price = ?, original_price = ?,
+                        savings = ?, badge = ?, status = ?
+                    WHERE id = ? AND restaurant_id = ?
+                ");
+
+                return $stmt->execute([
+                    $name,
+                    $description,
+                    $price,
+                    $originalPrice,
+                    $savings,
+                    $badge,
+                    $status,
+                    $formuleId,
+                    self::$restaurantId
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Supprime une formule (soft delete)
+     */
+    public static function deleteFormule($formuleId) {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            UPDATE formules
+            SET deleted_at = NOW()
+            WHERE id = ? AND restaurant_id = ?
+        ");
+
+        return $stmt->execute([$formuleId, self::$restaurantId]);
+    }
+
+    /**
      * Génère un slug unique depuis un nom
      */
     private static function generateSlug($name) {
