@@ -39,6 +39,21 @@ function getMenuJsonPath(): string {
 }
 
 /**
+ * Normalise un prix en remplaçant la virgule par un point avant conversion
+ * Gère les prix envoyés avec virgule décimale (ex: "0,09" → 0.09)
+ *
+ * @param mixed $value Valeur à normaliser (string, int, float)
+ * @return float Prix normalisé
+ */
+function normalizePrice($value): float {
+    if (is_string($value)) {
+        // Remplacer virgule par point pour format français → anglais
+        $value = str_replace(',', '.', $value);
+    }
+    return (float)$value;
+}
+
+/**
  * ⚡ OPTIMISATION: Convertir et optimiser une image en WebP
  *
  * @param string $sourcePath Chemin du fichier source (JPG/PNG/WebP)
@@ -1484,8 +1499,8 @@ switch ($action) {
         try {
             $name = trim((string)($input['name'] ?? ''));
             $description = trim((string)($input['description'] ?? ''));
-            $price = (float)($input['price'] ?? 0);
-            $originalPrice = isset($input['originalPrice']) && $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
+            $price = normalizePrice($input['price'] ?? 0);
+            $originalPrice = isset($input['originalPrice']) && $input['originalPrice'] !== '' ? normalizePrice($input['originalPrice']) : null;
             $badge = isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null;
             $status = $input['status'] ?? 'available';
 
@@ -1601,9 +1616,9 @@ switch ($action) {
             $patch = [];
             if (isset($input['name'])) $patch['name'] = trim($input['name']);
             if (isset($input['description'])) $patch['description'] = trim($input['description']);
-            if (isset($input['price'])) $patch['price'] = (float)$input['price'];
+            if (isset($input['price'])) $patch['price'] = normalizePrice($input['price']);
             if (isset($input['originalPrice'])) {
-                $patch['originalPrice'] = $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
+                $patch['originalPrice'] = $input['originalPrice'] !== '' ? normalizePrice($input['originalPrice']) : null;
             }
             if (isset($input['badge'])) {
                 $patch['badge'] = $input['badge'] !== '' ? trim($input['badge']) : null;
