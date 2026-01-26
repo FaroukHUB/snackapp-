@@ -228,6 +228,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $supplements = MenuRepository::getAllSupplements();
             $categorySupplements = MenuRepository::getCategorySupplements();
 
+            // ✅ FIX: Fusionner avec customProducts du runtime pour la période de transition
+            require_once __DIR__ . '/../config.php';
+            $runtime = loadMenuRuntime();
+
+            // Ajouter les customProducts aux catégories appropriées
+            if (!empty($runtime['customProducts'])) {
+                foreach ($runtime['customProducts'] as $productId => $product) {
+                    $categoryId = $product['categoryId'] ?? null;
+                    if (!$categoryId) continue;
+
+                    // Trouver la catégorie correspondante
+                    foreach ($categories as &$category) {
+                        if ($category['id'] == $categoryId || $category['slug'] == $categoryId) {
+                            if (!isset($category['items'])) {
+                                $category['items'] = [];
+                            }
+                            // Ajouter le produit custom à la catégorie
+                            $category['items'][] = $product;
+                            break;
+                        }
+                    }
+                    unset($category);
+                }
+            }
+
             // Formater le menu pour le frontend
             $menu = ['categories' => $categories];
 
@@ -444,16 +469,29 @@ if ($useMySQL) {
 
         case 'edit_product':
         case 'update_product':
-            $productId = (int)($input['product_id'] ?? 0);
+            $productIdRaw = $input['product_id'] ?? null;
+
+            if (!$productIdRaw) {
+                jsonError('ID produit manquant');
+            }
+
+            // ✅ FIX: Détecter si c'est un ID numérique (MySQL) ou string (JSON/custom)
+            // Les produits MySQL ont des IDs numériques (1, 2, 3...)
+            // Les produits JSON/custom ont des IDs string ("pizza-reine", "marguerita"...)
+            $isNumericId = is_numeric($productIdRaw);
+
+            if (!$isNumericId) {
+                // ID string: c'est un produit JSON/custom, ne pas traiter en MySQL
+                // Laisser le code JSON (fallback) le gérer
+                break;
+            }
+
+            $productId = (int)$productIdRaw;
             $name = trim((string)($input['name'] ?? ''));
             $description = trim((string)($input['description'] ?? ''));
             $priceSolo = (float)($input['priceSolo'] ?? 0);
             $priceMenu = isset($input['priceMenu']) && $input['priceMenu'] !== '' ? (float)$input['priceMenu'] : null;
             $status = $input['status'] ?? 'available';
-
-            if (!$productId) {
-                jsonError('ID produit manquant');
-            }
 
             // Extraire baseIngredients (ingrédients retirables)
             $baseIngredients = null;
