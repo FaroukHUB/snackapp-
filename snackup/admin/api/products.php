@@ -694,6 +694,12 @@ switch ($action) {
             jsonError('Type de catégorie invalide (doit être "sale" ou "sucre")');
         }
 
+        // 🔍 LOG TEMPORAIRE POUR DEBUG
+        error_log("=== EDIT_CATEGORY DEBUG ===");
+        error_log("Category ID reçu: " . $categoryId);
+        error_log("Name: " . $name);
+        error_log("Icon: " . $icon);
+
         $runtime = loadMenuRuntime();
         $menuPath = SNACK_ROOT . '/config/menu.json';
         $categoryFound = false;
@@ -703,12 +709,15 @@ switch ($action) {
             clearstatcache(true, $menuPath);
             $menuData = json_decode(file_get_contents($menuPath), true);
             if ($menuData && isset($menuData['menu']['categories'])) {
+                error_log("Nombre de catégories dans menu.json: " . count($menuData['menu']['categories']));
                 foreach ($menuData['menu']['categories'] as &$cat) {
+                    error_log("Checking category: " . ($cat['id'] ?? 'NO ID'));
                     if (($cat['id'] ?? '') === $categoryId) {
                         // Modifier directement dans menu.json
                         $cat['name'] = $name;
                         $cat['description'] = $description;
                         $categoryFound = true;
+                        error_log("✅ Catégorie trouvée dans menu.json!");
                         break;
                     }
                 }
@@ -734,9 +743,12 @@ switch ($action) {
             $runtime['customCategories'][$categoryId]['name'] = $name;
             $runtime['customCategories'][$categoryId]['description'] = $description;
             $categoryFound = true;
+            error_log("✅ Catégorie trouvée dans customCategories!");
         }
 
         if (!$categoryFound) {
+            error_log("❌ Catégorie introuvable: " . $categoryId);
+            error_log("CustomCategories disponibles: " . json_encode(array_keys($runtime['customCategories'] ?? [])));
             jsonError('Catégorie introuvable');
         }
 
