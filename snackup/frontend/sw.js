@@ -15,7 +15,7 @@ const CACHE_ASSETS = [
     '/template-v2/js/cart.js',
     '/template-v2/js/reviews.js',
     '/images/hero.jpg',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css',
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
 ];
 

@@ -10,7 +10,7 @@ $csrfToken = getCsrfToken();
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="csrf-token" content="<?= e($csrfToken) ?>">
   <title>Admin • Produits</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
   <style>
     :root{
@@ -1115,9 +1115,9 @@ $csrfToken = getCsrfToken();
     });
 
     function openEditCategoryModal(categoryId){
-      currentEditCategoryId = categoryId;
+      currentEditCategoryId = parseInt(categoryId, 10);
       const cats = getCategories();
-      const cat = cats.find(c => c.id === categoryId);
+      const cat = cats.find(c => c.id === currentEditCategoryId);
       if (!cat) {
         toast("error", "Erreur", "Catégorie introuvable.");
         return;
@@ -1143,8 +1143,9 @@ $csrfToken = getCsrfToken();
     }
 
     async function deleteCategory(categoryId){
+      const id = parseInt(categoryId, 10);
       const cats = getCategories();
-      const cat = cats.find(c => c.id === categoryId);
+      const cat = cats.find(c => c.id === id);
       if (!cat) return;
 
       const itemsCount = Array.isArray(cat.items) ? cat.items.length : 0;
@@ -1156,7 +1157,7 @@ $csrfToken = getCsrfToken();
       if (!confirm(confirmMsg)) return;
 
       try {
-        await apiPostJson({ action: "delete_category", category_id: categoryId });
+        await apiPostJson({ action: "delete_category", category_id: id });
         toast("success", "Catégorie supprimée", `"${cat.name}" a été supprimée.`);
         await boot();
       } catch(err) {
@@ -2573,7 +2574,7 @@ $csrfToken = getCsrfToken();
       const data = await apiGet();
       state.menu = data;
       const cats = getCategories();
-      if (!cats.find(c=>c.id===state.selectedCategoryId)) {
+      if (!cats.find(c=>c.id===parseInt(state.selectedCategoryId, 10))) {
         state.selectedCategoryId = cats[0]?.id ?? null;
       }
       render();
