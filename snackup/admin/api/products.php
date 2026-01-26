@@ -694,90 +694,22 @@ switch ($action) {
             jsonError('Type de catégorie invalide (doit être "sale" ou "sucre")');
         }
 
-        // 🔍 LOG TEMPORAIRE POUR DEBUG
-        error_log("=== EDIT_CATEGORY DEBUG ===");
-        error_log("Category ID reçu: " . $categoryId);
-        error_log("Name: " . $name);
-        error_log("Icon: " . $icon);
+        // ✅ UTILISER MYSQL au lieu de menu.json
+        try {
+            $success = MenuRepository::editCategory($categoryId, $name, $description, $icon, $flavor);
 
-        $runtime = loadMenuRuntime();
-        $menuPath = SNACK_ROOT . '/config/menu.json';
-        $categoryFound = false;
-
-        // Vérifier si c'est une catégorie de menu.json
-        if (file_exists($menuPath)) {
-            clearstatcache(true, $menuPath);
-            $menuData = json_decode(file_get_contents($menuPath), true);
-            if ($menuData && isset($menuData['menu']['categories'])) {
-                error_log("Nombre de catégories dans menu.json: " . count($menuData['menu']['categories']));
-                foreach ($menuData['menu']['categories'] as &$cat) {
-                    error_log("Checking category: " . ($cat['id'] ?? 'NO ID'));
-                    if (($cat['id'] ?? '') === $categoryId) {
-                        // Modifier directement dans menu.json
-                        $cat['name'] = $name;
-                        $cat['description'] = $description;
-                        $categoryFound = true;
-                        error_log("✅ Catégorie trouvée dans menu.json!");
-                        break;
-                    }
-                }
-                unset($cat);
-
-                // Mettre à jour l'icône dans categoryIcons
-                if ($categoryFound && $icon !== '') {
-                    if (!isset($menuData['categoryIcons'])) {
-                        $menuData['categoryIcons'] = [];
-                    }
-                    $menuData['categoryIcons'][$categoryId] = $icon;
-                }
-
-                // Sauvegarder menu.json si modifié
-                if ($categoryFound) {
-                    file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-                }
+            if (!$success) {
+                jsonError('Catégorie introuvable ou échec de la mise à jour');
             }
+
+            // Régénérer menu.json depuis MySQL
+            regenerateMenuJson();
+
+            jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon]]);
+        } catch (Exception $e) {
+            error_log('[PRODUCTS API] ❌ Erreur edit_category: ' . $e->getMessage());
+            jsonError('Erreur lors de la modification de la catégorie');
         }
-
-        // Sinon vérifier dans customCategories
-        if (!$categoryFound && isset($runtime['customCategories'][$categoryId])) {
-            $runtime['customCategories'][$categoryId]['name'] = $name;
-            $runtime['customCategories'][$categoryId]['description'] = $description;
-            $categoryFound = true;
-            error_log("✅ Catégorie trouvée dans customCategories!");
-        }
-
-        if (!$categoryFound) {
-            error_log("❌ Catégorie introuvable: " . $categoryId);
-            error_log("CustomCategories disponibles: " . json_encode(array_keys($runtime['customCategories'] ?? [])));
-            jsonError('Catégorie introuvable');
-        }
-
-        // Gérer le flavor (toujours dans runtime)
-        if ($flavor !== '') {
-            $supplementsSales = [
-                'sup-mix-fromages', 'sup-cheddar', 'sup-camembert',
-                'sup-chakchouka', 'sup-pomme-terre', 'sup-oignons-confits',
-                'sup-oeuf', 'sup-viande-hachee', 'sup-escalope-poulet', 'sup-jambon'
-            ];
-
-            $supplementsSucres = [
-                'sup-nutella', 'sup-chocolat', 'sup-confiture', 'sup-creme-noisette',
-                'sup-beurre-cacahuete', 'sup-miel', 'sup-caramel', 'sup-speculoos',
-                'sup-oursons', 'sup-smarties', 'sup-mnm', 'sup-kitkat',
-                'sup-maltesers', 'sup-kinder', 'sup-oreo', 'sup-banane',
-                'sup-fraise', 'sup-pomme', 'sup-kiwi', 'sup-ananas',
-                'sup-myrtilles', 'sup-framboises', 'sup-noix-coco', 'sup-amandes',
-                'sup-noisettes', 'sup-noix', 'sup-chantilly'
-            ];
-
-            if ($flavor === 'sale') {
-                $runtime['supplements']['defaultForCategories'][$categoryId] = $supplementsSales;
-            } else {
-                $runtime['supplements']['defaultForCategories'][$categoryId] = $supplementsSucres;
-            }
-        }
-
-        saveMenuRuntime($runtime, true);
 
         jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon]]);
         break;
