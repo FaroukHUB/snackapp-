@@ -1498,8 +1498,8 @@ $csrfToken = getCsrfToken();
         let imgHtml = '';
         if (opt.image) {
           let imgSrc = opt.image;
-          if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../')) {
-            imgSrc = '../' + imgSrc;
+          if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../../')) {
+            imgSrc = '../../' + imgSrc;
           }
           imgHtml = `<img src="${escapeHtml(imgSrc)}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;opacity:${isAvailable ? '1' : '0.4'}">`;
         } else {
@@ -1621,8 +1621,8 @@ $csrfToken = getCsrfToken();
         let imgHtml = '';
         if (opt.image) {
           let imgSrc = opt.image;
-          if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../')) {
-            imgSrc = '../' + imgSrc;
+          if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../../')) {
+            imgSrc = '../../' + imgSrc;
           }
           imgHtml = `<img src="${escapeHtml(imgSrc)}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;opacity:${isAvailable ? '1' : '0.4'}">`;
         } else {
@@ -1725,7 +1725,7 @@ $csrfToken = getCsrfToken();
       // Afficher l'image actuelle
       const previewDiv = $("#editProductImagePreview");
       if (product.image) {
-        previewDiv.innerHTML = `<img src="../${product.image}" style="max-width:150px;max-height:100px;border-radius:8px;object-fit:cover;">`;
+        previewDiv.innerHTML = `<img src="../../${product.image}" style="max-width:150px;max-height:100px;border-radius:8px;object-fit:cover;">`;
       } else {
         previewDiv.innerHTML = `<span style="color:#6b7280;">Aucune image</span>`;
       }
@@ -2140,8 +2140,8 @@ $csrfToken = getCsrfToken();
         tr.style.cursor = "pointer";
         let img = it.image ? String(it.image) : "";
         // Préfixer avec ../ pour remonter à la racine du site
-        if (img && !img.startsWith('http') && !img.startsWith('../')) {
-          img = '../' + img;
+        if (img && !img.startsWith('http') && !img.startsWith('../../')) {
+          img = '../../' + img;
         }
 
         tr.innerHTML = `
@@ -2293,7 +2293,7 @@ $csrfToken = getCsrfToken();
 
         // Afficher l'image existante
         if (formule.image) {
-          $("#formuleImgPreview").src = "../" + formule.image;
+          $("#formuleImgPreview").src = "../../" + formule.image;
           $("#formuleImgPreview").style.display = "block";
         }
 
@@ -2456,7 +2456,7 @@ $csrfToken = getCsrfToken();
         card.onmouseenter = () => card.style.background = "rgba(255,255,255,.08)";
         card.onmouseleave = () => card.style.background = "rgba(255,255,255,.04)";
 
-        let imgSrc = f.image ? "../" + f.image : "";
+        let imgSrc = f.image ? "../../" + f.image : "";
 
         card.innerHTML = `
           <div style="width:80px;height:80px;flex-shrink:0;border-radius:12px;overflow:hidden;border:1px solid var(--stroke);background:rgba(0,0,0,.18);">
@@ -2532,7 +2532,7 @@ $csrfToken = getCsrfToken();
         const card = document.createElement("div");
         card.style.cssText = "display:flex;gap:10px;padding:10px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);position:relative;";
 
-        let imgSrc = product.image ? "../" + product.image : "";
+        let imgSrc = product.image ? "../../" + product.image : "";
 
         card.innerHTML = `
           <div style="width:50px;height:50px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.18);">
@@ -2578,7 +2578,7 @@ $csrfToken = getCsrfToken();
         item.onmouseenter = () => item.style.background = "rgba(255,255,255,.06)";
         item.onmouseleave = () => item.style.background = "";
 
-        let imgSrc = product.image ? "../" + product.image : "";
+        let imgSrc = product.image ? "../../" + product.image : "";
 
         item.innerHTML = `
           <div style="width:40px;height:40px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.18);">

@@ -204,6 +204,7 @@ const Config = {
      * Find product by ID or SLUG
      * Supports:
      * - Numeric ID lookup: getProduct(123) or getProduct("123")
+     * - String ID lookup: getProduct("fromagere")
      * - Slug lookup: getProduct("margherita-26cm")
      */
     getProduct(productId) {
@@ -221,8 +222,8 @@ const Config = {
                 // Lookup par ID numérique (strict)
                 product = category.items?.find(p => p.id === numericId);
             } else {
-                // Lookup par slug (strict)
-                product = category.items?.find(p => p.slug === productId);
+                // Lookup par ID string ou par slug (strict)
+                product = category.items?.find(p => p.id === productId || p.slug === productId);
             }
 
             if (product) {
