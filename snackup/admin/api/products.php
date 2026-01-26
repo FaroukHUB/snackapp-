@@ -557,6 +557,157 @@ if ($useMySQL) {
         case 'delete_supplement':
             jsonError('Gestion suppléments non implémentée (migration en cours)');
 
+        // Endpoints formules (utilise menu.json temporairement)
+        case 'add_formule':
+        case 'update_formule':
+        case 'delete_formule':
+            require_once __DIR__ . '/../config.php';
+            $runtime = loadMenuRuntime();
+
+            if ($action === 'add_formule') {
+                $name = trim((string)($input['name'] ?? ''));
+                $price = (float)($input['price'] ?? 0);
+                if ($name === '' || $price <= 0) jsonError('Nom et prix requis');
+
+                $baseId = 'formule-' . strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+                $baseId = trim($baseId, '-');
+
+                $existingIds = array_keys($runtime['customFormules'] ?? []);
+                $menuData = json_decode(file_get_contents(SNACK_ROOT . '/config/menu.json'), true);
+                foreach (($menuData['formules'] ?? []) as $f) {
+                    if (isset($f['id'])) $existingIds[] = $f['id'];
+                }
+
+                $id = $baseId;
+                $i = 2;
+                while (in_array($id, $existingIds, true)) {
+                    $id = $baseId . '-' . $i;
+                    $i++;
+                }
+
+                $imagePath = handleFormuleImageUpload($id);
+                $includes = [];
+                if (isset($input['includes'])) {
+                    $incData = is_string($input['includes']) ? json_decode($input['includes'], true) : $input['includes'];
+                    if (is_array($incData)) $includes = $incData;
+                }
+
+                $formule = [
+                    'id' => $id,
+                    'name' => $name,
+                    'description' => trim((string)($input['description'] ?? '')),
+                    'price' => $price,
+                    'originalPrice' => isset($input['originalPrice']) && $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null,
+                    'savings' => null,
+                    'badge' => isset($input['badge']) && $input['badge'] !== '' ? trim($input['badge']) : null,
+                    'image' => $imagePath,
+                    'includes' => $includes,
+                    'status' => $input['status'] ?? 'available'
+                ];
+
+                if ($formule['originalPrice'] !== null) {
+                    $formule['savings'] = round($formule['originalPrice'] - $formule['price'], 2);
+                }
+
+                if (!isset($runtime['customFormules'])) $runtime['customFormules'] = [];
+                $runtime['customFormules'][$id] = $formule;
+
+                saveMenuRuntime($runtime);
+                syncFormulesToMenu($runtime);
+                jsonSuccess(['formule' => $formule]);
+
+            } elseif ($action === 'update_formule') {
+                $formuleId = $input['formule_id'] ?? null;
+                if (!$formuleId) jsonError('ID formule manquant');
+
+                $patch = [];
+                if (isset($input['name'])) $patch['name'] = trim($input['name']);
+                if (isset($input['description'])) $patch['description'] = trim($input['description']);
+                if (isset($input['price'])) $patch['price'] = (float)$input['price'];
+                if (isset($input['originalPrice'])) {
+                    $patch['originalPrice'] = $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
+                }
+                if (isset($input['badge'])) {
+                    $patch['badge'] = $input['badge'] !== '' ? trim($input['badge']) : null;
+                }
+                if (isset($input['status'])) $patch['status'] = $input['status'];
+                if (isset($input['includes'])) {
+                    $incData = is_string($input['includes']) ? json_decode($input['includes'], true) : $input['includes'];
+                    if (is_array($incData)) $patch['includes'] = $incData;
+                }
+
+                if (isset($patch['price']) || isset($patch['originalPrice'])) {
+                    $currentPrice = $patch['price'] ?? null;
+                    $currentOriginal = $patch['originalPrice'] ?? null;
+                    if ($currentPrice !== null && $currentOriginal !== null) {
+                        $patch['savings'] = round($currentOriginal - $currentPrice, 2);
+                    }
+                }
+
+                $imagePath = handleFormuleImageUpload($formuleId);
+                if ($imagePath) {
+                    $oldImagePath = null;
+                    if (isset($runtime['customFormules'][$formuleId]['image'])) {
+                        $oldImagePath = $runtime['customFormules'][$formuleId]['image'];
+                    } elseif (isset($runtime['formules'][$formuleId]['image'])) {
+                        $oldImagePath = $runtime['formules'][$formuleId]['image'];
+                    }
+
+                    if ($oldImagePath && $oldImagePath !== $imagePath) {
+                        $fullPath = SNACK_ROOT . '/' . ltrim($oldImagePath, '/');
+                        if (file_exists($fullPath) && strpos($oldImagePath, '/formules/') !== false) {
+                            @unlink($fullPath);
+                        }
+                    }
+
+                    $patch['image'] = $imagePath;
+                }
+
+                if (isset($runtime['customFormules'][$formuleId])) {
+                    $runtime['customFormules'][$formuleId] = array_merge($runtime['customFormules'][$formuleId], $patch);
+                } else {
+                    if (!isset($runtime['formules'])) $runtime['formules'] = [];
+                    if (!isset($runtime['formules'][$formuleId])) $runtime['formules'][$formuleId] = [];
+                    $runtime['formules'][$formuleId] = array_merge($runtime['formules'][$formuleId], $patch);
+                }
+
+                saveMenuRuntime($runtime);
+                syncFormulesToMenu($runtime);
+                jsonSuccess(['formule' => $patch]);
+
+            } elseif ($action === 'delete_formule') {
+                $formuleId = $input['formule_id'] ?? null;
+                if (!$formuleId) jsonError('ID formule manquant');
+
+                $imagePath = null;
+                if (isset($runtime['customFormules'][$formuleId]['image'])) {
+                    $imagePath = $runtime['customFormules'][$formuleId]['image'];
+                }
+
+                if ($imagePath) {
+                    $fullPath = SNACK_ROOT . '/' . ltrim($imagePath, '/');
+                    if (file_exists($fullPath) && strpos($imagePath, '/formules/') !== false) {
+                        @unlink($fullPath);
+                    }
+                }
+
+                if (isset($runtime['customFormules'][$formuleId])) {
+                    unset($runtime['customFormules'][$formuleId]);
+                }
+
+                if (!isset($runtime['deletedFormules'])) {
+                    $runtime['deletedFormules'] = [];
+                }
+                if (!in_array($formuleId, $runtime['deletedFormules'], true)) {
+                    $runtime['deletedFormules'][] = $formuleId;
+                }
+
+                saveMenuRuntime($runtime);
+                syncFormulesToMenu($runtime);
+                jsonSuccess();
+            }
+            break;
+
         default:
             jsonError('Action inconnue');
     }

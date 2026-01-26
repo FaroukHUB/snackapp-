@@ -767,7 +767,7 @@ $csrfToken = getCsrfToken();
           </div>
           <div class="two">
             <div class="field">
-              <label for="editPriceSolo">Prix Solo 26cm <span class="muted">(optionnel pour produits avec options)</span></label>
+              <label for="editPriceSolo">Prix Solo 26cm</label>
               <input id="editPriceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" />
             </div>
             <div class="field">
@@ -961,7 +961,7 @@ $csrfToken = getCsrfToken();
           <div class="field">
             <label>Photo de la formule</label>
             <div class="upload">
-              <img id="formuleImgPreview" class="preview" alt="Aperçu" style="display:none;" />
+              <img id="formuleImgPreview" class="preview" alt="Aperçu" style="display:none;" onerror="this.style.display='none'" />
               <div style="display:flex;flex-direction:column;gap:8px">
                 <input id="formuleImage" name="image" type="file" accept="image/png,image/jpeg,image/webp" />
                 <span class="muted">Formats: jpg / png / webp • conseillé: 800×600</span>
@@ -2460,7 +2460,7 @@ $csrfToken = getCsrfToken();
 
         card.innerHTML = `
           <div style="width:80px;height:80px;flex-shrink:0;border-radius:12px;overflow:hidden;border:1px solid var(--stroke);background:rgba(0,0,0,.18);">
-            ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" style="width:100%;height:100%;object-fit:cover;" alt="${escapeHtml(f.name)}">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);">📦</div>'}
+            ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" style="width:100%;height:100%;object-fit:cover;" alt="${escapeHtml(f.name)}" onerror="this.style.display='none'">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);">📦</div>'}
           </div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
@@ -2588,7 +2588,7 @@ $csrfToken = getCsrfToken();
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
           </div>
-          <div style="font-size:13px;font-weight:600;color:var(--brand);">${(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--brand);">${Number(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
           <button type="button" class="btn btn-good" style="padding:6px 12px;font-size:11px;">+ Ajouter</button>
         `;
 
