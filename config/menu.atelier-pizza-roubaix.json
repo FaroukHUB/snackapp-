@@ -108,23 +108,6 @@
                         "badge": "Spécialité 🇩🇿"
                     },
                     {
-                        "id": "la-marvelous",
-                        "name": "La Marvelous",
-                        "description": "Notre signature! Viande hachée, mix fromages, oignons confits, poivrons, sauce maison.",
-                        "priceSolo": 850,
-                        "image": "images/uploads/la-marvelous-285461ea.webp",
-                        "baseIngredients": [
-                            "viande hachée",
-                            "mix fromages",
-                            "oignons confits",
-                            "poivrons",
-                            "sauce maison"
-                        ],
-                        "isSignature": true,
-                        "status": "available",
-                        "badge": "Signature ⭐"
-                    },
-                    {
                         "id": "la-crousti",
                         "name": "La Crousti",
                         "description": "Mix fromages, tenders maison croustillants, sauce maison, oignons crispy, sauce thaï.",
@@ -1282,8 +1265,7 @@
         "items": [
             "fromagere",
             "parisienne",
-            "lyonnaise",
-            "la-marvelous"
+            "lyonnaise"
         ]
     },
     "accompagnements": {
@@ -1300,32 +1282,7 @@
             "status": "available"
         }
     },
-    "formules": [
-        {
-            "id": "formule-formule-midi",
-            "name": "formule midi",
-            "description": "poulet frite boisson",
-            "price": 450,
-            "originalPrice": 700,
-            "savings": 250,
-            "badge": null,
-            "image": "images/formules/formule-formule-midi-2b7d9071.jpg",
-            "includes": [],
-            "status": "available"
-        },
-        {
-            "id": "formule-formule-walou",
-            "name": "formule walou",
-            "description": "walou + walou = walou",
-            "price": 250,
-            "originalPrice": null,
-            "savings": null,
-            "badge": null,
-            "image": "images/formules/formule-formule-walou-24fc4b39.webp",
-            "includes": [],
-            "status": "available"
-        }
-    ],
+    "formules": [],
     "upsellRules": [
         {
             "when": [
