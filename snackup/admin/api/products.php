@@ -665,10 +665,15 @@ if ($useMySQL) {
                     error_log('[PRODUCTS API] ✅ add_formule SUCCESS');
                     jsonSuccess(['formule' => $formule]);
 
-                } catch (Exception $e) {
-                    error_log('[PRODUCTS API] ❌ ERREUR add_formule: ' . $e->getMessage());
-                    error_log('[PRODUCTS API] ❌ Stack trace: ' . $e->getTraceAsString());
-                    jsonError('Erreur lors de la création de la formule: ' . $e->getMessage());
+                } catch (Throwable $e) {
+                    error_log('[PRODUCTS API] ❌❌❌ ERREUR FATALE add_formule ❌❌❌');
+                    error_log('[PRODUCTS API] ❌ Type: ' . get_class($e));
+                    error_log('[PRODUCTS API] ❌ Message: ' . $e->getMessage());
+                    error_log('[PRODUCTS API] ❌ Fichier: ' . $e->getFile());
+                    error_log('[PRODUCTS API] ❌ Ligne: ' . $e->getLine());
+                    error_log('[PRODUCTS API] ❌ Stack trace complète:');
+                    error_log($e->getTraceAsString());
+                    jsonError('Erreur création formule: ' . $e->getMessage() . ' (fichier: ' . basename($e->getFile()) . ':' . $e->getLine() . ')');
                 }
 
             } elseif ($action === 'update_formule') {
@@ -1593,10 +1598,15 @@ switch ($action) {
 
             jsonSuccess(['formule' => $formule]);
 
-        } catch (Exception $e) {
-            error_log('[PRODUCTS API JSON MODE] ❌ ERREUR add_formule: ' . $e->getMessage());
-            error_log('[PRODUCTS API JSON MODE] ❌ Stack trace: ' . $e->getTraceAsString());
-            jsonError('Erreur lors de la création de la formule: ' . $e->getMessage());
+        } catch (Throwable $e) {
+            error_log('[PRODUCTS API JSON MODE] ❌❌❌ ERREUR FATALE add_formule ❌❌❌');
+            error_log('[PRODUCTS API JSON MODE] ❌ Type: ' . get_class($e));
+            error_log('[PRODUCTS API JSON MODE] ❌ Message: ' . $e->getMessage());
+            error_log('[PRODUCTS API JSON MODE] ❌ Fichier: ' . $e->getFile());
+            error_log('[PRODUCTS API JSON MODE] ❌ Ligne: ' . $e->getLine());
+            error_log('[PRODUCTS API JSON MODE] ❌ Stack trace complète:');
+            error_log($e->getTraceAsString());
+            jsonError('Erreur création formule: ' . $e->getMessage() . ' (fichier: ' . basename($e->getFile()) . ':' . $e->getLine() . ')');
         }
         break;
 
