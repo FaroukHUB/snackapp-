@@ -6,7 +6,7 @@
 
 return [
     'database' => [
-        'host' => 'localhost',
+        'host' => '127.0.0.1',
         'name' => 'zajr1824_atelierpizza',
         'user' => 'zajr1824_atelierpizza',
         'password' => 'Mariagor6!',
