@@ -450,8 +450,18 @@ class MenuRepository {
             $sortOrder
         ]);
 
+        $insertedId = $pdo->lastInsertId();
+
+        // 🔒 VALIDATION: S'assurer que l'AUTO_INCREMENT a fonctionné
+        if (!$insertedId || $insertedId === '0' || $insertedId === '') {
+            error_log('[MenuRepository] ❌ ERREUR CRITIQUE: lastInsertId() a retourné une valeur invalide: ' . var_export($insertedId, true));
+            throw new Exception('Échec AUTO_INCREMENT: ID non généré par la base de données');
+        }
+
+        error_log('[MenuRepository] ✅ Formule insérée avec ID: ' . $insertedId);
+
         return [
-            'id' => $pdo->lastInsertId(),
+            'id' => $insertedId,
             'name' => $name,
             'price' => $price,
             'originalPrice' => $originalPrice

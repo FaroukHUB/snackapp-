@@ -766,6 +766,11 @@ if ($useMySQL) {
 
         // ===== FORMULES (DB-FIRST) =====
         case 'add_formule':
+            // 🔒 VALIDATION: Rejeter tout formule_id envoyé (création = AUTO_INCREMENT uniquement)
+            if (isset($input['formule_id']) && $input['formule_id'] !== '' && $input['formule_id'] !== null) {
+                jsonError('Impossible de créer une formule avec un ID pré-défini (AUTO_INCREMENT requis)');
+            }
+
             $name = trim((string)($input['name'] ?? ''));
             $description = trim((string)($input['description'] ?? ''));
             $price = (float)($input['price'] ?? 0);
@@ -790,8 +795,17 @@ if ($useMySQL) {
 
             try {
                 $result = MenuRepository::addFormule($name, $description, $price, $originalPrice, $imagePath, $includes);
+
+                // ✅ VALIDATION: S'assurer que l'ID a été retourné
+                if (!isset($result['id']) || !$result['id']) {
+                    error_log('[PRODUCTS API] ❌ addFormule n\'a pas retourné d\'ID! Result: ' . json_encode($result));
+                    jsonError('Création échouée: ID non retourné par la base de données');
+                }
+
+                error_log('[PRODUCTS API] ✅ Formule créée avec ID: ' . $result['id']);
                 jsonSuccess(['formule' => $result]);
             } catch (Exception $e) {
+                error_log('[PRODUCTS API] ❌ Erreur création formule: ' . $e->getMessage());
                 jsonError('Erreur création formule: ' . $e->getMessage());
             }
             break;

@@ -2372,12 +2372,11 @@ $csrfToken = getCsrfToken();
     $("#formFormule").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const formuleId = $("#formuleId").value || null;
+      const formuleId = $("#formuleId").value.trim() || null;
       const name = $("#formuleName").value.trim();
       const description = $("#formuleDesc").value.trim();
       const price = parseFloat($("#formulePrice").value) || 0;
       const originalPrice = $("#formuleOriginalPrice").value ? parseFloat($("#formuleOriginalPrice").value) : null;
-      const badge = $("#formuleBadge").value.trim() || null;
       const status = $("#formuleStatus").value;
       const imageFile = $("#formuleImage").files[0];
 
@@ -2401,12 +2400,12 @@ $csrfToken = getCsrfToken();
 
       try {
         const formData = new FormData();
+        // ⚠️ CRITIQUE: Ne JAMAIS envoyer formule_id lors d'un add (AUTO_INCREMENT géré par DB)
         if (formuleId) formData.set("formule_id", formuleId);
         formData.set("name", name);
         formData.set("description", description);
         formData.set("price", price);
         if (originalPrice !== null) formData.set("originalPrice", originalPrice);
-        if (badge) formData.set("badge", badge);
         formData.set("status", status);
         formData.set("includes", JSON.stringify(includes));
         if (imageFile) formData.set("image", imageFile);
@@ -2423,6 +2422,13 @@ $csrfToken = getCsrfToken();
 
     $("#btnDeleteFormule").addEventListener("click", async () => {
       if (!currentEditFormule) return;
+
+      // 🔒 VALIDATION: Vérifier que l'ID existe avant suppression
+      if (!currentEditFormule.id) {
+        toast("error", "Erreur", "ID formule manquant - impossible de supprimer");
+        return;
+      }
+
       if (!confirm(`Supprimer la formule "${currentEditFormule.name}" ?`)) return;
 
       try {
