@@ -9,11 +9,6 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 
-// Définir le restaurant ID pour MenuRepository dès le départ
-if (!SNACK_USE_JSON && defined('SNACK_RESTAURANT_ID')) {
-    MenuRepository::$restaurantId = SNACK_RESTAURANT_ID;
-}
-
 header('Content-Type: application/json');
 header('Cache-Control: no-cache, must-revalidate');
 
@@ -210,8 +205,9 @@ function regenerateMenuJson(): void {
    MODE MySQL ou JSON
    ========================= */
 
-// Utiliser MySQL si la constante SNACK_USE_JSON est false
-$useMySQL = !SNACK_USE_JSON;
+// ⚠️ MODE MYSQL DÉSACTIVÉ - Retour au mode JSON
+// MySQL contient données incomplètes, on utilise menu.json
+$useMySQL = true;
 
 /* =========================
    GET: Retourner le menu complet
@@ -227,31 +223,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $categories = MenuRepository::getAllCategories();
             $supplements = MenuRepository::getAllSupplements();
             $categorySupplements = MenuRepository::getCategorySupplements();
-
-            // ✅ FIX: Fusionner avec customProducts du runtime pour la période de transition
-            require_once __DIR__ . '/../config.php';
-            $runtime = loadMenuRuntime();
-
-            // Ajouter les customProducts aux catégories appropriées
-            if (!empty($runtime['customProducts'])) {
-                foreach ($runtime['customProducts'] as $productId => $product) {
-                    $categoryId = $product['categoryId'] ?? null;
-                    if (!$categoryId) continue;
-
-                    // Trouver la catégorie correspondante
-                    foreach ($categories as &$category) {
-                        if ($category['id'] == $categoryId || $category['slug'] == $categoryId) {
-                            if (!isset($category['items'])) {
-                                $category['items'] = [];
-                            }
-                            // Ajouter le produit custom à la catégorie
-                            $category['items'][] = $product;
-                            break;
-                        }
-                    }
-                    unset($category);
-                }
-            }
 
             // Formater le menu pour le frontend
             $menu = ['categories' => $categories];
@@ -397,28 +368,14 @@ if ($useMySQL) {
             break;
 
         case 'edit_category':
-            $categoryIdRaw = $input['category_id'] ?? null;
-
-            if (!$categoryIdRaw) {
-                jsonError('ID catégorie manquant');
-            }
-
-            // Détecter si c'est un ID numérique (MySQL) ou string (JSON)
-            $isNumericId = is_numeric($categoryIdRaw);
-
-            if (!$isNumericId) {
-                // ID string: c'est une catégorie JSON/custom, laisser le fallback JSON le gérer
-                break;
-            }
-
-            $categoryId = (int)$categoryIdRaw;
+            $categoryId = (int)($input['category_id'] ?? 0);
             $name = trim((string)($input['name'] ?? ''));
             $description = trim((string)($input['description'] ?? ''));
             $icon = trim((string)($input['icon'] ?? 'fa-utensils'));
             $flavor = trim((string)($input['flavor'] ?? ''));
 
-            if ($name === '') {
-                jsonError('Nom manquant');
+            if (!$categoryId || $name === '') {
+                jsonError('Paramètres manquants');
             }
 
             try {
@@ -432,21 +389,11 @@ if ($useMySQL) {
             break;
 
         case 'delete_category':
-            $categoryIdRaw = $input['category_id'] ?? null;
+            $categoryId = (int)($input['category_id'] ?? 0);
 
-            if (!$categoryIdRaw) {
+            if (!$categoryId) {
                 jsonError('ID manquant');
             }
-
-            // Détecter si c'est un ID numérique (MySQL) ou string (JSON)
-            $isNumericId = is_numeric($categoryIdRaw);
-
-            if (!$isNumericId) {
-                // ID string: c'est une catégorie JSON/custom, laisser le fallback JSON le gérer
-                break;
-            }
-
-            $categoryId = (int)$categoryIdRaw;
 
             try {
                 MenuRepository::deleteCategory($categoryId);
@@ -469,13 +416,17 @@ if ($useMySQL) {
                 jsonError('Champs invalides');
             }
 
-            // Extraire baseIngredients (ingrédients retirables)
-            $baseIngredients = [];
+            $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+            $imagePath = handleImageUpload($baseSlug);
+
+            // Gérer baseIngredients (peut être une chaîne JSON depuis FormData)
+            $baseIngredients = null;
             if (isset($input['baseIngredients'])) {
-                $baseIngData = is_string($input['baseIngredients']) ? json_decode($input['baseIngredients'], true) : $input['baseIngredients'];
-                if (is_array($baseIngData)) {
-                    $baseIngredients = array_values($baseIngData);
+                $baseIng = $input['baseIngredients'];
+                if (is_string($baseIng)) {
+                    $baseIng = json_decode($baseIng, true) ?? [];
                 }
+                $baseIngredients = is_array($baseIng) ? $baseIng : [];
             }
 
             // Gérer snackupContext (peut être une chaîne JSON depuis FormData)
@@ -487,9 +438,6 @@ if ($useMySQL) {
                 }
                 $snackupContext = is_array($snackupCtx) ? $snackupCtx : null;
             }
-
-            $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
-            $imagePath = handleImageUpload($baseSlug);
 
             try {
                 $result = MenuRepository::addProduct($categoryId, $name, $description, $imagePath, $priceSolo, $priceMenu, $baseIngredients, $snackupContext);
@@ -503,35 +451,32 @@ if ($useMySQL) {
 
         case 'edit_product':
         case 'update_product':
-            $productIdRaw = $input['product_id'] ?? null;
-
-            if (!$productIdRaw) {
-                jsonError('ID produit manquant');
-            }
-
-            // ✅ FIX: Détecter si c'est un ID numérique (MySQL) ou string (JSON/custom)
-            // Les produits MySQL ont des IDs numériques (1, 2, 3...)
-            // Les produits JSON/custom ont des IDs string ("pizza-reine", "marguerita"...)
-            $isNumericId = is_numeric($productIdRaw);
-
-            if (!$isNumericId) {
-                // ID string: c'est un produit JSON/custom, ne pas traiter en MySQL
-                // Laisser le code JSON (fallback) le gérer
-                break;
-            }
-
-            $productId = (int)$productIdRaw;
+            $productId = (int)($input['product_id'] ?? 0);
             $name = trim((string)($input['name'] ?? ''));
             $description = trim((string)($input['description'] ?? ''));
             $priceSolo = (float)($input['priceSolo'] ?? 0);
             $priceMenu = isset($input['priceMenu']) && $input['priceMenu'] !== '' ? (float)$input['priceMenu'] : null;
             $status = $input['status'] ?? 'available';
 
-            // Extraire baseIngredients (ingrédients retirables)
+            if (!$productId) {
+                jsonError('ID produit manquant');
+            }
+
+            // Gérer upload image si présent
+            $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+            $imagePath = handleImageUpload($baseSlug);
+            if (!$imagePath && isset($input['image'])) {
+                $imagePath = $input['image']; // Garder l'image existante
+            }
+
+            // Gérer baseIngredients (peut être une chaîne JSON depuis FormData)
             $baseIngredients = null;
             if (isset($input['baseIngredients'])) {
-                $baseIngData = is_string($input['baseIngredients']) ? json_decode($input['baseIngredients'], true) : $input['baseIngredients'];
-                $baseIngredients = is_array($baseIngData) ? array_values($baseIngData) : [];
+                $baseIng = $input['baseIngredients'];
+                if (is_string($baseIng)) {
+                    $baseIng = json_decode($baseIng, true) ?? [];
+                }
+                $baseIngredients = is_array($baseIng) ? $baseIng : [];
             }
 
             // Gérer snackupContext (peut être une chaîne JSON depuis FormData)
@@ -542,13 +487,6 @@ if ($useMySQL) {
                     $snackupCtx = json_decode($snackupCtx, true) ?? null;
                 }
                 $snackupContext = is_array($snackupCtx) ? $snackupCtx : null;
-            }
-
-            // Gérer upload image si présent
-            $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
-            $imagePath = handleImageUpload($baseSlug);
-            if (!$imagePath && isset($input['image'])) {
-                $imagePath = $input['image']; // Garder l'image existante
             }
 
             try {
@@ -612,6 +550,7 @@ if ($useMySQL) {
 }
 
 /* ===== Fallback JSON Mode ===== */
+if (!$useMySQL) {
 require_once __DIR__ . '/../config.php';
 $runtime = loadMenuRuntime();
 
@@ -756,37 +695,8 @@ switch ($action) {
         }
 
         $runtime = loadMenuRuntime();
-
-        // Vérifier que la catégorie existe (dans customCategories OU dans menu.json)
-        $categoryExists = isset($runtime['customCategories'][$categoryId]);
-
-        if (!$categoryExists) {
-            // Chercher dans menu.json
-            $menuJsonPath = SNACK_ROOT . '/config/menu.json';
-            if (file_exists($menuJsonPath)) {
-                $menuData = json_decode(file_get_contents($menuJsonPath), true);
-                if ($menuData && isset($menuData['menu']['categories'])) {
-                    foreach ($menuData['menu']['categories'] as $cat) {
-                        if (($cat['id'] ?? '') === $categoryId) {
-                            $categoryExists = true;
-                            // Créer un override dans customCategories pour cette catégorie de menu.json
-                            if (!isset($runtime['customCategories'])) {
-                                $runtime['customCategories'] = [];
-                            }
-                            $runtime['customCategories'][$categoryId] = [
-                                'id' => $categoryId,
-                                'name' => $cat['name'] ?? '',
-                                'description' => $cat['description'] ?? ''
-                            ];
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!$categoryExists) {
-            jsonError('Catégorie introuvable dans menu.json et customCategories');
+        if (!isset($runtime['customCategories'][$categoryId])) {
+            jsonError('Catégorie introuvable');
         }
 
         $runtime['customCategories'][$categoryId]['name'] = $name;
@@ -1954,3 +1864,5 @@ function syncFormulesToMenu(array $runtime): void {
 
     file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
+
+} // Fin du if (!$useMySQL) - Fallback JSON Mode
