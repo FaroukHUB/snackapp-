@@ -19,7 +19,7 @@ class MenuRepository {
 
         // Récupérer catégories actives
         $stmt = $pdo->prepare("
-            SELECT id, slug, name, description, icon, flavor, product_type, sort_order
+            SELECT id, name, description, icon, flavor, product_type, sort_order
             FROM categories
             WHERE restaurant_id = ? AND is_active = 1
             ORDER BY sort_order ASC, id ASC
@@ -42,7 +42,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, slug, name, description, image,
+            SELECT id, name, description, image,
                    price_solo as priceSolo, price_menu as priceMenu,
                    status, sort_order, base_ingredients as baseIngredients
             FROM products
@@ -138,9 +138,6 @@ class MenuRepository {
         try {
             $pdo->beginTransaction();
 
-            // Générer un slug unique
-            $slug = self::generateSlug($name);
-
             // Déterminer sort_order (dernier + 1)
             $stmt = $pdo->prepare("
                 SELECT MAX(sort_order) as max_order
@@ -153,12 +150,11 @@ class MenuRepository {
             // Insérer la catégorie
             $stmt = $pdo->prepare("
                 INSERT INTO categories
-                (restaurant_id, slug, name, description, icon, flavor, sort_order, is_active)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+                (restaurant_id, name, description, icon, flavor, sort_order, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, 1)
             ");
             $stmt->execute([
                 self::$restaurantId,
-                $slug,
                 $name,
                 $description,
                 $icon,
@@ -177,7 +173,6 @@ class MenuRepository {
 
             return [
                 'id' => $categoryId,
-                'slug' => $slug,
                 'name' => $name,
                 'description' => $description,
                 'icon' => $icon,
@@ -281,8 +276,6 @@ class MenuRepository {
     public static function addProduct($categoryId, $name, $description, $image, $priceSolo, $priceMenu = null, $baseIngredients = []) {
         $pdo = Database::getInstance();
 
-        $slug = self::generateSlug($name);
-
         // Déterminer sort_order
         $stmt = $pdo->prepare("
             SELECT MAX(sort_order) as max_order
@@ -297,14 +290,13 @@ class MenuRepository {
 
         $stmt = $pdo->prepare("
             INSERT INTO products
-            (restaurant_id, category_id, slug, name, description, image, price_solo, price_menu, base_ingredients, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            (restaurant_id, category_id, name, description, image, price_solo, price_menu, base_ingredients, status, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
         ");
 
         $stmt->execute([
             self::$restaurantId,
             $categoryId,
-            $slug,
             $name,
             $description,
             $image,
@@ -316,7 +308,6 @@ class MenuRepository {
 
         return [
             'id' => $pdo->lastInsertId(),
-            'slug' => $slug,
             'name' => $name
         ];
     }
@@ -397,7 +388,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, slug, name, description, image,
+            SELECT id, name, description, image,
                    price, original_price as originalPrice, savings,
                    badge, includes, status, sort_order
             FROM formules
@@ -431,8 +422,6 @@ class MenuRepository {
     public static function addFormule($name, $description, $price, $originalPrice = null, $badge = null, $image = null, $includes = []) {
         $pdo = Database::getInstance();
 
-        $slug = self::generateSlug($name);
-
         // Calculer l'économie
         $savings = ($originalPrice && $originalPrice > $price) ? round($originalPrice - $price, 2) : null;
 
@@ -450,13 +439,12 @@ class MenuRepository {
 
         $stmt = $pdo->prepare("
             INSERT INTO formules
-            (restaurant_id, slug, name, description, image, price, original_price, savings, badge, includes, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            (restaurant_id, name, description, image, price, original_price, savings, badge, includes, status, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
         ");
 
         $stmt->execute([
             self::$restaurantId,
-            $slug,
             $name,
             $description,
             $image,
@@ -470,7 +458,6 @@ class MenuRepository {
 
         return [
             'id' => $pdo->lastInsertId(),
-            'slug' => $slug,
             'name' => $name,
             'price' => $price,
             'originalPrice' => $originalPrice,
@@ -599,15 +586,16 @@ class MenuRepository {
 
     /**
      * Génère un slug unique depuis un nom
+     * NOTE: Fonction désactivée - la colonne 'slug' n'existe pas dans la DB actuelle
      */
-    private static function generateSlug($name) {
-        $slug = strtolower(trim($name));
-        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
-        $slug = trim($slug, '-');
-
-        // Ajouter un suffix unique si nécessaire
-        $slug .= '-' . substr(md5(uniqid()), 0, 8);
-
-        return $slug;
-    }
+    // private static function generateSlug($name) {
+    //     $slug = strtolower(trim($name));
+    //     $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+    //     $slug = trim($slug, '-');
+    //
+    //     // Ajouter un suffix unique si nécessaire
+    //     $slug .= '-' . substr(md5(uniqid()), 0, 8);
+    //
+    //     return $slug;
+    // }
 }
