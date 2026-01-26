@@ -756,8 +756,37 @@ switch ($action) {
         }
 
         $runtime = loadMenuRuntime();
-        if (!isset($runtime['customCategories'][$categoryId])) {
-            jsonError('Catégorie introuvable');
+
+        // Vérifier que la catégorie existe (dans customCategories OU dans menu.json)
+        $categoryExists = isset($runtime['customCategories'][$categoryId]);
+
+        if (!$categoryExists) {
+            // Chercher dans menu.json
+            $menuJsonPath = SNACK_ROOT . '/config/menu.json';
+            if (file_exists($menuJsonPath)) {
+                $menuData = json_decode(file_get_contents($menuJsonPath), true);
+                if ($menuData && isset($menuData['menu']['categories'])) {
+                    foreach ($menuData['menu']['categories'] as $cat) {
+                        if (($cat['id'] ?? '') === $categoryId) {
+                            $categoryExists = true;
+                            // Créer un override dans customCategories pour cette catégorie de menu.json
+                            if (!isset($runtime['customCategories'])) {
+                                $runtime['customCategories'] = [];
+                            }
+                            $runtime['customCategories'][$categoryId] = [
+                                'id' => $categoryId,
+                                'name' => $cat['name'] ?? '',
+                                'description' => $cat['description'] ?? ''
+                            ];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$categoryExists) {
+            jsonError('Catégorie introuvable dans menu.json et customCategories');
         }
 
         $runtime['customCategories'][$categoryId]['name'] = $name;
