@@ -1,1 +1,5 @@
 *.zip
+admin-panel-v2/
+images/uploads/
+snackup/admin/api/test-debug.php
+snackup/test-error-log.php
