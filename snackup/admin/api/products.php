@@ -420,11 +420,20 @@ if ($useMySQL) {
                 jsonError('Champs invalides');
             }
 
+            // Extraire baseIngredients (ingrédients retirables)
+            $baseIngredients = [];
+            if (isset($input['baseIngredients'])) {
+                $baseIngData = is_string($input['baseIngredients']) ? json_decode($input['baseIngredients'], true) : $input['baseIngredients'];
+                if (is_array($baseIngData)) {
+                    $baseIngredients = array_values($baseIngData);
+                }
+            }
+
             $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
             $imagePath = handleImageUpload($baseSlug);
 
             try {
-                $result = MenuRepository::addProduct($categoryId, $name, $description, $imagePath, $priceSolo, $priceMenu);
+                $result = MenuRepository::addProduct($categoryId, $name, $description, $imagePath, $priceSolo, $priceMenu, $baseIngredients);
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
                 jsonSuccess(['product' => $result]);
@@ -446,6 +455,13 @@ if ($useMySQL) {
                 jsonError('ID produit manquant');
             }
 
+            // Extraire baseIngredients (ingrédients retirables)
+            $baseIngredients = null;
+            if (isset($input['baseIngredients'])) {
+                $baseIngData = is_string($input['baseIngredients']) ? json_decode($input['baseIngredients'], true) : $input['baseIngredients'];
+                $baseIngredients = is_array($baseIngData) ? array_values($baseIngData) : [];
+            }
+
             // Gérer upload image si présent
             $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
             $imagePath = handleImageUpload($baseSlug);
@@ -454,7 +470,7 @@ if ($useMySQL) {
             }
 
             try {
-                MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status);
+                MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status, $baseIngredients);
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
                 jsonSuccess(['product' => ['id' => $productId, 'name' => $name]]);

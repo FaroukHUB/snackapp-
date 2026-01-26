@@ -279,7 +279,7 @@ class MenuRepository {
     /**
      * Ajoute un produit
      */
-    public static function addProduct($categoryId, $name, $description, $image, $priceSolo, $priceMenu = null) {
+    public static function addProduct($categoryId, $name, $description, $image, $priceSolo, $priceMenu = null, $baseIngredients = []) {
         $pdo = Database::getInstance();
 
         $slug = self::generateSlug($name);
@@ -293,10 +293,13 @@ class MenuRepository {
         $stmt->execute([$categoryId]);
         $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
 
+        // Convertir baseIngredients en JSON
+        $baseIngredientsJson = !empty($baseIngredients) ? json_encode($baseIngredients, JSON_UNESCAPED_UNICODE) : null;
+
         $stmt = $pdo->prepare("
             INSERT INTO products
-            (restaurant_id, category_id, slug, name, description, image, price_solo, price_menu, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            (restaurant_id, category_id, slug, name, description, image, price_solo, price_menu, base_ingredients, status, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
         ");
 
         $stmt->execute([
@@ -308,6 +311,7 @@ class MenuRepository {
             $image,
             $priceSolo,
             $priceMenu,
+            $baseIngredientsJson,
             $sortOrder
         ]);
 
@@ -321,26 +325,55 @@ class MenuRepository {
     /**
      * Modifie un produit
      */
-    public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status) {
+    public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status, $baseIngredients = null) {
         $pdo = Database::getInstance();
 
-        $stmt = $pdo->prepare("
-            UPDATE products
-            SET name = ?, description = ?, image = ?,
-                price_solo = ?, price_menu = ?, status = ?
-            WHERE id = ? AND restaurant_id = ?
-        ");
+        // Convertir baseIngredients en JSON si fourni
+        $baseIngredientsJson = null;
+        if ($baseIngredients !== null) {
+            $baseIngredientsJson = !empty($baseIngredients) ? json_encode($baseIngredients, JSON_UNESCAPED_UNICODE) : null;
+        }
 
-        return $stmt->execute([
-            $name,
-            $description,
-            $image,
-            $priceSolo,
-            $priceMenu,
-            $status,
-            $productId,
-            self::$restaurantId
-        ]);
+        // Si baseIngredients est fourni, l'inclure dans l'UPDATE
+        if ($baseIngredients !== null) {
+            $stmt = $pdo->prepare("
+                UPDATE products
+                SET name = ?, description = ?, image = ?,
+                    price_solo = ?, price_menu = ?, status = ?, base_ingredients = ?
+                WHERE id = ? AND restaurant_id = ?
+            ");
+
+            return $stmt->execute([
+                $name,
+                $description,
+                $image,
+                $priceSolo,
+                $priceMenu,
+                $status,
+                $baseIngredientsJson,
+                $productId,
+                self::$restaurantId
+            ]);
+        } else {
+            // Comportement par défaut sans modifier base_ingredients
+            $stmt = $pdo->prepare("
+                UPDATE products
+                SET name = ?, description = ?, image = ?,
+                    price_solo = ?, price_menu = ?, status = ?
+                WHERE id = ? AND restaurant_id = ?
+            ");
+
+            return $stmt->execute([
+                $name,
+                $description,
+                $image,
+                $priceSolo,
+                $priceMenu,
+                $status,
+                $productId,
+                self::$restaurantId
+            ]);
+        }
     }
 
     /**
