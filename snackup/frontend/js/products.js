@@ -1883,47 +1883,57 @@ const Products = {
 
     /**
      * Update formule selector states based on selections and limits
-     * Disables selectors of the same type once the quantity limit is reached
+     * Disables selectors of the same category/product once the quantity limit is reached
      */
     updateFormuleSelectorStates(formule) {
         if (!formule.includes || formule.includes.length === 0) return;
 
-        // Calculate selection counts and limits for each type
-        const typeLimits = {};
-        const typeSelectionCounts = {};
+        // Calculate selection counts and limits for each unique category/product
+        const categoryLimits = {};
+        const categorySelectionCounts = {};
 
-        // Calculate limits (sum of quantities for each type)
+        // Helper function to get unique key for an include
+        const getIncludeKey = (include) => {
+            if (include.type === 'category' && include.categoryId) {
+                return `category-${include.categoryId}`;
+            } else if (include.type === 'product' && include.productId) {
+                return `product-${include.productId}`;
+            }
+            return `type-${include.type}`; // Fallback
+        };
+
+        // Calculate limits (sum of quantities for each unique category/product)
         formule.includes.forEach((include, index) => {
-            const type = include.type;
+            const key = getIncludeKey(include);
             const quantity = include.quantity || 1;
 
-            if (!typeLimits[type]) {
-                typeLimits[type] = 0;
-                typeSelectionCounts[type] = 0;
+            if (!categoryLimits[key]) {
+                categoryLimits[key] = 0;
+                categorySelectionCounts[key] = 0;
             }
 
-            typeLimits[type] += quantity;
+            categoryLimits[key] += quantity;
 
             // Count current selections
             if (this.formuleSelections[index]) {
-                typeSelectionCounts[type]++;
+                categorySelectionCounts[key]++;
             }
         });
 
-        console.log('[updateFormuleSelectorStates] Limits:', typeLimits);
-        console.log('[updateFormuleSelectorStates] Selections:', typeSelectionCounts);
+        console.log('[updateFormuleSelectorStates] Limits par catégorie:', categoryLimits);
+        console.log('[updateFormuleSelectorStates] Sélections par catégorie:', categorySelectionCounts);
 
         // Update selector states for each include
         formule.includes.forEach((include, index) => {
-            const type = include.type;
+            const key = getIncludeKey(include);
             const selector = document.querySelector(`[data-include-index="${index}"]`);
 
             if (!selector) return;
 
             const hasSelection = !!this.formuleSelections[index];
-            const limitReached = typeSelectionCounts[type] >= typeLimits[type];
+            const limitReached = categorySelectionCounts[key] >= categoryLimits[key];
 
-            // Disable if: no selection AND limit reached for this type
+            // Disable if: no selection AND limit reached for this category/product
             if (!hasSelection && limitReached) {
                 selector.disabled = true;
                 selector.style.opacity = '0.5';
