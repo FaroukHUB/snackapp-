@@ -440,9 +440,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'defaultForCategories' => $categorySupplements
             ];
 
-            // Charger formules depuis menu.json (temporaire - pas encore migré)
+            // ✅ Charger formules depuis MySQL
+            $formules = MenuRepository::getAllFormules();
+
+            // Charger featured et categoryIcons depuis menu.json (pas encore migrés)
             $menuJsonPath = getMenuJsonPath();
-            $formules = [];
             $featured = [
                 'enabled' => true,
                 'title' => 'Sélection pour vous',
@@ -454,7 +456,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (file_exists($menuJsonPath)) {
                 $menuData = json_decode(file_get_contents($menuJsonPath), true);
                 if ($menuData) {
-                    $formules = $menuData['formules'] ?? [];
                     $featured = $menuData['featured'] ?? $featured;
                     $categoryIcons = $menuData['categoryIcons'] ?? [];
                 }
