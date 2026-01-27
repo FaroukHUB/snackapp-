@@ -416,10 +416,46 @@ class MenuRepository {
     }
 
     /**
+     * Détecte le type de la colonne id dans la table formules
+     * @return string 'int' ou 'varchar'
+     */
+    private static function detectIdType(): string {
+        static $idType = null;
+
+        if ($idType === null) {
+            $pdo = Database::getInstance();
+            $stmt = $pdo->query("DESCRIBE formules");
+            $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($columns as $col) {
+                if ($col['Field'] === 'id') {
+                    $type = strtolower($col['Type']);
+                    $idType = (strpos($type, 'int') !== false) ? 'int' : 'varchar';
+                    error_log("[MenuRepository] Détection type colonne 'id': {$type} → {$idType}");
+                    break;
+                }
+            }
+        }
+
+        return $idType ?? 'int';
+    }
+
+    /**
+     * Génère un ID unique pour les formules (si varchar)
+     * Format: formule-{timestamp}-{random}
+     */
+    private static function generateFormuleId(): string {
+        return 'formule-' . time() . '-' . bin2hex(random_bytes(4));
+    }
+
+    /**
      * Ajoute une formule
      */
     public static function addFormule($name, $description, $price, $originalPrice = null, $image = null, $includes = []) {
         $pdo = Database::getInstance();
+
+        // Détecter le type de la colonne id
+        $idType = self::detectIdType();
 
         // Déterminer sort_order
         $stmt = $pdo->prepare("
@@ -433,32 +469,61 @@ class MenuRepository {
         // Convertir includes en JSON
         $includesJson = !empty($includes) ? json_encode($includes, JSON_UNESCAPED_UNICODE) : null;
 
-        $stmt = $pdo->prepare("
-            INSERT INTO formules
-            (restaurant_id, name, description, image, price, original_price, includes, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)
-        ");
+        if ($idType === 'varchar') {
+            // Colonne id est VARCHAR → Générer un ID unique
+            $generatedId = self::generateFormuleId();
 
-        $stmt->execute([
-            self::$restaurantId,
-            $name,
-            $description,
-            $image,
-            $price,
-            $originalPrice,
-            $includesJson,
-            $sortOrder
-        ]);
+            error_log("[MenuRepository] 🔑 Génération ID string pour formule: {$generatedId}");
 
-        $insertedId = $pdo->lastInsertId();
+            $stmt = $pdo->prepare("
+                INSERT INTO formules
+                (id, restaurant_id, name, description, image, price, original_price, includes, status, sort_order)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            ");
 
-        // 🔒 VALIDATION: S'assurer que l'AUTO_INCREMENT a fonctionné
-        if (!$insertedId || $insertedId === '0' || $insertedId === '') {
-            error_log('[MenuRepository] ❌ ERREUR CRITIQUE: lastInsertId() a retourné une valeur invalide: ' . var_export($insertedId, true));
-            throw new Exception('Échec AUTO_INCREMENT: ID non généré par la base de données');
+            $stmt->execute([
+                $generatedId,
+                self::$restaurantId,
+                $name,
+                $description,
+                $image,
+                $price,
+                $originalPrice,
+                $includesJson,
+                $sortOrder
+            ]);
+
+            $insertedId = $generatedId;
+
+        } else {
+            // Colonne id est INT AUTO_INCREMENT → Comportement classique
+            $stmt = $pdo->prepare("
+                INSERT INTO formules
+                (restaurant_id, name, description, image, price, original_price, includes, status, sort_order)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            ");
+
+            $stmt->execute([
+                self::$restaurantId,
+                $name,
+                $description,
+                $image,
+                $price,
+                $originalPrice,
+                $includesJson,
+                $sortOrder
+            ]);
+
+            $insertedId = $pdo->lastInsertId();
+
+            // 🔒 VALIDATION: S'assurer que l'AUTO_INCREMENT a fonctionné
+            if (!$insertedId || $insertedId === '0' || $insertedId === '') {
+                error_log('[MenuRepository] ❌ ERREUR CRITIQUE: lastInsertId() a retourné une valeur invalide: ' . var_export($insertedId, true));
+                throw new Exception('Échec AUTO_INCREMENT: ID non généré par la base de données');
+            }
         }
 
-        error_log('[MenuRepository] ✅ Formule insérée avec ID: ' . $insertedId);
+        error_log("[MenuRepository] ✅ Formule insérée avec ID ({$idType}): {$insertedId}");
 
         return [
             'id' => $insertedId,

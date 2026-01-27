@@ -812,7 +812,7 @@ if ($useMySQL) {
             break;
 
         case 'update_formule':
-            $formuleId = (int)($input['formule_id'] ?? 0);
+            $formuleId = trim((string)($input['formule_id'] ?? ''));
 
             if (!$formuleId) {
                 jsonError('ID formule manquant');
@@ -849,7 +849,7 @@ if ($useMySQL) {
             break;
 
         case 'delete_formule':
-            $formuleId = (int)($input['formule_id'] ?? 0);
+            $formuleId = trim((string)($input['formule_id'] ?? ''));
 
             if (!$formuleId) {
                 jsonError('ID formule manquant');
