@@ -2311,9 +2311,9 @@ const Products = {
         // Create product with correct price based on menu type
         const productToAdd = { ...this.currentProduct };
 
+        // Utiliser le prix menu si sélectionné, sinon prix solo
         if (this.menuType === 'menu' && this.currentProduct.priceMenu) {
             productToAdd.price = this.currentProduct.priceMenu;
-            productToAdd.name = this.currentProduct.name + ' (Menu)';
         } else {
             productToAdd.price = this.currentProduct.priceSolo || this.currentProduct.price;
         }

@@ -300,6 +300,7 @@ const Cart = {
             const selectedBeverage = item.options?.selectedBeverage;
             const selectedVariant = item.options?.selectedVariant;
             const selectedCapsule = item.options?.selectedCapsule;
+            const formuleSelections = item.options?.formuleSelections || [];
 
             return `
             <div class="mini-cart-item" data-index="${index}">
@@ -308,8 +309,12 @@ const Cart = {
                 <div class="mini-cart-item-info">
                     <div class="mini-cart-item-name">
                         ${escapeHtml(item.name)}
-                        ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 9px; padding: 1px 4px; border-radius: 3px; margin-left: 4px;">MENU</span>' : ''}
                     </div>
+                    ${formuleSelections.length > 0 ? `
+                        <div class="mini-cart-item-formule" style="font-size: 11px; color: var(--primary); margin-top: 4px;">
+                            ${formuleSelections.map(p => `<div>📦 ${escapeHtml(p.name)}</div>`).join('')}
+                        </div>
+                    ` : ''}
                     ${selectedSauce ? `
                         <div class="mini-cart-item-sauce" style="font-size: 11px; color: var(--warning);">
                             🌶️ ${escapeHtml(selectedSauce.name)}
