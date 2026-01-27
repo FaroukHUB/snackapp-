@@ -72,10 +72,10 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, name, flavor, price, status
+            SELECT id, name, flavor, COALESCE(group_name, 'autres') as group_name, price, status
             FROM supplements
-            WHERE restaurant_id = ?
-            ORDER BY sort_order ASC
+            WHERE restaurant_id = ? AND flavor != 'sucre'
+            ORDER BY group_name ASC, sort_order ASC
         ");
         $stmt->execute([self::$restaurantId]);
 
@@ -85,12 +85,43 @@ class MenuRepository {
                 'id' => $supp['id'],
                 'name' => $supp['name'],
                 'flavor' => $supp['flavor'],
+                'group_name' => $supp['group_name'],
                 'price' => (float)$supp['price'],
                 'status' => $supp['status']
             ];
         }
 
         return $supplements;
+    }
+
+    /**
+     * Récupère les suppléments groupés par group_name
+     */
+    public static function getSupplementsGrouped() {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            SELECT id, name, flavor, COALESCE(group_name, 'autres') as group_name, price, status
+            FROM supplements
+            WHERE restaurant_id = ? AND status = 'available' AND flavor != 'sucre'
+            ORDER BY group_name ASC, sort_order ASC
+        ");
+        $stmt->execute([self::$restaurantId]);
+
+        $grouped = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $supp) {
+            $group = $supp['group_name'];
+            if (!isset($grouped[$group])) {
+                $grouped[$group] = [];
+            }
+            $grouped[$group][] = [
+                'id' => $supp['id'],
+                'name' => $supp['name'],
+                'price' => (float)$supp['price']
+            ];
+        }
+
+        return $grouped;
     }
 
     /**

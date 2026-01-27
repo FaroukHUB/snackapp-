@@ -434,9 +434,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             // Formater le menu pour le frontend
             $menu = ['categories' => $categories];
 
-            // Formater les suppléments
+            // Formater les suppléments (avec groupement)
+            $supplementsGrouped = MenuRepository::getSupplementsGrouped();
             $supplementsFormatted = [
                 'catalog' => $supplements,
+                'grouped' => $supplementsGrouped,
                 'defaultForCategories' => $categorySupplements
             ];
 
@@ -759,11 +761,94 @@ if ($useMySQL) {
             }
             break;
 
-        // Endpoints supplements désactivés (pas critiques pour l'instant)
+        // ===== SUPPLÉMENTS (DB-FIRST) =====
         case 'add_supplement':
+            $name = trim((string)($input['name'] ?? ''));
+            $price = normalizePrice($input['price'] ?? 0);
+            $status = $input['status'] ?? 'available';
+            $flavor = $input['flavor'] ?? 'sale';
+            $groupName = $input['group_name'] ?? 'autres';
+
+            if ($name === '') {
+                jsonError('Nom du supplément requis');
+            }
+
+            try {
+                $supplementId = SupplementRepository::create(SNACK_RESTAURANT_ID, [
+                    'name' => $name,
+                    'price' => $price,
+                    'status' => $status,
+                    'flavor' => $flavor,
+                    'group_name' => $groupName
+                ]);
+
+                $supplement = SupplementRepository::getById($supplementId);
+                jsonSuccess(['supplement' => $supplement]);
+            } catch (Exception $e) {
+                jsonError('Erreur création supplément: ' . $e->getMessage());
+            }
+            break;
+
         case 'update_supplement':
+            $supplementId = (int)($input['supplement_id'] ?? $input['id'] ?? 0);
+
+            if (!$supplementId) {
+                jsonError('ID supplément manquant');
+            }
+
+            $updateData = [];
+            if (isset($input['name'])) $updateData['name'] = trim((string)$input['name']);
+            if (isset($input['price'])) $updateData['price'] = normalizePrice($input['price']);
+            if (isset($input['status'])) $updateData['status'] = $input['status'];
+            if (isset($input['flavor'])) $updateData['flavor'] = $input['flavor'];
+            if (isset($input['group_name'])) $updateData['group_name'] = $input['group_name'];
+
+            if (empty($updateData)) {
+                jsonError('Aucune donnée à mettre à jour');
+            }
+
+            try {
+                $updated = SupplementRepository::update($supplementId, $updateData);
+                if ($updated) {
+                    $supplement = SupplementRepository::getById($supplementId);
+                    jsonSuccess(['supplement' => $supplement]);
+                } else {
+                    jsonError('Supplément non trouvé ou non modifié');
+                }
+            } catch (Exception $e) {
+                jsonError('Erreur mise à jour supplément: ' . $e->getMessage());
+            }
+            break;
+
         case 'delete_supplement':
-            jsonError('Gestion suppléments non implémentée (migration en cours)');
+            $supplementId = (int)($input['supplement_id'] ?? $input['id'] ?? 0);
+
+            if (!$supplementId) {
+                jsonError('ID supplément manquant');
+            }
+
+            try {
+                // Suppression définitive (hard delete)
+                $deleted = SupplementRepository::hardDelete($supplementId);
+                if ($deleted) {
+                    jsonSuccess(['message' => 'Supplément supprimé']);
+                } else {
+                    jsonError('Supplément non trouvé');
+                }
+            } catch (Exception $e) {
+                jsonError('Erreur suppression supplément: ' . $e->getMessage());
+            }
+            break;
+
+        case 'delete_sweet_supplements':
+            // Supprime tous les suppléments sucrés (legacy Marvelous)
+            try {
+                $count = SupplementRepository::deleteAllSweet(SNACK_RESTAURANT_ID);
+                jsonSuccess(['message' => "Suppléments sucrés supprimés: $count"]);
+            } catch (Exception $e) {
+                jsonError('Erreur suppression suppléments sucrés: ' . $e->getMessage());
+            }
+            break;
 
         // ===== FORMULES (DB-FIRST) =====
         case 'add_formule':

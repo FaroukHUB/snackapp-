@@ -1076,86 +1076,49 @@ const Products = {
                 supplementsContainer.classList.remove('hidden');
                 supplementsContainer.style.display = '';
 
-                // Grouper les suppléments par catégorie
-                const saledCategoryOrder = ['fromage', 'legume', 'viande', 'autre'];
-                const sucreCategoryOrder = ['base', 'croquant', 'fruit', 'prime'];
-                const categoryLabels = {
-                    // Salés
-                    'fromage': 'Fromages',
-                    'legume': 'Légumes',
+                // Grouper les suppléments par group_name (DB-first)
+                const groupOrder = ['viande', 'fromages', 'legumes', 'sauces', 'autres'];
+                const groupLabels = {
                     'viande': 'Viandes',
-                    'autre': 'Autres',
-                    // Sucrés
-                    'base': 'Base',
-                    'croquant': 'Croquant',
-                    'fruit': 'Fruit',
-                    'prime': 'Prime'
+                    'fromages': 'Fromages',
+                    'legumes': 'Légumes',
+                    'sauces': 'Sauces',
+                    'autres': 'Autres'
                 };
 
                 const grouped = {};
                 supplements.forEach(sup => {
-                    const cat = sup.category || 'autre';
-                    if (!grouped[cat]) grouped[cat] = [];
-                    grouped[cat].push(sup);
+                    // Utiliser group_name de la DB, fallback sur 'autres'
+                    const group = sup.group_name || 'autres';
+                    if (!grouped[group]) grouped[group] = [];
+                    grouped[group].push(sup);
                 });
-
-                // Déterminer si c'est salé ou sucré
-                const hasSaled = saledCategoryOrder.some(cat => grouped[cat] && grouped[cat].length > 0);
-                const hasSucre = sucreCategoryOrder.some(cat => grouped[cat] && grouped[cat].length > 0);
 
                 let html = '';
 
-                // Afficher les suppléments salés
-                if (hasSaled) {
-                    saledCategoryOrder.forEach(cat => {
-                        if (grouped[cat] && grouped[cat].length > 0) {
-                            html += `
-                                <div class="supplement-category">
-                                    <h4 class="supplement-category-title">${categoryLabels[cat]}</h4>
-                                    <div class="supplement-category-items">
-                                        ${grouped[cat].map(sup => `
-                                            <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
-                                                <div class="supplement-info">
-                                                    <div class="supplement-checkbox">
-                                                        <i class="fas fa-check" style="font-size: 12px;"></i>
-                                                    </div>
-                                                    <span class="supplement-name">${sup.name}</span>
+                // Afficher les suppléments par groupe
+                groupOrder.forEach(group => {
+                    if (grouped[group] && grouped[group].length > 0) {
+                        html += `
+                            <div class="supplement-category">
+                                <h4 class="supplement-category-title">${groupLabels[group]}</h4>
+                                <div class="supplement-category-items">
+                                    ${grouped[group].map(sup => `
+                                        <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
+                                            <div class="supplement-info">
+                                                <div class="supplement-checkbox">
+                                                    <i class="fas fa-check" style="font-size: 12px;"></i>
                                                 </div>
-                                                <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
+                                                <span class="supplement-name">${sup.name}</span>
                                             </div>
-                                        `).join('')}
-                                    </div>
+                                            <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
+                                        </div>
+                                    `).join('')}
                                 </div>
-                            `;
-                        }
-                    });
-                }
-
-                // Afficher les suppléments sucrés
-                if (hasSucre) {
-                    sucreCategoryOrder.forEach(cat => {
-                        if (grouped[cat] && grouped[cat].length > 0) {
-                            html += `
-                                <div class="supplement-category">
-                                    <h4 class="supplement-category-title">${categoryLabels[cat]}</h4>
-                                    <div class="supplement-category-items">
-                                        ${grouped[cat].map(sup => `
-                                            <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
-                                                <div class="supplement-info">
-                                                    <div class="supplement-checkbox">
-                                                        <i class="fas fa-check" style="font-size: 12px;"></i>
-                                                    </div>
-                                                    <span class="supplement-name">${sup.name}</span>
-                                                </div>
-                                                <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    });
-                }
+                            </div>
+                        `;
+                    }
+                });
 
                 supplementsList.innerHTML = html;
             } else {

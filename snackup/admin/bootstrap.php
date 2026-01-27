@@ -39,6 +39,7 @@ require_once __DIR__ . '/../backend/repositories/OrderRepository.php';
 require_once __DIR__ . '/../backend/repositories/CustomerRepository.php';
 require_once __DIR__ . '/../backend/repositories/PromoCodeRepository.php';
 require_once __DIR__ . '/../backend/repositories/LoyaltyRepository.php';
+require_once __DIR__ . '/../backend/repositories/SupplementRepository.php';
 
 // Constantes pour le mode MySQL
 define('SNACK_USE_JSON', false);
