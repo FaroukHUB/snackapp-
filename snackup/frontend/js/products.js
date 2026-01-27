@@ -987,6 +987,7 @@ const Products = {
             if (formuleIncludesSection) {
                 formuleIncludesSection.classList.add('hidden');
                 formuleIncludesSection.style.display = 'none';
+                console.log('❌ ENCART FORMULE: MASQUÉ (produit simple, pas une formule)');
             }
 
             // Update modal content
@@ -1836,8 +1837,10 @@ const Products = {
 
         console.log('[renderFormuleSelectorsInteractive] Found', formule.includes.length, 'includes');
 
-        // Show the section
+        // Show the section (DOIT reset display car openProductModal() le cache)
         includesSection.classList.remove('hidden');
+        includesSection.style.display = '';
+        console.log('✅ ENCART FORMULE: VISIBLE (formule avec includes)');
 
         // Render interactive selectors for each include
         includesList.innerHTML = formule.includes.map((include, index) => {
