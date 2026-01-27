@@ -392,7 +392,7 @@ class MenuRepository {
                    price, original_price as originalPrice,
                    includes, status, sort_order
             FROM formules
-            WHERE restaurant_id = ?
+            WHERE restaurant_id = ? AND status = 'available'
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([self::$restaurantId]);
