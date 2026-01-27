@@ -50,7 +50,7 @@ const Products = {
         this.renderCategoryIcons();
         this.renderFeatured();
         this.renderSidebar();
-        this.renderFormules();
+        // renderFormules() supprimé - maintenant intégré dans renderAllCategories()
         this.renderAllCategories();
         this.renderRestaurantInfo();
         this.setupModal();
@@ -416,53 +416,52 @@ const Products = {
     },
 
     /**
-     * Render formules section
+     * Render formules section - NOUVEAU: retourne HTML complet de la section
      */
-    renderFormules() {
-        const grid = document.getElementById('formulesGrid');
-        const section = document.getElementById('formulesSection');
-        if (!grid) return;
-
+    renderFormulesSection() {
         const formules = Config.getAvailableFormules();
 
         if (formules.length === 0) {
-            section?.classList.add('hidden');
-            return;
+            return '';
         }
 
-        grid.innerHTML = formules.map(formule => {
+        const cardsHtml = formules.map(formule => {
             const hasImage = formule.image && formule.image.trim() !== '';
+
+            // Badge dynamique depuis la DB
+            const badgeHtml = formule.badge
+                ? `<span class="formule-savings">${escapeHtml(formule.badge)}</span>`
+                : '';
+
+            // Image wrapper avec centrage
             const imageHtml = hasImage
-                ? `<div class="formule-image-wrapper">
-                       <img src="../../${formule.image}" alt="${formule.name}" class="formule-image"
+                ? `<div class="formule-image-centered">
+                       <img src="../../${escapeHtml(formule.image)}" alt="${escapeHtml(formule.name)}" class="formule-image"
                             loading="lazy"
                             onerror="this.parentElement.innerHTML='<div class=\\'formule-image-placeholder\\'><i class=\\'fas fa-fire\\'></i></div>'">
-                       ${formule.badge ? `<span class="formule-savings">${formule.badge}</span>` : ''}
+                       ${badgeHtml}
                    </div>`
-                : `<div class="formule-image-wrapper">
+                : `<div class="formule-image-centered">
                        <div class="formule-image-placeholder"><i class="fas fa-fire"></i></div>
-                       ${formule.badge ? `<span class="formule-savings">${formule.badge}</span>` : ''}
+                       ${badgeHtml}
                    </div>`;
 
-            // Texte de disponibilité (si existe)
-            const availabilityHtml = formule.availability
-                ? `<p class="formule-availability">${formule.availability}</p>`
+            // Description ou availability depuis DB (pas de texte hardcodé)
+            const descriptionHtml = formule.description
+                ? `<p class="formule-description">${escapeHtml(formule.description)}</p>`
                 : '';
 
             return `
-                <div class="formule-card" onclick="Products.openFormuleModal('${formule.id}')">
+                <div class="formule-card" onclick="Products.openFormuleModal('${escapeHtml(formule.id)}')">
                     ${imageHtml}
                     <div class="formule-card-content">
-                        <div class="formule-info">
-                            <h3 class="formule-name">${formule.name}</h3>
-                            <p class="formule-description">${formule.description || ''}</p>
-                            ${availabilityHtml}
-                            <div class="formule-price">
-                                <span class="current">${Config.formatPrice(formule.price)}</span>
-                                ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
-                            </div>
+                        <h3 class="formule-name">${escapeHtml(formule.name)}</h3>
+                        ${descriptionHtml}
+                        <div class="formule-price">
+                            <span class="current">${Config.formatPrice(formule.price)}</span>
+                            ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
                         </div>
-                        <button type="button" class="formule-cta-btn" onclick="event.stopPropagation(); Products.openFormuleModal('${formule.id}')">
+                        <button type="button" class="formule-cta-btn" onclick="event.stopPropagation(); Products.openFormuleModal('${escapeHtml(formule.id)}')">
                             <i class="fas fa-check-circle"></i>
                             Choisir cette formule
                         </button>
@@ -470,6 +469,28 @@ const Products = {
                 </div>
             `;
         }).join('');
+
+        // Retourner la section complète avec styles alignés sur product-section
+        return `
+            <section class="product-section formules-section" id="formulesSection">
+                <h2>
+                    <i class="fas fa-fire"></i>
+                    Nos Formules
+                </h2>
+                <div class="formules-grid">
+                    ${cardsHtml}
+                </div>
+            </section>
+        `;
+    },
+
+    /**
+     * OBSOLÈTE - Garder pour compatibilité mais ne plus utiliser
+     */
+    renderFormules() {
+        // Cette fonction n'est plus utilisée - remplacée par renderFormulesSection()
+        // Gardée pour éviter les erreurs si appelée ailleurs
+        return;
     },
 
     /**
@@ -552,7 +573,7 @@ const Products = {
 
         console.log('✅ Non-empty categories:', nonEmptyCategories.length);
 
-        // Render categories and insert formules after "sucres-sales"
+        // Render categories
         let html = '';
         nonEmptyCategories.forEach(cat => {
             html += `
@@ -566,12 +587,13 @@ const Products = {
                     </div>
                 </section>
             `;
-
-            // Insérer les formules juste après "Nos Sucrés Salés"
-            if (cat.id === 'sucres-sales') {
-                html += this.renderFormulesInline();
-            }
         });
+
+        // Insérer la section formules APRÈS toutes les catégories
+        const formulesHtml = this.renderFormulesSection();
+        if (formulesHtml) {
+            html += formulesHtml;
+        }
 
         container.innerHTML = html;
 

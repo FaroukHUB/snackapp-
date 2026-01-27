@@ -499,31 +499,50 @@ ul {
 /* ============================================
    FORMULES SECTION
    ============================================ */
+/* ALIGNEMENT AVEC PRODUCT-SECTION : mêmes margins, paddings, border */
 .formules-section {
-    margin-bottom: 48px;
+    /* Mêmes valeurs que .product-section */
+    margin-bottom: 64px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--gray-200);
     scroll-margin-top: calc(var(--header-height) + 24px);
+}
+
+.formules-section:last-child {
+    border-bottom: none;
+    margin-bottom: 32px;
+}
+
+/* TITRE : mêmes styles que .product-section h2 */
+.formules-section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--success);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.formules-section h2 i {
+    color: var(--success);
+    font-size: 20px;
 }
 
 .formules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
 }
 
 @media (max-width: 768px) {
     .formules-grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
+        gap: 16px;
     }
 }
 
-@media (max-width: 400px) {
-    .formules-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Formule Card - Style Promo/Combo moderne */
+/* CARTE FORMULE : Design vertical, plus haute que large, fond légèrement vert */
 .formule-card {
     background: #ffffff;
     border-radius: 16px;
@@ -531,35 +550,43 @@ ul {
     position: relative;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
+    min-height: 440px;
+    /* Fond légèrement vert */
+    background: linear-gradient(180deg, #f0fff4 0%, #ffffff 100%);
 }
 
 .formule-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
 }
 
 .formule-card-content {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    padding: 20px;
+    flex: 1;
+    text-align: center;
 }
 
-/* Image en haut (comme card promo) */
-.formule-image-wrapper {
+/* IMAGE CENTRÉE (pas collée en haut/gauche) */
+.formule-image-centered {
     width: 100%;
-    height: 200px;
-    overflow: hidden;
-    background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
+    min-height: 200px;
 }
 
 .formule-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 12px;
     transition: transform 0.3s ease;
 }
 
@@ -568,107 +595,83 @@ ul {
 }
 
 .formule-image-placeholder {
-    width: 100%;
-    height: 100%;
+    width: 180px;
+    height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-    color: white;
-    font-size: 48px;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: var(--success);
+    font-size: 64px;
+    border-radius: 12px;
 }
 
-/* Badge "Boisson offerte" en haut à droite */
+/* BADGE : vient de la DB, pas hardcodé */
 .formule-savings {
     position: absolute;
     top: 12px;
     right: 12px;
     background: var(--warning);
     color: var(--gray-900);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
     z-index: 10;
 }
 
-/* Info section */
-.formule-info {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex: 1;
-}
-
+/* NOM CENTRÉ */
 .formule-name {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
     color: var(--gray-900);
-    margin: 0;
+    margin: 0 0 10px 0;
     line-height: 1.3;
+    text-align: center;
 }
 
+/* DESCRIPTION : vient de la DB */
 .formule-description {
     font-size: 14px;
     color: var(--gray-600);
     line-height: 1.5;
-    margin: 0;
-    flex: 1;
+    margin: 0 0 16px 0;
+    text-align: center;
 }
 
-/* Texte spécial type "Uniquement le midi" */
-.formule-availability {
-    font-size: 12px;
-    color: var(--primary);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Prix en gros bouton rouge */
-.formule-price-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    color: white;
-    font-size: 28px;
-    font-weight: 800;
-    padding: 12px 24px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-    margin: 8px 0;
-}
-
+/* PRIX MIS EN VALEUR (rouge OK) */
 .formule-price {
     display: flex;
     align-items: baseline;
+    justify-content: center;
     gap: 8px;
     flex-wrap: wrap;
+    margin-bottom: 16px;
 }
 
 .formule-price .current {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 800;
-    color: var(--danger);
+    color: var(--primary);
 }
 
 .formule-price .original {
-    font-size: 16px;
+    font-size: 15px;
     text-decoration: line-through;
     color: var(--gray-400);
 }
 
-/* Bouton CTA "Choisir cette formule" */
+/* BOUTON CTA EN BAS */
 .formule-cta-btn {
     width: 100%;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--primary);
     color: white;
     border: none;
-    padding: 14px 24px;
-    font-size: 16px;
+    padding: 13px 20px;
+    font-size: 15px;
     font-weight: 700;
-    border-radius: 0;
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -679,22 +682,12 @@ ul {
 }
 
 .formule-cta-btn:hover {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    background: var(--primary-dark);
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .formule-cta-btn i {
-    font-size: 18px;
-}
-
-/* Fallback pour l'ancien bouton (si utilisé) */
-.formule-footer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-top: auto;
+    font-size: 16px;
 }
 
 .formule-add-btn {
