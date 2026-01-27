@@ -2323,6 +2323,9 @@ $csrfToken = getCsrfToken();
       const cats = getCategories();
       const idx = formuleIncludesCount++;
 
+      console.log('[addFormuleInclude] data:', data);
+      console.log('[addFormuleInclude] cats:', cats);
+
       const div = document.createElement("div");
       div.className = "formule-include-row";
       div.style.cssText = "display:flex;gap:8px;align-items:center;padding:10px;border:1px solid var(--stroke);border-radius:10px;background:rgba(0,0,0,.18);";
@@ -2332,6 +2335,8 @@ $csrfToken = getCsrfToken();
       const qtyVal = data?.quantity ?? 1;
       const catIdVal = data?.categoryId ?? "";
       const prodIdVal = data?.productId ?? "";
+
+      console.log('[addFormuleInclude] catIdVal:', catIdVal, '| prodIdVal:', prodIdVal);
 
       // Collecter tous les produits disponibles
       const allProducts = [];
@@ -2347,6 +2352,26 @@ $csrfToken = getCsrfToken();
         }
       });
 
+      // Log pour debug
+      console.log('[addFormuleInclude] Checking category selection...');
+      console.log('[addFormuleInclude] Number of categories:', cats.length);
+      console.log('[addFormuleInclude] Looking for category with ID:', catIdVal);
+      cats.forEach(c => {
+        const match = String(c.id) == String(catIdVal);
+        console.log(`  - Category "${c.name}" (id: ${typeof c.id} "${c.id}") vs (${typeof catIdVal} "${catIdVal}") = ${match}`);
+      });
+
+      // Générer les options avec comparaison robuste
+      const categoryOptions = cats.map(c => {
+        const isSelected = String(c.id) == String(catIdVal);
+        return `<option value="${escapeHtml(c.id)}" ${isSelected ? 'selected' : ''}>${escapeHtml(c.name)}</option>`;
+      }).join('');
+
+      const productOptions = allProducts.map(p => {
+        const isSelected = String(p.id) == String(prodIdVal);
+        return `<option value="${escapeHtml(p.id)}" ${isSelected ? 'selected' : ''}>${escapeHtml(p.name)} (${escapeHtml(p.categoryName)})</option>`;
+      }).join('');
+
       div.innerHTML = `
         <select name="include_type_${idx}" class="select" style="width:110px;" onchange="toggleIncludeType(this, ${idx})">
           <option value="category" ${typeVal === 'category' ? 'selected' : ''}>Catégorie</option>
@@ -2354,11 +2379,11 @@ $csrfToken = getCsrfToken();
         </select>
         <select name="include_cat_${idx}" class="select include-cat" style="width:140px;${typeVal === 'product' ? 'display:none;' : ''}">
           <option value="">-- Catégorie --</option>
-          ${cats.map(c => `<option value="${escapeHtml(c.id)}" ${c.id === catIdVal ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+          ${categoryOptions}
         </select>
         <select name="include_prod_${idx}" class="select include-prod" style="width:180px;${typeVal === 'category' ? 'display:none;' : ''}">
           <option value="">-- Produit --</option>
-          ${allProducts.map(p => `<option value="${escapeHtml(p.id)}" ${p.id === prodIdVal ? 'selected' : ''}>${escapeHtml(p.name)} (${escapeHtml(p.categoryName)})</option>`).join('')}
+          ${productOptions}
         </select>
         <input name="include_label_${idx}" class="input" type="text" placeholder="Label affiché" value="${escapeHtml(labelVal)}" style="flex:1;min-width:100px;" />
         <input name="include_qty_${idx}" class="input" type="number" min="1" value="${qtyVal}" style="width:60px;" />
