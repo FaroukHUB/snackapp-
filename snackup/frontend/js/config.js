@@ -45,9 +45,8 @@ const Config = {
      * Load restaurant data
      */
     async loadRestaurant() {
-        // TEMPORARY: Use restaurant-test.php for testing without database
-        const response = await fetch(this.basePath + 'restaurant-test.php');
-        if (!response.ok) throw new Error('Failed to load restaurant-test.php');
+        const response = await fetch(this.basePath + 'restaurant.php');
+        if (!response.ok) throw new Error('Failed to load restaurant.php');
         this.restaurant = await response.json();
     },
 
@@ -55,9 +54,8 @@ const Config = {
      * Load menu data
      */
     async loadMenu() {
-        // TEMPORARY: Use menu-test.php for testing without database
-        const response = await fetch(this.basePath + 'menu-test.php');
-        if (!response.ok) throw new Error('Failed to load menu-test.php');
+        const response = await fetch(this.basePath + 'menu.php');
+        if (!response.ok) throw new Error('Failed to load menu.php');
         const data = await response.json();
 
         this.menu = data.menu;
