@@ -1531,7 +1531,7 @@ $csrfToken = getCsrfToken();
           try {
             await apiPostJson({ action: "update_patisserie_option_status", index: idx, status: newStatus });
             toast("success", "Statut modifié", `${opt.name} est maintenant ${newStatus === 'available' ? 'disponible' : 'indisponible'}.`);
-            state.menu = await apiGet();
+            state.menu = normalizeMenuData(await apiGet());
             renderPatisserieOptionsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de modifier le statut.");
@@ -1547,7 +1547,7 @@ $csrfToken = getCsrfToken();
           try {
             await apiPostJson({ action: "delete_patisserie_option", index: idx });
             toast("success", "Supprimé", `${opt.name} supprimé.`);
-            state.menu = await apiGet();
+            state.menu = normalizeMenuData(await apiGet());
             renderPatisserieOptionsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
@@ -1578,7 +1578,7 @@ $csrfToken = getCsrfToken();
         await apiPostMultipart(formData, 'add_patisserie_option');
         toast("success", "Ajouté", `${name} ajouté avec succès.`);
         $("#formAddPatisserieOption").reset();
-        state.menu = await apiGet();
+        state.menu = normalizeMenuData(await apiGet());
         renderPatisserieOptionsList();
       } catch(err) {
         toast("error", "Erreur", err?.message ?? "Impossible d'ajouter.");
@@ -1654,7 +1654,7 @@ $csrfToken = getCsrfToken();
           try {
             await apiPostJson({ action: "update_beverage_option_status", beverage_type: currentBeverageProductId, index: idx, status: newStatus });
             toast("success", "Statut modifié", `${opt.name} est maintenant ${newStatus === 'available' ? 'disponible' : 'indisponible'}.`);
-            state.menu = await apiGet();
+            state.menu = normalizeMenuData(await apiGet());
             renderBeverageOptionsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de modifier le statut.");
@@ -1670,7 +1670,7 @@ $csrfToken = getCsrfToken();
           try {
             await apiPostJson({ action: "delete_beverage_option", beverage_type: currentBeverageProductId, index: idx });
             toast("success", "Supprimé", `${opt.name} supprimé.`);
-            state.menu = await apiGet();
+            state.menu = normalizeMenuData(await apiGet());
             renderBeverageOptionsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
@@ -1702,7 +1702,7 @@ $csrfToken = getCsrfToken();
         await apiPostMultipart(formData, 'add_beverage_option');
         toast("success", "Ajouté", `${name} ajouté avec succès.`);
         $("#formAddBeverageOption").reset();
-        state.menu = await apiGet();
+        state.menu = normalizeMenuData(await apiGet());
         renderBeverageOptionsList();
       } catch(err) {
         toast("error", "Erreur", err?.message ?? "Impossible d'ajouter.");
@@ -2029,6 +2029,11 @@ $csrfToken = getCsrfToken();
       const data = await res.json().catch(()=>null);
       if (!res.ok || !data || data.success !== true) throw new Error(getErrorMessage(res, data));
       return data;
+    }
+
+    // Helper pour transformer les données API en format state.menu
+    function normalizeMenuData(data){
+      return { ...data.menu, supplements: data.supplements, formules: data.formules, featured: data.featured, categoryIcons: data.categoryIcons };
     }
 
     async function apiPostJson(payload){
@@ -2644,7 +2649,7 @@ $csrfToken = getCsrfToken();
 
     async function boot(){
       const data = await apiGet();
-      state.menu = data;
+      state.menu = normalizeMenuData(data);
       const cats = getCategories();
       if (!cats.find(c=>c.id===parseInt(state.selectedCategoryId, 10))) {
         state.selectedCategoryId = cats[0]?.id ?? null;
