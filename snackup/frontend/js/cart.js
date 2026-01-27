@@ -465,8 +465,12 @@ const Cart = {
             const selectedBeverage = item.options?.selectedBeverage;
 
             message += `${item.quantity}x ${item.name}`;
-            if (menuType === 'menu') {
-                message += ` (MENU)`;
+            // Afficher les produits de formule
+            const formuleSelections = item.options?.formuleSelections || [];
+            if (formuleSelections.length > 0) {
+                formuleSelections.forEach(p => {
+                    message += `\n   📦 ${p.name}`;
+                });
             }
             if (selectedSauce) {
                 message += `\n   🌶️ Sauce: ${selectedSauce.name}`;

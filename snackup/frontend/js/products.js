@@ -2318,14 +2318,11 @@ const Products = {
             productToAdd.price = this.currentProduct.priceSolo || this.currentProduct.price;
         }
 
-        // For formules, resolve the selected products and add to name
+        // For formules, resolve the selected products
         let formuleProducts = null;
         if (this.currentProduct.isFormule && this.formuleSelections) {
             formuleProducts = this.resolveFormuleSelections();
-
-            // Add selected products to formule name
-            const selectionNames = formuleProducts.map(p => p.name).join(', ');
-            productToAdd.name = `${productToAdd.name} (${selectionNames})`;
+            // NE PAS modifier le nom - les produits seront affichés séparément dans le panier
         }
 
         Cart.addItem(
