@@ -2072,6 +2072,7 @@ const Products = {
 
     /**
      * Validate that all required formule selections are made
+     * Validates by choiceGroup: each group needs at least 1 selection
      */
     validateFormuleSelections() {
         if (!this.currentProduct?.isFormule) return true;
@@ -2079,13 +2080,44 @@ const Products = {
         const formule = this.currentProduct;
         if (!formule.includes || formule.includes.length === 0) return true;
 
-        // Check if all selections are made
-        const allSelected = Object.values(this.formuleSelections).every(selection => selection !== null);
+        // Build list of required groups and check selections per group
+        const requiredGroups = new Set();
+        const selectedByGroup = {};
+
+        formule.includes.forEach((include, index) => {
+            // Determine group key (choiceGroup if defined, otherwise unique per include)
+            const groupKey = include.choiceGroup || `include-${index}`;
+            requiredGroups.add(groupKey);
+
+            if (!selectedByGroup[groupKey]) {
+                selectedByGroup[groupKey] = [];
+            }
+
+            // If this include has a selection, add it to the group
+            if (this.formuleSelections[index]) {
+                selectedByGroup[groupKey].push({
+                    index,
+                    productId: this.formuleSelections[index]
+                });
+            }
+        });
+
+        // Validate: each required group must have at least 1 selection
+        let allGroupsValid = true;
+        requiredGroups.forEach(group => {
+            if (!selectedByGroup[group] || selectedByGroup[group].length === 0) {
+                allGroupsValid = false;
+            }
+        });
+
+        console.log('[validateFormuleSelections] Groupes requis:', Array.from(requiredGroups));
+        console.log('[validateFormuleSelections] Sélections par groupe:', selectedByGroup);
+        console.log('[validateFormuleSelections] Formule valide:', allGroupsValid);
 
         // Enable/disable add to cart button
         const addButton = document.getElementById('addToCartBtn');
         if (addButton) {
-            if (allSelected) {
+            if (allGroupsValid) {
                 addButton.disabled = false;
                 addButton.classList.remove('disabled');
             } else {
@@ -2094,11 +2126,12 @@ const Products = {
             }
         }
 
-        return allSelected;
+        return allGroupsValid;
     },
 
     /**
      * Resolve formule selections to actual product objects
+     * Only includes ONE product per choiceGroup (no duplicates)
      */
     resolveFormuleSelections() {
         const resolved = [];
@@ -2106,24 +2139,40 @@ const Products = {
 
         if (!formule?.includes || !this.formuleSelections) return resolved;
 
+        // Track which groups have already been added to avoid duplicates
+        const addedGroups = new Set();
+
         formule.includes.forEach((include, index) => {
             const selectedProductId = this.formuleSelections[index];
-            if (selectedProductId) {
-                const product = Config.getProduct(selectedProductId);
-                if (product) {
-                    resolved.push({
-                        type: include.type,
-                        label: include.label || include.type,
-                        product: {
-                            id: product.id,
-                            name: product.name,
-                            price: product.priceSolo || product.price
-                        }
-                    });
-                }
+            if (!selectedProductId) return;
+
+            // Determine group key
+            const groupKey = include.choiceGroup || `include-${index}`;
+
+            // Skip if this group already has a product added
+            if (addedGroups.has(groupKey)) {
+                console.log(`[resolveFormuleSelections] Groupe "${groupKey}" déjà ajouté, skip index ${index}`);
+                return;
+            }
+
+            const product = Config.getProduct(selectedProductId);
+            if (product) {
+                resolved.push({
+                    type: include.type,
+                    label: include.choiceGroup || include.label || include.type,
+                    choiceGroup: include.choiceGroup,
+                    product: {
+                        id: product.id,
+                        name: product.name,
+                        price: product.priceSolo || product.price
+                    }
+                });
+                addedGroups.add(groupKey);
+                console.log(`[resolveFormuleSelections] Ajouté: groupe="${groupKey}", produit="${product.name}"`);
             }
         });
 
+        console.log('[resolveFormuleSelections] Total produits résolus:', resolved.length);
         return resolved;
     },
 
