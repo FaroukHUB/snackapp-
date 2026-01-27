@@ -505,10 +505,10 @@ const Products = {
             return '';
         }
 
-        // Couleurs alternées : rouge et noir (charte)
+        // Couleurs alternées : vert Marvelous et rose
         const colors = [
-            { bg: 'linear-gradient(135deg, #dc2626, #b91c1c)' },  // Rouge
-            { bg: 'linear-gradient(135deg, #1a1a2e, #16213e)' }   // Noir
+            { bg: 'linear-gradient(135deg, #2ec4b6, #25a89c)' },
+            { bg: 'linear-gradient(135deg, #ec4899, #db2777)' }
         ];
 
         const formulesHtml = formules.map((formule, index) => {
@@ -531,7 +531,7 @@ const Products = {
                             ${Config.formatPrice(formule.price)}
                         </div>
                         ${formule.originalPrice ? `<div style="font-size: 13px; color: rgba(255, 255, 255, 0.7); text-decoration: line-through; margin-top: -6px; margin-bottom: 10px;">${Config.formatPrice(formule.originalPrice)}</div>` : ''}
-                        <button onclick="event.stopPropagation(); Products.addFormuleDirectly('${formule.id}')" style="background: white; color: ${index % 2 === 0 ? '#dc2626' : '#1a1a2e'}; padding: 8px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 10px rgba(0,0,0,0.12); margin-top: 4px;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <button onclick="event.stopPropagation(); Products.addFormuleDirectly('${formule.id}')" style="background: white; color: ${index % 2 === 0 ? '#2ec4b6' : '#ec4899'}; padding: 8px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 10px rgba(0,0,0,0.12); margin-top: 4px;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                             AJOUTER <i class="fas fa-plus" style="margin-left: 5px; font-size: 11px;"></i>
                         </button>
                     </div>
