@@ -461,7 +461,7 @@ const Products = {
                             <span class="current">${Config.formatPrice(formule.price)}</span>
                             ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
                         </div>
-                        <button type="button" class="formule-cta-btn" onclick="event.stopPropagation(); Products.openFormuleModal('${escapeHtml(formule.id)}')">
+                        <button type="button" class="formule-cta-btn" onclick="event.stopPropagation(); Products.addFormuleDirectly('${escapeHtml(formule.id)}')">
                             <i class="fas fa-check-circle"></i>
                             Choisir cette formule
                         </button>
@@ -529,7 +529,7 @@ const Products = {
                             ${Config.formatPrice(formule.price)}
                         </div>
                         ${formule.originalPrice ? `<div style="font-size: 13px; color: rgba(255, 255, 255, 0.7); text-decoration: line-through; margin-top: -6px; margin-bottom: 10px;">${Config.formatPrice(formule.originalPrice)}</div>` : ''}
-                        <button onclick="event.stopPropagation(); Products.openFormuleModal('${formule.id}')" style="background: white; color: ${index % 2 === 0 ? '#2ec4b6' : '#ec4899'}; padding: 8px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 10px rgba(0,0,0,0.12); margin-top: 4px;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <button onclick="event.stopPropagation(); Products.addFormuleDirectly('${formule.id}')" style="background: white; color: ${index % 2 === 0 ? '#2ec4b6' : '#ec4899'}; padding: 8px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 3px 10px rgba(0,0,0,0.12); margin-top: 4px;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                             AJOUTER <i class="fas fa-plus" style="margin-left: 5px; font-size: 11px;"></i>
                         </button>
                     </div>
@@ -1629,6 +1629,25 @@ const Products = {
         document.querySelectorAll('.accompagnement-item').forEach(item => {
             item.classList.toggle('selected', item.dataset.id === this.selectedAccompagnement);
         });
+    },
+
+    /**
+     * Add formule directly to cart (without modal)
+     */
+    addFormuleDirectly(formuleId) {
+        const formule = Config.getFormule(formuleId);
+        if (!formule) return;
+
+        // Add formule to cart with basic info
+        Cart.addItem({
+            id: formule.id,
+            name: formule.name,
+            image: formule.image,
+            price: formule.price,
+            categoryId: 'formules',
+            isFormule: true,
+            includes: formule.includes
+        }, 1, [], {});
     },
 
     /**
