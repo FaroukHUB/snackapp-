@@ -899,6 +899,7 @@ const Products = {
 
         // Add to cart button
         document.getElementById('addToCartBtn')?.addEventListener('click', () => {
+            console.log("🔥🔥🔥 TRACE: CLICK addToCartBtn", {file: "products.js", function: "initModal.addToCartBtn.click"});
             this.addCurrentToCart();
         });
 
@@ -1689,6 +1690,7 @@ const Products = {
      * Open formule modal with interactive component selection
      */
     openFormuleModal(formuleId) {
+        console.log("🔥🔥🔥 TRACE: openFormuleModal APPELÉ", {file: "products.js", formuleId});
         const formule = Config.getFormule(formuleId);
         if (!formule) return;
 
@@ -1872,9 +1874,11 @@ const Products = {
         // Attach change event listeners to all selectors
         includesList.querySelectorAll('.formule-selector').forEach(selector => {
             selector.addEventListener('change', (e) => {
+                console.log("🔥🔥🔥 TRACE: SELECTOR CHANGE", {file: "products.js", function: "renderFormuleSelectorsInteractive.onChange"});
                 const includeIndex = parseInt(e.target.dataset.includeIndex);
                 const selectedProductId = e.target.value;
                 const choiceGroup = e.target.dataset.choiceGroup;
+                console.log("🔥 SELECTOR DATA:", {includeIndex, selectedProductId, choiceGroup});
 
                 // If this selector has a choiceGroup and a value is selected,
                 // clear all other selections in the same group (replacement logic)
@@ -2075,6 +2079,7 @@ const Products = {
      * Validates by choiceGroup: each group needs at least 1 selection
      */
     validateFormuleSelections() {
+        console.log("🔥🔥🔥 TRACE: validateFormuleSelections APPELÉ", {file: "products.js"});
         if (!this.currentProduct?.isFormule) return true;
 
         const formule = this.currentProduct;
@@ -2134,6 +2139,7 @@ const Products = {
      * Only includes ONE product per choiceGroup (no duplicates)
      */
     resolveFormuleSelections() {
+        console.log("🔥🔥🔥 TRACE: resolveFormuleSelections APPELÉ", {file: "products.js"});
         const resolved = [];
         const formule = this.currentProduct;
 
@@ -2245,13 +2251,16 @@ const Products = {
      * Add current modal product to cart
      */
     addCurrentToCart() {
+        console.log("🔥🔥🔥 TRACE: addCurrentToCart APPELÉ", {file: "products.js", isFormule: this.currentProduct?.isFormule});
         if (!this.currentProduct) return;
 
         // Validate formule selections if it's a formule
         if (this.currentProduct.isFormule && !this.validateFormuleSelections()) {
+            console.log("🔥 VALIDATION ÉCHOUÉE - bouton bloqué");
             alert('Veuillez sélectionner tous les composants de la formule');
             return;
         }
+        console.log("🔥 VALIDATION OK - ajout au panier");
 
         // Create product with correct price based on menu type
         const productToAdd = { ...this.currentProduct };

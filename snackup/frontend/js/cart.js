@@ -67,6 +67,7 @@ const Cart = {
      * @param {Object} options - Additional options (size, choices for formule)
      */
     addItem(item, quantity = 1, supplements = [], options = {}) {
+        console.log("🔥🔥🔥 TRACE: Cart.addItem APPELÉ", {file: "cart.js", item: item?.name, isFormule: !!item?.includes, options});
         // Generate unique key for this item configuration
         const itemKey = this.generateItemKey(item, supplements, options);
 
