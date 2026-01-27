@@ -30,7 +30,6 @@ const Cart = {
     init() {
         this.load();
         this.updateUI();
-        console.log('Cart initialized with', this.items.length, 'items');
     },
 
     /**
@@ -41,10 +40,27 @@ const Cart = {
             const saved = localStorage.getItem(this.storageKey);
             if (saved) {
                 this.items = JSON.parse(saved);
+                // Sanitize: nettoyer les noms contenant "(, )" legacy
+                this.sanitizeItemNames();
             }
         } catch (e) {
-            console.error('Failed to load cart:', e);
             this.items = [];
+        }
+    },
+
+    /**
+     * Sanitize item names - remove legacy "(, )" pattern
+     */
+    sanitizeItemNames() {
+        let modified = false;
+        this.items.forEach(item => {
+            if (item.name && /\s*\(\s*,\s*\)\s*$/.test(item.name)) {
+                item.name = item.name.replace(/\s*\(\s*,\s*\)\s*$/, '');
+                modified = true;
+            }
+        });
+        if (modified) {
+            this.save();
         }
     },
 
@@ -67,11 +83,6 @@ const Cart = {
      * @param {Object} options - Additional options (size, choices for formule)
      */
     addItem(item, quantity = 1, supplements = [], options = {}) {
-        console.log("🔥🔥🔥 TRACE: Cart.addItem APPELÉ", {file: "cart.js", item: item?.name, isFormule: !!item?.includes, options});
-        // 🔍 DEBUG: Vérifier si le nom contient déjà "(, )"
-        if (item?.name && item.name.includes('(')) {
-            console.warn("⚠️ ALERTE: Le nom contient des parenthèses:", item.name);
-        }
         // Generate unique key for this item configuration
         const itemKey = this.generateItemKey(item, supplements, options);
 
@@ -294,8 +305,6 @@ const Cart = {
         }
 
         container.innerHTML = this.items.map((item, index) => {
-            // 🔍 DEBUG: Afficher le nom stocké
-            console.log(`📦 Panier item ${index}: "${item.name}"`, item.name.includes('(') ? '⚠️ CONTIENT PARENTHÈSES' : '✅ OK');
             const menuType = item.options?.menuType;
             const removedIngredients = item.options?.removedIngredients || [];
             const selectedDrink = item.options?.selectedDrink;
