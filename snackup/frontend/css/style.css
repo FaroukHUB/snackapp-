@@ -501,12 +501,20 @@ ul {
    ============================================ */
 .formules-section {
     margin-bottom: 48px;
+    scroll-margin-top: calc(var(--header-height) + 24px);
 }
 
 .formules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .formules-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
 }
 
 @media (max-width: 400px) {
@@ -515,40 +523,48 @@ ul {
     }
 }
 
+/* Formule Card - Style Promo/Combo moderne */
 .formule-card {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border-radius: var(--border-radius-lg);
+    background: #ffffff;
+    border-radius: 16px;
     overflow: hidden;
-    color: var(--white);
     position: relative;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
 }
 
 .formule-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
 }
 
 .formule-card-content {
-    padding: 24px;
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    height: 100%;
 }
 
+/* Image en haut (comme card promo) */
 .formule-image-wrapper {
-    width: 100px;
-    height: 100px;
-    border-radius: var(--border-radius);
-    flex-shrink: 0;
+    width: 100%;
+    height: 200px;
     overflow: hidden;
-    background: rgba(255,255,255,0.1);
+    background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+    position: relative;
 }
 
 .formule-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.formule-card:hover .formule-image {
+    transform: scale(1.05);
 }
 
 .formule-image-placeholder {
@@ -557,94 +573,152 @@ ul {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.6);
-    font-size: 32px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+    color: white;
+    font-size: 48px;
 }
 
-.formule-info {
-    flex: 1;
-    min-width: 0;
-    overflow: visible;
-}
-
-.formule-name {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.formule-description {
-    font-size: 13px;
-    opacity: 0.9;
-    margin-bottom: 12px;
-    line-height: 1.4;
-}
-
-.formule-price {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-}
-
-.formule-price .current {
-    font-size: 24px;
-    font-weight: 800;
-}
-
-.formule-price .original {
-    font-size: 14px;
-    text-decoration: line-through;
-    opacity: 0.7;
-}
-
-.formule-footer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-top: 12px;
-    position: relative;
-    z-index: 5;
-}
-
-.formule-add-btn {
-    background: rgba(255,255,255,0.95);
-    color: var(--primary);
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    transition: var(--transition);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 10;
-    pointer-events: auto;
-}
-
-.formule-add-btn:hover {
-    background: white;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
+/* Badge "Boisson offerte" en haut à droite */
 .formule-savings {
     position: absolute;
     top: 12px;
     right: 12px;
     background: var(--warning);
     color: var(--gray-900);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 50px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+}
+
+/* Info section */
+.formule-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.formule-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.formule-description {
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.5;
+    margin: 0;
+    flex: 1;
+}
+
+/* Texte spécial type "Uniquement le midi" */
+.formule-availability {
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Prix en gros bouton rouge */
+.formule-price-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    font-size: 28px;
+    font-weight: 800;
+    padding: 12px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    margin: 8px 0;
+}
+
+.formule-price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.formule-price .current {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--danger);
+}
+
+.formule-price .original {
+    font-size: 16px;
+    text-decoration: line-through;
+    color: var(--gray-400);
+}
+
+/* Bouton CTA "Choisir cette formule" */
+.formule-cta-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.formule-cta-btn:hover {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.formule-cta-btn i {
+    font-size: 18px;
+}
+
+/* Fallback pour l'ancien bouton (si utilisé) */
+.formule-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.formule-add-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.formule-add-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 /* ============================================
@@ -1536,6 +1610,89 @@ ul {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+/* Formule Includes Section */
+.modal-formule-includes {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-radius: 12px;
+    border: 2px solid #86efac;
+}
+
+.modal-formule-includes h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #15803d;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-formule-includes h4 i {
+    color: #22c55e;
+}
+
+.formule-includes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formule-include-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.formule-include-item i {
+    color: #22c55e;
+    font-size: 14px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.formule-include-content {
+    flex: 1;
+}
+
+.formule-include-title {
+    font-weight: 600;
+    color: var(--gray-900);
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.formule-include-type {
+    font-size: 12px;
+    color: var(--gray-500);
+    text-transform: capitalize;
+}
+
+.formule-include-rules {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.formule-include-rule {
+    font-size: 12px;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.formule-include-rule i {
+    color: var(--primary);
+    font-size: 11px;
 }
 
 /* Drinks Selection (Menu) */

@@ -436,28 +436,36 @@ const Products = {
                 ? `<div class="formule-image-wrapper">
                        <img src="../../${formule.image}" alt="${formule.name}" class="formule-image"
                             loading="lazy"
-                            onerror="this.parentElement.innerHTML='<div class=\\'formule-image-placeholder\\'><i class=\\'fas fa-box-open\\'></i></div>'">
+                            onerror="this.parentElement.innerHTML='<div class=\\'formule-image-placeholder\\'><i class=\\'fas fa-fire\\'></i></div>'">
+                       ${formule.badge ? `<span class="formule-savings">${formule.badge}</span>` : ''}
                    </div>`
                 : `<div class="formule-image-wrapper">
-                       <div class="formule-image-placeholder"><i class="fas fa-box-open"></i></div>
+                       <div class="formule-image-placeholder"><i class="fas fa-fire"></i></div>
+                       ${formule.badge ? `<span class="formule-savings">${formule.badge}</span>` : ''}
                    </div>`;
+
+            // Texte de disponibilité (si existe)
+            const availabilityHtml = formule.availability
+                ? `<p class="formule-availability">${formule.availability}</p>`
+                : '';
 
             return `
                 <div class="formule-card" onclick="Products.openFormuleModal('${formule.id}')">
-                    ${formule.badge ? `<span class="formule-savings">${formule.badge}</span>` : ''}
+                    ${imageHtml}
                     <div class="formule-card-content">
-                        ${imageHtml}
                         <div class="formule-info">
                             <h3 class="formule-name">${formule.name}</h3>
-                            <p class="formule-description">${formule.description}</p>
-                            <div class="formule-footer">
-                                <div class="formule-price">
-                                    <span class="current">${Config.formatPrice(formule.price)}</span>
-                                    ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
-                                </div>
-                                <button type="button" class="formule-add-btn" data-formule-id="${formule.id}"><i class="fas fa-plus"></i></button>
+                            <p class="formule-description">${formule.description || ''}</p>
+                            ${availabilityHtml}
+                            <div class="formule-price">
+                                <span class="current">${Config.formatPrice(formule.price)}</span>
+                                ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
                             </div>
                         </div>
+                        <button type="button" class="formule-cta-btn" onclick="event.stopPropagation(); Products.openFormuleModal('${formule.id}')">
+                            <i class="fas fa-check-circle"></i>
+                            Choisir cette formule
+                        </button>
                     </div>
                 </div>
             `;
@@ -1629,12 +1637,13 @@ const Products = {
         if (formule.image) {
             modalImage.src = '../../' + formule.image;
             modalImage.onerror = () => { modalImage.style.display = 'none'; };
+            modalImage.style.display = 'block';
         } else {
             modalImage.style.display = 'none';
         }
 
         document.getElementById('modalTitle').textContent = formule.name;
-        document.getElementById('modalDescription').textContent = formule.description;
+        document.getElementById('modalDescription').textContent = formule.description || '';
 
         // Hide menu toggle for formules (fixed price)
         document.getElementById('menuToggleSection').style.display = 'none';
@@ -1648,12 +1657,88 @@ const Products = {
         // Hide drinks for formules
         document.getElementById('modalDrinks').classList.add('hidden');
 
+        // Hide all variant/options sections
+        const sectionsToHide = ['modalVariants', 'modalCapsules', 'modalSauce', 'modalKidsOptions',
+                                'modalViennoiserie', 'modalPatisserie', 'modalBeverage', 'modalAccompagnement'];
+        sectionsToHide.forEach(id => {
+            const section = document.getElementById(id);
+            if (section) section.classList.add('hidden');
+        });
+
+        // Show and populate formule includes
+        this.renderFormuleIncludes(formule);
+
         // Set price
         document.getElementById('addToCartPrice').textContent = Config.formatPrice(formule.price);
 
         this.updateModalUI();
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+    },
+
+    /**
+     * Render formule includes in modal
+     */
+    renderFormuleIncludes(formule) {
+        const includesSection = document.getElementById('modalFormuleIncludes');
+        const includesList = document.getElementById('formuleIncludesList');
+
+        if (!includesSection || !includesList) return;
+
+        // Check if formule has includes
+        if (!formule.includes || formule.includes.length === 0) {
+            includesSection.classList.add('hidden');
+            return;
+        }
+
+        // Show the section
+        includesSection.classList.remove('hidden');
+
+        // Render includes
+        includesList.innerHTML = formule.includes.map(include => {
+            let rulesHtml = '';
+
+            // Display rules if any
+            if (include.rules) {
+                const rulesList = [];
+
+                if (include.rules.allowedCategories && include.rules.allowedCategories.length > 0) {
+                    rulesList.push(`<div class="formule-include-rule">
+                        <i class="fas fa-tag"></i>
+                        Catégories: ${include.rules.allowedCategories.join(', ')}
+                    </div>`);
+                }
+
+                if (include.rules.maxPrice) {
+                    rulesList.push(`<div class="formule-include-rule">
+                        <i class="fas fa-coins"></i>
+                        Maximum: ${Config.formatPrice(include.rules.maxPrice)}
+                    </div>`);
+                }
+
+                if (include.rules.specificProducts && include.rules.specificProducts.length > 0) {
+                    rulesList.push(`<div class="formule-include-rule">
+                        <i class="fas fa-list"></i>
+                        Produits spécifiques disponibles
+                    </div>`);
+                }
+
+                if (rulesList.length > 0) {
+                    rulesHtml = `<div class="formule-include-rules">${rulesList.join('')}</div>`;
+                }
+            }
+
+            return `
+                <div class="formule-include-item">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="formule-include-content">
+                        <div class="formule-include-title">${include.quantity || 1}x ${include.name || include.type}</div>
+                        <div class="formule-include-type">${include.type}</div>
+                        ${rulesHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
     },
 
     /**
