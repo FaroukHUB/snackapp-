@@ -1710,11 +1710,13 @@ const Products = {
 
         // Initialize formule selections
         this.formuleSelections = {};
+        this.isFormuleValid = false; // INITIALISÉ À FALSE - aucune sélection au départ
         if (formule.includes && formule.includes.length > 0) {
             formule.includes.forEach((include, index) => {
                 this.formuleSelections[index] = null;
             });
         }
+        console.log("🔥 INIT: isFormuleValid =", this.isFormuleValid);
 
         const modal = document.getElementById('productModal');
 
@@ -2119,19 +2121,23 @@ const Products = {
         console.log('[validateFormuleSelections] Sélections par groupe:', selectedByGroup);
         console.log('[validateFormuleSelections] Formule valide:', allGroupsValid);
 
-        // Enable/disable add to cart button
+        // STOCKER LE RÉSULTAT DANS UNE VARIABLE CENTRALE
+        this.isFormuleValid = allGroupsValid;
+
+        // Enable/disable add to cart button - SYNCHRONISÉ AVEC this.isFormuleValid
         const addButton = document.getElementById('addToCartBtn');
         if (addButton) {
-            if (allGroupsValid) {
-                addButton.disabled = false;
+            addButton.disabled = !this.isFormuleValid;
+            if (this.isFormuleValid) {
                 addButton.classList.remove('disabled');
+                console.log('🔥 BOUTON ACTIVÉ (isFormuleValid=true)');
             } else {
-                addButton.disabled = true;
                 addButton.classList.add('disabled');
+                console.log('🔥 BOUTON DÉSACTIVÉ (isFormuleValid=false)');
             }
         }
 
-        return allGroupsValid;
+        return this.isFormuleValid;
     },
 
     /**
@@ -2251,16 +2257,15 @@ const Products = {
      * Add current modal product to cart
      */
     addCurrentToCart() {
-        console.log("🔥🔥🔥 TRACE: addCurrentToCart APPELÉ", {file: "products.js", isFormule: this.currentProduct?.isFormule});
+        console.log("🔥🔥🔥 TRACE: addCurrentToCart APPELÉ", {file: "products.js", isFormule: this.currentProduct?.isFormule, isFormuleValid: this.isFormuleValid});
         if (!this.currentProduct) return;
 
-        // Validate formule selections if it's a formule
-        if (this.currentProduct.isFormule && !this.validateFormuleSelections()) {
-            console.log("🔥 VALIDATION ÉCHOUÉE - bouton bloqué");
-            alert('Veuillez sélectionner tous les composants de la formule');
+        // VÉRIFICATION CENTRALE: Si c'est une formule, utiliser this.isFormuleValid (pas de re-validation)
+        if (this.currentProduct.isFormule && this.isFormuleValid !== true) {
+            console.log("🔥 BLOQUÉ: isFormuleValid =", this.isFormuleValid, "→ return immédiat");
             return;
         }
-        console.log("🔥 VALIDATION OK - ajout au panier");
+        console.log("🔥 VALIDATION OK - ajout au panier (isFormuleValid=true)");
 
         // Create product with correct price based on menu type
         const productToAdd = { ...this.currentProduct };
