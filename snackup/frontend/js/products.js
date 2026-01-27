@@ -1857,7 +1857,7 @@ const Products = {
                         <label for="${selectId}" class="formule-include-title">
                             ${includeLabel}
                         </label>
-                        <select id="${selectId}" class="formule-selector" data-include-index="${index}">
+                        <select id="${selectId}" class="formule-selector" data-include-index="${index}" data-include-type="${include.type}">
                             <option value="">-- Choisissez --</option>
                             ${optionsHtml}
                         </select>
@@ -1872,8 +1872,67 @@ const Products = {
                 const includeIndex = parseInt(e.target.dataset.includeIndex);
                 const selectedProductId = e.target.value;
                 this.formuleSelections[includeIndex] = selectedProductId || null;
+                this.updateFormuleSelectorStates(formule);
                 this.validateFormuleSelections();
             });
+        });
+
+        // Initialize selector states
+        this.updateFormuleSelectorStates(formule);
+    },
+
+    /**
+     * Update formule selector states based on selections and limits
+     * Disables selectors of the same type once the quantity limit is reached
+     */
+    updateFormuleSelectorStates(formule) {
+        if (!formule.includes || formule.includes.length === 0) return;
+
+        // Calculate selection counts and limits for each type
+        const typeLimits = {};
+        const typeSelectionCounts = {};
+
+        // Calculate limits (sum of quantities for each type)
+        formule.includes.forEach((include, index) => {
+            const type = include.type;
+            const quantity = include.quantity || 1;
+
+            if (!typeLimits[type]) {
+                typeLimits[type] = 0;
+                typeSelectionCounts[type] = 0;
+            }
+
+            typeLimits[type] += quantity;
+
+            // Count current selections
+            if (this.formuleSelections[index]) {
+                typeSelectionCounts[type]++;
+            }
+        });
+
+        console.log('[updateFormuleSelectorStates] Limits:', typeLimits);
+        console.log('[updateFormuleSelectorStates] Selections:', typeSelectionCounts);
+
+        // Update selector states for each include
+        formule.includes.forEach((include, index) => {
+            const type = include.type;
+            const selector = document.querySelector(`[data-include-index="${index}"]`);
+
+            if (!selector) return;
+
+            const hasSelection = !!this.formuleSelections[index];
+            const limitReached = typeSelectionCounts[type] >= typeLimits[type];
+
+            // Disable if: no selection AND limit reached for this type
+            if (!hasSelection && limitReached) {
+                selector.disabled = true;
+                selector.style.opacity = '0.5';
+                selector.style.cursor = 'not-allowed';
+            } else {
+                selector.disabled = false;
+                selector.style.opacity = '1';
+                selector.style.cursor = 'pointer';
+            }
         });
     },
 
