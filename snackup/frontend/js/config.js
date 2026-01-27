@@ -400,9 +400,23 @@ const Config = {
 
     /**
      * Get formule by ID
+     * Supports both numeric and string IDs (flexible like getProduct)
      */
     getFormule(formuleId) {
-        return this.formules.find(f => f.id === formuleId);
+        // Handle both number and string IDs
+        const isNumericLookup = typeof formuleId === 'number' ||
+                                (typeof formuleId === 'string' && /^\d+$/.test(formuleId));
+
+        // Convert to number if it's a numeric string
+        const numericId = isNumericLookup ? Number(formuleId) : null;
+
+        if (isNumericLookup) {
+            // Lookup by numeric ID (strict)
+            return this.formules.find(f => f.id === numericId);
+        } else {
+            // Lookup by string ID (for formule-midi, etc.)
+            return this.formules.find(f => f.id === formuleId);
+        }
     },
 
     /**
