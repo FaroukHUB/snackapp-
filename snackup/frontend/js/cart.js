@@ -40,27 +40,9 @@ const Cart = {
             const saved = localStorage.getItem(this.storageKey);
             if (saved) {
                 this.items = JSON.parse(saved);
-                // Sanitize: nettoyer les noms contenant "(, )" legacy
-                this.sanitizeItemNames();
             }
         } catch (e) {
             this.items = [];
-        }
-    },
-
-    /**
-     * Sanitize item names - remove legacy "(, )" pattern
-     */
-    sanitizeItemNames() {
-        let modified = false;
-        this.items.forEach(item => {
-            if (item.name && /\s*\(\s*,\s*\)\s*$/.test(item.name)) {
-                item.name = item.name.replace(/\s*\(\s*,\s*\)\s*$/, '');
-                modified = true;
-            }
-        });
-        if (modified) {
-            this.save();
         }
     },
 
