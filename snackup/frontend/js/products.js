@@ -1902,17 +1902,17 @@ const Products = {
             return `type-${include.type}`; // Fallback
         };
 
-        // Calculate limits (sum of quantities for each unique category/product)
+        // Calculate limits for each unique category/product
+        // If multiple includes share the same categoryId, they share ONE global limit (not summed)
         formule.includes.forEach((include, index) => {
             const key = getIncludeKey(include);
             const quantity = include.quantity || 1;
 
             if (!categoryLimits[key]) {
-                categoryLimits[key] = 0;
+                // Use the first quantity found for this category, don't sum multiple includes
+                categoryLimits[key] = quantity;
                 categorySelectionCounts[key] = 0;
             }
-
-            categoryLimits[key] += quantity;
 
             // Count current selections
             if (this.formuleSelections[index]) {
