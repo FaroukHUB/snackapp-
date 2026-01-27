@@ -1,6 +1,6 @@
 {
-  "name": "Fabrik Burger - Commandez en ligne",
-  "short_name": "Fabrik Burger",
+  "name": "SnackApp - Commandez en ligne",
+  "short_name": "SnackApp",
   "description": "Commandez vos burgers gourmets en Click & Collect chez Fabrik Burger Lille",
   "start_url": "/template-v2/index.html",
   "display": "standalone",
