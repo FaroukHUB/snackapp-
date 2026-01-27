@@ -68,6 +68,10 @@ const Cart = {
      */
     addItem(item, quantity = 1, supplements = [], options = {}) {
         console.log("🔥🔥🔥 TRACE: Cart.addItem APPELÉ", {file: "cart.js", item: item?.name, isFormule: !!item?.includes, options});
+        // 🔍 DEBUG: Vérifier si le nom contient déjà "(, )"
+        if (item?.name && item.name.includes('(')) {
+            console.warn("⚠️ ALERTE: Le nom contient des parenthèses:", item.name);
+        }
         // Generate unique key for this item configuration
         const itemKey = this.generateItemKey(item, supplements, options);
 
@@ -290,6 +294,8 @@ const Cart = {
         }
 
         container.innerHTML = this.items.map((item, index) => {
+            // 🔍 DEBUG: Afficher le nom stocké
+            console.log(`📦 Panier item ${index}: "${item.name}"`, item.name.includes('(') ? '⚠️ CONTIENT PARENTHÈSES' : '✅ OK');
             const menuType = item.options?.menuType;
             const removedIngredients = item.options?.removedIngredients || [];
             const selectedDrink = item.options?.selectedDrink;
