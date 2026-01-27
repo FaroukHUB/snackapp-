@@ -461,7 +461,7 @@ const Products = {
                             <span class="current">${Config.formatPrice(formule.price)}</span>
                             ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
                         </div>
-                        <button type="button" class="formule-cta-btn" onclick="event.stopPropagation(); Products.addFormuleDirectly('${escapeHtml(formule.id)}')">
+                        <button type="button" class="formule-cta-btn" data-add-formule="${escapeHtml(formule.id)}">
                             <i class="fas fa-check-circle"></i>
                             Choisir cette formule
                         </button>
@@ -925,6 +925,24 @@ const Products = {
         // Ajouter les listeners globaux
         document.addEventListener('keydown', this._escapeHandler, { passive: true });
         document.addEventListener('click', this._formuleClickHandler, { passive: true });
+
+        // ⚡ EVENT DELEGATION pour les boutons "Choisir cette formule"
+        this._formuleAddHandler = this._formuleAddHandler || ((e) => {
+            const btn = e.target.closest('[data-add-formule]');
+            if (!btn) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const formuleId = btn.dataset.addFormule;
+            console.log('CLICK FORMULE', formuleId);
+
+            this.addFormuleDirectly(formuleId);
+        });
+
+        // Remove avant d'add pour éviter les doublons
+        document.removeEventListener('click', this._formuleAddHandler);
+        document.addEventListener('click', this._formuleAddHandler);
     },
 
     /**
@@ -1636,7 +1654,12 @@ const Products = {
      */
     addFormuleDirectly(formuleId) {
         const formule = Config.getFormule(formuleId);
-        if (!formule) return;
+        if (!formule) {
+            console.error('Formule not found:', formuleId);
+            return;
+        }
+
+        console.log('Adding formule to cart:', formule.name);
 
         // Add formule to cart with basic info
         Cart.addItem({
@@ -1648,6 +1671,17 @@ const Products = {
             isFormule: true,
             includes: formule.includes
         }, 1, [], {});
+
+        console.log('Formule added to cart, opening mini cart...');
+
+        // Ouvrir le mini-cart automatiquement (desktop uniquement)
+        if (window.innerWidth > 768) {
+            const miniCart = document.getElementById('miniCart');
+            if (miniCart) {
+                miniCart.classList.add('active');
+                console.log('Mini cart opened');
+            }
+        }
     },
 
     /**
