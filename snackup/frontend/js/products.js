@@ -3,6 +3,8 @@
    Template V2 - SnackApp
    ============================================ */
 
+console.log("🔥 FRONT products.js ACTIF : /home/user/snackapp-/snackup/frontend/js/products.js");
+
 // 🔒 SÉCURITÉ: Fonction pour échapper le HTML et prévenir les attaques XSS
 function escapeHtml(unsafe) {
     if (unsafe === null || unsafe === undefined) return '';
