@@ -1066,12 +1066,14 @@ $csrfToken = getCsrfToken();
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-    const state = {
+    // Rendre state global pour debug en console
+    window.state = {
       menu: null,
       selectedCategoryId: null,
       catQuery: "",
       prodQuery: "",
     };
+    const state = window.state;
 
     function toast(type, title, message){
       const host = $("#toast");
@@ -1480,7 +1482,7 @@ $csrfToken = getCsrfToken();
 
     function renderPatisserieOptionsList() {
       const container = $("#patisserieOptionsList");
-      const patisserieProduct = state.menu?.menu?.categories?.flatMap(c => c.items || []).find(p => p.id === 'patisserie');
+      const patisserieProduct = state.menu?.categories?.flatMap(c => c.items || []).find(p => p.id === 'patisserie');
       const options = patisserieProduct?.pâtisserieOptions || [];
 
       container.innerHTML = "";
@@ -1603,7 +1605,7 @@ $csrfToken = getCsrfToken();
 
     function renderBeverageOptionsList() {
       const container = $("#beverageOptionsList");
-      const beverageProduct = state.menu?.menu?.categories?.flatMap(c => c.items || []).find(p => p.id === currentBeverageProductId);
+      const beverageProduct = state.menu?.categories?.flatMap(c => c.items || []).find(p => p.id === currentBeverageProductId);
       const options = beverageProduct?.beverageOptions || [];
 
       container.innerHTML = "";
@@ -2057,7 +2059,7 @@ $csrfToken = getCsrfToken();
     }
 
     function getCategories(){
-      return state.menu?.menu?.categories ?? [];
+      return state.menu?.categories ?? [];
     }
 
     function selectCategory(id){
