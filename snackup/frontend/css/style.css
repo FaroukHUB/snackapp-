@@ -542,7 +542,7 @@ ul {
     }
 }
 
-/* CARTE FORMULE : Design vertical, plus haute que large, fond légèrement vert */
+/* CARTE FORMULE : Design vertical, plus haute que large, fond noir/rouge */
 .formule-card {
     background: #ffffff;
     border-radius: 16px;
@@ -554,8 +554,8 @@ ul {
     display: flex;
     flex-direction: column;
     min-height: 440px;
-    /* Fond légèrement vert */
-    background: linear-gradient(180deg, #f0fff4 0%, #ffffff 100%);
+    /* Fond avec accent rouge */
+    background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
 }
 
 .formule-card:hover {
