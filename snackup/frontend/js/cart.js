@@ -40,6 +40,10 @@ const Cart = {
             const saved = localStorage.getItem(this.storageKey);
             if (saved) {
                 this.items = JSON.parse(saved);
+                // 🔍 TEMP DEBUG - PROUVER SOURCE "(, )"
+                this.items.forEach((item, i) => {
+                    console.log(`LOAD_ITEM[${i}] name=`, item.name);
+                });
             }
         } catch (e) {
             this.items = [];
