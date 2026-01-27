@@ -1778,47 +1778,15 @@ const Products = {
         // Show the section
         includesSection.classList.remove('hidden');
 
-        // Render includes
+        // Render includes (simple display without selectors)
         includesList.innerHTML = formule.includes.map(include => {
-            let rulesHtml = '';
-
-            // Display rules if any
-            if (include.rules) {
-                const rulesList = [];
-
-                if (include.rules.allowedCategories && include.rules.allowedCategories.length > 0) {
-                    rulesList.push(`<div class="formule-include-rule">
-                        <i class="fas fa-tag"></i>
-                        Catégories: ${include.rules.allowedCategories.join(', ')}
-                    </div>`);
-                }
-
-                if (include.rules.maxPrice) {
-                    rulesList.push(`<div class="formule-include-rule">
-                        <i class="fas fa-coins"></i>
-                        Maximum: ${Config.formatPrice(include.rules.maxPrice)}
-                    </div>`);
-                }
-
-                if (include.rules.specificProducts && include.rules.specificProducts.length > 0) {
-                    rulesList.push(`<div class="formule-include-rule">
-                        <i class="fas fa-list"></i>
-                        Produits spécifiques disponibles
-                    </div>`);
-                }
-
-                if (rulesList.length > 0) {
-                    rulesHtml = `<div class="formule-include-rules">${rulesList.join('')}</div>`;
-                }
-            }
+            const includeLabel = include.label || `${include.quantity || 1}x ${include.type}`;
 
             return `
                 <div class="formule-include-item">
                     <i class="fas fa-check-circle"></i>
                     <div class="formule-include-content">
-                        <div class="formule-include-title">${include.quantity || 1}x ${include.name || include.type}</div>
-                        <div class="formule-include-type">${include.type}</div>
-                        ${rulesHtml}
+                        <div class="formule-include-title">${includeLabel}</div>
                     </div>
                 </div>
             `;
@@ -1846,10 +1814,9 @@ const Products = {
         // Render interactive selectors for each include
         includesList.innerHTML = formule.includes.map((include, index) => {
             const selectId = `formule-select-${index}`;
-            const quantity = include.quantity || 1;
-            const includeName = include.name || include.type;
+            const includeLabel = include.label || `${include.quantity || 1}x ${include.type}`;
 
-            // Get available products based on rules
+            // Get available products based on include rules
             const availableProducts = this.getAvailableProductsForInclude(include);
 
             if (availableProducts.length === 0) {
@@ -1857,24 +1824,27 @@ const Products = {
                     <div class="formule-include-item">
                         <i class="fas fa-check-circle"></i>
                         <div class="formule-include-content">
-                            <div class="formule-include-title">${quantity}x ${includeName}</div>
+                            <div class="formule-include-title">${includeLabel}</div>
                             <div class="formule-include-note">Aucun produit disponible</div>
                         </div>
                     </div>
                 `;
             }
 
-            // Create selector
+            // Create selector with all available products from the category
             const optionsHtml = availableProducts.map(product => {
-                return `<option value="${product.id}">${product.name} ${product.priceNote || ''}</option>`;
+                return `<option value="${product.id}">${product.name}</option>`;
             }).join('');
+
+            // Determine icon based on categoryId or productId
+            const iconName = this.getIconForInclude(include);
 
             return `
                 <div class="formule-include-item">
-                    <i class="fas fa-${this.getIconForType(include.type)}"></i>
+                    <i class="fas fa-${iconName}"></i>
                     <div class="formule-include-content">
                         <label for="${selectId}" class="formule-include-title">
-                            ${quantity}x ${includeName}
+                            ${includeLabel}
                         </label>
                         <select id="${selectId}" class="formule-selector" data-include-index="${index}">
                             <option value="">-- Choisissez --</option>
@@ -1897,54 +1867,69 @@ const Products = {
     },
 
     /**
-     * Get available products for a formule include based on rules
+     * Get available products for a formule include based on type and categoryId/productId
      */
     getAvailableProductsForInclude(include) {
-        const rules = include.rules || {};
         let products = [];
 
-        // If specific products are defined, use them
-        if (rules.specificProducts && rules.specificProducts.length > 0) {
-            products = rules.specificProducts
-                .map(id => Config.getProduct(id))
-                .filter(p => p && p.status === 'available');
+        // If type is 'product', get specific product by ID
+        if (include.type === 'product' && include.productId) {
+            const product = Config.getProduct(include.productId);
+            if (product && product.status === 'available') {
+                products = [product];
+            }
         }
-        // Otherwise, filter by category
-        else if (rules.allowedCategories && rules.allowedCategories.length > 0) {
-            rules.allowedCategories.forEach(categorySlug => {
-                const category = Config.menu.categories.find(c => c.slug === categorySlug);
-                if (category && category.products) {
-                    const categoryProducts = category.products.filter(p => p.status === 'available');
-                    products.push(...categoryProducts);
-                }
-            });
-        }
-
-        // Filter by max price if specified
-        if (rules.maxPrice) {
-            products = products.filter(p => {
-                const price = p.priceSolo || p.price || 0;
-                return price <= rules.maxPrice;
-            });
-        }
-
-        // Add price note for products exceeding base price
-        if (rules.basePrice) {
-            products = products.map(p => {
-                const price = p.priceSolo || p.price || 0;
-                const extra = price - rules.basePrice;
-                return {
-                    ...p,
-                    priceNote: extra > 0 ? `(+${Config.formatPrice(extra)})` : ''
-                };
-            });
+        // If type is 'category', get all products from that category
+        else if (include.type === 'category' && include.categoryId) {
+            const categoryProducts = Config.getProductsByCategory(include.categoryId);
+            products = categoryProducts.filter(p => p && p.status === 'available');
         }
 
         return products;
     },
 
     /**
-     * Get icon for formule include type
+     * Get icon for formule include based on categoryId or productId
+     */
+    getIconForInclude(include) {
+        // Map category IDs to icons
+        const categoryIconMap = {
+            'pizzas': 'pizza-slice',
+            'burgers': 'hamburger',
+            'tacos': 'taco',
+            'paninis': 'bread-slice',
+            'salades': 'salad',
+            'pates': 'bowl-rice',
+            'gratins': 'bowl-rice',
+            'crepes': 'cookie',
+            'gaufres': 'waffle',
+            'desserts': 'ice-cream',
+            'boissons': 'glass-whiskey',
+            'sodas-eaux': 'bottle-water',
+            'boissons-chaudes': 'mug-hot',
+            'jus-cocktails': 'cocktail',
+            'accompagnements': 'utensils',
+            'sides': 'french-fries'
+        };
+
+        // If type is category, use categoryId to find icon
+        if (include.type === 'category' && include.categoryId) {
+            return categoryIconMap[include.categoryId] || 'utensils';
+        }
+
+        // If type is product, try to find the product and use its category
+        if (include.type === 'product' && include.productId) {
+            const product = Config.getProduct(include.productId);
+            if (product && product.categoryId) {
+                return categoryIconMap[product.categoryId] || 'utensils';
+            }
+        }
+
+        return 'check-circle';
+    },
+
+    /**
+     * Get icon for formule include type (legacy method, kept for compatibility)
      */
     getIconForType(type) {
         const iconMap = {
@@ -2001,7 +1986,7 @@ const Products = {
                 if (product) {
                     resolved.push({
                         type: include.type,
-                        name: include.name || include.type,
+                        label: include.label || include.type,
                         product: {
                             id: product.id,
                             name: product.name,
