@@ -1797,16 +1797,27 @@ const Products = {
      * Render formule includes with interactive selectors
      */
     renderFormuleSelectorsInteractive(formule) {
+        console.log('[renderFormuleSelectorsInteractive] Starting with formule:', formule);
+
         const includesSection = document.getElementById('modalFormuleIncludes');
         const includesList = document.getElementById('formuleIncludesList');
 
-        if (!includesSection || !includesList) return;
+        if (!includesSection || !includesList) {
+            console.error('[renderFormuleSelectorsInteractive] Missing DOM elements!', {
+                includesSection: !!includesSection,
+                includesList: !!includesList
+            });
+            return;
+        }
 
         // Check if formule has includes
         if (!formule.includes || formule.includes.length === 0) {
+            console.warn('[renderFormuleSelectorsInteractive] No includes found');
             includesSection.classList.add('hidden');
             return;
         }
+
+        console.log('[renderFormuleSelectorsInteractive] Found', formule.includes.length, 'includes');
 
         // Show the section
         includesSection.classList.remove('hidden');
@@ -1872,19 +1883,39 @@ const Products = {
     getAvailableProductsForInclude(include) {
         let products = [];
 
+        console.log('[getAvailableProductsForInclude]', include);
+
         // If type is 'product', get specific product by ID
         if (include.type === 'product' && include.productId) {
             const product = Config.getProduct(include.productId);
+            console.log('[getAvailableProductsForInclude] Found product:', product);
             if (product && product.status === 'available') {
                 products = [product];
             }
         }
         // If type is 'category', get all products from that category
         else if (include.type === 'category' && include.categoryId) {
-            const categoryProducts = Config.getProductsByCategory(include.categoryId);
+            // Try to get products by category ID (could be string or number)
+            let categoryProducts = Config.getProductsByCategory(include.categoryId);
+
+            // If nothing found and categoryId is a string, try to find category by matching name or slug
+            if (categoryProducts.length === 0 && typeof include.categoryId === 'string') {
+                const allCategories = Config.menu?.categories || [];
+                const category = allCategories.find(cat =>
+                    cat.id === include.categoryId ||
+                    cat.name?.toLowerCase() === include.categoryId.toLowerCase() ||
+                    cat.slug === include.categoryId
+                );
+                if (category) {
+                    categoryProducts = category.items || [];
+                }
+            }
+
+            console.log('[getAvailableProductsForInclude] Found products in category:', categoryProducts.length);
             products = categoryProducts.filter(p => p && p.status === 'available');
         }
 
+        console.log('[getAvailableProductsForInclude] Returning products:', products.length);
         return products;
     },
 

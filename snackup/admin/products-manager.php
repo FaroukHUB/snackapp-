@@ -2333,6 +2333,20 @@ $csrfToken = getCsrfToken();
       const catIdVal = data?.categoryId ?? "";
       const prodIdVal = data?.productId ?? "";
 
+      // Collecter tous les produits disponibles
+      const allProducts = [];
+      cats.forEach(cat => {
+        if (cat.items && Array.isArray(cat.items)) {
+          cat.items.forEach(item => {
+            allProducts.push({
+              id: item.id,
+              name: item.name,
+              categoryName: cat.name
+            });
+          });
+        }
+      });
+
       div.innerHTML = `
         <select name="include_type_${idx}" class="select" style="width:110px;" onchange="toggleIncludeType(this, ${idx})">
           <option value="category" ${typeVal === 'category' ? 'selected' : ''}>Catégorie</option>
@@ -2342,7 +2356,10 @@ $csrfToken = getCsrfToken();
           <option value="">-- Catégorie --</option>
           ${cats.map(c => `<option value="${escapeHtml(c.id)}" ${c.id === catIdVal ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
         </select>
-        <input name="include_prod_${idx}" class="input include-prod" type="text" placeholder="ID produit" value="${escapeHtml(prodIdVal)}" style="width:140px;${typeVal === 'category' ? 'display:none;' : ''}" />
+        <select name="include_prod_${idx}" class="select include-prod" style="width:180px;${typeVal === 'category' ? 'display:none;' : ''}">
+          <option value="">-- Produit --</option>
+          ${allProducts.map(p => `<option value="${escapeHtml(p.id)}" ${p.id === prodIdVal ? 'selected' : ''}>${escapeHtml(p.name)} (${escapeHtml(p.categoryName)})</option>`).join('')}
+        </select>
         <input name="include_label_${idx}" class="input" type="text" placeholder="Label affiché" value="${escapeHtml(labelVal)}" style="flex:1;min-width:100px;" />
         <input name="include_qty_${idx}" class="input" type="number" min="1" value="${qtyVal}" style="width:60px;" />
         <button type="button" class="btn btn-danger" style="padding:6px 10px;" onclick="this.closest('.formule-include-row').remove()">✕</button>
