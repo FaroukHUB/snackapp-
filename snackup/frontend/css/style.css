@@ -1609,15 +1609,15 @@ ul {
 .modal-formule-includes {
     margin-bottom: 20px;
     padding: 16px;
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    background: linear-gradient(135deg, #fef2f2 0%, #fce7e7 100%);
     border-radius: 12px;
-    border: 2px solid #86efac;
+    border: 2px solid #fca5a5;
 }
 
 .modal-formule-includes h4 {
     font-size: 16px;
     font-weight: 700;
-    color: #15803d;
+    color: #b91c1c;
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -1625,7 +1625,7 @@ ul {
 }
 
 .modal-formule-includes h4 i {
-    color: #22c55e;
+    color: #dc2626;
 }
 
 .formule-includes-list {
@@ -1645,7 +1645,7 @@ ul {
 }
 
 .formule-include-item i {
-    color: #22c55e;
+    color: #dc2626;
     font-size: 14px;
     margin-top: 2px;
     flex-shrink: 0;

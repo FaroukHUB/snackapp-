@@ -982,6 +982,13 @@ const Products = {
             this.selectedVariant = null;
             this.selectedCapsule = null;
 
+            // IMPORTANT: Masquer l'encart "Cette formule comprend" (produits non-formule)
+            const formuleIncludesSection = document.getElementById('modalFormuleIncludes');
+            if (formuleIncludesSection) {
+                formuleIncludesSection.classList.add('hidden');
+                formuleIncludesSection.style.display = 'none';
+            }
+
             // Update modal content
             const imgEl = document.getElementById('modalImage');
             if (product.image) {
