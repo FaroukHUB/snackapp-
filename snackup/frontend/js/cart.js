@@ -29,6 +29,7 @@ const Cart = {
      */
     init() {
         this.load();
+        this.checkLegacyData();
         this.updateUI();
     },
 
@@ -40,14 +41,33 @@ const Cart = {
             const saved = localStorage.getItem(this.storageKey);
             if (saved) {
                 this.items = JSON.parse(saved);
-                // 🔍 TEMP DEBUG - PROUVER SOURCE "(, )"
-                this.items.forEach((item, i) => {
-                    console.log(`LOAD_ITEM[${i}] name=`, item.name);
-                });
             }
         } catch (e) {
             this.items = [];
         }
+    },
+
+    /**
+     * Detect legacy data with "(, )" pattern and purge cart if found
+     */
+    checkLegacyData() {
+        const hasLegacy = this.items.some(item => item.name && /\(\s*,\s*\)/.test(item.name));
+        if (hasLegacy) {
+            this.items = [];
+            this.save();
+            this.showLegacyResetMessage();
+        }
+    },
+
+    /**
+     * Show message to user after legacy data purge
+     */
+    showLegacyResetMessage() {
+        const message = document.createElement('div');
+        message.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#fff;padding:16px 24px;border-radius:8px;z-index:9999;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+        message.textContent = 'Votre panier a été réinitialisé suite à une mise à jour des formules.';
+        document.body.appendChild(message);
+        setTimeout(() => message.remove(), 5000);
     },
 
     /**

@@ -2325,9 +2325,6 @@ const Products = {
             // NE PAS modifier le nom - les produits seront affichés séparément dans le panier
         }
 
-        // 🔍 TEMP DEBUG - PROUVER SOURCE "(, )"
-        console.log("ADD_ITEM name=", productToAdd.name);
-
         Cart.addItem(
             productToAdd,
             this.currentQuantity,
