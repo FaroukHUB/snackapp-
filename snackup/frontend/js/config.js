@@ -183,7 +183,7 @@ const Config = {
      * Get products from a specific category
      */
     getProductsByCategory(categoryId) {
-        const category = this.menu?.categories?.find(c => c.id === categoryId);
+        const category = this.menu?.categories?.find(c => c.id == categoryId);
         return category?.items || [];
     },
 
