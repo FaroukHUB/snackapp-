@@ -2335,6 +2335,7 @@ $csrfToken = getCsrfToken();
       const qtyVal = data?.quantity ?? 1;
       const catIdVal = data?.categoryId ?? "";
       const prodIdVal = data?.productId ?? "";
+      const choiceGroupVal = data?.choiceGroup ?? "";
 
       console.log('[addFormuleInclude] catIdVal:', catIdVal, '| prodIdVal:', prodIdVal);
 
@@ -2386,6 +2387,7 @@ $csrfToken = getCsrfToken();
           ${productOptions}
         </select>
         <input name="include_label_${idx}" class="input" type="text" placeholder="Label affiché" value="${escapeHtml(labelVal)}" style="flex:1;min-width:100px;" />
+        <input name="include_group_${idx}" class="input" type="text" placeholder="Groupe (ex: pizza)" value="${escapeHtml(choiceGroupVal)}" style="width:100px;" title="Les éléments du même groupe sont mutuellement exclusifs" />
         <input name="include_qty_${idx}" class="input" type="number" min="1" value="${qtyVal}" style="width:60px;" />
         <button type="button" class="btn btn-danger" style="padding:6px 10px;" onclick="this.closest('.formule-include-row').remove()">✕</button>
       `;
@@ -2435,10 +2437,14 @@ $csrfToken = getCsrfToken();
         const type = row.querySelector(`[name^="include_type_"]`).value;
         const label = row.querySelector(`[name^="include_label_"]`).value.trim();
         const qty = parseInt(row.querySelector(`[name^="include_qty_"]`).value) || 1;
+        const choiceGroup = row.querySelector(`[name^="include_group_"]`)?.value.trim() || "";
 
         if (!label) return;
 
         const inc = { type, label, quantity: qty };
+        if (choiceGroup) {
+          inc.choiceGroup = choiceGroup;
+        }
         if (type === 'category') {
           inc.categoryId = row.querySelector('.include-cat').value;
         } else {

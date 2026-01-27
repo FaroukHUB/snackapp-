@@ -1850,6 +1850,9 @@ const Products = {
             // Determine icon based on categoryId or productId
             const iconName = this.getIconForInclude(include);
 
+            // Add choiceGroup data attribute if defined
+            const choiceGroupAttr = include.choiceGroup ? `data-choice-group="${include.choiceGroup}"` : '';
+
             return `
                 <div class="formule-include-item">
                     <i class="fas fa-${iconName}"></i>
@@ -1857,7 +1860,7 @@ const Products = {
                         <label for="${selectId}" class="formule-include-title">
                             ${includeLabel}
                         </label>
-                        <select id="${selectId}" class="formule-selector" data-include-index="${index}" data-include-type="${include.type}">
+                        <select id="${selectId}" class="formule-selector" data-include-index="${index}" data-include-type="${include.type}" ${choiceGroupAttr}>
                             <option value="">-- Choisissez --</option>
                             ${optionsHtml}
                         </select>
@@ -1871,6 +1874,21 @@ const Products = {
             selector.addEventListener('change', (e) => {
                 const includeIndex = parseInt(e.target.dataset.includeIndex);
                 const selectedProductId = e.target.value;
+                const choiceGroup = e.target.dataset.choiceGroup;
+
+                // If this selector has a choiceGroup and a value is selected,
+                // clear all other selections in the same group (replacement logic)
+                if (choiceGroup && selectedProductId) {
+                    includesList.querySelectorAll(`.formule-selector[data-choice-group="${choiceGroup}"]`).forEach(otherSelector => {
+                        const otherIndex = parseInt(otherSelector.dataset.includeIndex);
+                        if (otherIndex !== includeIndex) {
+                            // Clear other selections in the same group
+                            this.formuleSelections[otherIndex] = null;
+                            otherSelector.value = '';
+                        }
+                    });
+                }
+
                 this.formuleSelections[includeIndex] = selectedProductId || null;
                 this.updateFormuleSelectorStates(formule);
                 this.validateFormuleSelections();
@@ -1883,57 +1901,63 @@ const Products = {
 
     /**
      * Update formule selector states based on selections and limits
-     * Disables selectors of the same category/product once the quantity limit is reached
+     * Uses choiceGroup for grouping if available, otherwise falls back to categoryId
      */
     updateFormuleSelectorStates(formule) {
         if (!formule.includes || formule.includes.length === 0) return;
 
-        // Calculate selection counts and limits for each unique category/product
-        const categoryLimits = {};
-        const categorySelectionCounts = {};
+        // Calculate selection counts and limits for each group
+        const groupLimits = {};
+        const groupSelectionCounts = {};
 
-        // Helper function to get unique key for an include
-        const getIncludeKey = (include) => {
+        // Helper function to get group key for an include
+        // Priority: choiceGroup > categoryId > productId > type
+        const getGroupKey = (include) => {
+            // If choiceGroup is defined, use it (primary grouping mechanism)
+            if (include.choiceGroup) {
+                return `group-${include.choiceGroup}`;
+            }
+            // Fallback to legacy behavior for backwards compatibility
             if (include.type === 'category' && include.categoryId) {
                 return `category-${include.categoryId}`;
             } else if (include.type === 'product' && include.productId) {
                 return `product-${include.productId}`;
             }
-            return `type-${include.type}`; // Fallback
+            return `type-${include.type}`;
         };
 
-        // Calculate limits for each unique category/product
-        // If multiple includes share the same categoryId, they share ONE global limit (not summed)
+        // Calculate limits for each group
+        // If multiple includes share the same choiceGroup, they share ONE global limit
         formule.includes.forEach((include, index) => {
-            const key = getIncludeKey(include);
+            const key = getGroupKey(include);
             const quantity = include.quantity || 1;
 
-            if (!categoryLimits[key]) {
-                // Use the first quantity found for this category, don't sum multiple includes
-                categoryLimits[key] = quantity;
-                categorySelectionCounts[key] = 0;
+            if (!groupLimits[key]) {
+                // Use the first quantity found for this group
+                groupLimits[key] = quantity;
+                groupSelectionCounts[key] = 0;
             }
 
             // Count current selections
             if (this.formuleSelections[index]) {
-                categorySelectionCounts[key]++;
+                groupSelectionCounts[key]++;
             }
         });
 
-        console.log('[updateFormuleSelectorStates] Limits par catégorie:', categoryLimits);
-        console.log('[updateFormuleSelectorStates] Sélections par catégorie:', categorySelectionCounts);
+        console.log('[updateFormuleSelectorStates] Limits par groupe:', groupLimits);
+        console.log('[updateFormuleSelectorStates] Sélections par groupe:', groupSelectionCounts);
 
         // Update selector states for each include
         formule.includes.forEach((include, index) => {
-            const key = getIncludeKey(include);
+            const key = getGroupKey(include);
             const selector = document.querySelector(`[data-include-index="${index}"]`);
 
             if (!selector) return;
 
             const hasSelection = !!this.formuleSelections[index];
-            const limitReached = categorySelectionCounts[key] >= categoryLimits[key];
+            const limitReached = groupSelectionCounts[key] >= groupLimits[key];
 
-            // Disable if: no selection AND limit reached for this category/product
+            // Disable if: no selection AND limit reached for this group
             if (!hasSelection && limitReached) {
                 selector.disabled = true;
                 selector.style.opacity = '0.5';
