@@ -312,7 +312,7 @@ const Cart = {
                     </div>
                     ${formuleSelections.length > 0 ? `
                         <div class="mini-cart-item-formule" style="font-size: 11px; color: var(--primary); margin-top: 4px;">
-                            ${formuleSelections.map(p => `<div>📦 ${escapeHtml(p.name)}</div>`).join('')}
+                            ${formuleSelections.map(p => `<div>📦 ${escapeHtml(p.product?.name || p.label)}</div>`).join('')}
                         </div>
                     ` : ''}
                     ${selectedSauce ? `
@@ -469,7 +469,7 @@ const Cart = {
             const formuleSelections = item.options?.formuleSelections || [];
             if (formuleSelections.length > 0) {
                 formuleSelections.forEach(p => {
-                    message += `\n   📦 ${p.name}`;
+                    message += `\n   📦 ${p.product?.name || p.label}`;
                 });
             }
             if (selectedSauce) {

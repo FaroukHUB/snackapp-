@@ -1817,7 +1817,7 @@
                             </div>
                             ${item.options?.formuleSelections?.length > 0 ? `
                                 <div class="cart-item-formule" style="color: var(--primary); font-size: 13px; margin-top: 4px;">
-                                    ${item.options.formuleSelections.map(p => `<div>📦 ${p.name}</div>`).join('')}
+                                    ${item.options.formuleSelections.map(p => `<div>📦 ${p.product?.name || p.label}</div>`).join('')}
                                 </div>
                             ` : ''}
                             ${item.supplements.length > 0 ? `
