@@ -937,7 +937,8 @@ const Products = {
             const formuleId = btn.dataset.addFormule;
             console.log('CLICK FORMULE', formuleId);
 
-            this.addFormuleDirectly(formuleId);
+            // Open modal instead of adding directly
+            this.openFormuleModal(formuleId);
         });
 
         // Remove avant d'add pour éviter les doublons
@@ -1685,13 +1686,13 @@ const Products = {
     },
 
     /**
-     * Open formule modal (simplified for now)
+     * Open formule modal with interactive component selection
      */
     openFormuleModal(formuleId) {
         const formule = Config.getFormule(formuleId);
         if (!formule) return;
 
-        // For now, treat formule like a product with fixed price
+        // Initialize formule as current product with selections storage
         this.currentProduct = {
             ...formule,
             price: formule.price,
@@ -1704,6 +1705,14 @@ const Products = {
         this.selectedSupplements = [];
         this.removedIngredients = [];
         this.menuType = 'solo';
+
+        // Initialize formule selections
+        this.formuleSelections = {};
+        if (formule.includes && formule.includes.length > 0) {
+            formule.includes.forEach((include, index) => {
+                this.formuleSelections[index] = null;
+            });
+        }
 
         const modal = document.getElementById('productModal');
 
@@ -1740,8 +1749,8 @@ const Products = {
             if (section) section.classList.add('hidden');
         });
 
-        // Show and populate formule includes
-        this.renderFormuleIncludes(formule);
+        // Show and populate formule includes with interactive selectors
+        this.renderFormuleSelectorsInteractive(formule);
 
         // Set price
         document.getElementById('addToCartPrice').textContent = Config.formatPrice(formule.price);
@@ -1817,6 +1826,196 @@ const Products = {
     },
 
     /**
+     * Render formule includes with interactive selectors
+     */
+    renderFormuleSelectorsInteractive(formule) {
+        const includesSection = document.getElementById('modalFormuleIncludes');
+        const includesList = document.getElementById('formuleIncludesList');
+
+        if (!includesSection || !includesList) return;
+
+        // Check if formule has includes
+        if (!formule.includes || formule.includes.length === 0) {
+            includesSection.classList.add('hidden');
+            return;
+        }
+
+        // Show the section
+        includesSection.classList.remove('hidden');
+
+        // Render interactive selectors for each include
+        includesList.innerHTML = formule.includes.map((include, index) => {
+            const selectId = `formule-select-${index}`;
+            const quantity = include.quantity || 1;
+            const includeName = include.name || include.type;
+
+            // Get available products based on rules
+            const availableProducts = this.getAvailableProductsForInclude(include);
+
+            if (availableProducts.length === 0) {
+                return `
+                    <div class="formule-include-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="formule-include-content">
+                            <div class="formule-include-title">${quantity}x ${includeName}</div>
+                            <div class="formule-include-note">Aucun produit disponible</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Create selector
+            const optionsHtml = availableProducts.map(product => {
+                return `<option value="${product.id}">${product.name} ${product.priceNote || ''}</option>`;
+            }).join('');
+
+            return `
+                <div class="formule-include-item">
+                    <i class="fas fa-${this.getIconForType(include.type)}"></i>
+                    <div class="formule-include-content">
+                        <label for="${selectId}" class="formule-include-title">
+                            ${quantity}x ${includeName}
+                        </label>
+                        <select id="${selectId}" class="formule-selector" data-include-index="${index}">
+                            <option value="">-- Choisissez --</option>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Attach change event listeners to all selectors
+        includesList.querySelectorAll('.formule-selector').forEach(selector => {
+            selector.addEventListener('change', (e) => {
+                const includeIndex = parseInt(e.target.dataset.includeIndex);
+                const selectedProductId = e.target.value;
+                this.formuleSelections[includeIndex] = selectedProductId || null;
+                this.validateFormuleSelections();
+            });
+        });
+    },
+
+    /**
+     * Get available products for a formule include based on rules
+     */
+    getAvailableProductsForInclude(include) {
+        const rules = include.rules || {};
+        let products = [];
+
+        // If specific products are defined, use them
+        if (rules.specificProducts && rules.specificProducts.length > 0) {
+            products = rules.specificProducts
+                .map(id => Config.getProduct(id))
+                .filter(p => p && p.status === 'available');
+        }
+        // Otherwise, filter by category
+        else if (rules.allowedCategories && rules.allowedCategories.length > 0) {
+            rules.allowedCategories.forEach(categorySlug => {
+                const category = Config.menu.categories.find(c => c.slug === categorySlug);
+                if (category && category.products) {
+                    const categoryProducts = category.products.filter(p => p.status === 'available');
+                    products.push(...categoryProducts);
+                }
+            });
+        }
+
+        // Filter by max price if specified
+        if (rules.maxPrice) {
+            products = products.filter(p => {
+                const price = p.priceSolo || p.price || 0;
+                return price <= rules.maxPrice;
+            });
+        }
+
+        // Add price note for products exceeding base price
+        if (rules.basePrice) {
+            products = products.map(p => {
+                const price = p.priceSolo || p.price || 0;
+                const extra = price - rules.basePrice;
+                return {
+                    ...p,
+                    priceNote: extra > 0 ? `(+${Config.formatPrice(extra)})` : ''
+                };
+            });
+        }
+
+        return products;
+    },
+
+    /**
+     * Get icon for formule include type
+     */
+    getIconForType(type) {
+        const iconMap = {
+            'pizza': 'pizza-slice',
+            'boisson': 'glass-whiskey',
+            'pate': 'bowl-rice',
+            'gratin': 'bowl-rice',
+            'dessert': 'ice-cream',
+            'accompagnement': 'utensils'
+        };
+        return iconMap[type?.toLowerCase()] || 'check-circle';
+    },
+
+    /**
+     * Validate that all required formule selections are made
+     */
+    validateFormuleSelections() {
+        if (!this.currentProduct?.isFormule) return true;
+
+        const formule = this.currentProduct;
+        if (!formule.includes || formule.includes.length === 0) return true;
+
+        // Check if all selections are made
+        const allSelected = Object.values(this.formuleSelections).every(selection => selection !== null);
+
+        // Enable/disable add to cart button
+        const addButton = document.getElementById('addToCartBtn');
+        if (addButton) {
+            if (allSelected) {
+                addButton.disabled = false;
+                addButton.classList.remove('disabled');
+            } else {
+                addButton.disabled = true;
+                addButton.classList.add('disabled');
+            }
+        }
+
+        return allSelected;
+    },
+
+    /**
+     * Resolve formule selections to actual product objects
+     */
+    resolveFormuleSelections() {
+        const resolved = [];
+        const formule = this.currentProduct;
+
+        if (!formule?.includes || !this.formuleSelections) return resolved;
+
+        formule.includes.forEach((include, index) => {
+            const selectedProductId = this.formuleSelections[index];
+            if (selectedProductId) {
+                const product = Config.getProduct(selectedProductId);
+                if (product) {
+                    resolved.push({
+                        type: include.type,
+                        name: include.name || include.type,
+                        product: {
+                            id: product.id,
+                            name: product.name,
+                            price: product.priceSolo || product.price
+                        }
+                    });
+                }
+            }
+        });
+
+        return resolved;
+    },
+
+    /**
      * Toggle supplement selection
      */
     toggleSupplement(supId) {
@@ -1887,6 +2086,12 @@ const Products = {
     addCurrentToCart() {
         if (!this.currentProduct) return;
 
+        // Validate formule selections if it's a formule
+        if (this.currentProduct.isFormule && !this.validateFormuleSelections()) {
+            alert('Veuillez sélectionner tous les composants de la formule');
+            return;
+        }
+
         // Create product with correct price based on menu type
         const productToAdd = { ...this.currentProduct };
 
@@ -1895,6 +2100,16 @@ const Products = {
             productToAdd.name = this.currentProduct.name + ' (Menu)';
         } else {
             productToAdd.price = this.currentProduct.priceSolo || this.currentProduct.price;
+        }
+
+        // For formules, resolve the selected products and add to name
+        let formuleProducts = null;
+        if (this.currentProduct.isFormule && this.formuleSelections) {
+            formuleProducts = this.resolveFormuleSelections();
+
+            // Add selected products to formule name
+            const selectionNames = formuleProducts.map(p => p.name).join(', ');
+            productToAdd.name = `${productToAdd.name} (${selectionNames})`;
         }
 
         Cart.addItem(
@@ -1913,7 +2128,8 @@ const Products = {
                 selectedKidsCrepe: this.selectedKidsCrepe ? { ...this.selectedKidsCrepe } : null,
                 selectedKidsSauce: this.selectedKidsSauce ? { ...this.selectedKidsSauce } : null,
                 selectedVariant: this.selectedVariant ? { ...this.selectedVariant } : null,
-                selectedCapsule: this.selectedCapsule
+                selectedCapsule: this.selectedCapsule,
+                formuleSelections: formuleProducts
             }
         );
 
