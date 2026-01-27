@@ -1883,6 +1883,9 @@ const Products = {
                         const otherIndex = parseInt(otherSelector.dataset.includeIndex);
                         if (otherIndex !== includeIndex) {
                             // Clear other selections in the same group
+                            if (this.formuleSelections[otherIndex]) {
+                                console.log(`[REMPLACEMENT] choiceGroup="${choiceGroup}" : index ${otherIndex} EFFACÉ (remplacé par index ${includeIndex})`);
+                            }
                             this.formuleSelections[otherIndex] = null;
                             otherSelector.value = '';
                         }
