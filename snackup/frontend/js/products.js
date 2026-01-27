@@ -1696,6 +1696,10 @@ const Products = {
         const formule = Config.getFormule(formuleId);
         if (!formule) return;
 
+        // 🔥 TRACE: Voir les includes de la formule BRUTS (tels que renvoyés par l'API)
+        console.log("🔥 FORMULE CHARGÉE:", formule.name);
+        console.log("🔥 INCLUDES BRUTS:", JSON.stringify(formule.includes, null, 2));
+
         // Initialize formule as current product with selections storage
         this.currentProduct = {
             ...formule,
@@ -2094,8 +2098,16 @@ const Products = {
         const selectedByGroup = {};
 
         formule.includes.forEach((include, index) => {
+            // 🔥 TRACE: Voir include AVANT fallback
+            console.log(`🔥 INCLUDE[${index}]:`, {
+                label: include.label,
+                choiceGroup: include.choiceGroup,
+                categoryId: include.categoryId,
+                type: include.type
+            });
             // Determine group key (choiceGroup if defined, otherwise unique per include)
             const groupKey = include.choiceGroup || `include-${index}`;
+            console.log(`🔥 GROUPKEY[${index}]:`, groupKey, include.choiceGroup ? "(choiceGroup)" : "(FALLBACK)");
             requiredGroups.add(groupKey);
 
             if (!selectedByGroup[groupKey]) {
