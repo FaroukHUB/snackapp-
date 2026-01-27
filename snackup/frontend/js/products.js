@@ -575,9 +575,20 @@ const Products = {
 
         console.log('✅ Non-empty categories:', nonEmptyCategories.length);
 
-        // Render categories
+        // Préparer le HTML des formules
+        const formulesHtml = this.renderFormulesSection();
+
+        // Trouver l'index de "Pizza originale" (recherche insensible à la casse)
+        const pizzaOriginaleIndex = nonEmptyCategories.findIndex(cat =>
+            cat.name && cat.name.toLowerCase().includes('originale')
+        );
+
+        console.log('🍕 Pizza originale index:', pizzaOriginaleIndex,
+            pizzaOriginaleIndex >= 0 ? `(${nonEmptyCategories[pizzaOriginaleIndex].name})` : '(non trouvée - fallback fin)');
+
+        // Render categories avec insertion formules après Pizza originale
         let html = '';
-        nonEmptyCategories.forEach(cat => {
+        nonEmptyCategories.forEach((cat, index) => {
             html += `
                 <section class="product-section" id="${cat.id}">
                     <h2>
@@ -589,11 +600,17 @@ const Products = {
                     </div>
                 </section>
             `;
+
+            // Insérer formules APRÈS Pizza originale
+            if (index === pizzaOriginaleIndex && formulesHtml) {
+                console.log('✅ FORMULES: Insérées après', cat.name);
+                html += formulesHtml;
+            }
         });
 
-        // Insérer la section formules APRÈS toutes les catégories
-        const formulesHtml = this.renderFormulesSection();
-        if (formulesHtml) {
+        // Fallback: si Pizza originale non trouvée, ajouter formules à la fin
+        if (pizzaOriginaleIndex < 0 && formulesHtml) {
+            console.log('⚠️ FORMULES: Fallback - ajoutées à la fin (Pizza originale non trouvée)');
             html += formulesHtml;
         }
 
