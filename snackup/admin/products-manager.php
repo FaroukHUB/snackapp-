@@ -1287,14 +1287,20 @@ $csrfToken = getCsrfToken();
       openModal("#modalSupplements");
     });
 
-    // Récupère les groupes depuis l'API (DB)
+    // Récupère les groupes depuis l'API (DB) - avec fallback
     function getSupplementGroups() {
-      return state.menu?.supplements?.groups ?? [];
+      const groups = state.menu?.supplements?.groups;
+      if (Array.isArray(groups) && groups.length > 0) return groups;
+      // Fallback: extraire les groupes des suppléments existants
+      const supplements = getSupplements();
+      const uniqueGroups = [...new Set(Object.values(supplements).map(s => s.category || s.group_name || 'autres'))];
+      return uniqueGroups.length > 0 ? uniqueGroups : ['autres'];
     }
 
     // Capitalise la première lettre
-    function capitalize(str) {
-      return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+    function capitalizeStr(str) {
+      if (!str || typeof str !== 'string') return 'Autres';
+      return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     // Remplit le select des catégories dynamiquement
@@ -1303,60 +1309,59 @@ $csrfToken = getCsrfToken();
       if (!select) return;
 
       const groups = getSupplementGroups();
-      select.innerHTML = groups.length > 0
-        ? groups.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(capitalize(g))}</option>`).join('')
-        : '<option value="autres">Autres</option>';
+      select.innerHTML = groups.map(g =>
+        `<option value="${escapeHtml(String(g))}">${escapeHtml(capitalizeStr(g))}</option>`
+      ).join('');
     }
 
     function renderSupplementsList(){
       const container = $("#supplementsList");
-      const supplements = getSupplements();
+      if (!container) return;
+
+      const supplements = getSupplements() || {};
       const groups = getSupplementGroups();
       container.innerHTML = "";
 
       // Peupler le select des catégories
       populateCategorySelect();
 
-      // Grouper les suppléments par leur catégorie (group_name en DB)
+      // Grouper les suppléments par leur catégorie
       const grouped = {};
       Object.values(supplements).forEach(sup => {
+        if (!sup) return;
         const cat = sup.category || sup.group_name || 'autres';
         if (!grouped[cat]) grouped[cat] = [];
         grouped[cat].push(sup);
       });
 
-      // Afficher par groupe (ordre depuis DB)
-      const groupOrder = groups.length > 0 ? groups : Object.keys(grouped);
       let hasAny = false;
 
-      groupOrder.forEach(group => {
+      // Afficher par groupe
+      groups.forEach(group => {
         if (grouped[group] && grouped[group].length > 0) {
           hasAny = true;
-
-          // Titre du groupe
           const groupTitle = document.createElement("div");
           groupTitle.style.cssText = "font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;letter-spacing:0.3px;";
-          groupTitle.textContent = capitalize(group);
+          groupTitle.textContent = capitalizeStr(group);
           container.appendChild(groupTitle);
 
           grouped[group].forEach(sup => {
-            container.appendChild(createSupplementItem(sup));
+            if (sup) container.appendChild(createSupplementItem(sup));
           });
         }
       });
 
       // Afficher les suppléments sans groupe connu
       Object.keys(grouped).forEach(group => {
-        if (!groupOrder.includes(group) && grouped[group].length > 0) {
+        if (!groups.includes(group) && grouped[group] && grouped[group].length > 0) {
           hasAny = true;
-
           const groupTitle = document.createElement("div");
           groupTitle.style.cssText = "font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;letter-spacing:0.3px;";
-          groupTitle.textContent = capitalize(group);
+          groupTitle.textContent = capitalizeStr(group);
           container.appendChild(groupTitle);
 
           grouped[group].forEach(sup => {
-            container.appendChild(createSupplementItem(sup));
+            if (sup) container.appendChild(createSupplementItem(sup));
           });
         }
       });
@@ -1413,20 +1418,24 @@ $csrfToken = getCsrfToken();
     function createSupplementItem(sup) {
       const div = document.createElement("div");
       div.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);";
+      const price = parseFloat(sup.price) || 0;
+      const priceStr = price.toFixed(2).replace('.', ',');
+      const status = sup.status || 'available';
+      const supId = String(sup.id || '');
       div.innerHTML = `
         <div style="flex:1;">
-          <strong style="font-size:13px;">${escapeHtml(sup.name)}</strong>
-          <span style="color:var(--muted);margin-left:8px;">${parseFloat(sup.price).toFixed(2).replace('.', ',')} ${CURRENCY}</span>
-          <span class="status" data-status="${sup.status ?? 'available'}" style="margin-left:8px;padding:4px 8px;">
-            <span class="dot"></span>${sup.status === 'available' ? 'Dispo' : 'Indispo'}
+          <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
+          <span style="color:var(--muted);margin-left:8px;">${priceStr} ${CURRENCY}</span>
+          <span class="status" data-status="${status}" style="margin-left:8px;padding:4px 8px;">
+            <span class="dot"></span>${status === 'available' ? 'Dispo' : 'Indispo'}
           </span>
         </div>
         <div style="display:flex;gap:6px;">
-          <button class="btn" type="button" data-toggle-sup="${escapeHtml(sup.id)}"
-            style="padding:6px 12px;font-size:12px;font-weight:600;${sup.status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
-            ${sup.status === 'available' ? '✓ Disponible' : '✕ Indisponible'}
+          <button class="btn" type="button" data-toggle-sup="${escapeHtml(supId)}"
+            style="padding:6px 12px;font-size:12px;font-weight:600;${status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
+            ${status === 'available' ? '✓ Disponible' : '✕ Indisponible'}
           </button>
-          <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(sup.id)}" style="padding:6px 10px;">🗑️</button>
+          <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(supId)}" style="padding:6px 10px;">🗑️</button>
         </div>
       `;
       return div;
