@@ -47,6 +47,9 @@ if ($useMySQL) {
         ];
     }
 
+    // Charger les plateformes de livraison
+    $deliveryPlatforms = RestaurantRepository::getDeliveryPlatforms(SNACK_RESTAURANT_ID);
+
     $restaurantSettings = [
         'contact' => [
             'phone' => $settings['phone'] ?? '',
@@ -63,7 +66,19 @@ if ($useMySQL) {
         'openingHours' => $formattedHours,
         'faq' => [
             'items' => array_map(fn($f) => ['question' => $f['question'], 'answer' => $f['answer']], $faqItems)
-        ]
+        ],
+        'delivery' => [
+            'enabled' => (bool) ($settings['delivery_enabled'] ?? true)
+        ],
+        'platforms' => array_map(function($p) {
+            return [
+                'id' => $p['slug'],
+                'name' => $p['name'],
+                'url' => $p['url'],
+                'icon' => $p['icon'] ?? $p['slug'],
+                'enabled' => (bool) $p['is_enabled']
+            ];
+        }, $deliveryPlatforms)
     ];
 
     // ⚡ PAGINATION: 10 commandes par page
@@ -2973,6 +2988,28 @@ if (isset($_GET['export'])) {
 
     <script src="notification-sound.js"></script>
     <script>
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            toast.style.cssText = `
+                position: fixed; bottom: 20px; right: 20px; z-index: 10000;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white; padding: 12px 20px; border-radius: 8px;
+                display: flex; align-items: center; gap: 10px;
+                animation: slideIn 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         // PIN Protection - demande le PIN à chaque accès
         const PROTECTED_SECTIONS = ['stats', 'archives'];
         let pendingSection = null;

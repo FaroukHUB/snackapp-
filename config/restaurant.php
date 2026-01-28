@@ -85,11 +85,11 @@ $response = [
     ],
 
     'location' => [
-        'address' => $restaurant['address'],
-        'city' => $restaurant['city'] ?? '',
-        'postalCode' => $restaurant['postal_code'] ?? '',
-        'latitude' => (float)($restaurant['latitude'] ?? 0),
-        'longitude' => (float)($restaurant['longitude'] ?? 0),
+        'address' => $settings['address'] ?? $restaurant['address'] ?? '',
+        'city' => $settings['city'] ?? $restaurant['city'] ?? '',
+        'postalCode' => $settings['postal_code'] ?? $restaurant['postal_code'] ?? '',
+        'latitude' => (float)($settings['latitude'] ?? $restaurant['latitude'] ?? 0),
+        'longitude' => (float)($settings['longitude'] ?? $restaurant['longitude'] ?? 0),
         'googleMapsUrl' => $instanceConfig['location']['googleMapsUrl'] ?? '',
         'googleMapsEmbed' => $instanceConfig['location']['googleMapsEmbed'] ?? ''
     ],
