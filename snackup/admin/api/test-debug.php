@@ -10,7 +10,7 @@ try {
     echo "3. Bootstrap OK\n";
 
     echo "4. Loading SettingsRepository...\n";
-    require_once SNACK_ROOT . '/backend/repositories/SettingsRepository.php';
+    require_once SNACK_ROOT . '/snackup/backend/repositories/SettingsRepository.php';
     echo "5. SettingsRepository OK\n";
 
     echo "6. Testing DB connection...\n";

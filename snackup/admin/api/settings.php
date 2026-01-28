@@ -15,7 +15,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../bootstrap.php';
-require_once SNACK_ROOT . '/backend/repositories/SettingsRepository.php';
+require_once SNACK_ROOT . '/snackup/backend/repositories/SettingsRepository.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-cache, must-revalidate');
