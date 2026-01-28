@@ -1370,8 +1370,11 @@ $csrfToken = getCsrfToken();
           const newStatus = sup.status === 'available' ? 'unavailable' : 'available';
           try {
             await apiPostJson({ action: "update_supplement", supplement_id: id, status: newStatus });
+            // Mise à jour locale du state (évite boot() complet)
+            if (state.menu?.supplements?.catalog?.[id]) {
+              state.menu.supplements.catalog[id].status = newStatus;
+            }
             toast("success", "Statut modifié", `${sup.name} est maintenant ${newStatus === 'available' ? 'disponible' : 'indisponible'}.`);
-            await boot();
             renderSupplementsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de modifier le statut.");
@@ -1385,8 +1388,11 @@ $csrfToken = getCsrfToken();
           if (!confirm(`Supprimer le supplément "${sup.name}" ?`)) return;
           try {
             await apiPostJson({ action: "delete_supplement", supplement_id: id });
+            // Suppression locale du state (évite boot() complet)
+            if (state.menu?.supplements?.catalog) {
+              delete state.menu.supplements.catalog[id];
+            }
             toast("success", "Supprimé", `${sup.name} a été supprimé.`);
-            await boot();
             renderSupplementsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
@@ -1434,10 +1440,18 @@ $csrfToken = getCsrfToken();
       }
 
       try {
-        await apiPostJson({ action: "add_supplement", name, category, price });
-        toast("success", "Supplément ajouté", `"${name}" a été créé dans la catégorie "${category}".`);
+        const result = await apiPostJson({ action: "add_supplement", name, category, price });
+        // Ajouter le nouveau supplément au state local (évite boot() complet)
+        if (result.supplement) {
+          if (!state.menu.supplements) state.menu.supplements = { catalog: {} };
+          if (!state.menu.supplements.catalog) state.menu.supplements.catalog = {};
+          state.menu.supplements.catalog[result.supplement.id] = {
+            ...result.supplement,
+            category: category // S'assurer que la catégorie est présente
+          };
+        }
+        toast("success", "Supplément ajouté", `"${name}" a été créé.`);
         $("#formAddSupplement").reset();
-        await boot();
         renderSupplementsList();
       } catch(err) {
         toast("error", "Erreur", err?.message ?? "Impossible d'ajouter.");
