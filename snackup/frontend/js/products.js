@@ -931,7 +931,6 @@ const Products = {
 
         // Add to cart button
         document.getElementById('addToCartBtn')?.addEventListener('click', () => {
-            console.log("🔥🔥🔥 TRACE: CLICK addToCartBtn", {file: "products.js", function: "initModal.addToCartBtn.click"});
             this.addCurrentToCart();
         });
 
@@ -983,22 +982,18 @@ const Products = {
      * Open product modal
      */
     openProductModal(productId) {
-        this._modalStartTime = performance.now();
-        console.log('⏱️ openProductModal START:', this._modalStartTime.toFixed(2));
-
         const product = Config.getProduct(productId);
         if (!product) return;
 
-        // Ouvrir le modal
+        // Ouvrir le modal immédiatement (visuel d'abord)
         const modal = document.getElementById('productModal');
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        // Reset state (synchrone)
+        // Reset state
         this.currentProduct = product;
         this.currentQuantity = 1;
         this.selectedSupplements = [];
-        console.log('🧪 RESET selectedSupplements = []');
         this.removedIngredients = [];
         this.menuType = 'solo';
         this.selectedDrink = null;
@@ -1017,7 +1012,6 @@ const Products = {
             if (formuleIncludesSection) {
                 formuleIncludesSection.classList.add('hidden');
                 formuleIncludesSection.style.display = 'none';
-                console.log('❌ ENCART FORMULE: MASQUÉ (produit simple, pas une formule)');
             }
 
             // Update modal content
@@ -1417,9 +1411,6 @@ const Products = {
             }
 
         this.updateModalUI();
-        const _endTime = performance.now();
-        console.log('⏱️ openProductModal END:', _endTime.toFixed(2));
-        console.log('⏱️ TOTAL:', (_endTime - this._modalStartTime).toFixed(2), 'ms');
     },
 
     /**
@@ -1698,13 +1689,8 @@ const Products = {
      * Open formule modal with interactive component selection
      */
     openFormuleModal(formuleId) {
-        console.log("🔥🔥🔥 TRACE: openFormuleModal APPELÉ", {file: "products.js", formuleId});
         const formule = Config.getFormule(formuleId);
         if (!formule) return;
-
-        // 🔥 TRACE: Voir les includes de la formule BRUTS (tels que renvoyés par l'API)
-        console.log("🔥 FORMULE CHARGÉE:", formule.name);
-        console.log("🔥 INCLUDES BRUTS:", JSON.stringify(formule.includes, null, 2));
 
         // Initialize formule as current product with selections storage
         this.currentProduct = {
@@ -1722,13 +1708,12 @@ const Products = {
 
         // Initialize formule selections
         this.formuleSelections = {};
-        this.isFormuleValid = false; // INITIALISÉ À FALSE - aucune sélection au départ
+        this.isFormuleValid = false;
         if (formule.includes && formule.includes.length > 0) {
             formule.includes.forEach((include, index) => {
                 this.formuleSelections[index] = null;
             });
         }
-        console.log("🔥 INIT: isFormuleValid =", this.isFormuleValid);
 
         const modal = document.getElementById('productModal');
 
@@ -1838,7 +1823,6 @@ const Products = {
         // Show the section (DOIT reset display car openProductModal() le cache)
         includesSection.classList.remove('hidden');
         includesSection.style.display = '';
-        console.log('✅ ENCART FORMULE: VISIBLE (formule avec includes)');
 
         // Render interactive selectors for each include
         includesList.innerHTML = formule.includes.map((include, index) => {
@@ -1890,11 +1874,9 @@ const Products = {
         // Attach change event listeners to all selectors
         includesList.querySelectorAll('.formule-selector').forEach(selector => {
             selector.addEventListener('change', (e) => {
-                console.log("🔥🔥🔥 TRACE: SELECTOR CHANGE", {file: "products.js", function: "renderFormuleSelectorsInteractive.onChange"});
                 const includeIndex = parseInt(e.target.dataset.includeIndex);
                 const selectedProductId = e.target.value;
                 const choiceGroup = e.target.dataset.choiceGroup;
-                console.log("🔥 SELECTOR DATA:", {includeIndex, selectedProductId, choiceGroup});
 
                 // If this selector has a choiceGroup and a value is selected,
                 // clear all other selections in the same group (replacement logic)
@@ -2291,15 +2273,12 @@ const Products = {
      * Add current modal product to cart
      */
     addCurrentToCart() {
-        console.log("🔥🔥🔥 TRACE: addCurrentToCart APPELÉ", {file: "products.js", isFormule: this.currentProduct?.isFormule, isFormuleValid: this.isFormuleValid});
         if (!this.currentProduct) return;
 
         // VÉRIFICATION CENTRALE: Si c'est une formule, utiliser this.isFormuleValid (pas de re-validation)
         if (this.currentProduct.isFormule && this.isFormuleValid !== true) {
-            console.log("🔥 BLOQUÉ: isFormuleValid =", this.isFormuleValid, "→ return immédiat");
             return;
         }
-        console.log("🔥 VALIDATION OK - ajout au panier (isFormuleValid=true)");
 
         // Create product with correct price based on menu type
         const productToAdd = { ...this.currentProduct };
