@@ -165,10 +165,14 @@ switch ($action) {
         $input = readInput();
         unset($input['action']);
 
-        if (SettingsRepository::updatePaymentSettings($input)) {
-            jsonSuccess(['message' => 'Paramètres de paiement mis à jour']);
-        } else {
-            jsonError('Aucune modification');
+        try {
+            if (SettingsRepository::updatePaymentSettings($input)) {
+                jsonSuccess(['message' => 'Paramètres de paiement mis à jour']);
+            } else {
+                jsonError('Aucune modification - données reçues: ' . json_encode($input));
+            }
+        } catch (Exception $e) {
+            jsonError('Erreur SQL: ' . $e->getMessage());
         }
         break;
 

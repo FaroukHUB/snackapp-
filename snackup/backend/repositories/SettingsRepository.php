@@ -308,18 +308,23 @@ class SettingsRepository {
             }
         }
 
-        if (count($insertFields) <= 1) return false; // Seulement restaurant_id
+        if (count($insertFields) <= 1) {
+            error_log("[updatePaymentSettings] Aucun champ valide. Data: " . json_encode($data));
+            return false;
+        }
 
         $placeholders = implode(', ', array_fill(0, count($insertFields), '?'));
         $fieldList = implode(', ', $insertFields);
         $updateList = implode(', ', $updateParts);
 
-        $stmt = $pdo->prepare("
-            INSERT INTO payment_settings ($fieldList)
-            VALUES ($placeholders)
-            ON DUPLICATE KEY UPDATE $updateList
-        ");
+        $sql = "INSERT INTO payment_settings ($fieldList) VALUES ($placeholders) ON DUPLICATE KEY UPDATE $updateList";
+        error_log("[updatePaymentSettings] SQL: $sql");
+        error_log("[updatePaymentSettings] Values: " . json_encode($insertValues));
 
-        return $stmt->execute($insertValues);
+        $stmt = $pdo->prepare($sql);
+        $result = $stmt->execute($insertValues);
+
+        error_log("[updatePaymentSettings] Result: " . ($result ? 'true' : 'false'));
+        return $result;
     }
 }
