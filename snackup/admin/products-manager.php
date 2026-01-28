@@ -1282,19 +1282,32 @@ $csrfToken = getCsrfToken();
 
     // ===== GESTION DES SUPPLÉMENTS =====
     $("#btnManageSupplements").addEventListener("click", () => {
-      setupSupplementsEvents(); // Attache events UNE SEULE FOIS
-      renderSupplementsList();
-      openModal("#modalSupplements");
+      try {
+        setupSupplementsEvents(); // Attache events UNE SEULE FOIS
+        renderSupplementsList();
+        openModal("#modalSupplements");
+      } catch (err) {
+        console.error('[Supplements] Erreur ouverture modal:', err);
+        alert('Erreur: ' + err.message);
+      }
     });
 
-    // Récupère les groupes depuis l'API (DB) - avec fallback
+    // Récupère les groupes depuis l'API (DB) - SIMPLIFIÉ
     function getSupplementGroups() {
-      const groups = state.menu?.supplements?.groups;
-      if (Array.isArray(groups) && groups.length > 0) return groups;
-      // Fallback: extraire les groupes des suppléments existants
-      const supplements = getSupplements();
-      const uniqueGroups = [...new Set(Object.values(supplements).map(s => s.category || s.group_name || 'autres'))];
-      return uniqueGroups.length > 0 ? uniqueGroups : ['autres'];
+      try {
+        const catalog = state.menu?.supplements?.catalog || {};
+        const groups = new Set();
+        Object.values(catalog).forEach(sup => {
+          if (sup && (sup.category || sup.group_name)) {
+            groups.add(sup.category || sup.group_name);
+          }
+        });
+        const result = Array.from(groups);
+        return result.length > 0 ? result : ['autres'];
+      } catch (err) {
+        console.error('[getSupplementGroups] Erreur:', err);
+        return ['autres'];
+      }
     }
 
     // Capitalise la première lettre
@@ -1305,69 +1318,80 @@ $csrfToken = getCsrfToken();
 
     // Remplit le select des catégories dynamiquement
     function populateCategorySelect() {
-      const select = $("#supCategory");
-      if (!select) return;
-
-      const groups = getSupplementGroups();
-      select.innerHTML = groups.map(g =>
-        `<option value="${escapeHtml(String(g))}">${escapeHtml(capitalizeStr(g))}</option>`
-      ).join('');
+      try {
+        const select = $("#supCategory");
+        if (!select) return;
+        const groups = getSupplementGroups();
+        select.innerHTML = groups.map(g =>
+          `<option value="${escapeHtml(String(g))}">${escapeHtml(capitalizeStr(g))}</option>`
+        ).join('');
+      } catch (err) {
+        console.error('[populateCategorySelect] Erreur:', err);
+      }
     }
 
     function renderSupplementsList(){
-      const container = $("#supplementsList");
-      if (!container) return;
+      try {
+        const container = $("#supplementsList");
+        if (!container) return;
 
-      const supplements = getSupplements() || {};
-      const groups = getSupplementGroups();
-      container.innerHTML = "";
+        const supplements = getSupplements() || {};
+        const groups = getSupplementGroups();
+        container.innerHTML = "";
 
-      // Peupler le select des catégories
-      populateCategorySelect();
+        // Peupler le select des catégories
+        populateCategorySelect();
 
-      // Grouper les suppléments par leur catégorie
-      const grouped = {};
-      Object.values(supplements).forEach(sup => {
-        if (!sup) return;
-        const cat = sup.category || sup.group_name || 'autres';
-        if (!grouped[cat]) grouped[cat] = [];
-        grouped[cat].push(sup);
-      });
+        // Grouper les suppléments par leur catégorie
+        const grouped = {};
+        Object.values(supplements).forEach(sup => {
+          if (!sup) return;
+          const cat = sup.category || sup.group_name || 'autres';
+          if (!grouped[cat]) grouped[cat] = [];
+          grouped[cat].push(sup);
+        });
 
-      let hasAny = false;
+        let hasAny = false;
 
-      // Afficher par groupe
-      groups.forEach(group => {
-        if (grouped[group] && grouped[group].length > 0) {
-          hasAny = true;
-          const groupTitle = document.createElement("div");
-          groupTitle.style.cssText = "font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;letter-spacing:0.3px;";
-          groupTitle.textContent = capitalizeStr(group);
-          container.appendChild(groupTitle);
+        // Afficher par groupe
+        groups.forEach(group => {
+          if (grouped[group] && grouped[group].length > 0) {
+            hasAny = true;
+            const groupTitle = document.createElement("div");
+            groupTitle.style.cssText = "font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;letter-spacing:0.3px;";
+            groupTitle.textContent = capitalizeStr(group);
+            container.appendChild(groupTitle);
 
-          grouped[group].forEach(sup => {
-            if (sup) container.appendChild(createSupplementItem(sup));
-          });
+            grouped[group].forEach(sup => {
+              if (sup) container.appendChild(createSupplementItem(sup));
+            });
+          }
+        });
+
+        // Afficher les suppléments sans groupe connu
+        Object.keys(grouped).forEach(group => {
+          if (!groups.includes(group) && grouped[group] && grouped[group].length > 0) {
+            hasAny = true;
+            const groupTitle = document.createElement("div");
+            groupTitle.style.cssText = "font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;letter-spacing:0.3px;";
+            groupTitle.textContent = capitalizeStr(group);
+            container.appendChild(groupTitle);
+
+            grouped[group].forEach(sup => {
+              if (sup) container.appendChild(createSupplementItem(sup));
+            });
+          }
+        });
+
+        if (!hasAny) {
+          container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
         }
-      });
-
-      // Afficher les suppléments sans groupe connu
-      Object.keys(grouped).forEach(group => {
-        if (!groups.includes(group) && grouped[group] && grouped[group].length > 0) {
-          hasAny = true;
-          const groupTitle = document.createElement("div");
-          groupTitle.style.cssText = "font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;letter-spacing:0.3px;";
-          groupTitle.textContent = capitalizeStr(group);
-          container.appendChild(groupTitle);
-
-          grouped[group].forEach(sup => {
-            if (sup) container.appendChild(createSupplementItem(sup));
-          });
+      } catch (err) {
+        console.error('[renderSupplementsList] Erreur:', err);
+        const container = $("#supplementsList");
+        if (container) {
+          container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;color:red;">Erreur: ' + escapeHtml(err.message) + '</p>';
         }
-      });
-
-      if (!hasAny) {
-        container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
       }
     }
 
