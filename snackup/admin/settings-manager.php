@@ -443,7 +443,7 @@ $csrfToken = getCsrfToken();
         free_delivery_threshold: $('#freeDeliveryThreshold').value ? parseFloat($('#freeDeliveryThreshold').value) : null
       };
       const res = await api('update_settings', data);
-      toast(res.success ? 'Paramètres enregistrés' : res.error, res.success ? 'success' : 'error');
+      toast(res.success ? 'Paramètres enregistrés' : (res.error || res.message), res.success ? 'success' : 'error');
     });
 
     // Save Stripe
@@ -455,7 +455,7 @@ $csrfToken = getCsrfToken();
         stripe_mode: $('#stripeMode').value
       };
       const res = await api('update_payment_settings', data);
-      toast(res.success ? 'Configuration paiement enregistrée' : res.error, res.success ? 'success' : 'error');
+      toast(res.success ? 'Configuration paiement enregistrée' : (res.error || res.message), res.success ? 'success' : 'error');
     });
 
     // Cities
@@ -524,7 +524,7 @@ $csrfToken = getCsrfToken();
         deliveryCities = res.cities;
         renderCities();
         toast('Ville supprimée');
-      } else toast(res.error, 'error');
+      } else toast((res.error || res.message), 'error');
     }
 
     $('#formCity').addEventListener('submit', async (e) => {
@@ -545,7 +545,7 @@ $csrfToken = getCsrfToken();
         renderCities();
         closeModal('modalCity');
         toast(id ? 'Ville modifiée' : 'Ville ajoutée');
-      } else toast(res.error, 'error');
+      } else toast((res.error || res.message), 'error');
     });
 
     $('#toggleCityActive').onclick = function() { this.classList.toggle('active'); };
