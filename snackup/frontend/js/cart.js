@@ -253,6 +253,13 @@ const Cart = {
         const PIZZA_SOLO_PRICE = 7.50;
         const PIZZA_DUO_PRICE = 9.00;
 
+        console.log('🍕 BUNDLE DEBUG - items:', this.items.map(i => ({
+            name: i.name,
+            categoryName: i.categoryName,
+            menuType: i.options?.menuType,
+            qty: i.quantity
+        })));
+
         // Filtrer les pizzas (nom de catégorie contient "pizza")
         const pizzas = this.items.filter(item => {
             // D'abord essayer categoryName stocké
@@ -261,10 +268,14 @@ const Cart = {
             if (!catName && item.id && typeof Config !== 'undefined') {
                 const product = Config.getProduct(item.id);
                 catName = product?.categoryName || '';
+                console.log('🍕 BUNDLE FALLBACK pour', item.name, '→ catName:', catName);
             }
-            return catName.toLowerCase().includes('pizza');
+            const isPizza = catName.toLowerCase().includes('pizza');
+            console.log('🍕 BUNDLE CHECK:', item.name, 'catName:', catName, 'isPizza:', isPizza);
+            return isPizza;
         });
 
+        console.log('🍕 BUNDLE - Pizzas trouvées:', pizzas.length);
         if (pizzas.length === 0) return { discount: 0, details: [] };
 
         // Séparer par taille (menuType: 'solo' ou 'duo')
@@ -304,6 +315,7 @@ const Cart = {
             }
         }
 
+        console.log('🍕 BUNDLE RESULT: soloCount=', soloCount, 'duoCount=', duoCount, 'discount=', discount);
         return { discount, details, soloCount, duoCount };
     },
 
