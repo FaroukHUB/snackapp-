@@ -722,18 +722,7 @@ $csrfToken = getCsrfToken();
         <form id="formAddSupplement" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
           <input id="supName" name="name" class="input" type="text" placeholder="Nom du supplément" style="flex:1;min-width:140px;" required />
           <select id="supCategory" name="category" class="input" style="width:130px;" required>
-            <optgroup label="Salé">
-              <option value="fromage">Fromage</option>
-              <option value="legume">Légume</option>
-              <option value="viande">Viande</option>
-              <option value="autre">Autre (Salé)</option>
-            </optgroup>
-            <optgroup label="Sucré">
-              <option value="base">Base</option>
-              <option value="croquant">Croquant</option>
-              <option value="fruit">Fruit</option>
-              <option value="prime">Prime</option>
-            </optgroup>
+            <!-- Groupes chargés dynamiquement depuis DB -->
           </select>
           <input id="supPrice" name="price" class="input" type="number" step="0.01" min="0" placeholder="Prix <?= CURRENCY ?>" style="width:90px;" required />
           <button class="btn btn-good" type="submit">+ Ajouter</button>
@@ -1240,29 +1229,11 @@ $csrfToken = getCsrfToken();
       const allSupplements = getSupplements();
       container.innerHTML = "";
 
-      // Définir les catégories de suppléments
-      const saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-      const sucreCategories = ['base', 'croquant', 'fruit', 'prime'];
-
-      // Filtrer les suppléments selon la catégorie du produit
+      // Filtrer selon defaultForCategories si categoryId fourni
       let supplements = allSupplements;
-
       if (categoryId) {
-        // Pour les crêpes salées signature : uniquement suppléments salés
-        if (categoryId === 'crepes-salees-signature') {
-          supplements = Object.values(allSupplements).filter(sup =>
-            saledCategories.includes(sup.category)
-          ).reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {});
-        }
-        // Pour les catégories sucrées : uniquement suppléments sucrés
-        else if (['crepes-sucrees', 'gaufres', 'bubble-waffle'].includes(categoryId)) {
-          supplements = Object.values(allSupplements).filter(sup =>
-            sucreCategories.includes(sup.category)
-          ).reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {});
-        }
-        // Pour les autres catégories : afficher seulement ceux de defaultForCategories
-        else {
-          const allowedIds = state.menu?.supplements?.defaultForCategories?.[categoryId] ?? [];
+        const allowedIds = state.menu?.supplements?.defaultForCategories?.[categoryId] ?? [];
+        if (allowedIds.length > 0) {
           supplements = Object.values(allSupplements).filter(sup =>
             allowedIds.includes(sup.id)
           ).reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {});
@@ -1275,7 +1246,7 @@ $csrfToken = getCsrfToken();
         const checked = selectedIds.includes(sup.id) ? "checked" : "";
         label.innerHTML = `
           <input type="checkbox" name="supplements[]" value="${escapeHtml(sup.id)}" ${checked} style="width:16px;height:16px;" />
-          ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} ${CURRENCY})</span>
+          ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${parseFloat(sup.price).toFixed(2).replace('.', ',')} ${CURRENCY})</span>
         `;
         container.appendChild(label);
       });
@@ -1316,84 +1287,83 @@ $csrfToken = getCsrfToken();
       openModal("#modalSupplements");
     });
 
+    // Récupère les groupes depuis l'API (DB)
+    function getSupplementGroups() {
+      return state.menu?.supplements?.groups ?? [];
+    }
+
+    // Capitalise la première lettre
+    function capitalize(str) {
+      return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+    }
+
+    // Remplit le select des catégories dynamiquement
+    function populateCategorySelect() {
+      const select = $("#supCategory");
+      if (!select) return;
+
+      const groups = getSupplementGroups();
+      select.innerHTML = groups.length > 0
+        ? groups.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(capitalize(g))}</option>`).join('')
+        : '<option value="autres">Autres</option>';
+    }
+
     function renderSupplementsList(){
       const container = $("#supplementsList");
       const supplements = getSupplements();
+      const groups = getSupplementGroups();
       container.innerHTML = "";
 
-      // Grouper les suppléments par catégorie
-      const saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-      const sucreCategories = ['base', 'croquant', 'fruit', 'prime'];
-      const categoryLabels = {
-        'base': 'Base',
-        'croquant': 'Croquant',
-        'fruit': 'Fruit',
-        'prime': 'Prime'
-      };
+      // Peupler le select des catégories
+      populateCategorySelect();
 
-      const saled = {};
-      const sucre = {};
-
+      // Grouper les suppléments par leur catégorie (group_name en DB)
+      const grouped = {};
       Object.values(supplements).forEach(sup => {
-        const cat = sup.category || 'autre';
-        if (saledCategories.includes(cat)) {
-          if (!saled[cat]) saled[cat] = [];
-          saled[cat].push(sup);
-        } else if (sucreCategories.includes(cat)) {
-          if (!sucre[cat]) sucre[cat] = [];
-          sucre[cat].push(sup);
+        const cat = sup.category || sup.group_name || 'autres';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(sup);
+      });
+
+      // Afficher par groupe (ordre depuis DB)
+      const groupOrder = groups.length > 0 ? groups : Object.keys(grouped);
+      let hasAny = false;
+
+      groupOrder.forEach(group => {
+        if (grouped[group] && grouped[group].length > 0) {
+          hasAny = true;
+
+          // Titre du groupe
+          const groupTitle = document.createElement("div");
+          groupTitle.style.cssText = "font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;letter-spacing:0.3px;";
+          groupTitle.textContent = capitalize(group);
+          container.appendChild(groupTitle);
+
+          grouped[group].forEach(sup => {
+            container.appendChild(createSupplementItem(sup));
+          });
         }
       });
 
-      // Afficher les suppléments salés
-      const hasSaled = Object.values(saled).some(arr => arr.length > 0);
-      if (hasSaled) {
-        const saledTitle = document.createElement("h4");
-        saledTitle.style.cssText = "font-size:14px;font-weight:700;color:#E91E63;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 12px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;";
-        saledTitle.textContent = "Suppléments Salés";
-        container.appendChild(saledTitle);
+      // Afficher les suppléments sans groupe connu
+      Object.keys(grouped).forEach(group => {
+        if (!groupOrder.includes(group) && grouped[group].length > 0) {
+          hasAny = true;
 
-        saledCategories.forEach(cat => {
-          if (saled[cat] && saled[cat].length > 0) {
-            saled[cat].forEach(sup => {
-              container.appendChild(createSupplementItem(sup));
-            });
-          }
-        });
+          const groupTitle = document.createElement("div");
+          groupTitle.style.cssText = "font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;letter-spacing:0.3px;";
+          groupTitle.textContent = capitalize(group);
+          container.appendChild(groupTitle);
 
-        // Espacement entre sections
-        const spacer = document.createElement("div");
-        spacer.style.cssText = "height:24px;";
-        container.appendChild(spacer);
-      }
+          grouped[group].forEach(sup => {
+            container.appendChild(createSupplementItem(sup));
+          });
+        }
+      });
 
-      // Afficher les suppléments sucrés par catégorie
-      const hasSucre = Object.values(sucre).some(arr => arr.length > 0);
-      if (hasSucre) {
-        const sucreTitle = document.createElement("h4");
-        sucreTitle.style.cssText = "font-size:14px;font-weight:700;color:#E91E63;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 12px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;";
-        sucreTitle.textContent = "Suppléments Sucrés";
-        container.appendChild(sucreTitle);
-
-        sucreCategories.forEach(cat => {
-          if (sucre[cat] && sucre[cat].length > 0) {
-            // Sous-titre de catégorie
-            const catTitle = document.createElement("div");
-            catTitle.style.cssText = "font-size:13px;font-weight:600;color:#F06292;margin:12px 0 8px 0;padding-left:8px;text-transform:uppercase;letter-spacing:0.3px;";
-            catTitle.textContent = categoryLabels[cat] || cat;
-            container.appendChild(catTitle);
-
-            sucre[cat].forEach(sup => {
-              container.appendChild(createSupplementItem(sup));
-            });
-          }
-        });
-      }
-
-      if (!hasSaled && !hasSucre) {
+      if (!hasAny) {
         container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
       }
-      // Events attachés via delegation (voir setupSupplementsEvents)
     }
 
     // Event delegation pour suppléments (attaché UNE SEULE FOIS)
@@ -1446,7 +1416,7 @@ $csrfToken = getCsrfToken();
       div.innerHTML = `
         <div style="flex:1;">
           <strong style="font-size:13px;">${escapeHtml(sup.name)}</strong>
-          <span style="color:var(--muted);margin-left:8px;">${sup.price.toFixed(0)} ${CURRENCY}</span>
+          <span style="color:var(--muted);margin-left:8px;">${parseFloat(sup.price).toFixed(2).replace('.', ',')} ${CURRENCY}</span>
           <span class="status" data-status="${sup.status ?? 'available'}" style="margin-left:8px;padding:4px 8px;">
             <span class="dot"></span>${sup.status === 'available' ? 'Dispo' : 'Indispo'}
           </span>

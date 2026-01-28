@@ -24,22 +24,39 @@ function syncMenuStatuses(): void {
 
         // Sync supplements
         if (!empty($runtime['supplements']['catalog'])) {
+            // Préparer les statements
             $stmtUpdate = $pdo->prepare("
                 UPDATE supplements
                 SET name = ?, price = ?, status = ?, flavor = ?, group_name = ?
                 WHERE id = ? AND restaurant_id = ?
             ");
 
+            $stmtInsert = $pdo->prepare("
+                INSERT INTO supplements (restaurant_id, name, price, status, flavor, group_name, sort_order)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            // Récupérer le prochain sort_order
+            $stmtMaxOrder = $pdo->prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM supplements WHERE restaurant_id = ?");
+            $stmtMaxOrder->execute([$restaurantId]);
+            $nextOrder = (int)$stmtMaxOrder->fetchColumn();
+
             foreach ($runtime['supplements']['catalog'] as $id => $sup) {
-                $stmtUpdate->execute([
-                    $sup['name'] ?? '',
-                    (float)($sup['price'] ?? 0),
-                    $sup['status'] ?? 'available',
-                    $sup['flavor'] ?? 'sale',
-                    $sup['category'] ?? $sup['group_name'] ?? 'autres',
-                    $id,
-                    $restaurantId
-                ]);
+                $name = $sup['name'] ?? '';
+                $price = (float)($sup['price'] ?? 0);
+                $status = $sup['status'] ?? 'available';
+                $flavor = $sup['flavor'] ?? 'sale';
+                $groupName = $sup['category'] ?? $sup['group_name'] ?? 'autres';
+
+                // Si l'ID est numérique, c'est un supplément existant en DB → UPDATE
+                if (is_numeric($id)) {
+                    $stmtUpdate->execute([$name, $price, $status, $flavor, $groupName, $id, $restaurantId]);
+                }
+                // Sinon c'est un nouveau supplément (ID string comme "sup-bacon") → INSERT
+                else {
+                    $stmtInsert->execute([$restaurantId, $name, $price, $status, $flavor, $groupName, $nextOrder]);
+                    $nextOrder++;
+                }
             }
         }
 

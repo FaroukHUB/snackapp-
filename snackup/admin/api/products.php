@@ -436,9 +436,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             // Formater les suppléments (avec groupement)
             $supplementsGrouped = MenuRepository::getSupplementsGrouped();
+            $supplementGroups = MenuRepository::getSupplementGroups();
             $supplementsFormatted = [
                 'catalog' => $supplements,
                 'grouped' => $supplementsGrouped,
+                'groups' => $supplementGroups, // Groupes distincts pour le select admin
                 'defaultForCategories' => $categorySupplements
             ];
 
@@ -1732,48 +1734,16 @@ switch ($action) {
             $i++;
         }
 
-        // Déterminer le flavor basé sur la catégorie
-        $saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-        $sucreCategories = ['base', 'croquant', 'fruit', 'prime'];
-        $flavor = in_array($category, $saledCategories) ? 'sale' : 'sucre';
-
+        // Tous les suppléments sont salés (sucrés retirés)
         $runtime['supplements']['catalog'][$id] = [
             'id' => $id,
             'name' => $name,
             'price' => $price,
             'status' => 'available',
-            'category' => $category,
-            'flavor' => $flavor
+            'category' => $category,      // Pour compatibilité admin
+            'group_name' => $category,    // Pour DB
+            'flavor' => 'sale'            // Toujours salé
         ];
-
-        // ✅ Ajouter automatiquement le supplément aux catégories de produits concernées
-        if (!isset($runtime['supplements']['defaultForCategories'])) {
-            $runtime['supplements']['defaultForCategories'] = [];
-        }
-
-        // Déterminer les catégories de produits selon le type de supplément
-        $saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-        $sucreCategories = ['base', 'croquant', 'fruit', 'prime'];
-
-        $productCategories = [];
-        if (in_array($category, $saledCategories)) {
-            // Suppléments salés → crêpes salées
-            $productCategories = ['crepes-salees-signature'];
-        } elseif (in_array($category, $sucreCategories)) {
-            // Suppléments sucrés → crêpes sucrées, gaufres, bubble waffle
-            $productCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
-        }
-
-        // Ajouter le supplément à chaque catégorie de produits
-        foreach ($productCategories as $catId) {
-            if (!isset($runtime['supplements']['defaultForCategories'][$catId])) {
-                $runtime['supplements']['defaultForCategories'][$catId] = [];
-            }
-            // Ajouter seulement si pas déjà présent
-            if (!in_array($id, $runtime['supplements']['defaultForCategories'][$catId], true)) {
-                $runtime['supplements']['defaultForCategories'][$catId][] = $id;
-            }
-        }
 
         // ⚡ OPTIMISATION: Synchronisation groupée
         saveMenuRuntime($runtime);
@@ -1807,9 +1777,8 @@ switch ($action) {
         if (isset($input['status'])) $runtime['supplements']['catalog'][$id]['status'] = $input['status'];
         if (isset($input['category'])) {
             $runtime['supplements']['catalog'][$id]['category'] = $input['category'];
-            // Mettre à jour le flavor basé sur la nouvelle catégorie
-            $saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-            $runtime['supplements']['catalog'][$id]['flavor'] = in_array($input['category'], $saledCategories) ? 'sale' : 'sucre';
+            $runtime['supplements']['catalog'][$id]['group_name'] = $input['category']; // Sync avec DB
+            $runtime['supplements']['catalog'][$id]['flavor'] = 'sale'; // Toujours salé
         }
 
         // ⚡ OPTIMISATION: Synchronisation groupée

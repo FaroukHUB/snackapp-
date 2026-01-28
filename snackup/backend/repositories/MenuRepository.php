@@ -86,6 +86,7 @@ class MenuRepository {
                 'name' => $supp['name'],
                 'flavor' => $supp['flavor'],
                 'group_name' => $supp['group_name'],
+                'category' => $supp['group_name'], // Alias pour compatibilité admin
                 'price' => (float)$supp['price'],
                 'status' => $supp['status']
             ];
@@ -122,6 +123,23 @@ class MenuRepository {
         }
 
         return $grouped;
+    }
+
+    /**
+     * Récupère les groupes de suppléments distincts depuis la DB
+     */
+    public static function getSupplementGroups() {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            SELECT DISTINCT COALESCE(group_name, 'autres') as group_name
+            FROM supplements
+            WHERE restaurant_id = ? AND flavor != 'sucre' AND status = 'available'
+            ORDER BY group_name ASC
+        ");
+        $stmt->execute([self::$restaurantId]);
+
+        return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'group_name');
     }
 
     /**
