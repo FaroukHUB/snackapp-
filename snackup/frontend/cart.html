@@ -880,30 +880,16 @@
                         <div class="form-row">
                             <label class="delivery-type-label">
                                 <i class="fas fa-map-marker-alt" style="color: #ef4444; margin-right: 8px;"></i>
-                                Type de livraison *
+                                Zone de livraison *
                             </label>
-                            <div class="delivery-type-container">
+                            <!-- Zones générées dynamiquement depuis la DB -->
+                            <div class="delivery-type-container" id="deliveryZonesContainer">
+                                <!-- Sera rempli par renderDeliveryZones() -->
                                 <label class="delivery-type-card">
                                     <input type="radio" name="deliveryType" value="libre" onchange="CartPage.setDeliveryType('libre')" checked>
                                     <div class="delivery-card-content">
                                         <i class="fas fa-map"></i>
                                         <span>Adresse libre</span>
-                                        <i class="fas fa-check delivery-check"></i>
-                                    </div>
-                                </label>
-                                <label class="delivery-type-card">
-                                    <input type="radio" name="deliveryType" value="riad-city" onchange="CartPage.setDeliveryType('riad-city')">
-                                    <div class="delivery-card-content">
-                                        <i class="fas fa-building"></i>
-                                        <span>Riad City</span>
-                                        <i class="fas fa-check delivery-check"></i>
-                                    </div>
-                                </label>
-                                <label class="delivery-type-card">
-                                    <input type="radio" name="deliveryType" value="riad-prestige" onchange="CartPage.setDeliveryType('riad-prestige')">
-                                    <div class="delivery-card-content">
-                                        <i class="fas fa-home"></i>
-                                        <span>Riad Prestige</span>
                                         <i class="fas fa-check delivery-check"></i>
                                     </div>
                                 </label>
@@ -1030,68 +1016,7 @@
                             </div>
                         </div>
 
-                        <!-- Riad City -->
-                        <div id="deliveryRiadCity" class="form-row" style="display: none;">
-                            <label>Riad City *</label>
-                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
-                                <select id="riadCityBat" class="input">
-                                    <option value="">Sélectionnez le bâtiment *</option>
-                                    <option value="A">Bâtiment A</option>
-                                    <option value="B">Bâtiment B</option>
-                                    <option value="C">Bâtiment C</option>
-                                    <option value="D">Bâtiment D</option>
-                                    <option value="E">Bâtiment E</option>
-                                    <option value="F">Bâtiment F</option>
-                                    <option value="G">Bâtiment G</option>
-                                    <option value="H">Bâtiment H</option>
-                                    <option value="I">Bâtiment I</option>
-                                    <option value="J">Bâtiment J</option>
-                                    <option value="K">Bâtiment K</option>
-                                    <option value="L">Bâtiment L</option>
-                                    <option value="M">Bâtiment M</option>
-                                    <option value="N">Bâtiment N</option>
-                                </select>
-                                <input type="text" id="riadCityAppt" placeholder="N° Appt (opt.)" class="input">
-                            </div>
-                        </div>
-
-                        <!-- Riad Prestige -->
-                        <div id="deliveryRiadPrestige" class="form-row" style="display: none;">
-                            <label for="riadPrestigeVilla">Riad Prestige Villa *</label>
-                            <select id="riadPrestigeVilla" class="input">
-                                <option value="">Sélectionnez la villa *</option>
-                                <option value="1">Villa 1</option>
-                                <option value="2">Villa 2</option>
-                                <option value="3">Villa 3</option>
-                                <option value="4">Villa 4</option>
-                                <option value="5">Villa 5</option>
-                                <option value="6">Villa 6</option>
-                                <option value="7">Villa 7</option>
-                                <option value="8">Villa 8</option>
-                                <option value="9">Villa 9</option>
-                                <option value="10">Villa 10</option>
-                                <option value="11">Villa 11</option>
-                                <option value="12">Villa 12</option>
-                                <option value="13">Villa 13</option>
-                                <option value="14">Villa 14</option>
-                                <option value="15">Villa 15</option>
-                                <option value="16">Villa 16</option>
-                                <option value="17">Villa 17</option>
-                                <option value="18">Villa 18</option>
-                                <option value="19">Villa 19</option>
-                                <option value="20">Villa 20</option>
-                                <option value="21">Villa 21</option>
-                                <option value="22">Villa 22</option>
-                                <option value="23">Villa 23</option>
-                                <option value="24">Villa 24</option>
-                                <option value="25">Villa 25</option>
-                                <option value="26">Villa 26</option>
-                                <option value="27">Villa 27</option>
-                                <option value="28">Villa 28</option>
-                                <option value="29">Villa 29</option>
-                                <option value="30">Villa 30</option>
-                            </select>
-                        </div>
+                        <!-- Zones spécifiques supprimées - tout est maintenant dans la DB -->
 
                         <style>
                         /* Design Ultramoderne pour le paiement */
@@ -1724,8 +1649,11 @@
              * Génère les zones de livraison depuis la DB
              */
             renderDeliveryZones() {
-                const container = document.querySelector('.delivery-type-container');
-                if (!container || !this.settings.delivery_zones?.length) return;
+                const container = document.getElementById('deliveryZonesContainer');
+                if (!container) return;
+
+                // Si pas de zones dans la DB, garder juste "Adresse libre"
+                if (!this.settings.delivery_zones?.length) return;
 
                 // Garder l'option "Adresse libre" et ajouter les zones
                 let html = `
@@ -2409,27 +2337,10 @@
                 this.deliveryType = type;
                 this.selectedDeliveryFee = fee;
 
-                // Hide all delivery sub-fields
+                // Afficher le champ d'adresse pour toutes les zones
                 const deliveryLibre = document.getElementById('deliveryLibre');
-                const deliveryRiadCity = document.getElementById('deliveryRiadCity');
-                const deliveryRiadPrestige = document.getElementById('deliveryRiadPrestige');
-
-                if (deliveryLibre) deliveryLibre.style.display = 'none';
-                if (deliveryRiadCity) deliveryRiadCity.style.display = 'none';
-                if (deliveryRiadPrestige) deliveryRiadPrestige.style.display = 'none';
-
-                // Show address input for libre mode, or zone-specific fields if they exist
-                if (type === 'libre') {
-                    if (deliveryLibre) deliveryLibre.style.display = 'block';
-                } else if (type.startsWith('zone-')) {
-                    // Pour les zones définies dans la DB, afficher juste l'input adresse
-                    if (deliveryLibre) deliveryLibre.style.display = 'block';
-                }
-                // Legacy support for hardcoded zones (if still in HTML)
-                else if (type === 'riad-city' && deliveryRiadCity) {
-                    deliveryRiadCity.style.display = 'block';
-                } else if (type === 'riad-prestige' && deliveryRiadPrestige) {
-                    deliveryRiadPrestige.style.display = 'block';
+                if (deliveryLibre) {
+                    deliveryLibre.style.display = 'block';
                 }
 
                 // Recalculer le résumé (frais de livraison changent selon le type)
@@ -2735,16 +2646,12 @@
                             this.showToast('Veuillez entrer la ville', 'error');
                             return;
                         }
-                    } else if (deliveryType === 'riad-city') {
-                        const bat = document.getElementById('riadCityBat').value;
-                        if (!bat) {
-                            this.showToast('Veuillez sélectionner le bâtiment', 'error');
-                            return;
-                        }
-                    } else if (deliveryType === 'riad-prestige') {
-                        const villa = document.getElementById('riadPrestigeVilla').value;
-                        if (!villa) {
-                            this.showToast('Veuillez sélectionner la villa', 'error');
+                    }
+                    // Pour les zones dynamiques (zone-X), valider aussi l'adresse
+                    else if (deliveryType.startsWith('zone-')) {
+                        const address = document.getElementById('customerAddress').value.trim();
+                        if (!address) {
+                            this.showToast('Veuillez entrer votre adresse', 'error');
                             return;
                         }
                     }
@@ -2885,28 +2792,23 @@
                         // ⚡ NOUVEAU: Sauvegarder l'adresse dans un champ dédié
                         deliveryAddress = fullAddress;
                         modeNotes = `🚗 LIVRAISON\nAdresse: ${fullAddress}`;
-                    } else if (deliveryType === 'riad-city') {
-                        const bat = document.getElementById('riadCityBat').value;
-                        const appt = document.getElementById('riadCityAppt').value.trim();
-                        const fullAddress = `Riad City Bât ${bat}${appt ? ' - Appt ' + appt : ''}`;
+                    } else if (deliveryType.startsWith('zone-')) {
+                        // Zone dynamique depuis la DB
+                        const zoneId = parseInt(deliveryType.replace('zone-', ''));
+                        const zone = this.settings.delivery_zones?.find(z => z.id == zoneId);
+                        const zoneName = zone?.name || 'Zone';
+                        const address = document.getElementById('customerAddress').value.trim();
+                        const fullAddress = `${zoneName}: ${address}`;
 
-                        // ⚡ NOUVEAU: Sauvegarder l'adresse Riad City
                         deliveryAddress = fullAddress;
-                        modeNotes = `🚗 LIVRAISON: ${fullAddress}`;
-                    } else if (deliveryType === 'riad-prestige') {
-                        const villa = document.getElementById('riadPrestigeVilla').value;
-                        const fullAddress = `Riad Prestige Villa ${villa}`;
-
-                        // ⚡ NOUVEAU: Sauvegarder l'adresse Riad Prestige
-                        deliveryAddress = fullAddress;
-                        modeNotes = `🚗 LIVRAISON: ${fullAddress}`;
+                        modeNotes = `🚗 LIVRAISON (${zoneName})\nAdresse: ${address}`;
                     }
                 }
 
                 // ⚡ Instructions de paiement pour LIVRAISON ET SUR PLACE
                 if (this.mode === 'delivery' || this.mode === 'dinein') {
                     if (paymentInfo.change_for) {
-                        deliveryInstructions = `Monnaie pour ${paymentInfo.change_for} DA`;
+                        deliveryInstructions = `Monnaie pour ${Config.formatPrice(paymentInfo.change_for)}`;
                     } else if (paymentInfo.has_exact_change) {
                         deliveryInstructions = 'Client a la monnaie exacte';
                     }
