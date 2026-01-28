@@ -30,8 +30,41 @@ if ($useMySQL) {
     $primaryColor = $restaurant['primary_color'] ?? '#c58a3a';
     $currency = CURRENCY;
 
-    // Mode MySQL: pas besoin de restaurant.json
-    $restaurantSettings = [];
+    // Charger les settings depuis la BD
+    $settings = RestaurantRepository::getSettings(SNACK_RESTAURANT_ID);
+    $openingHours = RestaurantRepository::getOpeningHours(SNACK_RESTAURANT_ID);
+    $faqItems = RestaurantRepository::getFaq(SNACK_RESTAURANT_ID);
+
+    // Construire $restaurantSettings pour compatibilité avec les templates
+    $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+    $formattedHours = [];
+    foreach ($openingHours as $h) {
+        $formattedHours[$h['day_of_week']] = [
+            'day' => $days[$h['day_of_week']] ?? 'jour',
+            'opens' => substr($h['opens'], 0, 5),
+            'closes' => substr($h['closes'], 0, 5),
+            'slots' => [['opens' => substr($h['opens'], 0, 5), 'closes' => substr($h['closes'], 0, 5)]]
+        ];
+    }
+
+    $restaurantSettings = [
+        'contact' => [
+            'phone' => $settings['phone'] ?? '',
+            'whatsappOrdersNumber' => $settings['whatsapp_number'] ?? '',
+            'extra_phones' => json_decode($settings['extra_phones'] ?? '[]', true) ?: []
+        ],
+        'social' => [
+            'instagram' => $settings['instagram'] ?? '',
+            'facebook' => $settings['facebook'] ?? '',
+            'tiktok' => $settings['tiktok'] ?? '',
+            'snapchat' => $settings['snapchat'] ?? '',
+            'extra' => json_decode($settings['extra_socials'] ?? '[]', true) ?: []
+        ],
+        'openingHours' => $formattedHours,
+        'faq' => [
+            'items' => array_map(fn($f) => ['question' => $f['question'], 'answer' => $f['answer']], $faqItems)
+        ]
+    ];
 
     // ⚡ PAGINATION: 10 commandes par page
     $ordersPage = isset($_GET['orders_page']) ? (int)$_GET['orders_page'] : 1;
@@ -432,10 +465,20 @@ $action = $_POST['action'];
             if ($useMySQL) {
                 $hours = [];
                 foreach ($_POST['hours'] as $i => $h) {
-                    $hours[] = [
-                        'opens' => $h['opens'] ?? '18:30',
-                        'closes' => $h['closes'] ?? '23:30'
-                    ];
+                    // Support nouveau format avec slots multiples
+                    if (isset($h['slots']) && is_array($h['slots'])) {
+                        $firstSlot = reset($h['slots']);
+                        $hours[] = [
+                            'opens' => $firstSlot['opens'] ?? '18:30',
+                            'closes' => $firstSlot['closes'] ?? '23:30'
+                        ];
+                    } else {
+                        // Ancien format direct
+                        $hours[] = [
+                            'opens' => $h['opens'] ?? '18:30',
+                            'closes' => $h['closes'] ?? '23:30'
+                        ];
+                    }
                 }
                 RestaurantRepository::updateOpeningHours(SNACK_RESTAURANT_ID, $hours);
             } else {
