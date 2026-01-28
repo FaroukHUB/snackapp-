@@ -111,6 +111,7 @@ const Cart = {
                 quantity: quantity,
                 isFormule: !!item.includes,
                 categoryId: item.categoryId || null,
+                categoryName: item.categoryName || null,
                 addedAt: Date.now()
             });
         }
@@ -252,10 +253,16 @@ const Cart = {
         const PIZZA_SOLO_PRICE = 7.50;
         const PIZZA_DUO_PRICE = 9.00;
 
-        // Filtrer les pizzas (catégorie contient "pizza")
+        // Filtrer les pizzas (nom de catégorie contient "pizza")
         const pizzas = this.items.filter(item => {
-            const catId = (item.categoryId || '').toLowerCase();
-            return catId.includes('pizza');
+            // D'abord essayer categoryName stocké
+            let catName = item.categoryName || '';
+            // Fallback: chercher dans Config si categoryName manque (anciens items)
+            if (!catName && item.id && typeof Config !== 'undefined') {
+                const product = Config.getProduct(item.id);
+                catName = product?.categoryName || '';
+            }
+            return catName.toLowerCase().includes('pizza');
         });
 
         if (pizzas.length === 0) return { discount: 0, details: [] };
