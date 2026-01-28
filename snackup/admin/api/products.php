@@ -769,7 +769,8 @@ if ($useMySQL) {
             $price = normalizePrice($input['price'] ?? 0);
             $status = $input['status'] ?? 'available';
             $flavor = $input['flavor'] ?? 'sale';
-            $groupName = $input['group_name'] ?? 'autres';
+            // Accepter category OU group_name (admin envoie category)
+            $groupName = $input['category'] ?? $input['group_name'] ?? 'autres';
 
             if ($name === '') {
                 jsonError('Nom du supplément requis');
@@ -803,6 +804,8 @@ if ($useMySQL) {
             if (isset($input['price'])) $updateData['price'] = normalizePrice($input['price']);
             if (isset($input['status'])) $updateData['status'] = $input['status'];
             if (isset($input['flavor'])) $updateData['flavor'] = $input['flavor'];
+            // Accepter category OU group_name (admin envoie category)
+            if (isset($input['category'])) $updateData['group_name'] = $input['category'];
             if (isset($input['group_name'])) $updateData['group_name'] = $input['group_name'];
 
             if (empty($updateData)) {
