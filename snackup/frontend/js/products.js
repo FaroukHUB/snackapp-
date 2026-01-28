@@ -970,7 +970,7 @@ const Products = {
      * Open product modal
      */
     openProductModal(productId) {
-        console.log('Opening modal for product:', productId);
+        console.log('🚀 [MODAL] openProductModal APPELÉ pour:', productId);
         const product = Config.getProduct(productId);
         console.log('Product found:', product);
         if (!product) return;
@@ -980,24 +980,26 @@ const Products = {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        // Remplir le contenu dans le prochain frame (non-bloquant)
-        requestAnimationFrame(() => {
-            // Reset state
-            this.currentProduct = product;
-            this.currentQuantity = 1;
-            this.selectedSupplements = [];
-            this.removedIngredients = [];
-            this.menuType = 'solo';
-            this.selectedDrink = null;
-            this.selectedSauce = null;
-            this.selectedAccompagnement = null;
-            this.selectedViennoiserie = null;
-            this.selectedPatisserie = null;
-            this.selectedBeverage = null;
-            this.selectedKidsCrepe = null;
-            this.selectedKidsSauce = null;
-            this.selectedVariant = null;
-            this.selectedCapsule = null;
+        // Remplir le contenu (synchrone - pas de requestAnimationFrame)
+        console.log('🔄 [MODAL] Reset état + reconstruction DOM');
+
+        // Reset state
+        this.currentProduct = product;
+        this.currentQuantity = 1;
+        console.log('⚠️ [MODAL] selectedSupplements RESET à []');
+        this.selectedSupplements = [];
+        this.removedIngredients = [];
+        this.menuType = 'solo';
+        this.selectedDrink = null;
+        this.selectedSauce = null;
+        this.selectedAccompagnement = null;
+        this.selectedViennoiserie = null;
+        this.selectedPatisserie = null;
+        this.selectedBeverage = null;
+        this.selectedKidsCrepe = null;
+        this.selectedKidsSauce = null;
+        this.selectedVariant = null;
+        this.selectedCapsule = null;
 
             // IMPORTANT: Masquer l'encart "Cette formule comprend" (produits non-formule)
             const formuleIncludesSection = document.getElementById('modalFormuleIncludes');
@@ -1120,6 +1122,7 @@ const Products = {
                     }
                 });
 
+                console.log('🔨 [MODAL] Reconstruction HTML suppléments:', supplements.length, 'items');
                 supplementsList.innerHTML = html;
             } else {
                 supplementsContainer.classList.add('hidden');
@@ -1400,8 +1403,8 @@ const Products = {
                 accompagnementContainer.style.display = 'none';
             }
 
-            this.updateModalUI();
-        }); // Fin requestAnimationFrame
+        this.updateModalUI();
+        console.log('✅ [MODAL] Modal prêt pour interaction');
     },
 
     /**
