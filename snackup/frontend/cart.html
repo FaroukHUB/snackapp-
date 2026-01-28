@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Votre Panier - Finaliser la Commande | SnackApp</title>
-    <meta name="description" content="Finalisez votre commande chez Fabrik Burger. Vérifiez votre panier et validez pour un retrait Click & Collect rapide.">
+    <title>Votre Panier - Finaliser la Commande</title>
+    <meta name="description" content="Finalisez votre commande. Vérifiez votre panier et validez pour un retrait rapide.">
     <meta name="robots" content="noindex, nofollow">
 
     <!-- Favicon & Theme -->
@@ -990,30 +990,16 @@
                         }
                         </style>
 
-                        <!-- Adresse libre avec ville et code postal -->
+                        <!-- Adresse de livraison (la ville est sélectionnée via les cartes) -->
                         <div id="deliveryLibre" class="form-row">
                             <label for="customerAddress">
                                 <i class="fas fa-map-pin" style="margin-right: 6px;"></i>
-                                Adresse complète *
+                                Votre adresse *
                             </label>
                             <input type="text" id="customerAddress" placeholder="Ex: 123 Rue de la République, Bâtiment A, Appt 12">
-
-                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-top: 12px;">
-                                <div>
-                                    <label for="customerCity" style="font-size: 13px; color: #6b7280; margin-bottom: 6px; display: block;">
-                                        <i class="fas fa-city" style="margin-right: 4px;"></i>
-                                        Ville *
-                                    </label>
-                                    <input type="text" id="customerCity" placeholder="Ex: Boumerdès" style="width: 100%;">
-                                </div>
-                                <div>
-                                    <label for="customerPostalCode" style="font-size: 13px; color: #6b7280; margin-bottom: 6px; display: block;">
-                                        <i class="fas fa-envelope" style="margin-right: 4px;"></i>
-                                        Code postal
-                                    </label>
-                                    <input type="text" id="customerPostalCode" placeholder="35000" style="width: 100%;">
-                                </div>
-                            </div>
+                            <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+                                <i class="fas fa-info-circle"></i> Sélectionnez votre ville ci-dessus, puis entrez votre adresse complète
+                            </p>
                         </div>
 
                         <!-- Zones spécifiques supprimées - tout est maintenant dans la DB -->
@@ -1318,8 +1304,8 @@
                                             <div class="payment-desc">Je paie avec:</div>
                                         </div>
                                         <div class="payment-amount-input">
-                                            <input type="number" id="changeForAmountCommon" placeholder="5000" min="0" step="100" disabled>
-                                            <span class="currency-badge">DA</span>
+                                            <input type="number" id="changeForAmountCommon" placeholder="50" min="0" step="1" disabled>
+                                            <span class="currency-badge" id="currencyBadge"></span>
                                         </div>
                                         <div class="payment-checkmark">
                                             <i class="fas fa-check"></i>
@@ -1400,15 +1386,15 @@
                 <div class="cart-summary">
                     <div class="cart-summary-row">
                         <span>Sous-total</span>
-                        <span id="summarySubtotal">0 DA</span>
+                        <span id="summarySubtotal">-</span>
                     </div>
                     <div class="cart-summary-row" id="discountRow" style="display: none;">
                         <span>Réduction</span>
-                        <span id="summaryDiscount" style="color: var(--success);">-0 DA</span>
+                        <span id="summaryDiscount" style="color: var(--success);">-</span>
                     </div>
                     <div class="cart-summary-row" id="deliveryFeeRow" style="display: none;">
                         <span>Frais de livraison</span>
-                        <span id="summaryDeliveryFee" style="color: #f59e0b;">+0 DA</span>
+                        <span id="summaryDeliveryFee" style="color: #f59e0b;">-</span>
                     </div>
 
                     <!-- Programme de fidélité - Récompenses -->
@@ -1433,8 +1419,8 @@
                                     <span style="color: #111827; font-weight: 600;">Vos points:</span>
                                     <span id="customerPoints" style="color: #10b981; font-weight: bold; font-size: 20px;">0</span>
                                 </div>
-                                <div style="font-size: 11px; color: #6b7280;">
-                                    <i class="fas fa-info-circle"></i> Gagnez des points à chaque commande: 100 DA = 1 point
+                                <div id="loyaltyInfoText" style="font-size: 11px; color: #6b7280;">
+                                    <i class="fas fa-info-circle"></i> <span id="loyaltyRatioText">Gagnez des points à chaque commande</span>
                                 </div>
                             </div>
 
@@ -1454,7 +1440,7 @@
 
                     <div class="cart-summary-row total">
                         <span>Total</span>
-                        <span class="price" id="summaryTotal">0 DA</span>
+                        <span class="price" id="summaryTotal">-</span>
                     </div>
 
                     <!-- Message légal SMS/Promotions -->
@@ -1558,7 +1544,7 @@
 
             <div class="product-modal-footer">
                 <button type="button" class="product-add-btn" onclick="CartPage.addUpsellToCart(event)" id="addUpsellBtn">
-                    <i class="fas fa-shopping-cart"></i> Ajouter • <span id="upsellModalPrice">0 DA</span>
+                    <i class="fas fa-shopping-cart"></i> Ajouter • <span id="upsellModalPrice">-</span>
                 </button>
             </div>
         </div>
@@ -1589,7 +1575,7 @@
                 country_code: '+33',
                 loyalty_euro_per_point: 10,
                 loyalty_point_value: 1,
-                delivery_zones: [],
+                delivery_cities: [],
                 payment: {}
             },
 
@@ -1609,8 +1595,8 @@
                     document.querySelector('.mode-selector').style.gridTemplateColumns = '1fr';
                 }
 
-                // Générer les zones de livraison dynamiques
-                this.renderDeliveryZones();
+                // Générer le sélecteur de villes ultramoderne
+                this.renderDeliveryCities();
 
                 // Mettre à jour le texte ratio points
                 this.updateLoyaltyText();
@@ -1646,57 +1632,219 @@
             },
 
             /**
-             * Génère les zones de livraison depuis la DB
+             * Génère le sélecteur de villes ultramoderne depuis la DB
              */
-            renderDeliveryZones() {
+            renderDeliveryCities() {
                 const container = document.getElementById('deliveryZonesContainer');
                 if (!container) return;
 
-                // Si pas de zones dans la DB, garder juste "Adresse libre"
-                if (!this.settings.delivery_zones?.length) return;
+                const cities = this.settings.delivery_cities || [];
 
-                // Garder l'option "Adresse libre" et ajouter les zones
-                let html = `
-                    <label class="delivery-type-card">
-                        <input type="radio" name="deliveryType" value="libre" onchange="CartPage.setDeliveryType('libre')" checked>
-                        <div class="delivery-card-content">
-                            <i class="fas fa-map"></i>
-                            <span>Adresse libre</span>
-                            <i class="fas fa-check delivery-check"></i>
+                // Si pas de villes configurées, afficher un message
+                if (!cities.length) {
+                    container.innerHTML = `
+                        <div style="text-align:center;padding:20px;color:#6b7280;font-size:14px;">
+                            <i class="fas fa-info-circle"></i> Livraison disponible sur demande
                         </div>
-                    </label>
+                    `;
+                    return;
+                }
+
+                // Trier: ville du resto en premier, puis par ordre alphabétique
+                const sortedCities = [...cities].sort((a, b) => {
+                    if (a.is_home_city == 1) return -1;
+                    if (b.is_home_city == 1) return 1;
+                    return a.city_name.localeCompare(b.city_name);
+                });
+
+                // Créer le sélecteur ultramoderne
+                let html = `
+                    <div class="city-selector-modern" style="display:flex;flex-direction:column;gap:10px;">
                 `;
 
-                this.settings.delivery_zones.forEach(zone => {
-                    const fee = parseFloat(zone.delivery_fee) || 0;
-                    const feeText = fee > 0 ? ` (+${Config.formatPrice(fee)})` : ' (Gratuit)';
+                sortedCities.forEach((city, index) => {
+                    const fee = parseFloat(city.delivery_fee) || 0;
+                    const isHome = city.is_home_city == 1;
+                    const checked = index === 0 ? 'checked' : '';
+
                     html += `
-                        <label class="delivery-type-card" data-zone-id="${zone.id}" data-fee="${fee}">
-                            <input type="radio" name="deliveryType" value="zone-${zone.id}" onchange="CartPage.setDeliveryType('zone-${zone.id}', ${fee})">
-                            <div class="delivery-card-content">
-                                <i class="fas fa-building"></i>
-                                <span>${this.escapeHtml(zone.name)}${feeText}</span>
-                                <i class="fas fa-check delivery-check"></i>
+                        <label class="city-option-card ${checked ? 'selected' : ''}" data-city-id="${city.id}" onclick="CartPage.selectCity(${city.id}, ${fee}, '${this.escapeHtml(city.city_name)}')">
+                            <input type="radio" name="deliveryCity" value="${city.id}" ${checked} style="display:none;">
+                            <div class="city-option-content">
+                                <div class="city-option-left">
+                                    <div class="city-option-icon" style="background:${isHome ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #6366f1, #4f46e5)'}">
+                                        <i class="fas fa-${isHome ? 'home' : 'map-marker-alt'}"></i>
+                                    </div>
+                                    <div class="city-option-info">
+                                        <span class="city-option-name">${this.escapeHtml(city.city_name)}</span>
+                                        ${isHome ? '<span class="city-home-badge">Ville du restaurant</span>' : ''}
+                                        ${city.estimated_time_min ? `<span class="city-option-time"><i class="fas fa-clock"></i> ~${city.estimated_time_min} min</span>` : ''}
+                                    </div>
+                                </div>
+                                <div class="city-option-right">
+                                    <span class="city-option-fee ${fee === 0 ? 'free' : ''}">${fee === 0 ? 'Gratuit' : Config.formatPrice(fee)}</span>
+                                    <div class="city-option-check"><i class="fas fa-check"></i></div>
+                                </div>
                             </div>
                         </label>
                     `;
                 });
 
+                html += `</div>`;
+
+                // Ajouter les styles inline pour le sélecteur ultramoderne
+                html += `
+                    <style>
+                    .city-option-card {
+                        display: block;
+                        background: #f9fafb;
+                        border: 2px solid #e5e7eb;
+                        border-radius: 16px;
+                        padding: 16px;
+                        cursor: pointer;
+                        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+                    .city-option-card:hover {
+                        border-color: #d1d5db;
+                        background: #f3f4f6;
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+                    }
+                    .city-option-card.selected {
+                        border-color: var(--primary, #e63946);
+                        background: linear-gradient(135deg, rgba(230,57,70,0.05), rgba(230,57,70,0.02));
+                        box-shadow: 0 4px 20px rgba(230,57,70,0.15);
+                    }
+                    .city-option-content {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                    }
+                    .city-option-left {
+                        display: flex;
+                        align-items: center;
+                        gap: 14px;
+                    }
+                    .city-option-icon {
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 14px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 18px;
+                        flex-shrink: 0;
+                    }
+                    .city-option-info {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                    }
+                    .city-option-name {
+                        font-weight: 700;
+                        font-size: 16px;
+                        color: #1f2937;
+                    }
+                    .city-home-badge {
+                        font-size: 11px;
+                        color: #10b981;
+                        font-weight: 600;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    }
+                    .city-option-time {
+                        font-size: 12px;
+                        color: #6b7280;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    }
+                    .city-option-right {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                    }
+                    .city-option-fee {
+                        font-size: 18px;
+                        font-weight: 800;
+                        color: #f59e0b;
+                    }
+                    .city-option-fee.free {
+                        color: #10b981;
+                        font-size: 15px;
+                    }
+                    .city-option-check {
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 50%;
+                        border: 2px solid #d1d5db;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: transparent;
+                        transition: all 0.2s;
+                    }
+                    .city-option-card.selected .city-option-check {
+                        background: var(--primary, #e63946);
+                        border-color: var(--primary, #e63946);
+                        color: white;
+                    }
+                    </style>
+                `;
+
                 container.innerHTML = html;
+
+                // Sélectionner la première ville par défaut
+                if (sortedCities.length > 0) {
+                    const first = sortedCities[0];
+                    this.selectedCityId = first.id;
+                    this.selectedCityFee = parseFloat(first.delivery_fee) || 0;
+                    this.selectedCityName = first.city_name;
+                }
             },
 
             /**
-             * Met à jour le texte du ratio points
+             * Sélectionne une ville de livraison
+             */
+            selectCity(cityId, fee, cityName) {
+                this.selectedCityId = cityId;
+                this.selectedCityFee = fee;
+                this.selectedCityName = cityName;
+
+                // Mettre à jour l'UI
+                document.querySelectorAll('.city-option-card').forEach(card => {
+                    card.classList.remove('selected');
+                    if (card.dataset.cityId == cityId) {
+                        card.classList.add('selected');
+                        card.querySelector('input[type="radio"]').checked = true;
+                    }
+                });
+
+                // Recalculer le total
+                this.updateSummary();
+            },
+
+            /**
+             * Met à jour le texte du ratio points et le badge devise
              */
             updateLoyaltyText() {
                 const euroPerPoint = this.settings.loyalty_euro_per_point || 10;
                 const symbol = this.settings.currency_symbol || '€';
-                const text = `Gagnez des points à chaque commande: ${euroPerPoint} ${symbol} = 1 point`;
+                const text = `Gagnez des points: ${euroPerPoint}${symbol} = 1 point`;
 
-                // Mettre à jour le texte dans le HTML
-                const infoEl = document.querySelector('#loyaltyRewardsDisplay .fa-info-circle')?.parentElement;
-                if (infoEl) {
-                    infoEl.innerHTML = `<i class="fas fa-info-circle"></i> ${text}`;
+                // Mettre à jour le texte du ratio de fidélité
+                const ratioEl = document.getElementById('loyaltyRatioText');
+                if (ratioEl) {
+                    ratioEl.textContent = text;
+                }
+
+                // Mettre à jour le badge devise (pour le champ monnaie)
+                const badgeEl = document.getElementById('currencyBadge');
+                if (badgeEl) {
+                    badgeEl.textContent = symbol;
                 }
             },
 
@@ -2197,7 +2345,7 @@
                     priceElement.textContent = Config.formatPrice(basePrice);
                 }
 
-                console.log('💰 Prix modal mis à jour:', basePrice, 'DA');
+                console.log('💰 Prix modal mis à jour:', Config.formatPrice(basePrice));
             },
 
             closeUpsellModal(event) {
@@ -2258,19 +2406,10 @@
             updateSummary() {
                 const subtotal = Cart.getSubtotal();
 
-                // Calculer les frais de livraison selon le type (dynamique depuis settings)
+                // Frais de livraison selon la ville sélectionnée
                 let deliveryFee = 0;
-                if (this.mode === 'delivery') {
-                    const deliveryType = this.deliveryType || 'libre';
-                    // Chercher la zone dans les settings
-                    if (deliveryType.startsWith('zone-')) {
-                        const zoneId = parseInt(deliveryType.replace('zone-', ''));
-                        const zone = this.settings.delivery_zones?.find(z => z.id == zoneId);
-                        if (zone) {
-                            deliveryFee = parseFloat(zone.delivery_fee) || 0;
-                        }
-                    }
-                    // Pour adresse libre, utiliser le calcul par distance (à implémenter)
+                if (this.mode === 'delivery' && this.selectedCityFee) {
+                    deliveryFee = this.selectedCityFee;
                 }
                 this.deliveryFee = deliveryFee;
 
@@ -2399,7 +2538,7 @@
 
                     const message = data.discount_type === 'percent'
                         ? `Code promo appliqué : -${data.discount_value}%`
-                        : `Code promo appliqué : -${data.discount_value} DA`;
+                        : `Code promo appliqué : -${Config.formatPrice(data.discount_value)}`;
 
                     this.showToast(message, 'success');
                     this.updateSummary();
@@ -2633,29 +2772,18 @@
 
                 // Validation Livraison
                 if (this.mode === 'delivery') {
-                    const deliveryType = this.deliveryType || 'libre';
-
-                    if (deliveryType === 'libre') {
-                        const address = document.getElementById('customerAddress').value.trim();
-                        const city = document.getElementById('customerCity').value.trim();
-                        if (!address) {
-                            this.showToast('Veuillez entrer votre adresse', 'error');
-                            return;
-                        }
-                        if (!city) {
-                            this.showToast('Veuillez entrer la ville', 'error');
-                            return;
-                        }
-                    }
-                    // Pour les zones dynamiques (zone-X), valider aussi l'adresse
-                    else if (deliveryType.startsWith('zone-')) {
-                        const address = document.getElementById('customerAddress').value.trim();
-                        if (!address) {
-                            this.showToast('Veuillez entrer votre adresse', 'error');
-                            return;
-                        }
+                    // Vérifier qu'une ville est sélectionnée
+                    if (!this.selectedCityId) {
+                        this.showToast('Veuillez sélectionner une ville de livraison', 'error');
+                        return;
                     }
 
+                    // Vérifier l'adresse
+                    const address = document.getElementById('customerAddress').value.trim();
+                    if (!address) {
+                        this.showToast('Veuillez entrer votre adresse', 'error');
+                        return;
+                    }
                 }
 
                 // Validation option de monnaie (pour LIVRAISON ET SUR PLACE)
@@ -2773,36 +2901,18 @@
                     // Mode simple sans précommande dans les notes
                     modeNotes = '📦 À EMPORTER';
                 } else if (this.mode === 'delivery') {
-                    const deliveryType = this.deliveryType || 'libre';
+                    const address = document.getElementById('customerAddress').value.trim();
+                    const cityName = this.selectedCityName || 'Ville';
 
-                    if (deliveryType === 'libre') {
-                        const address = document.getElementById('customerAddress').value.trim();
-                        const city = document.getElementById('customerCity').value.trim();
-                        const postalCode = document.getElementById('customerPostalCode').value.trim();
+                    // Construire l'adresse complète avec la ville sélectionnée
+                    const fullAddress = `${address}, ${cityName}`;
 
-                        // Construire l'adresse complète avec ville et code postal
-                        let fullAddress = address;
-                        if (city) {
-                            fullAddress += `, ${city}`;
-                        }
-                        if (postalCode) {
-                            fullAddress += ` ${postalCode}`;
-                        }
+                    // Sauvegarder l'adresse dans un champ dédié
+                    deliveryAddress = fullAddress;
 
-                        // ⚡ NOUVEAU: Sauvegarder l'adresse dans un champ dédié
-                        deliveryAddress = fullAddress;
-                        modeNotes = `🚗 LIVRAISON\nAdresse: ${fullAddress}`;
-                    } else if (deliveryType.startsWith('zone-')) {
-                        // Zone dynamique depuis la DB
-                        const zoneId = parseInt(deliveryType.replace('zone-', ''));
-                        const zone = this.settings.delivery_zones?.find(z => z.id == zoneId);
-                        const zoneName = zone?.name || 'Zone';
-                        const address = document.getElementById('customerAddress').value.trim();
-                        const fullAddress = `${zoneName}: ${address}`;
-
-                        deliveryAddress = fullAddress;
-                        modeNotes = `🚗 LIVRAISON (${zoneName})\nAdresse: ${address}`;
-                    }
+                    // Afficher les frais si applicable
+                    const feeText = this.selectedCityFee > 0 ? ` - Frais: ${Config.formatPrice(this.selectedCityFee)}` : ' - Livraison gratuite';
+                    modeNotes = `🚗 LIVRAISON (${cityName}${feeText})\nAdresse: ${address}`;
                 }
 
                 // ⚡ Instructions de paiement pour LIVRAISON ET SUR PLACE

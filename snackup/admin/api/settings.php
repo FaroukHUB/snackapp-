@@ -1,6 +1,6 @@
 <?php
 /**
- * API Settings - Gestion des paramètres restaurant, livraison, paiement
+ * API Settings - Gestion des paramètres restaurant, livraison par VILLE, paiement
  * Source de vérité: MySQL
  */
 
@@ -68,26 +68,26 @@ switch ($action) {
         jsonSuccess(['settings' => $settings]);
         break;
 
-    case 'calculate_delivery':
-        // Calculer frais de livraison selon distance
+    case 'get_delivery_fee':
+        // Récupérer frais de livraison pour une ville
         $input = readInput();
-        $distance = (float) ($input['distance_km'] ?? 0);
+        $cityName = trim($input['city'] ?? $_GET['city'] ?? '');
 
-        if ($distance <= 0) {
-            jsonError('Distance invalide');
+        if (empty($cityName)) {
+            jsonError('Ville non spécifiée');
         }
 
-        $result = SettingsRepository::calculateDeliveryFee($distance);
+        $result = SettingsRepository::getDeliveryFeeForCity($cityName);
 
         if ($result === null) {
             jsonSuccess([
                 'available' => false,
-                'message' => 'Livraison non disponible pour cette distance'
+                'message' => 'Livraison non disponible pour cette ville'
             ]);
         } else {
             jsonSuccess([
                 'available' => true,
-                'zone' => $result
+                'city' => $result
             ]);
         }
         break;
@@ -114,58 +114,58 @@ switch ($action) {
         break;
 
     // ========================================
-    // ADMIN: Zones de livraison
+    // ADMIN: Villes de livraison
     // ========================================
-    case 'get_delivery_zones':
+    case 'get_delivery_cities':
         requireAdmin();
-        $zones = SettingsRepository::getAllDeliveryZones();
-        jsonSuccess(['zones' => $zones]);
+        $cities = SettingsRepository::getAllDeliveryCities();
+        jsonSuccess(['cities' => $cities]);
         break;
 
-    case 'add_delivery_zone':
+    case 'add_delivery_city':
         requireAdmin();
         $input = readInput();
 
-        $id = SettingsRepository::addDeliveryZone($input);
-        $zones = SettingsRepository::getAllDeliveryZones();
+        $id = SettingsRepository::addDeliveryCity($input);
+        $cities = SettingsRepository::getAllDeliveryCities();
 
         jsonSuccess([
-            'message' => 'Zone ajoutée',
-            'zone_id' => $id,
-            'zones' => $zones
+            'message' => 'Ville ajoutée',
+            'city_id' => $id,
+            'cities' => $cities
         ]);
         break;
 
-    case 'update_delivery_zone':
+    case 'update_delivery_city':
         requireAdmin();
         $input = readInput();
         $id = (int) ($input['id'] ?? 0);
         unset($input['action'], $input['id']);
 
         if ($id <= 0) {
-            jsonError('ID zone manquant');
+            jsonError('ID ville manquant');
         }
 
-        if (SettingsRepository::updateDeliveryZone($id, $input)) {
-            $zones = SettingsRepository::getAllDeliveryZones();
-            jsonSuccess(['message' => 'Zone mise à jour', 'zones' => $zones]);
+        if (SettingsRepository::updateDeliveryCity($id, $input)) {
+            $cities = SettingsRepository::getAllDeliveryCities();
+            jsonSuccess(['message' => 'Ville mise à jour', 'cities' => $cities]);
         } else {
             jsonError('Erreur de mise à jour');
         }
         break;
 
-    case 'delete_delivery_zone':
+    case 'delete_delivery_city':
         requireAdmin();
         $input = readInput();
         $id = (int) ($input['id'] ?? 0);
 
         if ($id <= 0) {
-            jsonError('ID zone manquant');
+            jsonError('ID ville manquant');
         }
 
-        if (SettingsRepository::deleteDeliveryZone($id)) {
-            $zones = SettingsRepository::getAllDeliveryZones();
-            jsonSuccess(['message' => 'Zone supprimée', 'zones' => $zones]);
+        if (SettingsRepository::deleteDeliveryCity($id)) {
+            $cities = SettingsRepository::getAllDeliveryCities();
+            jsonSuccess(['message' => 'Ville supprimée', 'cities' => $cities]);
         } else {
             jsonError('Erreur de suppression');
         }

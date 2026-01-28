@@ -1,6 +1,6 @@
 <?php
 /**
- * SettingsRepository - Gestion MySQL pour paramètres restaurant, livraison, paiement
+ * SettingsRepository - Gestion MySQL pour paramètres restaurant, livraison par VILLE, paiement
  * Source de vérité: MySQL (pas de JSON hardcodé)
  */
 require_once __DIR__ . '/../Database.php';
@@ -31,8 +31,8 @@ class SettingsRepository {
         $stmt->execute([self::$restaurantId]);
         $settings = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        // Zones de livraison
-        $settings['delivery_zones'] = self::getDeliveryZones();
+        // Villes de livraison (actives uniquement)
+        $settings['delivery_cities'] = self::getDeliveryCities();
 
         // Payment settings (version publique - pas les clés secrètes)
         $settings['payment'] = self::getPublicPaymentSettings();
@@ -54,24 +54,28 @@ class SettingsRepository {
         $stmt->execute([self::$restaurantId]);
         $settings = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
-        $settings['delivery_zones'] = self::getDeliveryZones();
+        $settings['delivery_cities'] = self::getAllDeliveryCities();
         $settings['payment'] = self::getPaymentSettings();
 
         return $settings;
     }
 
+    // ========================================
+    // VILLES DE LIVRAISON
+    // ========================================
+
     /**
-     * Récupère les zones de livraison actives
+     * Récupère les villes de livraison actives (pour le frontend)
      */
-    public static function getDeliveryZones(): array {
+    public static function getDeliveryCities(): array {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, name, min_distance_km, max_distance_km,
-                   delivery_fee, min_order_amount, estimated_time_min, is_active
-            FROM delivery_zones
+            SELECT id, city_name, postal_code, delivery_fee,
+                   min_order_amount, estimated_time_min, is_home_city
+            FROM delivery_cities
             WHERE restaurant_id = ? AND is_active = 1
-            ORDER BY min_distance_km ASC, sort_order ASC
+            ORDER BY is_home_city DESC, sort_order ASC, city_name ASC
         ");
         $stmt->execute([self::$restaurantId]);
 
@@ -79,17 +83,17 @@ class SettingsRepository {
     }
 
     /**
-     * Récupère toutes les zones (admin)
+     * Récupère toutes les villes (admin)
      */
-    public static function getAllDeliveryZones(): array {
+    public static function getAllDeliveryCities(): array {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, name, min_distance_km, max_distance_km,
-                   delivery_fee, min_order_amount, estimated_time_min, is_active, sort_order
-            FROM delivery_zones
+            SELECT id, city_name, postal_code, delivery_fee,
+                   min_order_amount, estimated_time_min, is_active, is_home_city, sort_order
+            FROM delivery_cities
             WHERE restaurant_id = ?
-            ORDER BY sort_order ASC, min_distance_km ASC
+            ORDER BY is_home_city DESC, sort_order ASC, city_name ASC
         ");
         $stmt->execute([self::$restaurantId]);
 
@@ -97,25 +101,25 @@ class SettingsRepository {
     }
 
     /**
-     * Ajouter une zone de livraison
+     * Ajouter une ville de livraison
      */
-    public static function addDeliveryZone(array $data): int {
+    public static function addDeliveryCity(array $data): int {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            INSERT INTO delivery_zones
-            (restaurant_id, name, min_distance_km, max_distance_km, delivery_fee, min_order_amount, estimated_time_min, is_active, sort_order)
+            INSERT INTO delivery_cities
+            (restaurant_id, city_name, postal_code, delivery_fee, min_order_amount, estimated_time_min, is_active, is_home_city, sort_order)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
             self::$restaurantId,
-            $data['name'] ?? 'Nouvelle zone',
-            $data['min_distance_km'] ?? 0,
-            $data['max_distance_km'] ?? 5,
+            $data['city_name'] ?? 'Nouvelle ville',
+            $data['postal_code'] ?? null,
             $data['delivery_fee'] ?? 0,
             $data['min_order_amount'] ?? null,
             $data['estimated_time_min'] ?? 30,
             $data['is_active'] ?? 1,
+            $data['is_home_city'] ?? 0,
             $data['sort_order'] ?? 0
         ]);
 
@@ -123,16 +127,16 @@ class SettingsRepository {
     }
 
     /**
-     * Modifier une zone de livraison
+     * Modifier une ville de livraison
      */
-    public static function updateDeliveryZone(int $id, array $data): bool {
+    public static function updateDeliveryCity(int $id, array $data): bool {
         $pdo = Database::getInstance();
 
         $fields = [];
         $values = [];
 
-        $allowedFields = ['name', 'min_distance_km', 'max_distance_km', 'delivery_fee',
-                          'min_order_amount', 'estimated_time_min', 'is_active', 'sort_order'];
+        $allowedFields = ['city_name', 'postal_code', 'delivery_fee',
+                          'min_order_amount', 'estimated_time_min', 'is_active', 'is_home_city', 'sort_order'];
 
         foreach ($allowedFields as $field) {
             if (array_key_exists($field, $data)) {
@@ -147,7 +151,7 @@ class SettingsRepository {
         $values[] = self::$restaurantId;
 
         $stmt = $pdo->prepare("
-            UPDATE delivery_zones
+            UPDATE delivery_cities
             SET " . implode(', ', $fields) . "
             WHERE id = ? AND restaurant_id = ?
         ");
@@ -156,13 +160,13 @@ class SettingsRepository {
     }
 
     /**
-     * Supprimer une zone de livraison
+     * Supprimer une ville de livraison
      */
-    public static function deleteDeliveryZone(int $id): bool {
+    public static function deleteDeliveryCity(int $id): bool {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            DELETE FROM delivery_zones
+            DELETE FROM delivery_cities
             WHERE id = ? AND restaurant_id = ?
         ");
 
@@ -170,29 +174,33 @@ class SettingsRepository {
     }
 
     /**
-     * Calcule les frais de livraison selon la distance
+     * Récupère les frais de livraison pour une ville
      */
-    public static function calculateDeliveryFee(float $distanceKm): ?array {
-        $zones = self::getDeliveryZones();
+    public static function getDeliveryFeeForCity(string $cityName): ?array {
+        $pdo = Database::getInstance();
 
-        foreach ($zones as $zone) {
-            $min = (float) $zone['min_distance_km'];
-            $max = (float) $zone['max_distance_km'];
+        $stmt = $pdo->prepare("
+            SELECT id, city_name, delivery_fee, estimated_time_min, min_order_amount
+            FROM delivery_cities
+            WHERE restaurant_id = ? AND is_active = 1 AND LOWER(city_name) = LOWER(?)
+        ");
+        $stmt->execute([self::$restaurantId, $cityName]);
+        $city = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($distanceKm >= $min && $distanceKm <= $max) {
-                return [
-                    'zone_id' => $zone['id'],
-                    'zone_name' => $zone['name'],
-                    'fee' => (float) $zone['delivery_fee'],
-                    'estimated_time' => (int) $zone['estimated_time_min'],
-                    'min_order' => $zone['min_order_amount'] ? (float) $zone['min_order_amount'] : null
-                ];
-            }
-        }
+        if (!$city) return null;
 
-        // Aucune zone trouvée = livraison non disponible
-        return null;
+        return [
+            'city_id' => $city['id'],
+            'city_name' => $city['city_name'],
+            'fee' => (float) $city['delivery_fee'],
+            'estimated_time' => (int) $city['estimated_time_min'],
+            'min_order' => $city['min_order_amount'] ? (float) $city['min_order_amount'] : null
+        ];
     }
+
+    // ========================================
+    // PAIEMENTS
+    // ========================================
 
     /**
      * Payment settings (version publique - sans clés secrètes)
@@ -233,6 +241,10 @@ class SettingsRepository {
 
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
     }
+
+    // ========================================
+    // SETTINGS GÉNÉRAUX
+    // ========================================
 
     /**
      * Mettre à jour les settings restaurant
@@ -298,17 +310,6 @@ class SettingsRepository {
 
         $values[] = self::$restaurantId;
 
-        // Upsert: insert if not exists, update if exists
-        $fieldsList = implode(', ', array_keys(array_intersect_key($data, array_flip($allowedFields))));
-        $placeholders = implode(', ', array_fill(0, count($fields), '?'));
-
-        $stmt = $pdo->prepare("
-            INSERT INTO payment_settings (restaurant_id, " . implode(', ', array_intersect(array_keys($data), $allowedFields)) . ")
-            VALUES (?, " . implode(', ', array_fill(0, count(array_intersect_key($data, array_flip($allowedFields))), '?')) . ")
-            ON DUPLICATE KEY UPDATE " . implode(', ', $fields)
-        ");
-
-        // Simplifier: juste faire un UPDATE
         $stmt = $pdo->prepare("
             UPDATE payment_settings
             SET " . implode(', ', $fields) . "
