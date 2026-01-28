@@ -1803,7 +1803,7 @@ switch ($action) {
         }
 
         if (isset($input['name'])) $runtime['supplements']['catalog'][$id]['name'] = trim($input['name']);
-        if (isset($input['price'])) $runtime['supplements']['catalog'][$id]['price'] = (float)$input['price'];
+        if (isset($input['price'])) $runtime['supplements']['catalog'][$id]['price'] = normalizePrice($input['price']);
         if (isset($input['status'])) $runtime['supplements']['catalog'][$id]['status'] = $input['status'];
         if (isset($input['category'])) {
             $runtime['supplements']['catalog'][$id]['category'] = $input['category'];

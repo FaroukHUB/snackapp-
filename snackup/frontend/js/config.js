@@ -452,7 +452,9 @@ const Config = {
         // Convertir code devise en symbole
         const currencySymbols = { 'EUR': '€', 'USD': '$', 'GBP': '£', 'DA': 'DA', 'DZD': 'DA' };
         const symbol = currencySymbols[currencyCode] || currencyCode;
-        return Math.round(price) + ' ' + symbol;
+        // Afficher les décimales si nécessaire (ex: 1.50€), sinon entier (ex: 2€)
+        const formatted = Number(price).toFixed(2).replace(/\.00$/, '').replace('.', ',');
+        return formatted + ' ' + symbol;
     },
 
     /**
