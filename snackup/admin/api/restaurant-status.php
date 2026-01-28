@@ -1,174 +1,127 @@
 <?php
 /**
  * API: Gestion du statut du restaurant (ouvert/fermé pour les commandes)
+ * Version 2.0 - Utilise la base de données MySQL
  */
 
-// Session doit être démarrée AVANT config.php pour éviter les conflits
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-require_once '../config.php';
+require_once __DIR__ . '/../bootstrap.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Fichier pour stocker le statut
-$statusFile = DATA_DIR . 'restaurant-status.json';
-
 // Action demandée
 $action = $_GET['action'] ?? $_POST['action'] ?? 'get';
 
-// Initialiser le fichier si inexistant
-if (!file_exists($statusFile)) {
-    $defaultStatus = [
-        'accepting_orders' => false,
-        'last_updated' => date('Y-m-d H:i:s'),
-        'updated_by' => 'system'
-    ];
-    file_put_contents($statusFile, json_encode($defaultStatus, JSON_PRETTY_PRINT));
+// Vérifier que la BD est disponible
+if (!defined('SNACK_RESTAURANT_ID')) {
+    echo json_encode(['success' => false, 'error' => 'Configuration manquante']);
+    exit;
 }
 
-// Lire le statut actuel
-function getStatus() {
-    global $statusFile;
-    $content = file_get_contents($statusFile);
-    return json_decode($content, true);
-}
-
-// Sauvegarder le statut
-function saveStatus($data) {
-    global $statusFile;
-    return file_put_contents($statusFile, json_encode($data, JSON_PRETTY_PRINT)) !== false;
-}
+$restaurantId = SNACK_RESTAURANT_ID;
 
 // Router
 switch ($action) {
     case 'get':
         // Récupérer le statut actuel
-        $status = getStatus();
+        $acceptingOrders = RestaurantRepository::isAcceptingOrders($restaurantId);
+        $deliveryEnabled = RestaurantRepository::isDeliveryEnabled($restaurantId);
+
         echo json_encode([
             'success' => true,
-            'status' => $status
+            'status' => [
+                'accepting_orders' => $acceptingOrders,
+                'delivery_enabled' => $deliveryEnabled,
+                'last_updated' => date('Y-m-d H:i:s')
+            ]
         ]);
         break;
 
     case 'toggle':
         // Basculer le statut (pour l'admin)
-        if (!isset($_SESSION['admin_logged_in'])) {
-            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
-            exit;
-        }
+        requireAdmin();
 
-        $status = getStatus();
-        $status['accepting_orders'] = !$status['accepting_orders'];
-        $status['last_updated'] = date('Y-m-d H:i:s');
-        $status['updated_by'] = 'admin';
-
-        if (saveStatus($status)) {
-            echo json_encode([
-                'success' => true,
-                'status' => $status,
-                'message' => $status['accepting_orders'] ? 'Restaurant ouvert aux commandes' : 'Restaurant fermé aux commandes'
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
-        }
+        $newStatus = RestaurantRepository::toggleAcceptingOrders($restaurantId);
+        echo json_encode([
+            'success' => true,
+            'status' => [
+                'accepting_orders' => $newStatus,
+                'last_updated' => date('Y-m-d H:i:s')
+            ],
+            'message' => $newStatus ? 'Restaurant ouvert aux commandes' : 'Restaurant fermé aux commandes'
+        ]);
         break;
 
     case 'open':
         // Ouvrir le restaurant
-        if (!isset($_SESSION['admin_logged_in'])) {
-            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
-            exit;
-        }
+        requireAdmin();
 
-        $status = getStatus();
-        $status['accepting_orders'] = true;
-        $status['last_updated'] = date('Y-m-d H:i:s');
-        $status['updated_by'] = 'admin';
-
-        if (saveStatus($status)) {
-            echo json_encode([
-                'success' => true,
-                'status' => $status,
-                'message' => '✅ Restaurant ouvert aux commandes'
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
-        }
+        RestaurantRepository::toggleAcceptingOrders($restaurantId, true);
+        echo json_encode([
+            'success' => true,
+            'status' => [
+                'accepting_orders' => true,
+                'last_updated' => date('Y-m-d H:i:s')
+            ],
+            'message' => '✅ Restaurant ouvert aux commandes'
+        ]);
         break;
 
     case 'close':
         // Fermer le restaurant
-        if (!isset($_SESSION['admin_logged_in'])) {
-            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
-            exit;
-        }
+        requireAdmin();
 
-        $status = getStatus();
-        $status['accepting_orders'] = false;
-        $status['last_updated'] = date('Y-m-d H:i:s');
-        $status['updated_by'] = 'admin';
-
-        if (saveStatus($status)) {
-            echo json_encode([
-                'success' => true,
-                'status' => $status,
-                'message' => '🔒 Restaurant fermé aux commandes'
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
-        }
+        RestaurantRepository::toggleAcceptingOrders($restaurantId, false);
+        echo json_encode([
+            'success' => true,
+            'status' => [
+                'accepting_orders' => false,
+                'last_updated' => date('Y-m-d H:i:s')
+            ],
+            'message' => '🔒 Restaurant fermé aux commandes'
+        ]);
         break;
 
     case 'toggle_delivery':
         // Toggle livraison ON/OFF
-        if (!isset($_SESSION['admin_logged_in'])) {
-            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
-            exit;
-        }
+        requireAdmin();
 
-        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
-        $restaurant = json_decode(file_get_contents($restaurantFile), true);
-
-        if (!isset($restaurant['delivery'])) {
-            $restaurant['delivery'] = ['enabled' => true];
-        }
-
-        $restaurant['delivery']['enabled'] = !$restaurant['delivery']['enabled'];
-
-        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-            echo json_encode([
-                'success' => true,
-                'delivery_enabled' => $restaurant['delivery']['enabled'],
-                'message' => $restaurant['delivery']['enabled'] ? '🚚 Livraison activée' : '🏠 Livraison désactivée'
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
-        }
+        $newStatus = RestaurantRepository::toggleDelivery($restaurantId);
+        echo json_encode([
+            'success' => true,
+            'delivery_enabled' => $newStatus,
+            'message' => $newStatus ? '🚚 Livraison activée' : '🏠 Livraison désactivée'
+        ]);
         break;
 
     case 'get_settings':
         // Récupérer tous les paramètres du restaurant
-        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
-        $restaurant = json_decode(file_get_contents($restaurantFile), true);
+        $deliveryEnabled = RestaurantRepository::isDeliveryEnabled($restaurantId);
+        $platforms = RestaurantRepository::getDeliveryPlatforms($restaurantId);
+
+        // Transformer les plateformes au format attendu
+        $platformsFormatted = array_map(function($p) {
+            return [
+                'id' => $p['slug'],
+                'name' => $p['name'],
+                'url' => $p['url'],
+                'icon' => $p['icon'],
+                'enabled' => (bool) $p['is_enabled']
+            ];
+        }, $platforms);
 
         echo json_encode([
             'success' => true,
-            'delivery' => $restaurant['delivery'] ?? ['enabled' => false],
-            'platforms' => $restaurant['platforms'] ?? []
+            'delivery' => ['enabled' => $deliveryEnabled],
+            'platforms' => $platformsFormatted
         ]);
         break;
 
     case 'update_platform':
         // Activer/Désactiver une plateforme
-        if (!isset($_SESSION['admin_logged_in'])) {
-            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
-            exit;
-        }
+        requireAdmin();
 
         $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
         $platformId = $input['platform_id'] ?? null;
@@ -179,40 +132,49 @@ switch ($action) {
             exit;
         }
 
-        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
-        $restaurant = json_decode(file_get_contents($restaurantFile), true);
-
-        $found = false;
-        foreach ($restaurant['platforms'] as &$platform) {
-            if ($platform['id'] === $platformId) {
-                $platform['enabled'] = $enabled ?? !($platform['enabled'] ?? true);
-                $found = true;
+        // Trouver la plateforme par slug
+        $platforms = RestaurantRepository::getDeliveryPlatforms($restaurantId);
+        $platform = null;
+        foreach ($platforms as $p) {
+            if ($p['slug'] === $platformId) {
+                $platform = $p;
                 break;
             }
         }
 
-        if (!$found) {
+        if (!$platform) {
             echo json_encode(['success' => false, 'error' => 'Plateforme introuvable']);
             exit;
         }
 
-        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-            echo json_encode([
-                'success' => true,
-                'platforms' => $restaurant['platforms'],
-                'message' => 'Plateforme mise à jour'
-            ]);
+        // Si enabled n'est pas spécifié, toggle
+        if ($enabled === null) {
+            RestaurantRepository::toggleDeliveryPlatform($platform['id']);
         } else {
-            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
+            RestaurantRepository::updateDeliveryPlatform($platform['id'], ['enabled' => $enabled]);
         }
+
+        // Retourner les plateformes mises à jour
+        $updatedPlatforms = RestaurantRepository::getDeliveryPlatforms($restaurantId);
+        $platformsFormatted = array_map(function($p) {
+            return [
+                'id' => $p['slug'],
+                'name' => $p['name'],
+                'url' => $p['url'],
+                'enabled' => (bool) $p['is_enabled']
+            ];
+        }, $updatedPlatforms);
+
+        echo json_encode([
+            'success' => true,
+            'platforms' => $platformsFormatted,
+            'message' => 'Plateforme mise à jour'
+        ]);
         break;
 
     case 'add_platform':
         // Ajouter une nouvelle plateforme
-        if (!isset($_SESSION['admin_logged_in'])) {
-            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
-            exit;
-        }
+        requireAdmin();
 
         $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
         $name = trim($input['name'] ?? '');
@@ -223,47 +185,33 @@ switch ($action) {
             exit;
         }
 
-        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
-        $restaurant = json_decode(file_get_contents($restaurantFile), true);
-
-        $id = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
-        $id = trim($id, '-');
-
-        // Vérifier que l'ID n'existe pas déjà
-        foreach ($restaurant['platforms'] as $p) {
-            if ($p['id'] === $id) {
-                $id .= '-' . rand(100, 999);
-                break;
-            }
-        }
-
-        $newPlatform = [
-            'id' => $id,
+        $newId = RestaurantRepository::addDeliveryPlatform($restaurantId, [
             'name' => $name,
             'url' => $url,
             'enabled' => true
-        ];
+        ]);
 
-        $restaurant['platforms'][] = $newPlatform;
+        // Retourner les plateformes mises à jour
+        $platforms = RestaurantRepository::getDeliveryPlatforms($restaurantId);
+        $platformsFormatted = array_map(function($p) {
+            return [
+                'id' => $p['slug'],
+                'name' => $p['name'],
+                'url' => $p['url'],
+                'enabled' => (bool) $p['is_enabled']
+            ];
+        }, $platforms);
 
-        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-            echo json_encode([
-                'success' => true,
-                'platform' => $newPlatform,
-                'platforms' => $restaurant['platforms'],
-                'message' => 'Plateforme ajoutée'
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
-        }
+        echo json_encode([
+            'success' => true,
+            'platforms' => $platformsFormatted,
+            'message' => 'Plateforme ajoutée'
+        ]);
         break;
 
     case 'delete_platform':
         // Supprimer une plateforme
-        if (!isset($_SESSION['admin_logged_in'])) {
-            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
-            exit;
-        }
+        requireAdmin();
 
         $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
         $platformId = $input['platform_id'] ?? null;
@@ -273,66 +221,66 @@ switch ($action) {
             exit;
         }
 
-        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
-        $restaurant = json_decode(file_get_contents($restaurantFile), true);
-
-        $restaurant['platforms'] = array_values(array_filter(
-            $restaurant['platforms'],
-            fn($p) => $p['id'] !== $platformId
-        ));
-
-        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-            echo json_encode([
-                'success' => true,
-                'platforms' => $restaurant['platforms'],
-                'message' => 'Plateforme supprimée'
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
+        // Trouver la plateforme par slug
+        $platforms = RestaurantRepository::getDeliveryPlatforms($restaurantId);
+        $platform = null;
+        foreach ($platforms as $p) {
+            if ($p['slug'] === $platformId) {
+                $platform = $p;
+                break;
+            }
         }
+
+        if (!$platform) {
+            echo json_encode(['success' => false, 'error' => 'Plateforme introuvable']);
+            exit;
+        }
+
+        RestaurantRepository::deleteDeliveryPlatform($platform['id']);
+
+        // Retourner les plateformes mises à jour
+        $updatedPlatforms = RestaurantRepository::getDeliveryPlatforms($restaurantId);
+        $platformsFormatted = array_map(function($p) {
+            return [
+                'id' => $p['slug'],
+                'name' => $p['name'],
+                'url' => $p['url'],
+                'enabled' => (bool) $p['is_enabled']
+            ];
+        }, $updatedPlatforms);
+
+        echo json_encode([
+            'success' => true,
+            'platforms' => $platformsFormatted,
+            'message' => 'Plateforme supprimée'
+        ]);
         break;
 
     case 'save_theme':
         // Sauvegarder les couleurs du thème
-        if (!isset($_SESSION['admin_logged_in'])) {
-            echo json_encode(['success' => false, 'error' => 'Non autorisé']);
-            exit;
-        }
+        requireAdmin();
 
         $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
-        $restaurantFile = dirname(dirname(__DIR__)) . '/config/restaurant.json';
-        $restaurant = json_decode(file_get_contents($restaurantFile), true);
+        $colors = [];
+        if (isset($input['primary'])) $colors['primary'] = $input['primary'];
+        if (isset($input['primaryDark'])) $colors['primaryDark'] = $input['primaryDark'];
+        if (isset($input['secondary'])) $colors['secondary'] = $input['secondary'];
+        if (isset($input['accent'])) $colors['accent'] = $input['accent'];
 
-        if (!isset($restaurant['theme'])) {
-            $restaurant['theme'] = [];
+        if (!empty($colors)) {
+            RestaurantRepository::updateTheme($restaurantId, $colors);
         }
 
-        // Mettre à jour les couleurs directement dans theme
-        $colorFields = ['primary', 'accent', 'background', 'cardBackground'];
-        foreach ($colorFields as $field) {
-            if (isset($input[$field])) {
-                $restaurant['theme'][$field] = $input[$field];
-            }
-        }
+        $theme = RestaurantRepository::getTheme($restaurantId);
 
-        // Calculer automatiquement primaryDark
-        if (isset($input['primary'])) {
-            $restaurant['theme']['primaryDark'] = $input['primary']; // Le site calculera une version plus sombre
-        }
-
-        if (file_put_contents($restaurantFile, json_encode($restaurant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-            echo json_encode([
-                'success' => true,
-                'theme' => $restaurant['theme'],
-                'message' => 'Couleurs sauvegardées'
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Erreur de sauvegarde']);
-        }
+        echo json_encode([
+            'success' => true,
+            'theme' => $theme,
+            'message' => 'Couleurs sauvegardées'
+        ]);
         break;
 
     default:
         echo json_encode(['success' => false, 'error' => 'Action invalide']);
 }
-?>

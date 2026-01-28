@@ -49,6 +49,7 @@ if (!$restaurant) {
 }
 
 // Construire la réponse JSON avec les données DB + config instance
+// Thème: priorité BD > InstanceManager > défaut
 $themeConfig = InstanceManager::getThemeConfig() ?? [];
 
 $response = [
@@ -61,10 +62,10 @@ $response = [
     'isHalal' => (bool)($settings['is_halal'] ?? true),
 
     'theme' => [
-        'primary' => $themeConfig['primary'] ?? '#e63946',
-        'primaryDark' => $themeConfig['primary_dark'] ?? '#d62839',
-        'secondary' => $themeConfig['secondary'] ?? '#1a1a2e',
-        'accent' => $themeConfig['accent'] ?? '#ff6fae',
+        'primary' => $settings['theme_primary'] ?? $themeConfig['primary'] ?? '#e63946',
+        'primaryDark' => $settings['theme_primary_dark'] ?? $themeConfig['primary_dark'] ?? '#d62839',
+        'secondary' => $settings['theme_secondary'] ?? $themeConfig['secondary'] ?? '#1a1a2e',
+        'accent' => $settings['theme_accent'] ?? $themeConfig['accent'] ?? '#ff6fae',
         'background' => '#f5f5f5',
         'cardBackground' => '#ffffff',
         'textPrimary' => '#111111',
@@ -126,6 +127,22 @@ $response = [
                 'answer' => $f['answer']
             ];
         }, $faqItems)
+    ],
+
+    // Plateformes de livraison depuis table delivery_platforms
+    'platforms' => array_map(function($p) {
+        return [
+            'id' => $p['slug'],
+            'name' => $p['name'],
+            'url' => $p['url'],
+            'icon' => $p['icon'] ?? $p['slug'],
+            'enabled' => (bool) $p['is_enabled']
+        ];
+    }, RestaurantRepository::getDeliveryPlatforms($restaurantId)),
+
+    // Statut livraison
+    'delivery' => [
+        'enabled' => (bool) ($settings['delivery_enabled'] ?? true)
     ]
 ];
 

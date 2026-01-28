@@ -414,15 +414,17 @@ $action = $_POST['action'];
                 }
             }
 
-            // Mettre à jour restaurant.json - contact et social
-            if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
-            if (isset($_POST['whatsapp'])) $restaurantSettings['contact']['whatsappOrdersNumber'] = $_POST['whatsapp'];
-            $restaurantSettings['contact']['extra_phones'] = $extraPhones;
-            $restaurantSettings['social']['instagram'] = $socials['instagram'];
-            $restaurantSettings['social']['facebook'] = $socials['facebook'];
-            $restaurantSettings['social']['tiktok'] = $socials['tiktok'];
-            $restaurantSettings['social']['snapchat'] = $socials['snapchat'];
-            $restaurantSettings['social']['extra'] = $socials['extra'];
+            // Mode JSON fallback: Mettre à jour restaurant.json
+            if (!$useMySQL) {
+                if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
+                if (isset($_POST['whatsapp'])) $restaurantSettings['contact']['whatsappOrdersNumber'] = $_POST['whatsapp'];
+                $restaurantSettings['contact']['extra_phones'] = $extraPhones;
+                $restaurantSettings['social']['instagram'] = $socials['instagram'];
+                $restaurantSettings['social']['facebook'] = $socials['facebook'];
+                $restaurantSettings['social']['tiktok'] = $socials['tiktok'];
+                $restaurantSettings['social']['snapchat'] = $socials['snapchat'];
+                $restaurantSettings['social']['extra'] = $socials['extra'];
+            }
         }
 
         // Traitement des horaires (formulaire horaires)
@@ -436,41 +438,43 @@ $action = $_POST['action'];
                     ];
                 }
                 RestaurantRepository::updateOpeningHours(SNACK_RESTAURANT_ID, $hours);
-            }
-
-            // Mettre à jour restaurant.json - horaires
-            $restaurantSettings['openingHours'] = [];
-            $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-            foreach ($days as $i => $day) {
-                $dayData = ['day' => $day];
-                // Nouveau format avec slots multiples
-                if (isset($_POST['hours'][$i]['slots'])) {
-                    $slots = [];
-                    foreach ($_POST['hours'][$i]['slots'] as $slot) {
-                        if (!empty($slot['opens']) && !empty($slot['closes'])) {
-                            $slots[] = [
-                                'opens' => $slot['opens'],
-                                'closes' => $slot['closes']
-                            ];
+            } else {
+                // Mode JSON fallback: Mettre à jour restaurant.json - horaires
+                $restaurantSettings['openingHours'] = [];
+                $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+                foreach ($days as $i => $day) {
+                    $dayData = ['day' => $day];
+                    // Nouveau format avec slots multiples
+                    if (isset($_POST['hours'][$i]['slots'])) {
+                        $slots = [];
+                        foreach ($_POST['hours'][$i]['slots'] as $slot) {
+                            if (!empty($slot['opens']) && !empty($slot['closes'])) {
+                                $slots[] = [
+                                    'opens' => $slot['opens'],
+                                    'closes' => $slot['closes']
+                                ];
+                            }
                         }
+                        $dayData['slots'] = $slots;
+                        // Garder compatibilité avec ancien format (premier créneau)
+                        if (!empty($slots)) {
+                            $dayData['opens'] = $slots[0]['opens'];
+                            $dayData['closes'] = $slots[0]['closes'];
+                        }
+                    } else {
+                        // Ancien format
+                        $dayData['opens'] = $_POST['hours'][$i]['opens'] ?? '18:30';
+                        $dayData['closes'] = $_POST['hours'][$i]['closes'] ?? '23:30';
                     }
-                    $dayData['slots'] = $slots;
-                    // Garder compatibilité avec ancien format (premier créneau)
-                    if (!empty($slots)) {
-                        $dayData['opens'] = $slots[0]['opens'];
-                        $dayData['closes'] = $slots[0]['closes'];
-                    }
-                } else {
-                    // Ancien format
-                    $dayData['opens'] = $_POST['hours'][$i]['opens'] ?? '18:30';
-                    $dayData['closes'] = $_POST['hours'][$i]['closes'] ?? '23:30';
+                    $restaurantSettings['openingHours'][] = $dayData;
                 }
-                $restaurantSettings['openingHours'][] = $dayData;
             }
         }
 
-        // Sauvegarder restaurant.json
-        file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        // Sauvegarder restaurant.json SEULEMENT en mode JSON fallback
+        if (!$useMySQL && !empty($restaurantSettings)) {
+            file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        }
 
         header('Location: index.php#settings');
         exit;
@@ -489,10 +493,11 @@ $action = $_POST['action'];
 
         if ($useMySQL) {
             RestaurantRepository::updateFaq(SNACK_RESTAURANT_ID, $faqItemsNew);
+        } else {
+            // Mode JSON fallback: mettre à jour restaurant.json
+            $restaurantSettings['faq']['items'] = $faqItemsNew;
+            file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
-        // Toujours mettre à jour restaurant.json pour le site public
-        $restaurantSettings['faq']['items'] = $faqItemsNew;
-        file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
         header('Location: index.php#settings');
         exit;
