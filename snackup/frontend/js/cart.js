@@ -241,6 +241,75 @@ const Cart = {
     },
 
     /**
+     * Calcule la remise bundle "2 Pizzas"
+     * - 2 Pizzas Solo = 13€ (au lieu de 15€, économie 2€)
+     * - 2 Pizzas Duo = 15€ (au lieu de 18€, économie 3€)
+     */
+    calculateBundleDiscount() {
+        // Prix configurables (from settings if available)
+        const BUNDLE_SOLO_PRICE = 13.00;  // 2 pizzas solo
+        const BUNDLE_DUO_PRICE = 15.00;   // 2 pizzas duo
+        const PIZZA_SOLO_PRICE = 7.50;
+        const PIZZA_DUO_PRICE = 9.00;
+
+        // Filtrer les pizzas (catégorie contient "pizza")
+        const pizzas = this.items.filter(item => {
+            const catId = (item.categoryId || '').toLowerCase();
+            return catId.includes('pizza');
+        });
+
+        if (pizzas.length === 0) return { discount: 0, details: [] };
+
+        // Séparer par taille (menuType: 'solo' ou 'duo')
+        let soloCount = 0;
+        let duoCount = 0;
+
+        pizzas.forEach(item => {
+            const menuType = item.options?.menuType || 'solo';
+            const qty = item.quantity || 1;
+            if (menuType === 'duo' || menuType === 'menu') {
+                duoCount += qty;
+            } else {
+                soloCount += qty;
+            }
+        });
+
+        let discount = 0;
+        const details = [];
+
+        // Calculer remise Solo
+        if (soloCount >= 2) {
+            const bundles = Math.floor(soloCount / 2);
+            const soloDiscount = bundles * ((PIZZA_SOLO_PRICE * 2) - BUNDLE_SOLO_PRICE);
+            discount += soloDiscount;
+            if (soloDiscount > 0) {
+                details.push({ type: 'solo', count: bundles * 2, saved: soloDiscount });
+            }
+        }
+
+        // Calculer remise Duo
+        if (duoCount >= 2) {
+            const bundles = Math.floor(duoCount / 2);
+            const duoDiscount = bundles * ((PIZZA_DUO_PRICE * 2) - BUNDLE_DUO_PRICE);
+            discount += duoDiscount;
+            if (duoDiscount > 0) {
+                details.push({ type: 'duo', count: bundles * 2, saved: duoDiscount });
+            }
+        }
+
+        return { discount, details, soloCount, duoCount };
+    },
+
+    /**
+     * Get total with bundle discount applied
+     */
+    getTotalWithBundle() {
+        const subtotal = this.getSubtotal();
+        const { discount } = this.calculateBundleDiscount();
+        return subtotal - discount;
+    },
+
+    /**
      * Get all unique categories in cart
      */
     getCartCategories() {

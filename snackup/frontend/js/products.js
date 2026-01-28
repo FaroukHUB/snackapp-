@@ -653,6 +653,14 @@ const Products = {
             }
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
 
+            // Badge bundle pour pizzas
+            const isPizza = categoryId && categoryId.toLowerCase().includes('pizza');
+            const bundleBadge = isPizza ? `
+                <div class="bundle-offer-badge">
+                    <span class="bundle-icon">🔥</span>
+                    <span class="bundle-text">2 = 13€ Solo | 15€ Duo</span>
+                </div>` : '';
+
             return `
                 <article class="product-card-new ${isUnavailable ? 'unavailable' : ''}" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
                     ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
@@ -666,6 +674,7 @@ const Products = {
                     <div class="product-content-new">
                         <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
                         <p class="product-desc-new">${escapeHtml(desc)}</p>
+                        ${bundleBadge}
                         <div class="product-footer-new">
                             <span class="product-price-new">${priceText}</span>
                             <button class="product-btn-new" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">
