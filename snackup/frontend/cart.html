@@ -1657,18 +1657,38 @@
             discount: 0,
             appliedPromoCode: null,
 
+            // Settings chargés depuis MySQL (plus de hardcoding)
+            settings: {
+                currency_symbol: '€',
+                currency_position: 'after',
+                country_code: '+33',
+                loyalty_euro_per_point: 10,
+                loyalty_point_value: 1,
+                delivery_zones: [],
+                payment: {}
+            },
+
             async init() {
                 // Load config
                 await Config.init();
 
+                // Charger les settings depuis l'API MySQL
+                await this.loadSettings();
+
                 // Check delivery setting and hide option if disabled
-                const deliveryEnabled = Config.restaurant?.delivery?.enabled ?? true;
+                const deliveryEnabled = this.settings.delivery_enabled ?? Config.restaurant?.delivery?.enabled ?? true;
                 const deliveryOption = document.querySelector('.mode-option[data-mode="delivery"]');
                 if (!deliveryEnabled && deliveryOption) {
                     deliveryOption.style.display = 'none';
                     // Make pickup take full width
                     document.querySelector('.mode-selector').style.gridTemplateColumns = '1fr';
                 }
+
+                // Générer les zones de livraison dynamiques
+                this.renderDeliveryZones();
+
+                // Mettre à jour le texte ratio points
+                this.updateLoyaltyText();
 
                 // Initialize cart
                 Cart.init();
@@ -1682,6 +1702,74 @@
 
                 // ⚡ Auto-compléter l'adresse depuis les données client
                 this.setupPhoneAutoComplete();
+            },
+
+            /**
+             * Charge les settings depuis l'API MySQL
+             */
+            async loadSettings() {
+                try {
+                    const res = await fetch('../admin/api/settings.php?action=get_public');
+                    const data = await res.json();
+                    if (data.success && data.settings) {
+                        this.settings = { ...this.settings, ...data.settings };
+                        console.log('✅ Settings chargés:', this.settings);
+                    }
+                } catch (err) {
+                    console.warn('⚠️ Impossible de charger les settings, utilisation des valeurs par défaut:', err);
+                }
+            },
+
+            /**
+             * Génère les zones de livraison depuis la DB
+             */
+            renderDeliveryZones() {
+                const container = document.querySelector('.delivery-type-container');
+                if (!container || !this.settings.delivery_zones?.length) return;
+
+                // Garder l'option "Adresse libre" et ajouter les zones
+                let html = `
+                    <label class="delivery-type-card">
+                        <input type="radio" name="deliveryType" value="libre" onchange="CartPage.setDeliveryType('libre')" checked>
+                        <div class="delivery-card-content">
+                            <i class="fas fa-map"></i>
+                            <span>Adresse libre</span>
+                            <i class="fas fa-check delivery-check"></i>
+                        </div>
+                    </label>
+                `;
+
+                this.settings.delivery_zones.forEach(zone => {
+                    const fee = parseFloat(zone.delivery_fee) || 0;
+                    const feeText = fee > 0 ? ` (+${Config.formatPrice(fee)})` : ' (Gratuit)';
+                    html += `
+                        <label class="delivery-type-card" data-zone-id="${zone.id}" data-fee="${fee}">
+                            <input type="radio" name="deliveryType" value="zone-${zone.id}" onchange="CartPage.setDeliveryType('zone-${zone.id}', ${fee})">
+                            <div class="delivery-card-content">
+                                <i class="fas fa-building"></i>
+                                <span>${this.escapeHtml(zone.name)}${feeText}</span>
+                                <i class="fas fa-check delivery-check"></i>
+                            </div>
+                        </label>
+                    `;
+                });
+
+                container.innerHTML = html;
+            },
+
+            /**
+             * Met à jour le texte du ratio points
+             */
+            updateLoyaltyText() {
+                const euroPerPoint = this.settings.loyalty_euro_per_point || 10;
+                const symbol = this.settings.currency_symbol || '€';
+                const text = `Gagnez des points à chaque commande: ${euroPerPoint} ${symbol} = 1 point`;
+
+                // Mettre à jour le texte dans le HTML
+                const infoEl = document.querySelector('#loyaltyRewardsDisplay .fa-info-circle')?.parentElement;
+                if (infoEl) {
+                    infoEl.innerHTML = `<i class="fas fa-info-circle"></i> ${text}`;
+                }
             },
 
             /**
@@ -2242,15 +2330,19 @@
             updateSummary() {
                 const subtotal = Cart.getSubtotal();
 
-                // Calculer les frais de livraison selon le type
+                // Calculer les frais de livraison selon le type (dynamique depuis settings)
                 let deliveryFee = 0;
                 if (this.mode === 'delivery') {
                     const deliveryType = this.deliveryType || 'libre';
-                    if (deliveryType === 'riad-city') {
-                        deliveryFee = 50;
-                    } else if (deliveryType === 'riad-prestige') {
-                        deliveryFee = 100;
+                    // Chercher la zone dans les settings
+                    if (deliveryType.startsWith('zone-')) {
+                        const zoneId = parseInt(deliveryType.replace('zone-', ''));
+                        const zone = this.settings.delivery_zones?.find(z => z.id == zoneId);
+                        if (zone) {
+                            deliveryFee = parseFloat(zone.delivery_fee) || 0;
+                        }
                     }
+                    // Pour adresse libre, utiliser le calcul par distance (à implémenter)
                 }
                 this.deliveryFee = deliveryFee;
 
@@ -2313,21 +2405,31 @@
                 });
             },
 
-            setDeliveryType(type) {
+            setDeliveryType(type, fee = 0) {
                 this.deliveryType = type;
+                this.selectedDeliveryFee = fee;
 
                 // Hide all delivery sub-fields
-                document.getElementById('deliveryLibre').style.display = 'none';
-                document.getElementById('deliveryRiadCity').style.display = 'none';
-                document.getElementById('deliveryRiadPrestige').style.display = 'none';
+                const deliveryLibre = document.getElementById('deliveryLibre');
+                const deliveryRiadCity = document.getElementById('deliveryRiadCity');
+                const deliveryRiadPrestige = document.getElementById('deliveryRiadPrestige');
 
-                // Show selected type
+                if (deliveryLibre) deliveryLibre.style.display = 'none';
+                if (deliveryRiadCity) deliveryRiadCity.style.display = 'none';
+                if (deliveryRiadPrestige) deliveryRiadPrestige.style.display = 'none';
+
+                // Show address input for libre mode, or zone-specific fields if they exist
                 if (type === 'libre') {
-                    document.getElementById('deliveryLibre').style.display = 'block';
-                } else if (type === 'riad-city') {
-                    document.getElementById('deliveryRiadCity').style.display = 'block';
-                } else if (type === 'riad-prestige') {
-                    document.getElementById('deliveryRiadPrestige').style.display = 'block';
+                    if (deliveryLibre) deliveryLibre.style.display = 'block';
+                } else if (type.startsWith('zone-')) {
+                    // Pour les zones définies dans la DB, afficher juste l'input adresse
+                    if (deliveryLibre) deliveryLibre.style.display = 'block';
+                }
+                // Legacy support for hardcoded zones (if still in HTML)
+                else if (type === 'riad-city' && deliveryRiadCity) {
+                    deliveryRiadCity.style.display = 'block';
+                } else if (type === 'riad-prestige' && deliveryRiadPrestige) {
+                    deliveryRiadPrestige.style.display = 'block';
                 }
 
                 // Recalculer le résumé (frais de livraison changent selon le type)
@@ -2524,7 +2626,8 @@
             calculatePointsDiscount() {
                 const pointsToUse = parseInt(document.getElementById('pointsToUseInput').value) || 0;
                 const available = parseInt(document.getElementById('availablePoints').textContent) || 0;
-                const pointValue = 1; // 1 point = 1 DA (à récupérer depuis settings)
+                // Valeur d'un point depuis settings MySQL (dynamique)
+                const pointValue = parseFloat(this.settings.loyalty_point_value) || 1;
 
                 if (pointsToUse > available) {
                     document.getElementById('pointsToUseInput').value = available;
@@ -2536,7 +2639,7 @@
 
                 if (pointsToUse > 0) {
                     document.getElementById('pointsDiscountInfo').style.display = 'block';
-                    document.getElementById('pointsDiscountAmount').textContent = `-${discount} DA`;
+                    document.getElementById('pointsDiscountAmount').textContent = `-${Config.formatPrice(discount)}`;
                 } else {
                     document.getElementById('pointsDiscountInfo').style.display = 'none';
                 }

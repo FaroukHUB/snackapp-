@@ -2586,6 +2586,13 @@ if (isset($_GET['export'])) {
                 <a href="livreurs-manager.php" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);"><i class="fas fa-users-cog"></i> Gérer les livreurs</a>
             </div>
 
+            <!-- Paramètres -->
+            <div class="card" style="border-left: 4px solid #8b5cf6;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-cog" style="color: #8b5cf6;"></i> Paramètres</h3>
+                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Devise, zones de livraison, programme fidélité, méthodes de paiement.</p>
+                <a href="settings-manager.php" class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);"><i class="fas fa-sliders-h"></i> Configurer</a>
+            </div>
+
             <!-- Sécurité PIN -->
             <div class="card" style="border-left: 4px solid #ef4444;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-lock" style="color: #ef4444;"></i> Code PIN (Stats & Archives)</h3>
