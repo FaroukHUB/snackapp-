@@ -1007,23 +1007,26 @@ const Products = {
         this.selectedVariant = null;
         this.selectedCapsule = null;
 
-            // IMPORTANT: Masquer l'encart "Cette formule comprend" (produits non-formule)
+        // Charger le contenu essentiel immédiatement
+        document.getElementById('modalTitle').textContent = product.name;
+        const imgEl = document.getElementById('modalImage');
+        if (product.image) {
+            imgEl.src = '../../' + product.image;
+            imgEl.style.display = '';
+        } else {
+            imgEl.src = '';
+            imgEl.style.display = 'none';
+        }
+
+        // Différer le reste du chargement pour afficher le modal plus vite
+        requestAnimationFrame(() => {
+            // Masquer l'encart "Cette formule comprend" (produits non-formule)
             const formuleIncludesSection = document.getElementById('modalFormuleIncludes');
             if (formuleIncludesSection) {
                 formuleIncludesSection.classList.add('hidden');
                 formuleIncludesSection.style.display = 'none';
             }
 
-            // Update modal content
-            const imgEl = document.getElementById('modalImage');
-            if (product.image) {
-                imgEl.src = '../../' + product.image;
-                imgEl.style.display = '';
-            } else {
-                imgEl.src = '';
-                imgEl.style.display = 'none';
-            }
-            document.getElementById('modalTitle').textContent = product.name;
             document.getElementById('modalDescription').textContent = product.description || '';
 
             // Menu/Solo toggle
@@ -1410,7 +1413,8 @@ const Products = {
                 accompagnementContainer.style.display = 'none';
             }
 
-        this.updateModalUI();
+            this.updateModalUI();
+        }); // Fin du requestAnimationFrame
     },
 
     /**
