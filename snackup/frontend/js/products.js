@@ -3,7 +3,10 @@
    Template V2 - SnackApp
    ============================================ */
 
-console.log("🔥 FRONT products.js ACTIF : /home/user/snackapp-/snackup/frontend/js/products.js");
+console.log("🧪 PROOF products.js LOADED", {
+  file: "snackup/frontend/js/products.js",
+  commit: "AUDIT-001"
+});
 
 // 🔒 SÉCURITÉ: Fonction pour échapper le HTML et prévenir les attaques XSS
 function escapeHtml(unsafe) {
@@ -970,24 +973,22 @@ const Products = {
      * Open product modal
      */
     openProductModal(productId) {
-        console.log('🚀 [MODAL] openProductModal APPELÉ pour:', productId);
+        this._modalStartTime = performance.now();
+        console.log('⏱️ openProductModal START:', this._modalStartTime.toFixed(2));
+
         const product = Config.getProduct(productId);
-        console.log('Product found:', product);
         if (!product) return;
 
-        // Ouvrir le modal IMMÉDIATEMENT pour un feedback visuel instantané
+        // Ouvrir le modal
         const modal = document.getElementById('productModal');
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        // Remplir le contenu (synchrone - pas de requestAnimationFrame)
-        console.log('🔄 [MODAL] Reset état + reconstruction DOM');
-
-        // Reset state
+        // Reset state (synchrone)
         this.currentProduct = product;
         this.currentQuantity = 1;
-        console.log('⚠️ [MODAL] selectedSupplements RESET à []');
         this.selectedSupplements = [];
+        console.log('🧪 RESET selectedSupplements = []');
         this.removedIngredients = [];
         this.menuType = 'solo';
         this.selectedDrink = null;
@@ -1404,7 +1405,9 @@ const Products = {
             }
 
         this.updateModalUI();
-        console.log('✅ [MODAL] Modal prêt pour interaction');
+        const _endTime = performance.now();
+        console.log('⏱️ openProductModal END:', _endTime.toFixed(2));
+        console.log('⏱️ TOTAL:', (_endTime - this._modalStartTime).toFixed(2), 'ms');
     },
 
     /**
@@ -2220,19 +2223,17 @@ const Products = {
         const index = this.selectedSupplements.findIndex(s => String(s.id) === supIdStr);
         if (index >= 0) {
             this.selectedSupplements.splice(index, 1);
-            console.log('➖ Supplément retiré:', sup.name);
         } else {
             this.selectedSupplements.push(sup);
-            console.log('➕ Supplément ajouté:', sup.name, 'prix:', price);
         }
 
-        // LOG: État après toggle
-        console.log('📋 selectedSupplements:', this.selectedSupplements.map(s => ({
-            id: s.id,
-            name: s.name,
-            price: s.price,
-            typeof_price: typeof s.price
-        })));
+        // LOG AUDIT OBLIGATOIRE
+        console.log("🧪 TOGGLE SUPPLEMENT", {
+            supId: supId,
+            price: price,
+            action: index >= 0 ? 'REMOVED' : 'ADDED',
+            selectedSupplementsSnapshot: JSON.parse(JSON.stringify(this.selectedSupplements))
+        });
 
         // Update UI
         document.querySelectorAll('.supplement-item').forEach(item => {
@@ -2276,15 +2277,19 @@ const Products = {
         let total = parseFloat(basePrice) || 0;
 
         // Add supplements (normaliser chaque prix en Number)
-        console.log('💰 Calcul total - basePrice:', basePrice, '(parseFloat:', total, ')');
         this.selectedSupplements.forEach(sup => {
             const supPrice = parseFloat(sup.price) || 0;
             total += supPrice;
-            console.log('   + supplément:', sup.name, 'prix:', supPrice, '→ total:', total);
         });
 
         total *= this.currentQuantity;
-        console.log('💰 Total final (x' + this.currentQuantity + '):', total);
+
+        // LOG AUDIT OBLIGATOIRE
+        console.log("🧪 TOTAL CHECK", {
+            basePrice: parseFloat(basePrice) || 0,
+            supplements: this.selectedSupplements.map(s => ({id: s.id, price: parseFloat(s.price) || 0})),
+            total: total
+        });
 
         document.getElementById('addToCartPrice').textContent = Config.formatPrice(total);
     },
