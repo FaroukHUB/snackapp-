@@ -824,29 +824,12 @@
                             <input type="text" id="customerName" placeholder="Votre nom" required>
                         </div>
                         <div class="form-row">
-                            <label for="customerPhone"><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp *</label>
+                            <label for="customerPhone"><i class="fas fa-phone"></i> Téléphone *</label>
                             <div style="display: flex; gap: 8px; align-items: center;">
-                                <select id="countryCode" required style="flex: 0 0 auto; width: 160px; padding: 12px; border: 2px solid var(--gray-200); border-radius: 12px; font-size: 14px; background: white; cursor: pointer;">
-                                    <option value="">Pays *</option>
-                                    <option value="+213">🇩🇿 Algérie (+213)</option>
-                                    <option value="+33">🇫🇷 France (+33)</option>
-                                    <option value="+966">🇸🇦 Arabie S. (+966)</option>
-                                    <option value="+20">🇪🇬 Égypte (+20)</option>
-                                    <option value="+44">🇬🇧 Angleterre (+44)</option>
-                                    <option value="+971">🇦🇪 Émirats (+971)</option>
-                                    <option value="+1">🇨🇦 Canada (+1)</option>
-                                    <option value="+216">🇹🇳 Tunisie (+216)</option>
-                                    <option value="+212">🇲🇦 Maroc (+212)</option>
-                                    <option value="+221">🇸🇳 Sénégal (+221)</option>
-                                    <option value="+223">🇲🇱 Mali (+223)</option>
-                                    <option value="+86">🇨🇳 Chine (+86)</option>
-                                </select>
+                                <span style="padding: 12px 16px; background: var(--gray-100); border: 2px solid var(--gray-200); border-radius: 12px; font-size: 14px; font-weight: 600; color: var(--gray-700);">+33</span>
                                 <input type="tel" id="customerPhone" placeholder="6 12 34 56 78" required style="flex: 1; padding: 12px; border: 2px solid var(--gray-200); border-radius: 12px; font-size: 14px;">
+                                <input type="hidden" id="countryCode" value="+33">
                             </div>
-                            <small style="color: var(--gray-600); font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 4px;">
-                                <i class="fas fa-asterisk" style="font-size: 8px; color: var(--primary);"></i>
-                                Votre numéro est indispensable pour vous prévenir lorsque la commande sera prête
-                            </small>
                         </div>
                     </div>
 
@@ -1255,50 +1238,31 @@
                         </div>
 
                         <!-- Option monnaie (affiché seulement si espèces) -->
-                        <div id="cashChangeSection" style="display: none; margin-top: 16px;">
-                            <div class="form-row payment-modern-section" style="background: #fef3c7; border: 2px solid #fbbf24; border-radius: 12px; padding: 16px;">
-                                <label class="payment-modern-title" style="color: #92400e;">
-                                    <i class="fas fa-coins" style="color: #f59e0b; margin-right: 8px;"></i>
-                                    Avez-vous l'appoint ?
+                        <div id="cashChangeSection" style="display: none; margin-top: 12px;">
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <span style="font-size: 13px; color: var(--gray-600);">Appoint ?</span>
+                                <label class="change-chip selected" data-change="exact">
+                                    <input type="radio" name="changeOption" value="exact" onchange="CartPage.setChangeOption('exact')" checked>
+                                    <i class="fas fa-check"></i> Oui
                                 </label>
-                                <div class="payment-options-container">
-                                    <label class="payment-option-card exact-payment">
-                                        <input type="radio" name="changeOption" value="exact" onchange="CartPage.setChangeOption('exact')" checked>
-                                        <div class="payment-card-content">
-                                            <div class="payment-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                                <i class="fas fa-check-circle"></i>
-                                            </div>
-                                            <div class="payment-info">
-                                                <div class="payment-label">Oui, j'ai l'appoint</div>
-                                                <div class="payment-desc">Montant exact</div>
-                                            </div>
-                                            <div class="payment-checkmark">
-                                                <i class="fas fa-check"></i>
-                                            </div>
-                                        </div>
-                                    </label>
-
-                                    <label class="payment-option-card change-payment">
-                                        <input type="radio" name="changeOption" value="change" onchange="CartPage.setChangeOption('change')">
-                                        <div class="payment-card-content">
-                                            <div class="payment-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                                                <i class="fas fa-money-bill-wave"></i>
-                                            </div>
-                                            <div class="payment-info">
-                                                <div class="payment-label">Non, prévoir la monnaie</div>
-                                                <div class="payment-desc">Je paie avec:</div>
-                                            </div>
-                                            <div class="payment-amount-input">
-                                                <input type="number" id="changeForAmount" placeholder="50" min="0" step="1" disabled>
-                                                <span class="currency-badge" id="currencyBadge"></span>
-                                            </div>
-                                            <div class="payment-checkmark">
-                                                <i class="fas fa-check"></i>
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
+                                <label class="change-chip" data-change="change">
+                                    <input type="radio" name="changeOption" value="change" onchange="CartPage.setChangeOption('change')">
+                                    <i class="fas fa-coins"></i> Non, je paie
+                                </label>
+                                <input type="number" id="changeForAmount" placeholder="50" min="0" step="1" disabled
+                                    style="width: 70px; padding: 8px 10px; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 13px;">
+                                <span id="currencyBadge" style="font-weight: 600; color: var(--gray-600);">€</span>
                             </div>
+                            <style>
+                            .change-chip {
+                                display: inline-flex; align-items: center; gap: 4px;
+                                padding: 8px 12px; background: var(--gray-50); border: 2px solid var(--gray-200);
+                                border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--gray-600);
+                            }
+                            .change-chip input { display: none; }
+                            .change-chip:hover { border-color: var(--gray-300); }
+                            .change-chip.selected { border-color: var(--primary); background: rgba(230,57,70,0.08); color: var(--primary); }
+                            </style>
                         </div>
                     </div>
 
@@ -1607,143 +1571,37 @@
                     return a.city_name.localeCompare(b.city_name);
                 });
 
-                // Créer le sélecteur ultramoderne
-                let html = `
-                    <div class="city-selector-modern" style="display:flex;flex-direction:column;gap:10px;">
-                `;
-
+                // Sélecteur compact
+                let html = `<div class="city-grid">`;
                 sortedCities.forEach((city, index) => {
                     const fee = parseFloat(city.delivery_fee) || 0;
                     const isHome = city.is_home_city == 1;
-                    const checked = index === 0 ? 'checked' : '';
+                    const checked = index === 0;
+                    const feeText = fee === 0 ? 'Gratuit' : `+${Config.formatPrice(fee)}`;
 
                     html += `
-                        <label class="city-option-card ${checked ? 'selected' : ''}" data-city-id="${city.id}" onclick="CartPage.selectCity(${city.id}, ${fee}, '${this.escapeHtml(city.city_name)}')">
-                            <input type="radio" name="deliveryCity" value="${city.id}" ${checked} style="display:none;">
-                            <div class="city-option-content">
-                                <div class="city-option-left">
-                                    <div class="city-option-icon" style="background:${isHome ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #6366f1, #4f46e5)'}">
-                                        <i class="fas fa-${isHome ? 'home' : 'map-marker-alt'}"></i>
-                                    </div>
-                                    <div class="city-option-info">
-                                        <span class="city-option-name">${this.escapeHtml(city.city_name)}</span>
-                                        ${isHome ? '<span class="city-home-badge">Ville du restaurant</span>' : ''}
-                                        ${city.estimated_time_min ? `<span class="city-option-time"><i class="fas fa-clock"></i> ~${city.estimated_time_min} min</span>` : ''}
-                                    </div>
-                                </div>
-                                <div class="city-option-right">
-                                    <span class="city-option-fee ${fee === 0 ? 'free' : ''}">${fee === 0 ? 'Gratuit' : Config.formatPrice(fee)}</span>
-                                    <div class="city-option-check"><i class="fas fa-check"></i></div>
-                                </div>
-                            </div>
+                        <label class="city-chip ${checked ? 'selected' : ''}" data-city-id="${city.id}" onclick="CartPage.selectCity(${city.id}, ${fee}, '${this.escapeHtml(city.city_name)}')">
+                            <input type="radio" name="deliveryCity" value="${city.id}" ${checked ? 'checked' : ''}>
+                            <span class="city-chip-name">${isHome ? '🏠 ' : ''}${this.escapeHtml(city.city_name)}</span>
+                            <span class="city-chip-fee">${feeText}</span>
                         </label>
                     `;
                 });
-
-                html += `</div>`;
-
-                // Ajouter les styles inline pour le sélecteur ultramoderne
-                html += `
-                    <style>
-                    .city-option-card {
-                        display: block;
-                        background: #f9fafb;
-                        border: 2px solid #e5e7eb;
-                        border-radius: 16px;
-                        padding: 16px;
-                        cursor: pointer;
-                        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-                    }
-                    .city-option-card:hover {
-                        border-color: #d1d5db;
-                        background: #f3f4f6;
-                        transform: translateY(-2px);
-                        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-                    }
-                    .city-option-card.selected {
-                        border-color: var(--primary, #e63946);
-                        background: linear-gradient(135deg, rgba(230,57,70,0.05), rgba(230,57,70,0.02));
-                        box-shadow: 0 4px 20px rgba(230,57,70,0.15);
-                    }
-                    .city-option-content {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        gap: 12px;
-                    }
-                    .city-option-left {
-                        display: flex;
-                        align-items: center;
-                        gap: 14px;
-                    }
-                    .city-option-icon {
-                        width: 48px;
-                        height: 48px;
-                        border-radius: 14px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: white;
-                        font-size: 18px;
-                        flex-shrink: 0;
-                    }
-                    .city-option-info {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 4px;
-                    }
-                    .city-option-name {
-                        font-weight: 700;
-                        font-size: 16px;
-                        color: #1f2937;
-                    }
-                    .city-home-badge {
-                        font-size: 11px;
-                        color: #10b981;
-                        font-weight: 600;
-                        display: flex;
-                        align-items: center;
-                        gap: 4px;
-                    }
-                    .city-option-time {
-                        font-size: 12px;
-                        color: #6b7280;
-                        display: flex;
-                        align-items: center;
-                        gap: 4px;
-                    }
-                    .city-option-right {
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                    }
-                    .city-option-fee {
-                        font-size: 18px;
-                        font-weight: 800;
-                        color: #f59e0b;
-                    }
-                    .city-option-fee.free {
-                        color: #10b981;
-                        font-size: 15px;
-                    }
-                    .city-option-check {
-                        width: 28px;
-                        height: 28px;
-                        border-radius: 50%;
-                        border: 2px solid #d1d5db;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        color: transparent;
-                        transition: all 0.2s;
-                    }
-                    .city-option-card.selected .city-option-check {
-                        background: var(--primary, #e63946);
-                        border-color: var(--primary, #e63946);
-                        color: white;
-                    }
-                    </style>
-                `;
+                html += `</div>
+                <style>
+                .city-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+                .city-chip {
+                    display: inline-flex; align-items: center; gap: 8px;
+                    padding: 10px 14px; background: var(--gray-50); border: 2px solid var(--gray-200);
+                    border-radius: 25px; cursor: pointer; transition: all 0.2s;
+                }
+                .city-chip input { display: none; }
+                .city-chip:hover { border-color: var(--gray-300); background: var(--gray-100); }
+                .city-chip.selected { border-color: var(--primary); background: rgba(230,57,70,0.08); }
+                .city-chip-name { font-weight: 600; font-size: 13px; color: var(--gray-800); }
+                .city-chip-fee { font-size: 12px; font-weight: 700; color: var(--primary); }
+                .city-chip.selected .city-chip-fee { color: var(--primary); }
+                </style>`;
 
                 container.innerHTML = html;
 
@@ -2418,74 +2276,63 @@
             },
 
             /**
-             * Affiche les modes de paiement depuis les settings
+             * Affiche les modes de paiement depuis les settings (chips compacts)
              */
             renderPaymentMethods() {
                 const container = document.getElementById('paymentMethodContainer');
                 if (!container) return;
 
                 const payment = this.settings.payment || {};
-                let html = '';
+                let html = '<div class="pay-grid">';
+                let hasPayment = false;
 
-                // Paiement en ligne (Stripe)
+                // Paiement en ligne
                 if (payment.online_payment_enabled) {
+                    hasPayment = true;
                     html += `
-                        <label class="payment-option-card" data-method="online">
+                        <label class="pay-chip" data-method="online">
                             <input type="radio" name="paymentMethod" value="online" onchange="CartPage.setPaymentMethod('online')">
-                            <div class="payment-card-content">
-                                <div class="payment-icon" style="background: linear-gradient(135deg, #635bff, #4f46e5);">
-                                    <i class="fas fa-lock"></i>
-                                </div>
-                                <div class="payment-info">
-                                    <div class="payment-label">Paiement en ligne</div>
-                                    <div class="payment-desc">Carte bancaire sécurisée</div>
-                                </div>
-                                <div class="payment-checkmark"><i class="fas fa-check"></i></div>
-                            </div>
-                        </label>
-                    `;
+                            <i class="fas fa-lock"></i> En ligne
+                        </label>`;
                 }
 
-                // CB à la livraison (TPE)
+                // CB à la livraison
                 if (payment.card_on_delivery_enabled) {
+                    hasPayment = true;
                     html += `
-                        <label class="payment-option-card" data-method="card_delivery">
+                        <label class="pay-chip" data-method="card_delivery">
                             <input type="radio" name="paymentMethod" value="card_delivery" onchange="CartPage.setPaymentMethod('card_delivery')">
-                            <div class="payment-card-content">
-                                <div class="payment-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
-                                    <i class="fas fa-credit-card"></i>
-                                </div>
-                                <div class="payment-info">
-                                    <div class="payment-label">CB à la livraison</div>
-                                    <div class="payment-desc">Terminal mobile</div>
-                                </div>
-                                <div class="payment-checkmark"><i class="fas fa-check"></i></div>
-                            </div>
-                        </label>
-                    `;
+                            <i class="fas fa-credit-card"></i> CB livraison
+                        </label>`;
                 }
 
                 // Espèces
                 if (payment.cash_enabled) {
+                    hasPayment = true;
                     html += `
-                        <label class="payment-option-card" data-method="cash">
+                        <label class="pay-chip" data-method="cash">
                             <input type="radio" name="paymentMethod" value="cash" onchange="CartPage.setPaymentMethod('cash')">
-                            <div class="payment-card-content">
-                                <div class="payment-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                </div>
-                                <div class="payment-info">
-                                    <div class="payment-label">Espèces</div>
-                                    <div class="payment-desc">Paiement à la livraison</div>
-                                </div>
-                                <div class="payment-checkmark"><i class="fas fa-check"></i></div>
-                            </div>
-                        </label>
-                    `;
+                            <i class="fas fa-money-bill-wave"></i> Espèces
+                        </label>`;
                 }
 
-                if (!html) {
-                    html = '<p style="color:#9ca3af;text-align:center;padding:20px;">Aucun mode de paiement disponible</p>';
+                html += `</div>
+                <style>
+                .pay-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+                .pay-chip {
+                    display: inline-flex; align-items: center; gap: 6px;
+                    padding: 10px 16px; background: var(--gray-50); border: 2px solid var(--gray-200);
+                    border-radius: 25px; cursor: pointer; transition: all 0.2s;
+                    font-weight: 600; font-size: 13px; color: var(--gray-700);
+                }
+                .pay-chip input { display: none; }
+                .pay-chip:hover { border-color: var(--gray-300); background: var(--gray-100); }
+                .pay-chip.selected { border-color: var(--primary); background: rgba(230,57,70,0.08); color: var(--primary); }
+                .pay-chip i { font-size: 14px; }
+                </style>`;
+
+                if (!hasPayment) {
+                    html = '<p style="color:var(--gray-500);font-size:13px;padding:12px 0;">Aucun mode de paiement configuré</p>';
                 }
 
                 container.innerHTML = html;
@@ -2505,8 +2352,8 @@
                 this.paymentMethod = method;
 
                 // Update UI selection
-                document.querySelectorAll('#paymentMethodContainer .payment-option-card').forEach(card => {
-                    card.classList.toggle('selected', card.dataset.method === method);
+                document.querySelectorAll('.pay-chip').forEach(chip => {
+                    chip.classList.toggle('selected', chip.dataset.method === method);
                 });
 
                 // Afficher/masquer l'option monnaie (seulement pour espèces)
@@ -2538,14 +2385,20 @@
             setChangeOption(option) {
                 this.changeOption = option;
                 const changeInput = document.getElementById('changeForAmount');
-                if (!changeInput) return;
 
-                if (option === 'change') {
-                    changeInput.disabled = false;
-                    changeInput.focus();
-                } else {
-                    changeInput.disabled = true;
-                    changeInput.value = '';
+                // Update UI selection
+                document.querySelectorAll('.change-chip').forEach(chip => {
+                    chip.classList.toggle('selected', chip.dataset.change === option);
+                });
+
+                if (changeInput) {
+                    if (option === 'change') {
+                        changeInput.disabled = false;
+                        changeInput.focus();
+                    } else {
+                        changeInput.disabled = true;
+                        changeInput.value = '';
+                    }
                 }
             },
 
