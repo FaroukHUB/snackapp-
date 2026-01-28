@@ -806,11 +806,7 @@
                 <form class="checkout-form" id="checkoutForm">
                     <div class="form-row">
                         <label>Mode de retrait</label>
-                        <div class="mode-selector" style="grid-template-columns: repeat(3, 1fr);">
-                            <div class="mode-option" data-mode="dinein" onclick="CartPage.setMode('dinein')">
-                                <i class="fas fa-utensils"></i>
-                                <span>Sur place</span>
-                            </div>
+                        <div class="mode-selector" style="grid-template-columns: repeat(2, 1fr);">
                             <div class="mode-option selected" data-mode="pickup" onclick="CartPage.setMode('pickup')">
                                 <i class="fas fa-shopping-bag"></i>
                                 <span>À emporter</span>
@@ -851,27 +847,6 @@
                                 <i class="fas fa-asterisk" style="font-size: 8px; color: var(--primary);"></i>
                                 Votre numéro est indispensable pour vous prévenir lorsque la commande sera prête
                             </small>
-                        </div>
-                    </div>
-
-                    <!-- Champs Sur place -->
-                    <div id="dineinFields" style="display: none;">
-                        <div class="form-row">
-                            <label>Salle *</label>
-                            <div class="mode-selector" style="grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                                <div class="mode-option" data-room="famille" onclick="CartPage.setRoom('famille')">
-                                    <i class="fas fa-users"></i>
-                                    <span>Salle Famille</span>
-                                </div>
-                                <div class="mode-option" data-room="femme" onclick="CartPage.setRoom('femme')">
-                                    <i class="fas fa-female"></i>
-                                    <span>Salle Femme</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <label for="tableNumber">Numéro de table *</label>
-                            <input type="text" id="tableNumber" placeholder="Ex: F12" style="text-transform: uppercase;">
                         </div>
                     </div>
 
@@ -1267,86 +1242,64 @@
                         </style>
                     </div>
 
-                    <!-- Options de paiement et monnaie (pour livraison ET sur place) -->
+                    <!-- Mode de paiement (livraison uniquement) -->
                     <div id="paymentFields" style="display: none;">
-                        <!-- Option de monnaie - Design Moderne -->
                         <div class="form-row payment-modern-section">
                             <label class="payment-modern-title">
                                 <i class="fas fa-wallet" style="color: #10b981; margin-right: 8px;"></i>
-                                Paiement et monnaie *
+                                Mode de paiement *
                             </label>
-                            <div class="payment-options-container">
-                                <label class="payment-option-card exact-payment">
-                                    <input type="radio" name="changeOptionCommon" value="exact" onchange="CartPage.setChangeOption('exact')" checked>
-                                    <div class="payment-card-content">
-                                        <div class="payment-icon">
-                                            <i class="fas fa-check-circle"></i>
-                                        </div>
-                                        <div class="payment-info">
-                                            <div class="payment-label">J'ai l'appoint</div>
-                                            <div class="payment-desc">Montant exact</div>
-                                        </div>
-                                        <div class="payment-checkmark">
-                                            <i class="fas fa-check"></i>
-                                        </div>
-                                    </div>
-                                    <div class="payment-card-shine"></div>
-                                </label>
-
-                                <label class="payment-option-card change-payment">
-                                    <input type="radio" name="changeOptionCommon" value="change" onchange="CartPage.setChangeOption('change')">
-                                    <div class="payment-card-content">
-                                        <div class="payment-icon">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                        </div>
-                                        <div class="payment-info">
-                                            <div class="payment-label">Prévoir la monnaie</div>
-                                            <div class="payment-desc">Je paie avec:</div>
-                                        </div>
-                                        <div class="payment-amount-input">
-                                            <input type="number" id="changeForAmountCommon" placeholder="50" min="0" step="1" disabled>
-                                            <span class="currency-badge" id="currencyBadge"></span>
-                                        </div>
-                                        <div class="payment-checkmark">
-                                            <i class="fas fa-check"></i>
-                                        </div>
-                                    </div>
-                                    <div class="payment-card-shine"></div>
-                                </label>
-                            </div>
-                            <div class="payment-tip">
-                                <i class="fas fa-lightbulb"></i>
-                                <span>Facilitez le service en indiquant si vous avez l'appoint</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Précommande (à emporter uniquement) -->
-                    <div id="preorderSection" style="display: none; background: #f0fdf4; border: 2px solid #10b981; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                            <i class="fas fa-clock" style="color: #10b981;"></i>
-                            <h4 style="margin: 0; font-size: 15px; font-weight: 600; color: #065f46;">Précommande à emporter</h4>
-                        </div>
-                        <p style="margin: 0 0 12px 0; font-size: 13px; color: #047857;">Réservez vos produits pour plus tard (croissants, pains au chocolat, etc.)</p>
-
-                        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                            <div style="flex: 1;">
-                                <label for="preorderDate" style="display: block; margin-bottom: 4px; font-size: 13px; font-weight: 500; color: #065f46;">
-                                    <i class="fas fa-calendar"></i> Date de retrait
-                                </label>
-                                <input type="date" id="preorderDate" style="width: 100%; padding: 10px; border: 2px solid #6ee7b7; border-radius: 8px; font-size: 14px;">
-                            </div>
-                            <div style="flex: 1;">
-                                <label for="preorderTime" style="display: block; margin-bottom: 4px; font-size: 13px; font-weight: 500; color: #065f46;">
-                                    <i class="fas fa-clock"></i> Heure de retrait
-                                </label>
-                                <input type="time" id="preorderTime" style="width: 100%; padding: 10px; border: 2px solid #6ee7b7; border-radius: 8px; font-size: 14px;">
+                            <div class="payment-options-container" id="paymentMethodContainer">
+                                <!-- Généré dynamiquement par renderPaymentMethods() -->
                             </div>
                         </div>
 
-                        <small style="display: block; color: #047857; font-size: 12px;">
-                            <i class="fas fa-info-circle"></i> Laissez vide pour une commande immédiate
-                        </small>
+                        <!-- Option monnaie (affiché seulement si espèces) -->
+                        <div id="cashChangeSection" style="display: none; margin-top: 16px;">
+                            <div class="form-row payment-modern-section" style="background: #fef3c7; border: 2px solid #fbbf24; border-radius: 12px; padding: 16px;">
+                                <label class="payment-modern-title" style="color: #92400e;">
+                                    <i class="fas fa-coins" style="color: #f59e0b; margin-right: 8px;"></i>
+                                    Avez-vous l'appoint ?
+                                </label>
+                                <div class="payment-options-container">
+                                    <label class="payment-option-card exact-payment">
+                                        <input type="radio" name="changeOption" value="exact" onchange="CartPage.setChangeOption('exact')" checked>
+                                        <div class="payment-card-content">
+                                            <div class="payment-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                            <div class="payment-info">
+                                                <div class="payment-label">Oui, j'ai l'appoint</div>
+                                                <div class="payment-desc">Montant exact</div>
+                                            </div>
+                                            <div class="payment-checkmark">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    <label class="payment-option-card change-payment">
+                                        <input type="radio" name="changeOption" value="change" onchange="CartPage.setChangeOption('change')">
+                                        <div class="payment-card-content">
+                                            <div class="payment-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                                <i class="fas fa-money-bill-wave"></i>
+                                            </div>
+                                            <div class="payment-info">
+                                                <div class="payment-label">Non, prévoir la monnaie</div>
+                                                <div class="payment-desc">Je paie avec:</div>
+                                            </div>
+                                            <div class="payment-amount-input">
+                                                <input type="number" id="changeForAmount" placeholder="50" min="0" step="1" disabled>
+                                                <span class="currency-badge" id="currencyBadge"></span>
+                                            </div>
+                                            <div class="payment-checkmark">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Note avec mise en évidence -->
@@ -1607,9 +1560,6 @@
 
                 // Initial render
                 this.render();
-
-                // Show preorder section initially (mode is 'pickup' by default)
-                document.getElementById('preorderSection').style.display = 'block';
 
                 // ⚡ Auto-compléter l'adresse depuis les données client
                 this.setupPhoneAutoComplete();
@@ -2446,30 +2396,129 @@
             setMode(mode) {
                 this.mode = mode;
 
-                // Update button selection (only for mode buttons, not room buttons)
+                // Update button selection
                 document.querySelectorAll('[data-mode]').forEach(opt => {
                     opt.classList.toggle('selected', opt.dataset.mode === mode);
                 });
 
                 // Show/hide fields based on mode
-                document.getElementById('dineinFields').style.display = mode === 'dinein' ? 'block' : 'none';
                 document.getElementById('deliveryFields').style.display = mode === 'delivery' ? 'block' : 'none';
-                document.getElementById('paymentFields').style.display = (mode === 'delivery' || mode === 'dinein') ? 'block' : 'none';
+                document.getElementById('paymentFields').style.display = mode === 'delivery' ? 'block' : 'none';
 
-                // Show/hide preorder section (only for pickup mode)
-                document.getElementById('preorderSection').style.display = mode === 'pickup' ? 'block' : 'none';
+                // Reset payment method when mode changes
+                if (mode === 'delivery') {
+                    this.renderPaymentMethods();
+                } else {
+                    this.paymentMethod = null;
+                    document.getElementById('cashChangeSection').style.display = 'none';
+                }
 
-                // Recalculer le résumé (frais de livraison dépendent du mode)
+                // Recalculer le résumé
                 this.updateSummary();
             },
 
-            setRoom(room) {
-                this.room = room;
+            /**
+             * Affiche les modes de paiement depuis les settings
+             */
+            renderPaymentMethods() {
+                const container = document.getElementById('paymentMethodContainer');
+                if (!container) return;
 
-                // Update room selection
-                document.querySelectorAll('[data-room]').forEach(opt => {
-                    opt.classList.toggle('selected', opt.dataset.room === room);
+                const payment = this.settings.payment || {};
+                let html = '';
+
+                // Paiement en ligne (Stripe)
+                if (payment.online_payment_enabled) {
+                    html += `
+                        <label class="payment-option-card" data-method="online">
+                            <input type="radio" name="paymentMethod" value="online" onchange="CartPage.setPaymentMethod('online')">
+                            <div class="payment-card-content">
+                                <div class="payment-icon" style="background: linear-gradient(135deg, #635bff, #4f46e5);">
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <div class="payment-label">Paiement en ligne</div>
+                                    <div class="payment-desc">Carte bancaire sécurisée</div>
+                                </div>
+                                <div class="payment-checkmark"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                    `;
+                }
+
+                // CB à la livraison (TPE)
+                if (payment.card_on_delivery_enabled) {
+                    html += `
+                        <label class="payment-option-card" data-method="card_delivery">
+                            <input type="radio" name="paymentMethod" value="card_delivery" onchange="CartPage.setPaymentMethod('card_delivery')">
+                            <div class="payment-card-content">
+                                <div class="payment-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <div class="payment-label">CB à la livraison</div>
+                                    <div class="payment-desc">Terminal mobile</div>
+                                </div>
+                                <div class="payment-checkmark"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                    `;
+                }
+
+                // Espèces
+                if (payment.cash_enabled) {
+                    html += `
+                        <label class="payment-option-card" data-method="cash">
+                            <input type="radio" name="paymentMethod" value="cash" onchange="CartPage.setPaymentMethod('cash')">
+                            <div class="payment-card-content">
+                                <div class="payment-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div class="payment-info">
+                                    <div class="payment-label">Espèces</div>
+                                    <div class="payment-desc">Paiement à la livraison</div>
+                                </div>
+                                <div class="payment-checkmark"><i class="fas fa-check"></i></div>
+                            </div>
+                        </label>
+                    `;
+                }
+
+                if (!html) {
+                    html = '<p style="color:#9ca3af;text-align:center;padding:20px;">Aucun mode de paiement disponible</p>';
+                }
+
+                container.innerHTML = html;
+
+                // Sélectionner le premier par défaut
+                const firstRadio = container.querySelector('input[type="radio"]');
+                if (firstRadio) {
+                    firstRadio.checked = true;
+                    this.setPaymentMethod(firstRadio.value);
+                }
+            },
+
+            /**
+             * Définit le mode de paiement
+             */
+            setPaymentMethod(method) {
+                this.paymentMethod = method;
+
+                // Update UI selection
+                document.querySelectorAll('#paymentMethodContainer .payment-option-card').forEach(card => {
+                    card.classList.toggle('selected', card.dataset.method === method);
                 });
+
+                // Afficher/masquer l'option monnaie (seulement pour espèces)
+                const cashSection = document.getElementById('cashChangeSection');
+                if (cashSection) {
+                    cashSection.style.display = method === 'cash' ? 'block' : 'none';
+                }
+
+                // Reset change option when not cash
+                if (method !== 'cash') {
+                    this.changeOption = null;
+                }
             },
 
             setDeliveryType(type, fee = 0) {
@@ -2488,7 +2537,8 @@
 
             setChangeOption(option) {
                 this.changeOption = option;
-                const changeInput = document.getElementById('changeForAmountCommon');
+                const changeInput = document.getElementById('changeForAmount');
+                if (!changeInput) return;
 
                 if (option === 'change') {
                     changeInput.disabled = false;
@@ -2757,19 +2807,6 @@
                 // Combiner code pays + numéro (enlever le 0 initial si présent)
                 const phone = countryCode + cleanPhone.replace(/^0+/, '');
 
-                // Validation Sur place
-                if (this.mode === 'dinein') {
-                    if (!this.room) {
-                        this.showToast('Veuillez sélectionner la salle', 'error');
-                        return;
-                    }
-                    const tableNumber = document.getElementById('tableNumber').value.trim();
-                    if (!tableNumber) {
-                        this.showToast('Veuillez entrer le numéro de table', 'error');
-                        return;
-                    }
-                }
-
                 // Validation Livraison
                 if (this.mode === 'delivery') {
                     // Vérifier qu'une ville est sélectionnée
@@ -2784,18 +2821,21 @@
                         this.showToast('Veuillez entrer votre adresse', 'error');
                         return;
                     }
-                }
 
-                // Validation option de monnaie (pour LIVRAISON ET SUR PLACE)
-                if (this.mode === 'delivery' || this.mode === 'dinein') {
-                    const changeOption = this.changeOption || 'exact';
-                    if (changeOption === 'change') {
-                        const changeForAmount = parseFloat(document.getElementById('changeForAmountCommon').value);
+                    // Vérifier le mode de paiement
+                    if (!this.paymentMethod) {
+                        this.showToast('Veuillez sélectionner un mode de paiement', 'error');
+                        return;
+                    }
+
+                    // Validation option de monnaie (seulement si paiement espèces)
+                    if (this.paymentMethod === 'cash' && this.changeOption === 'change') {
+                        const changeForAmount = parseFloat(document.getElementById('changeForAmount')?.value || 0);
                         if (!changeForAmount || changeForAmount <= 0) {
                             this.showToast('Veuillez indiquer le montant pour la monnaie', 'error');
                             return;
                         }
-                        const total = Cart.getSubtotal() - this.discount;
+                        const total = Cart.getSubtotal() - this.discount + this.deliveryFee;
                         if (changeForAmount < total) {
                             this.showToast('Le montant pour la monnaie doit être supérieur au total', 'error');
                             return;
@@ -2868,16 +2908,25 @@
                 // Total = Sous-total - Réduction + Frais de livraison
                 const totalAmount = savedSubtotal - savedDiscount + deliveryFee;
 
-                // Prepare payment/change info for delivery AND dinein (AVANT notes)
+                // Prepare payment info
                 let paymentInfo = {};
-                if (this.mode === 'delivery' || this.mode === 'dinein') {
-                    const changeOption = this.changeOption || 'exact';
-                    if (changeOption === 'exact') {
-                        paymentInfo.has_exact_change = true;
-                    } else if (changeOption === 'change') {
-                        const changeForAmount = parseFloat(document.getElementById('changeForAmountCommon').value);
-                        if (changeForAmount > 0) {
-                            paymentInfo.change_for = changeForAmount;
+                let deliveryInstructions = null;
+
+                if (this.mode === 'delivery') {
+                    // Mode de paiement
+                    paymentInfo.payment_method = this.paymentMethod;
+
+                    // Info monnaie (seulement pour espèces)
+                    if (this.paymentMethod === 'cash') {
+                        if (this.changeOption === 'change') {
+                            const changeForAmount = parseFloat(document.getElementById('changeForAmount')?.value || 0);
+                            if (changeForAmount > 0) {
+                                paymentInfo.change_for = changeForAmount;
+                                deliveryInstructions = `Monnaie pour ${Config.formatPrice(changeForAmount)}`;
+                            }
+                        } else {
+                            paymentInfo.has_exact_change = true;
+                            deliveryInstructions = 'Client a la monnaie exacte';
                         }
                     }
                 }
@@ -2885,20 +2934,8 @@
                 // Build notes based on mode + prepare delivery address
                 let modeNotes = '';
                 let deliveryAddress = null;
-                let deliveryInstructions = null;
-                let preorderDate = null;
-                let preorderTime = null;
 
-                if (this.mode === 'dinein') {
-                    const tableNumber = document.getElementById('tableNumber').value.trim();
-                    const salleName = this.room === 'famille' ? 'Salle Famille' : 'Salle Femme';
-                    modeNotes = `🏠 SUR PLACE - ${salleName} - Table ${tableNumber}`;
-                } else if (this.mode === 'pickup') {
-                    // Collecter les informations de précommande SÉPARÉMENT
-                    preorderDate = document.getElementById('preorderDate').value || null;
-                    preorderTime = document.getElementById('preorderTime').value || null;
-
-                    // Mode simple sans précommande dans les notes
+                if (this.mode === 'pickup') {
                     modeNotes = '📦 À EMPORTER';
                 } else if (this.mode === 'delivery') {
                     const address = document.getElementById('customerAddress').value.trim();
@@ -2912,16 +2949,12 @@
 
                     // Afficher les frais si applicable
                     const feeText = this.selectedCityFee > 0 ? ` - Frais: ${Config.formatPrice(this.selectedCityFee)}` : ' - Livraison gratuite';
-                    modeNotes = `🚗 LIVRAISON (${cityName}${feeText})\nAdresse: ${address}`;
-                }
 
-                // ⚡ Instructions de paiement pour LIVRAISON ET SUR PLACE
-                if (this.mode === 'delivery' || this.mode === 'dinein') {
-                    if (paymentInfo.change_for) {
-                        deliveryInstructions = `Monnaie pour ${Config.formatPrice(paymentInfo.change_for)}`;
-                    } else if (paymentInfo.has_exact_change) {
-                        deliveryInstructions = 'Client a la monnaie exacte';
-                    }
+                    // Nom du mode de paiement
+                    const paymentNames = { online: 'Paiement en ligne', card_delivery: 'CB à la livraison', cash: 'Espèces' };
+                    const paymentName = paymentNames[this.paymentMethod] || 'Espèces';
+
+                    modeNotes = `🚗 LIVRAISON (${cityName}${feeText})\n💳 ${paymentName}\nAdresse: ${address}`;
                 }
 
                 // Prepare order data for admin API
@@ -2935,14 +2968,10 @@
                     delivery_fee: deliveryFee,
                     loyalty_reward_id: this.selectedReward || null,
                     loyalty_customer_id: this.loyaltyCustomer?.id || null,
-                    notes: note || null, // Notes propres du client uniquement
-                    mode_notes: modeNotes, // Mode séparé
-                    // ⚡ NOUVEAU: Envoyer l'adresse de livraison séparément
+                    notes: note || null,
+                    mode_notes: modeNotes,
                     delivery_address: deliveryAddress,
                     delivery_instructions: deliveryInstructions,
-                    // ⚡ NOUVEAU: Précommande séparée
-                    preorder_date: preorderDate,
-                    preorder_time: preorderTime,
                     ...paymentInfo
                 };
 
