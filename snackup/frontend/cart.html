@@ -2217,13 +2217,10 @@
             },
 
             updateSummary() {
-                console.log('📊 updateSummary CALLED');
                 const subtotal = Cart.getSubtotal();
-                console.log('📊 subtotal:', subtotal);
 
                 // Calcul remise bundle "2 pizzas"
                 const bundle = Cart.calculateBundleDiscount();
-                console.log('📊 bundle result:', bundle);
                 this.bundleDiscount = bundle.discount;
 
                 // Frais de livraison selon la ville sélectionnée

@@ -253,13 +253,6 @@ const Cart = {
         const PIZZA_SOLO_PRICE = 7.50;
         const PIZZA_DUO_PRICE = 9.00;
 
-        console.log('🍕 BUNDLE DEBUG - items:', this.items.map(i => ({
-            name: i.name,
-            categoryName: i.categoryName,
-            menuType: i.options?.menuType,
-            qty: i.quantity
-        })));
-
         // Filtrer les pizzas (nom de catégorie contient "pizza")
         const pizzas = this.items.filter(item => {
             // D'abord essayer categoryName stocké
@@ -268,14 +261,10 @@ const Cart = {
             if (!catName && item.id && typeof Config !== 'undefined') {
                 const product = Config.getProduct(item.id);
                 catName = product?.categoryName || '';
-                console.log('🍕 BUNDLE FALLBACK pour', item.name, '→ catName:', catName);
             }
-            const isPizza = catName.toLowerCase().includes('pizza');
-            console.log('🍕 BUNDLE CHECK:', item.name, 'catName:', catName, 'isPizza:', isPizza);
-            return isPizza;
+            return catName.toLowerCase().includes('pizza');
         });
 
-        console.log('🍕 BUNDLE - Pizzas trouvées:', pizzas.length);
         if (pizzas.length === 0) return { discount: 0, details: [] };
 
         // Séparer par taille (menuType: 'solo' ou 'duo')
@@ -315,7 +304,6 @@ const Cart = {
             }
         }
 
-        console.log('🍕 BUNDLE RESULT: soloCount=', soloCount, 'duoCount=', duoCount, 'discount=', discount);
         return { discount, details, soloCount, duoCount };
     },
 
@@ -360,16 +348,19 @@ const Cart = {
             badge.dataset.count = count;
         }
 
+        // Calculer le total avec remise bundle
+        const totalWithBundle = this.getTotalWithBundle();
+
         // Update total in header
         const total = document.getElementById('cartTotal');
         if (total) {
-            total.textContent = Config.formatPrice(this.getSubtotal());
+            total.textContent = Config.formatPrice(totalWithBundle);
         }
 
         // Update mini cart total
         const miniTotal = document.getElementById('miniCartTotal');
         if (miniTotal) {
-            miniTotal.textContent = Config.formatPrice(this.getSubtotal());
+            miniTotal.textContent = Config.formatPrice(totalWithBundle);
         }
 
         // Update mini cart items
@@ -377,7 +368,7 @@ const Cart = {
 
         // Call custom callback if defined
         if (typeof this.onUpdate === 'function') {
-            this.onUpdate(this.items, this.getSubtotal());
+            this.onUpdate(this.items, totalWithBundle);
         }
     },
 
