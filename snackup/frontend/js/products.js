@@ -599,7 +599,7 @@ const Products = {
                         ${cat.name}
                     </h2>
                     <div class="products-grid">
-                        ${this.renderProducts(cat.items || [], cat.id)}
+                        ${this.renderProducts(cat.items || [], cat.id, cat.name)}
                     </div>
                 </section>
             `;
@@ -625,12 +625,12 @@ const Products = {
     /**
      * Render products for a category
      */
-    renderProducts(products, categoryId) {
+    renderProducts(products, categoryId, categoryName = '') {
         if (!products || !Array.isArray(products)) {
             console.warn(`⚠️ No products array for category: ${categoryId}`);
             return '';
         }
-        console.log(`🍽️ Rendering ${products.length} products for category: ${categoryId}`);
+        console.log(`🍽️ Rendering ${products.length} products for category: ${categoryId} (${categoryName})`);
         return products.map(product => {
             const isUnavailable = product.status === 'unavailable';
 
@@ -654,9 +654,8 @@ const Products = {
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
 
             // Badge bundle pour pizzas
-            const catIdStr = String(categoryId || '').toLowerCase();
-            const catNameStr = String(product.category_name || '').toLowerCase();
-            const isPizza = catIdStr.includes('pizza') || catNameStr.includes('pizza');
+            const catNameLower = String(categoryName || '').toLowerCase();
+            const isPizza = catNameLower.includes('pizza');
             const bundleBadge = isPizza ? `
                 <div class="bundle-offer-badge">
                     <span class="bundle-icon">🔥</span>
