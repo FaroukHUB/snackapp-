@@ -3,10 +3,7 @@
    Template V2 - SnackApp
    ============================================ */
 
-console.log("🧪 PROOF products.js LOADED", {
-  file: "snackup/frontend/js/products.js",
-  commit: "AUDIT-001"
-});
+// products.js loaded
 
 // 🔒 SÉCURITÉ: Fonction pour échapper le HTML et prévenir les attaques XSS
 function escapeHtml(unsafe) {
@@ -2274,12 +2271,8 @@ const Products = {
 
         total *= this.currentQuantity;
 
-        // LOG AUDIT OBLIGATOIRE
-        console.log("🧪 TOTAL CHECK", {
-            basePrice: parseFloat(basePrice) || 0,
-            supplements: this.selectedSupplements.map(s => ({id: s.id, price: parseFloat(s.price) || 0})),
-            total: total
-        });
+        // Log simplifié (évite overhead DevTools)
+        // console.log("🧪 TOTAL:", total);
 
         document.getElementById('addToCartPrice').textContent = Config.formatPrice(total);
     },
