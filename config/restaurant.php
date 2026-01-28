@@ -27,6 +27,8 @@ try {
     // Récupérer les données du restaurant depuis la base
     $restaurant = RestaurantRepository::getById($restaurantId);
     $settings = RestaurantRepository::getSettings($restaurantId);
+    $openingHours = RestaurantRepository::getOpeningHours($restaurantId);
+    $faqItems = RestaurantRepository::getFaq($restaurantId);
 
 } catch (Exception $e) {
     http_response_code(500);
@@ -96,7 +98,35 @@ $response = [
         'primaryColor' => $themeConfig['primary'] ?? '#e63946'
     ],
 
-    'social' => json_decode($settings['social_links'] ?? '{}', true)
+    // Réseaux sociaux depuis colonnes individuelles
+    'social' => [
+        'instagram' => $settings['instagram'] ?? '',
+        'facebook' => $settings['facebook'] ?? '',
+        'tiktok' => $settings['tiktok'] ?? '',
+        'snapchat' => $settings['snapchat'] ?? ''
+    ],
+
+    // Horaires d'ouverture depuis table opening_hours
+    'openingHours' => array_map(function($h) {
+        $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+        return [
+            'day' => $days[$h['day_of_week']] ?? 'jour',
+            'opens' => substr($h['opens'], 0, 5),
+            'closes' => substr($h['closes'], 0, 5),
+            'isClosed' => (bool)($h['is_closed'] ?? false)
+        ];
+    }, $openingHours),
+
+    // FAQ depuis table faq
+    'faq' => [
+        'title' => 'Questions fréquentes',
+        'items' => array_map(function($f) {
+            return [
+                'question' => $f['question'],
+                'answer' => $f['answer']
+            ];
+        }, $faqItems)
+    ]
 ];
 
 // Injecter la config JavaScript pour le frontend
