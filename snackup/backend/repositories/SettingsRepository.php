@@ -284,7 +284,7 @@ class SettingsRepository {
     }
 
     /**
-     * Mettre à jour les settings paiement
+     * Mettre à jour les settings paiement (INSERT si n'existe pas)
      */
     public static function updatePaymentSettings(array $data): bool {
         $pdo = Database::getInstance();
@@ -296,26 +296,30 @@ class SettingsRepository {
             'require_payment_upfront', 'allow_partial_payment', 'partial_payment_percent'
         ];
 
-        $fields = [];
-        $values = [];
+        $insertFields = ['restaurant_id'];
+        $insertValues = [self::$restaurantId];
+        $updateParts = [];
 
         foreach ($allowedFields as $field) {
             if (array_key_exists($field, $data)) {
-                $fields[] = "$field = ?";
-                $values[] = $data[$field];
+                $insertFields[] = $field;
+                $insertValues[] = $data[$field];
+                $updateParts[] = "$field = VALUES($field)";
             }
         }
 
-        if (empty($fields)) return false;
+        if (count($insertFields) <= 1) return false; // Seulement restaurant_id
 
-        $values[] = self::$restaurantId;
+        $placeholders = implode(', ', array_fill(0, count($insertFields), '?'));
+        $fieldList = implode(', ', $insertFields);
+        $updateList = implode(', ', $updateParts);
 
         $stmt = $pdo->prepare("
-            UPDATE payment_settings
-            SET " . implode(', ', $fields) . "
-            WHERE restaurant_id = ?
+            INSERT INTO payment_settings ($fieldList)
+            VALUES ($placeholders)
+            ON DUPLICATE KEY UPDATE $updateList
         ");
 
-        return $stmt->execute($values);
+        return $stmt->execute($insertValues);
     }
 }
