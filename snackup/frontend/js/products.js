@@ -39,6 +39,9 @@ const Products = {
     modalSetup: false,
     searchSetup: false,
 
+    // Cache suppléments: ne reconstruire que si catégorie change
+    _supplementsCategoryId: null,
+
     /**
      * Capitalize first letter of a string
      */
@@ -1070,65 +1073,67 @@ const Products = {
                 ingredientsSection.style.display = 'none';
             }
 
-            // Render supplements
-            const supplements = Config.getSupplementsForCategory(product.categoryId);
+            // Render supplements (uniquement si catégorie différente)
             const supplementsContainer = document.getElementById('modalSupplements');
             const supplementsList = document.getElementById('supplementsList');
 
-            if (supplements.length > 0) {
-                supplementsContainer.classList.remove('hidden');
-                supplementsContainer.style.display = '';
+            if (this._supplementsCategoryId !== product.categoryId) {
+                this._supplementsCategoryId = product.categoryId;
+                const supplements = Config.getSupplementsForCategory(product.categoryId);
 
-                // Grouper les suppléments par group_name (DB-first)
-                const groupOrder = ['viande', 'fromages', 'legumes', 'sauces', 'autres'];
-                const groupLabels = {
-                    'viande': 'Viandes',
-                    'fromages': 'Fromages',
-                    'legumes': 'Légumes',
-                    'sauces': 'Sauces',
-                    'autres': 'Autres'
-                };
+                if (supplements.length > 0) {
+                    supplementsContainer.classList.remove('hidden');
+                    supplementsContainer.style.display = '';
 
-                const grouped = {};
-                supplements.forEach(sup => {
-                    // Utiliser group_name de la DB, fallback sur 'autres'
-                    const group = sup.group_name || 'autres';
-                    if (!grouped[group]) grouped[group] = [];
-                    grouped[group].push(sup);
-                });
+                    const groupOrder = ['viande', 'fromages', 'legumes', 'sauces', 'autres'];
+                    const groupLabels = {
+                        'viande': 'Viandes',
+                        'fromages': 'Fromages',
+                        'legumes': 'Légumes',
+                        'sauces': 'Sauces',
+                        'autres': 'Autres'
+                    };
 
-                let html = '';
+                    const grouped = {};
+                    supplements.forEach(sup => {
+                        const group = sup.group_name || 'autres';
+                        if (!grouped[group]) grouped[group] = [];
+                        grouped[group].push(sup);
+                    });
 
-                // Afficher les suppléments par groupe
-                groupOrder.forEach(group => {
-                    if (grouped[group] && grouped[group].length > 0) {
-                        html += `
-                            <div class="supplement-category">
-                                <h4 class="supplement-category-title">${groupLabels[group]}</h4>
-                                <div class="supplement-category-items">
-                                    ${grouped[group].map(sup => `
-                                        <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
-                                            <div class="supplement-info">
-                                                <div class="supplement-checkbox">
-                                                    <i class="fas fa-check" style="font-size: 12px;"></i>
+                    let html = '';
+                    groupOrder.forEach(group => {
+                        if (grouped[group] && grouped[group].length > 0) {
+                            html += `
+                                <div class="supplement-category">
+                                    <h4 class="supplement-category-title">${groupLabels[group]}</h4>
+                                    <div class="supplement-category-items">
+                                        ${grouped[group].map(sup => `
+                                            <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
+                                                <div class="supplement-info">
+                                                    <div class="supplement-checkbox">
+                                                        <i class="fas fa-check" style="font-size: 12px;"></i>
+                                                    </div>
+                                                    <span class="supplement-name">${sup.name}</span>
                                                 </div>
-                                                <span class="supplement-name">${sup.name}</span>
+                                                <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
                                             </div>
-                                            <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
-                                        </div>
-                                    `).join('')}
+                                        `).join('')}
+                                    </div>
                                 </div>
-                            </div>
-                        `;
-                    }
-                });
+                            `;
+                        }
+                    });
 
-                console.log('🔨 [MODAL] Reconstruction HTML suppléments:', supplements.length, 'items');
-                supplementsList.innerHTML = html;
-            } else {
-                supplementsContainer.classList.add('hidden');
-                supplementsContainer.style.display = 'none';
+                    supplementsList.innerHTML = html;
+                } else {
+                    supplementsContainer.classList.add('hidden');
+                    supplementsContainer.style.display = 'none';
+                }
             }
+
+            // Reset sélection visuelle (nouvelle ouverture)
+            document.querySelectorAll('.supplement-item').forEach(item => item.classList.remove('selected'));
 
             // Drinks selection désactivée (plus de boisson avec menu/duo)
             const drinksContainer = document.getElementById('modalDrinks');
@@ -2202,24 +2207,22 @@ const Products = {
      * Toggle supplement selection
      */
     toggleSupplement(supId) {
-        // Normaliser l'ID en string pour comparaison cohérente
         const supIdStr = String(supId);
 
-        // Chercher dans le catalog (clés peuvent être number ou string)
-        const sup = Config.supplements.catalog?.[supId] || Config.supplements.catalog?.[supIdStr];
+        // Lookup UNIQUE via byId (pas de fallback)
+        const sup = Config.supplements.byId?.[supIdStr];
         if (!sup) {
-            console.warn('[Products] Supplément non trouvé:', supId);
+            console.error('[toggleSupplement] ERREUR: supplément absent de byId:', supIdStr);
             return;
         }
 
-        // Vérifier que le prix est valide (nombre >= 0)
         const price = parseFloat(sup.price);
         if (isNaN(price) || price < 0) {
-            console.error('[Products] Supplément prix invalide:', sup.name, 'prix:', sup.price, 'typeof:', typeof sup.price);
+            console.error('[toggleSupplement] ERREUR: prix invalide:', sup.name, sup.price);
             return;
         }
 
-        // Comparaison avec conversion en string
+        // Toggle dans selectedSupplements
         const index = this.selectedSupplements.findIndex(s => String(s.id) === supIdStr);
         if (index >= 0) {
             this.selectedSupplements.splice(index, 1);
@@ -2227,22 +2230,9 @@ const Products = {
             this.selectedSupplements.push(sup);
         }
 
-        // LOG AUDIT OBLIGATOIRE
-        console.log("🧪 TOGGLE SUPPLEMENT", {
-            supId: supId,
-            price: price,
-            action: index >= 0 ? 'REMOVED' : 'ADDED',
-            selectedSupplementsSnapshot: JSON.parse(JSON.stringify(this.selectedSupplements))
-        });
-
-        // Update UI
+        // Sync UI
         document.querySelectorAll('.supplement-item').forEach(item => {
-            const id = item.dataset.id;
-            if (this.selectedSupplements.find(s => String(s.id) === id)) {
-                item.classList.add('selected');
-            } else {
-                item.classList.remove('selected');
-            }
+            item.classList.toggle('selected', this.selectedSupplements.some(s => String(s.id) === item.dataset.id));
         });
 
         this.updateModalUI();

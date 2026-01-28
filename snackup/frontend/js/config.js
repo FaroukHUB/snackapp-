@@ -65,6 +65,16 @@ const Config = {
         this.categoryIcons = data.categoryIcons || {};
         this.featured = data.featured || {};
         this.menuOptions = data.menuOptions || {};
+
+        // Créer index byId normalisé (clé = String(id))
+        this.supplements.byId = {};
+        const catalog = this.supplements.catalog || {};
+        for (const key in catalog) {
+            const sup = catalog[key];
+            if (sup && sup.id !== undefined) {
+                this.supplements.byId[String(sup.id)] = sup;
+            }
+        }
     },
 
     /**
