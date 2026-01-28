@@ -198,14 +198,13 @@ $csrfToken = getCsrfToken();
     .status[data-status="unavailable"]{background: rgba(239,68,68,.15);color:#f87171}
     .dot{width:8px;height:8px;border-radius:999px;background: currentColor}
 
-    /* ===== Modal moderne ===== */
+    /* ===== Modal moderne (optimisé: sans backdrop-filter pour éviter freeze) ===== */
     .modal-overlay{
       position:fixed;inset:0;
       display:none;
       align-items:center;justify-content:center;
       padding:12px;
-      background: rgba(0,0,0,.62);
-      backdrop-filter: blur(8px);
+      background: rgba(0,0,0,.88);
       z-index: 1000;
     }
     .modal-overlay[aria-hidden="false"]{display:flex}
@@ -221,13 +220,6 @@ $csrfToken = getCsrfToken();
       background: linear-gradient(180deg, rgba(20,25,40,.98), rgba(15,20,35,.98));
       box-shadow: var(--shadow);
       overflow:hidden;
-      transform: translateY(10px) scale(.98);
-      opacity:0;
-      transition: transform .16s ease, opacity .16s ease;
-    }
-    .modal-overlay[aria-hidden="false"] .modal{
-      transform: translateY(0) scale(1);
-      opacity:1;
     }
     .modal-h{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
     .modal-h h3{margin:0;font-size:14px;font-weight:600}
