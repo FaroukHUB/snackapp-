@@ -2206,13 +2206,30 @@ const Products = {
             return;
         }
 
+        // Vérifier que le prix est valide (nombre >= 0)
+        const price = parseFloat(sup.price);
+        if (isNaN(price) || price < 0) {
+            console.error('[Products] Supplément prix invalide:', sup.name, 'prix:', sup.price, 'typeof:', typeof sup.price);
+            return;
+        }
+
         // Comparaison avec conversion en string
         const index = this.selectedSupplements.findIndex(s => String(s.id) === supIdStr);
         if (index >= 0) {
             this.selectedSupplements.splice(index, 1);
+            console.log('➖ Supplément retiré:', sup.name);
         } else {
             this.selectedSupplements.push(sup);
+            console.log('➕ Supplément ajouté:', sup.name, 'prix:', price);
         }
+
+        // LOG: État après toggle
+        console.log('📋 selectedSupplements:', this.selectedSupplements.map(s => ({
+            id: s.id,
+            name: s.name,
+            price: s.price,
+            typeof_price: typeof s.price
+        })));
 
         // Update UI
         document.querySelectorAll('.supplement-item').forEach(item => {
@@ -2253,14 +2270,18 @@ const Products = {
             basePrice = this.currentProduct?.price || this.currentProduct?.priceSolo || 0;
         }
 
-        let total = basePrice;
+        let total = parseFloat(basePrice) || 0;
 
-        // Add supplements
+        // Add supplements (normaliser chaque prix en Number)
+        console.log('💰 Calcul total - basePrice:', basePrice, '(parseFloat:', total, ')');
         this.selectedSupplements.forEach(sup => {
-            total += sup.price || 0;
+            const supPrice = parseFloat(sup.price) || 0;
+            total += supPrice;
+            console.log('   + supplément:', sup.name, 'prix:', supPrice, '→ total:', total);
         });
 
         total *= this.currentQuantity;
+        console.log('💰 Total final (x' + this.currentQuantity + '):', total);
 
         document.getElementById('addToCartPrice').textContent = Config.formatPrice(total);
     },
