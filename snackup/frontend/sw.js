@@ -53,7 +53,7 @@ self.addEventListener('fetch', (event) => {
     if (request.method !== 'GET') return;
 
     // Ignorer les requêtes API (toujours réseau)
-    if (request.url.includes('/api/') || request.url.includes('/admin-panel-v2/')) {
+    if (request.url.includes('/api/') || request.url.includes('/admin/')) {
         return;
     }
 

@@ -1703,7 +1703,7 @@
 
                 this.isFetchingAddress = true;
                 try {
-                    const response = await fetch(`/admin-panel-v2/api/loyalty-public.php?action=check_points&phone=${encodeURIComponent(fullPhone)}`);
+                    const response = await fetch(`../admin/api/loyalty-public.php?action=check_points&phone=${encodeURIComponent(fullPhone)}`);
                     const data = await response.json();
 
                     if (data.success && data.customer) {
@@ -2444,7 +2444,7 @@
 
                 try {
                     // Appeler l'API de validation
-                    const response = await fetch(`../admin-panel-v2/api/promo-codes-public.php?action=validate&code=${encodeURIComponent(code)}&order_total=${orderTotal}`);
+                    const response = await fetch(`../admin/api/promo-codes-public.php?action=validate&code=${encodeURIComponent(code)}&order_total=${orderTotal}`);
                     const data = await response.json();
 
                     if (!data.success) {
@@ -2494,7 +2494,7 @@
 
                 try {
                     // Récupérer les points du client
-                    const pointsResponse = await fetch(`../admin-panel-v2/api/loyalty-public.php?action=check_points&phone=${encodeURIComponent(phone)}`);
+                    const pointsResponse = await fetch(`../admin/api/loyalty-public.php?action=check_points&phone=${encodeURIComponent(phone)}`);
                     const pointsData = await pointsResponse.json();
 
                     if (pointsData.success && pointsData.customer) {
@@ -2502,7 +2502,7 @@
                         this.loyaltyCustomer = pointsData.customer;
 
                         // Récupérer les récompenses disponibles
-                        const rewardsResponse = await fetch(`../admin-panel-v2/api/loyalty-public.php?action=get_rewards&points=${points}`);
+                        const rewardsResponse = await fetch(`../admin/api/loyalty-public.php?action=get_rewards&points=${points}`);
                         const rewardsData = await rewardsResponse.json();
 
                         if (rewardsData.success && rewardsData.rewards) {
@@ -2858,7 +2858,7 @@
 
                 // Send to admin API
                 try {
-                    const response = await fetch('../admin-panel-v2/api/orders.php', {
+                    const response = await fetch('../admin/api/orders.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
