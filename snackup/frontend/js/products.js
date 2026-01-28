@@ -654,7 +654,9 @@ const Products = {
             const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
 
             // Badge bundle pour pizzas
-            const isPizza = categoryId && categoryId.toLowerCase().includes('pizza');
+            const catIdStr = String(categoryId || '').toLowerCase();
+            const catNameStr = String(product.category_name || '').toLowerCase();
+            const isPizza = catIdStr.includes('pizza') || catNameStr.includes('pizza');
             const bundleBadge = isPizza ? `
                 <div class="bundle-offer-badge">
                     <span class="bundle-icon">🔥</span>
