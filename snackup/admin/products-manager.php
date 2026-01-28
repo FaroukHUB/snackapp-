@@ -1311,6 +1311,7 @@ $csrfToken = getCsrfToken();
 
     // ===== GESTION DES SUPPLÉMENTS =====
     $("#btnManageSupplements").addEventListener("click", () => {
+      setupSupplementsEvents(); // Attache events UNE SEULE FOIS
       renderSupplementsList();
       openModal("#modalSupplements");
     });
@@ -1392,11 +1393,22 @@ $csrfToken = getCsrfToken();
       if (!hasSaled && !hasSucre) {
         container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
       }
+      // Events attachés via delegation (voir setupSupplementsEvents)
+    }
 
-      // Attacher les événements
-      $$("[data-toggle-sup]", container).forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.toggleSup;
+    // Event delegation pour suppléments (attaché UNE SEULE FOIS)
+    let supplementsEventsAttached = false;
+    function setupSupplementsEvents() {
+      if (supplementsEventsAttached) return;
+      supplementsEventsAttached = true;
+
+      const container = $("#supplementsList");
+      container.addEventListener("click", async (e) => {
+        const toggleBtn = e.target.closest("[data-toggle-sup]");
+        const deleteBtn = e.target.closest("[data-delete-sup]");
+
+        if (toggleBtn) {
+          const id = toggleBtn.dataset.toggleSup;
           const sup = getSupplements()[id];
           if (!sup) return;
           const newStatus = sup.status === 'available' ? 'unavailable' : 'available';
@@ -1408,12 +1420,10 @@ $csrfToken = getCsrfToken();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de modifier le statut.");
           }
-        });
-      });
+        }
 
-      $$("[data-delete-sup]", container).forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.deleteSup;
+        if (deleteBtn) {
+          const id = deleteBtn.dataset.deleteSup;
           const sup = getSupplements()[id];
           if (!sup) return;
           if (!confirm(`Supprimer le supplément "${sup.name}" ?`)) return;
@@ -1425,7 +1435,7 @@ $csrfToken = getCsrfToken();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
           }
-        });
+        }
       });
     }
 

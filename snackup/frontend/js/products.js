@@ -2196,10 +2196,18 @@ const Products = {
      * Toggle supplement selection
      */
     toggleSupplement(supId) {
-        const sup = Config.supplements.catalog?.[supId];
-        if (!sup) return;
+        // Normaliser l'ID en string pour comparaison cohérente
+        const supIdStr = String(supId);
 
-        const index = this.selectedSupplements.findIndex(s => s.id === supId);
+        // Chercher dans le catalog (clés peuvent être number ou string)
+        const sup = Config.supplements.catalog?.[supId] || Config.supplements.catalog?.[supIdStr];
+        if (!sup) {
+            console.warn('[Products] Supplément non trouvé:', supId);
+            return;
+        }
+
+        // Comparaison avec conversion en string
+        const index = this.selectedSupplements.findIndex(s => String(s.id) === supIdStr);
         if (index >= 0) {
             this.selectedSupplements.splice(index, 1);
         } else {
@@ -2209,7 +2217,7 @@ const Products = {
         // Update UI
         document.querySelectorAll('.supplement-item').forEach(item => {
             const id = item.dataset.id;
-            if (this.selectedSupplements.find(s => s.id === id)) {
+            if (this.selectedSupplements.find(s => String(s.id) === id)) {
                 item.classList.add('selected');
             } else {
                 item.classList.remove('selected');
