@@ -85,21 +85,7 @@ class Database {
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
 
         $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-
-        // 🐛 DEBUG: Log the SQL query
-        $debugFile = dirname(__DIR__) . '/admin/debug_orders.log';
-        $timestamp = date('Y-m-d H:i:s');
-        file_put_contents($debugFile, "[$timestamp] [DB INSERT] Table: $table\n", FILE_APPEND);
-        file_put_contents($debugFile, "[$timestamp] [DB INSERT] Columns: $columns\n", FILE_APPEND);
-        file_put_contents($debugFile, "[$timestamp] [DB INSERT] SQL: $sql\n", FILE_APPEND);
-
-        try {
-            self::query($sql, array_values($data));
-            file_put_contents($debugFile, "[$timestamp] [DB INSERT] SUCCESS!\n", FILE_APPEND);
-        } catch (Exception $e) {
-            file_put_contents($debugFile, "[$timestamp] [DB INSERT] ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
-            throw $e;
-        }
+        self::query($sql, array_values($data));
 
         return (int) self::getInstance()->lastInsertId();
     }

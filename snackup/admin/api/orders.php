@@ -3,43 +3,7 @@
  * SnackApp v1 - Orders API
  * Gestion des commandes
  * Support MySQL avec fallback JSON
- *
- * VERSION: 2026-01-29-v3 (avec delivery_address + file logging)
  */
-
-// 🔄 FORCE OPCACHE RESET pour ce fichier et les dépendances
-if (function_exists('opcache_invalidate')) {
-    opcache_invalidate(__FILE__, true);
-    opcache_invalidate(__DIR__ . '/../bootstrap.php', true);
-    opcache_invalidate(__DIR__ . '/../config.php', true);
-    opcache_invalidate(__DIR__ . '/../../backend/Database.php', true);
-    opcache_invalidate(__DIR__ . '/../../backend/repositories/OrderRepository.php', true);
-}
-
-// 🐛 DEBUG: Écrire dans un fichier car error_log va vers /dev/null
-function debugLog($message) {
-    $logFile = __DIR__ . '/../debug_orders.log';
-    $timestamp = date('Y-m-d H:i:s');
-    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
-}
-
-// 🐛 TEST IMMEDIAT: Écrire au démarrage pour vérifier que le fichier peut être créé
-debugLog('=== ORDERS.PHP STARTED === Action: ' . ($_GET['action'] ?? $_POST['action'] ?? 'unknown'));
-
-// 🐛 DEBUG: Activer les erreurs temporairement
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-ini_set('log_errors', 1);
-
-// 🐛 DEBUG: Capturer toutes les erreurs fatales
-register_shutdown_function(function() {
-    $error = error_get_last();
-    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
-        error_log('[FATAL] ' . json_encode($error));
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'error' => 'Erreur serveur: ' . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']]);
-    }
-});
 
 require_once __DIR__ . '/../bootstrap.php';
 
@@ -369,26 +333,6 @@ function addOrder(bool $useMySQL) {
 
     if ($useMySQL) {
         try {
-            // 🐛 DEBUG: Log version et DB info
-            debugLog('[ADD_ORDER] VERSION: 2026-01-29-v3');
-            debugLog('[ADD_ORDER] Database: ' . DB_NAME);
-            debugLog('[ADD_ORDER] Restaurant ID: ' . SNACK_RESTAURANT_ID);
-
-            // 🐛 DEBUG: Vérifier que delivery_address existe dans la table
-            try {
-                $dbCheck = Database::fetchOne("SELECT DATABASE() as db");
-                debugLog('[ADD_ORDER] Active DB: ' . ($dbCheck['db'] ?? 'NULL'));
-
-                $cols = Database::fetchAll("SHOW COLUMNS FROM orders LIKE 'delivery_address'");
-                debugLog('[ADD_ORDER] delivery_address column exists: ' . (count($cols) > 0 ? 'YES' : 'NO'));
-
-                // Log le chemin du fichier Database.php chargé
-                $dbReflection = new ReflectionClass('Database');
-                debugLog('[ADD_ORDER] Database class loaded from: ' . $dbReflection->getFileName());
-            } catch (Exception $dbErr) {
-                debugLog('[ADD_ORDER] DB Check Error: ' . $dbErr->getMessage());
-            }
-
             $loyaltyRewardId = $requestData['loyalty_reward_id'] ?? null;
             $loyaltyCustomerId = $requestData['loyalty_customer_id'] ?? null;
 
