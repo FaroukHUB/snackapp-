@@ -781,7 +781,17 @@ if ($useMySQL) {
             $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
             $imagePath = handleImageUpload($baseSlug);
             if (!$imagePath && isset($input['image'])) {
-                $imagePath = $input['image']; // Garder l'image existante
+                $imagePath = $input['image']; // Garder l'image envoyée
+            }
+            // ✅ FIX: Si pas d'image fournie, récupérer l'existante de la BDD
+            if (!$imagePath) {
+                $pdo = Database::getInstance();
+                $stmtImg = $pdo->prepare("SELECT image FROM products WHERE id = ? AND restaurant_id = ?");
+                $stmtImg->execute([$productId, SNACK_RESTAURANT_ID]);
+                $existingImage = $stmtImg->fetchColumn();
+                if ($existingImage) {
+                    $imagePath = $existingImage;
+                }
             }
 
             // Gérer baseIngredients (peut être une chaîne JSON depuis FormData)
