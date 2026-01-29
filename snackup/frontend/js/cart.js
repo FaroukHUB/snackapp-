@@ -99,14 +99,14 @@ const Cart = {
             // Update quantity
             this.items[existingIndex].quantity += quantity;
         } else {
-            // Add new item
+            // Add new item - parseFloat pour garantir des nombres
             this.items.push({
                 key: itemKey,
                 id: item.id,
                 name: item.name,
                 image: item.image,
-                basePrice: item.price || item.priceSolo || 0,
-                supplements: supplements,
+                basePrice: parseFloat(item.price || item.priceSolo) || 0,
+                supplements: supplements.map(s => ({...s, price: parseFloat(s.price) || 0})),
                 options: options,
                 quantity: quantity,
                 isFormule: !!item.includes,
@@ -212,23 +212,23 @@ const Cart = {
 
         // Si variant sélectionné (cafe-caps, cafe-lor), utiliser SON prix
         if (item.options && item.options.selectedVariant && item.options.selectedVariant.price) {
-            total = item.options.selectedVariant.price;
+            total = parseFloat(item.options.selectedVariant.price) || 0;
         }
         // Si pâtisserie sélectionnée, utiliser SON prix (REMPLACE le basePrice, ne s'additionne pas!)
         else if (item.options && item.options.selectedPatisserie && item.options.selectedPatisserie.price) {
-            total = item.options.selectedPatisserie.price;
+            total = parseFloat(item.options.selectedPatisserie.price) || 0;
         }
         // ✅ FIX: Si beverage sélectionné (jus, smoothie, salade), utiliser SON prix
         else if (item.options && item.options.selectedBeverage && item.options.selectedBeverage.price) {
-            total = item.options.selectedBeverage.price;
+            total = parseFloat(item.options.selectedBeverage.price) || 0;
         } else {
             // Sinon, utiliser le prix de base
-            total = item.basePrice;
+            total = parseFloat(item.basePrice) || 0;
         }
 
-        // Add supplements prices
+        // Add supplements prices (parseFloat pour éviter concaténation de strings)
         if (item.supplements && item.supplements.length > 0) {
-            total += item.supplements.reduce((sum, sup) => sum + (sup.price || 0), 0);
+            total += item.supplements.reduce((sum, sup) => sum + (parseFloat(sup.price) || 0), 0);
         }
 
         return total * item.quantity;
