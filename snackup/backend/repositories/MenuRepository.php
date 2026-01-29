@@ -691,17 +691,160 @@ class MenuRepository {
     }
 
     /**
-     * Génère un slug unique depuis un nom
-     * NOTE: Fonction désactivée - la colonne 'slug' n'existe pas dans la DB actuelle
+     * Récupère les paramètres de la section Featured
      */
-    // private static function generateSlug($name) {
-    //     $slug = strtolower(trim($name));
-    //     $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
-    //     $slug = trim($slug, '-');
-    //
-    //     // Ajouter un suffix unique si nécessaire
-    //     $slug .= '-' . substr(md5(uniqid()), 0, 8);
-    //
-    //     return $slug;
-    // }
+    public static function getFeaturedSettings() {
+        $pdo = Database::getInstance();
+
+        try {
+            $stmt = $pdo->prepare("
+                SELECT enabled, title, subtitle
+                FROM featured_settings
+                WHERE restaurant_id = ?
+            ");
+            $stmt->execute([self::$restaurantId]);
+            $settings = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$settings) {
+                // Paramètres par défaut si non configurés
+                return [
+                    'enabled' => true,
+                    'title' => 'Sélection pour vous',
+                    'subtitle' => 'Nos produits les plus appréciés'
+                ];
+            }
+
+            return [
+                'enabled' => (bool)$settings['enabled'],
+                'title' => $settings['title'],
+                'subtitle' => $settings['subtitle']
+            ];
+        } catch (PDOException $e) {
+            // Table n'existe pas encore
+            return [
+                'enabled' => true,
+                'title' => 'Sélection pour vous',
+                'subtitle' => 'Nos produits les plus appréciés'
+            ];
+        }
+    }
+
+    /**
+     * Met à jour les paramètres de la section Featured
+     */
+    public static function updateFeaturedSettings($enabled, $title, $subtitle) {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            INSERT INTO featured_settings (restaurant_id, enabled, title, subtitle)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE enabled = ?, title = ?, subtitle = ?
+        ");
+
+        return $stmt->execute([
+            self::$restaurantId,
+            $enabled ? 1 : 0,
+            $title,
+            $subtitle,
+            $enabled ? 1 : 0,
+            $title,
+            $subtitle
+        ]);
+    }
+
+    /**
+     * Récupère les produits featured (sélection pour vous)
+     */
+    public static function getFeaturedProducts() {
+        $pdo = Database::getInstance();
+
+        try {
+            $stmt = $pdo->prepare("
+                SELECT p.id, p.name, p.description, p.image,
+                       p.price_solo as priceSolo, p.price_menu as priceMenu,
+                       p.status, c.slug as categorySlug
+                FROM products p
+                JOIN categories c ON p.category_id = c.id
+                WHERE p.restaurant_id = ? AND p.is_featured = 1 AND p.status = 'available'
+                ORDER BY p.sort_order ASC
+            ");
+            $stmt->execute([self::$restaurantId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Colonne is_featured n'existe pas encore
+            return [];
+        }
+    }
+
+    /**
+     * Récupère les IDs des produits featured
+     */
+    public static function getFeaturedProductIds() {
+        $pdo = Database::getInstance();
+
+        try {
+            $stmt = $pdo->prepare("
+                SELECT id FROM products
+                WHERE restaurant_id = ? AND is_featured = 1
+            ");
+            $stmt->execute([self::$restaurantId]);
+            return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'id');
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Active/désactive le statut featured d'un produit
+     */
+    public static function setProductFeatured($productId, $isFeatured) {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            UPDATE products
+            SET is_featured = ?
+            WHERE id = ? AND restaurant_id = ?
+        ");
+
+        return $stmt->execute([
+            $isFeatured ? 1 : 0,
+            $productId,
+            self::$restaurantId
+        ]);
+    }
+
+    /**
+     * Met à jour tous les produits featured en une fois
+     */
+    public static function updateFeaturedProducts($productIds) {
+        $pdo = Database::getInstance();
+
+        try {
+            $pdo->beginTransaction();
+
+            // D'abord, retirer featured de tous les produits
+            $stmt = $pdo->prepare("
+                UPDATE products SET is_featured = 0
+                WHERE restaurant_id = ?
+            ");
+            $stmt->execute([self::$restaurantId]);
+
+            // Ensuite, marquer les produits sélectionnés comme featured
+            if (!empty($productIds)) {
+                $placeholders = implode(',', array_fill(0, count($productIds), '?'));
+                $stmt = $pdo->prepare("
+                    UPDATE products SET is_featured = 1
+                    WHERE id IN ($placeholders) AND restaurant_id = ?
+                ");
+                $params = array_merge($productIds, [self::$restaurantId]);
+                $stmt->execute($params);
+            }
+
+            $pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
 }
