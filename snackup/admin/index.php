@@ -3148,16 +3148,15 @@ if (isset($_GET['export'])) {
             <h3 style="margin:0 0 10px; color:#fff;">Accès restreint</h3>
             <p style="color:#9ca3af; font-size:13px; margin-bottom:20px;">Entrez le code PIN pour accéder à cette section</p>
             <div style="display:flex; gap:8px; justify-content:center; margin-bottom:20px;">
-                <input type="tel" id="pinDigit1" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff; -webkit-text-security:disc;" oninput="pinInputHandler(this, 1)" onkeydown="pinKeyHandler(event, 1)" autocomplete="off">
-                <input type="tel" id="pinDigit2" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff; -webkit-text-security:disc;" oninput="pinInputHandler(this, 2)" onkeydown="pinKeyHandler(event, 2)" autocomplete="off">
-                <input type="tel" id="pinDigit3" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff; -webkit-text-security:disc;" oninput="pinInputHandler(this, 3)" onkeydown="pinKeyHandler(event, 3)" autocomplete="off">
-                <input type="tel" id="pinDigit4" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff; -webkit-text-security:disc;" oninput="pinInputHandler(this, 4)" onkeydown="pinKeyHandler(event, 4)" autocomplete="off">
+                <input type="password" id="pinDigit1" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff;" oninput="pinInputHandler(this, 1)" onkeydown="pinKeyHandler(event, 1)" autocomplete="off">
+                <input type="password" id="pinDigit2" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff;" oninput="pinInputHandler(this, 2)" onkeydown="pinKeyHandler(event, 2)" autocomplete="off">
+                <input type="password" id="pinDigit3" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff;" oninput="pinInputHandler(this, 3)" onkeydown="pinKeyHandler(event, 3)" autocomplete="off">
+                <input type="password" id="pinDigit4" maxlength="1" pattern="[0-9]" inputmode="numeric" style="width:50px; height:60px; text-align:center; font-size:24px; background:#2a2a3e; border:2px solid #444; border-radius:12px; color:#fff;" oninput="pinInputHandler(this, 4)" onkeydown="pinKeyHandler(event, 4)" autocomplete="off">
             </div>
             <p id="pinError" style="color:#ef4444; font-size:12px; margin-bottom:15px; display:none;">PIN incorrect</p>
-            <p id="pinLoading" style="color:#3b82f6; font-size:12px; margin-bottom:15px; display:none;"><i class="fas fa-spinner fa-spin"></i> Vérification...</p>
             <div style="display:flex; gap:10px;">
-                <button id="pinCancelBtn" onclick="closePinModal()" style="flex:1; padding:12px; background:#333; border:none; border-radius:10px; color:#fff; cursor:pointer;">Annuler</button>
-                <button id="pinValidateBtn" onclick="validatePin()" style="flex:1; padding:12px; background:linear-gradient(135deg,#3b82f6,#2563eb); border:none; border-radius:10px; color:#fff; cursor:pointer; font-weight:600;">Valider</button>
+                <button onclick="closePinModal()" style="flex:1; padding:12px; background:#333; border:none; border-radius:10px; color:#fff; cursor:pointer;">Annuler</button>
+                <button onclick="validatePin()" style="flex:1; padding:12px; background:linear-gradient(135deg,#3b82f6,#2563eb); border:none; border-radius:10px; color:#fff; cursor:pointer; font-weight:600;">Valider</button>
             </div>
         </div>
     </div>
@@ -3198,12 +3197,8 @@ if (isset($_GET['export'])) {
         function showPinModal(section) {
             pendingSection = section;
             pendingDeleteAction = null; // Reset
-            pinValidating = false;
             document.getElementById('pinModal').style.display = 'flex';
             document.getElementById('pinError').style.display = 'none';
-            document.getElementById('pinLoading').style.display = 'none';
-            document.getElementById('pinValidateBtn').disabled = false;
-            document.getElementById('pinValidateBtn').style.opacity = '1';
 
             // Réinitialiser les inputs
             ['pinDigit1','pinDigit2','pinDigit3','pinDigit4'].forEach(id => {
@@ -3220,24 +3215,16 @@ if (isset($_GET['export'])) {
 
         function closePinModal() {
             document.getElementById('pinModal').style.display = 'none';
-            document.getElementById('pinLoading').style.display = 'none';
-            document.getElementById('pinValidateBtn').disabled = false;
-            document.getElementById('pinValidateBtn').style.opacity = '1';
             pendingSection = null;
             pendingDeleteAction = null;
-            pinValidating = false;
         }
 
         // 🔒 Afficher le modal PIN spécifiquement pour la suppression
         function showPinModalForDeletion(deleteCallback) {
             pendingDeleteAction = deleteCallback;
             pendingSection = null; // Pas de navigation
-            pinValidating = false;
             document.getElementById('pinModal').style.display = 'flex';
             document.getElementById('pinError').style.display = 'none';
-            document.getElementById('pinLoading').style.display = 'none';
-            document.getElementById('pinValidateBtn').disabled = false;
-            document.getElementById('pinValidateBtn').style.opacity = '1';
 
             // Réinitialiser les inputs
             ['pinDigit1','pinDigit2','pinDigit3','pinDigit4'].forEach(id => {
@@ -3289,11 +3276,7 @@ if (isset($_GET['export'])) {
             }
         }
 
-        let pinValidating = false;
-
         function validatePin() {
-            if (pinValidating) return; // Éviter double validation
-
             const pin = ['pinDigit1','pinDigit2','pinDigit3','pinDigit4'].map(id => document.getElementById(id).value).join('');
             console.log('[PIN] Validation - PIN saisi:', pin, 'Longueur:', pin.length);
 
@@ -3301,13 +3284,6 @@ if (isset($_GET['export'])) {
                 console.warn('[PIN] PIN incomplet, longueur:', pin.length);
                 return;
             }
-
-            // Afficher état de chargement
-            pinValidating = true;
-            document.getElementById('pinError').style.display = 'none';
-            document.getElementById('pinLoading').style.display = 'block';
-            document.getElementById('pinValidateBtn').disabled = true;
-            document.getElementById('pinValidateBtn').style.opacity = '0.5';
 
             console.log('[PIN] Envoi requête vérification...');
             fetch('api/admin-pin.php', {
@@ -3317,18 +3293,10 @@ if (isset($_GET['export'])) {
             })
             .then(r => {
                 console.log('[PIN] Réponse reçue, status:', r.status);
-                if (!r.ok && r.status !== 403 && r.status !== 429) {
-                    throw new Error('Erreur serveur: ' + r.status);
-                }
                 return r.json();
             })
             .then(data => {
                 console.log('[PIN] Données:', data);
-                pinValidating = false;
-                document.getElementById('pinLoading').style.display = 'none';
-                document.getElementById('pinValidateBtn').disabled = false;
-                document.getElementById('pinValidateBtn').style.opacity = '1';
-
                 if (data.success) {
                     console.log('[PIN] ✅ Accès autorisé');
 
@@ -3368,11 +3336,7 @@ if (isset($_GET['export'])) {
             })
             .catch(err => {
                 console.error('[PIN] Erreur réseau:', err);
-                pinValidating = false;
-                document.getElementById('pinLoading').style.display = 'none';
-                document.getElementById('pinValidateBtn').disabled = false;
-                document.getElementById('pinValidateBtn').style.opacity = '1';
-                document.getElementById('pinError').textContent = 'Erreur de connexion: ' + err.message;
+                document.getElementById('pinError').textContent = 'Erreur de connexion';
                 document.getElementById('pinError').style.display = 'block';
             });
         }
