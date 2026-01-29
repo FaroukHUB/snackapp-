@@ -502,10 +502,23 @@ class MenuRepository {
     public static function getAllFormules() {
         $pdo = Database::getInstance();
 
+        // Vérifier si la colonne badge existe
+        $hasBadgeColumn = false;
+        try {
+            $checkStmt = $pdo->query("SHOW COLUMNS FROM formules LIKE 'badge'");
+            $hasBadgeColumn = $checkStmt->rowCount() > 0;
+        } catch (Exception $e) {
+            $hasBadgeColumn = false;
+        }
+
+        // Construire la requête selon les colonnes disponibles
+        $selectFields = "id, name, description, image, price, original_price as originalPrice, includes, status, sort_order";
+        if ($hasBadgeColumn) {
+            $selectFields = "id, name, description, image, badge, price, original_price as originalPrice, includes, status, sort_order";
+        }
+
         $stmt = $pdo->prepare("
-            SELECT id, name, description, image, badge,
-                   price, original_price as originalPrice,
-                   includes, status, sort_order
+            SELECT {$selectFields}
             FROM formules
             WHERE restaurant_id = ? AND status = 'available'
             ORDER BY sort_order ASC, id ASC
@@ -525,6 +538,11 @@ class MenuRepository {
             // Convert numeric strings to proper types
             $formule['price'] = (float)$formule['price'];
             $formule['originalPrice'] = !empty($formule['originalPrice']) ? (float)$formule['originalPrice'] : null;
+
+            // S'assurer que badge existe (même vide)
+            if (!isset($formule['badge'])) {
+                $formule['badge'] = null;
+            }
         }
 
         return $formules;
