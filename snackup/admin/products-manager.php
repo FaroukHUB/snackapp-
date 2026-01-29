@@ -1360,12 +1360,13 @@ $csrfToken = getCsrfToken();
 
     // ===== GESTION DES SUPPLÉMENTS =====
     $("#btnManageSupplements").addEventListener("click", () => {
-      console.log('[Supplements] Opening modal...');
-      console.log('[Supplements] Catalog:', state.menu?.supplements?.catalog);
-      setupSupplementsEvents();
-      renderSupplementsList();
+      // Ouvrir le modal d'abord (évite le freeze)
       openModal("#modalSupplements");
-      console.log('[Supplements] Modal opened');
+      // Rendu différé
+      requestAnimationFrame(() => {
+        setupSupplementsEvents();
+        renderSupplementsList();
+      });
     });
 
     // Capitalise la première lettre
@@ -1386,23 +1387,18 @@ $csrfToken = getCsrfToken();
     // Protection contre les rendus multiples
     let isRenderingSupplements = false;
     function renderSupplementsList(){
-      console.log('[Supplements] renderSupplementsList called, isRendering:', isRenderingSupplements);
-      if (isRenderingSupplements) {
-        console.log('[Supplements] Already rendering, skipping');
-        return;
-      }
+      if (isRenderingSupplements) return;
       isRenderingSupplements = true;
 
-      const container = $("#supplementsList");
-      if (!container) {
-        console.log('[Supplements] Container not found');
-        isRenderingSupplements = false;
-        return;
-      }
+      try {
+        const container = $("#supplementsList");
+        if (!container) {
+          isRenderingSupplements = false;
+          return;
+        }
 
-      const catalog = state.menu?.supplements?.catalog || {};
-      const supplements = Object.values(catalog).filter(s => s != null);
-      console.log('[Supplements] Found', supplements.length, 'supplements');
+        const catalog = state.menu?.supplements?.catalog || {};
+        const supplements = Object.values(catalog).filter(s => s != null);
 
       // Peupler le select
       populateCategorySelect();
@@ -1446,7 +1442,11 @@ $csrfToken = getCsrfToken();
       });
 
       container.innerHTML = html;
-      isRenderingSupplements = false;
+      } catch(e) {
+        console.error('[Supplements] Erreur rendu:', e);
+      } finally {
+        isRenderingSupplements = false;
+      }
     }
 
     // Event delegation pour suppléments (attaché UNE SEULE FOIS)
