@@ -544,7 +544,7 @@ ul {
    ============================================ */
 /* SECTION FORMULES : fond noir, titre blanc */
 .formules-section {
-    background: #1a1a1a;
+    background: #1a1a1a !important;
     margin: 0 -20px 64px -20px;
     padding: 32px 20px 48px 20px;
     border-bottom: none;
