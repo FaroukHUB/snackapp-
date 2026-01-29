@@ -537,7 +537,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 <body>
     <div class="page-container">
         <header class="page-header">
-            <a href="fidelite.html" class="back-btn">
+            <a href="index.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <h1 class="page-title">Ma Carte Fidelite</h1>
