@@ -558,8 +558,8 @@ ul {
 
 /* TITRE blanc sur fond noir */
 .formules-section h2 {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 800;
     color: #ffffff !important;
     margin-bottom: 20px;
     display: flex;
@@ -569,7 +569,7 @@ ul {
 
 .formules-section h2 i {
     color: #ffd700 !important;
-    font-size: 20px;
+    font-size: 26px;
 }
 
 .formules-grid {
@@ -780,8 +780,8 @@ ul {
 }
 
 .product-section h2 {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 800;
     color: var(--success);
     margin-bottom: 20px;
     display: flex;
@@ -791,12 +791,12 @@ ul {
 
 .product-section h2 i {
     color: var(--success);
-    font-size: 20px;
+    font-size: 26px;
 }
 
 /* Support des emojis comme icônes de catégorie */
 .product-section h2 .category-emoji {
-    font-size: 24px;
+    font-size: 28px;
     line-height: 1;
 }
 
