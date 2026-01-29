@@ -1145,10 +1145,21 @@ const Products = {
             const supplementsContainer = document.getElementById('modalSupplements');
             const supplementsList = document.getElementById('supplementsList');
 
-            // Vérifier si c'est une catégorie pizza
-            const productCategory = Config.getCategories().find(c => c.id === product.categoryId);
-            const categoryNameLower = (productCategory?.name || '').toLowerCase();
-            const isPizzaCategory = categoryNameLower.includes('pizza');
+            // Vérifier si c'est une catégorie pizza (par slug ou nom)
+            // Utiliser == pour comparaison souple (string/number)
+            const productCategory = Config.getCategories().find(c => String(c.id) === String(product.categoryId));
+            const categorySlug = String(productCategory?.slug || productCategory?.id || '').toLowerCase();
+            const categoryName = String(productCategory?.name || '').toLowerCase();
+
+            // DEBUG: afficher les infos de catégorie
+            console.log('[Supplements] Product categoryId:', product.categoryId, 'Found category:', productCategory?.name, 'Slug:', categorySlug);
+
+            // Les catégories de pizza ont un slug contenant "pizza" ou sont nommées avec "pizza"/"tomate"/"crème"/"originale"
+            const isPizzaCategory = categorySlug.includes('pizza') || categoryName.includes('pizza')
+                || categoryName.includes('tomate') || categoryName.includes('crème') || categoryName.includes('creme')
+                || categoryName.includes('originale');
+
+            console.log('[Supplements] isPizzaCategory:', isPizzaCategory);
 
             if (!isPizzaCategory) {
                 // Masquer les suppléments pour les catégories non-pizza
