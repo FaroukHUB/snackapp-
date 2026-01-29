@@ -1380,18 +1380,27 @@ $csrfToken = getCsrfToken();
       select.innerHTML = groups.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(capitalizeStr(g))}</option>`).join('');
     }
 
+    // Protection contre les rendus multiples
+    let isRenderingSupplements = false;
     function renderSupplementsList(){
+      if (isRenderingSupplements) return;
+      isRenderingSupplements = true;
+
       const container = $("#supplementsList");
-      if (!container) return;
+      if (!container) {
+        isRenderingSupplements = false;
+        return;
+      }
 
       const catalog = state.menu?.supplements?.catalog || {};
-      const supplements = Object.values(catalog);
+      const supplements = Object.values(catalog).filter(s => s != null);
 
       // Peupler le select
       populateCategorySelect();
 
       if (supplements.length === 0) {
         container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
+        isRenderingSupplements = false;
         return;
       }
 
@@ -1428,6 +1437,7 @@ $csrfToken = getCsrfToken();
       });
 
       container.innerHTML = html;
+      isRenderingSupplements = false;
     }
 
     // Event delegation pour suppléments (attaché UNE SEULE FOIS)
