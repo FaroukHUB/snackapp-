@@ -42,7 +42,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, name, description, image,
+            SELECT id, name, description, image, badge,
                    price_solo as priceSolo, price_menu as priceMenu,
                    status, sort_order, base_ingredients as baseIngredients
             FROM products
@@ -428,7 +428,7 @@ class MenuRepository {
     /**
      * Modifie un produit
      */
-    public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status, $baseIngredients = null) {
+    public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status, $baseIngredients = null, $badge = null) {
         $pdo = Database::getInstance();
 
         // Convertir baseIngredients en JSON si fourni
@@ -441,7 +441,7 @@ class MenuRepository {
         if ($baseIngredients !== null) {
             $stmt = $pdo->prepare("
                 UPDATE products
-                SET name = ?, description = ?, image = ?,
+                SET name = ?, description = ?, image = ?, badge = ?,
                     price_solo = ?, price_menu = ?, status = ?, base_ingredients = ?
                 WHERE id = ? AND restaurant_id = ?
             ");
@@ -450,6 +450,7 @@ class MenuRepository {
                 $name,
                 $description,
                 $image,
+                $badge,
                 $priceSolo,
                 $priceMenu,
                 $status,
@@ -461,7 +462,7 @@ class MenuRepository {
             // Comportement par défaut sans modifier base_ingredients
             $stmt = $pdo->prepare("
                 UPDATE products
-                SET name = ?, description = ?, image = ?,
+                SET name = ?, description = ?, image = ?, badge = ?,
                     price_solo = ?, price_menu = ?, status = ?
                 WHERE id = ? AND restaurant_id = ?
             ");
@@ -470,6 +471,7 @@ class MenuRepository {
                 $name,
                 $description,
                 $image,
+                $badge,
                 $priceSolo,
                 $priceMenu,
                 $status,

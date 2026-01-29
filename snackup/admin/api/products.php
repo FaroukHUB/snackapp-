@@ -804,18 +804,14 @@ if ($useMySQL) {
                 $baseIngredients = is_array($baseIng) ? $baseIng : [];
             }
 
-            // Gérer snackupContext (peut être une chaîne JSON depuis FormData)
-            $snackupContext = null;
-            if (isset($input['snackupContext'])) {
-                $snackupCtx = $input['snackupContext'];
-                if (is_string($snackupCtx)) {
-                    $snackupCtx = json_decode($snackupCtx, true) ?? null;
-                }
-                $snackupContext = is_array($snackupCtx) ? $snackupCtx : null;
+            // Gérer le badge
+            $badge = isset($input['badge']) ? trim($input['badge']) : null;
+            if ($badge === '') {
+                $badge = null;
             }
 
             try {
-                MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status, $baseIngredients, $snackupContext);
+                MenuRepository::editProduct($productId, $name, $description, $imagePath, $priceSolo, $priceMenu, $status, $baseIngredients, $badge);
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
                 jsonSuccess(['product' => ['id' => $productId, 'name' => $name]]);
