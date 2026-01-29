@@ -336,14 +336,24 @@ const Products = {
         // Add category links
         categories.forEach(cat => {
             const icon = cat.icon || 'fa-utensils';
+            const iconImage = cat.icon_image;
             // Only add if category has items
             if (cat.items && cat.items.length > 0) {
-                const iconHtml = icon.startsWith("fa-") ? `<i class="fas ${icon}"></i>` : icon;
+                // Priority: icon_image > emoji/text > FontAwesome
+                let iconHtml;
+                if (iconImage) {
+                    // Image badge (style hashtagbangers.fr)
+                    iconHtml = `<img src="${iconImage}" alt="" class="sidebar-icon-img">`;
+                } else if (icon.startsWith("fa-")) {
+                    iconHtml = `<i class="fas ${icon}"></i>`;
+                } else {
+                    iconHtml = `<span class="sidebar-icon-emoji">${icon}</span>`;
+                }
                 html += `
                     <li>
                         <a href="#${cat.id}" data-section="${cat.id}" onclick="Products.scrollToSection('${cat.id}', event)">
                             ${iconHtml}
-                            ${cat.name}
+                            <span class="sidebar-cat-name">${cat.name}</span>
                         </a>
                     </li>
                 `;

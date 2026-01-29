@@ -302,6 +302,79 @@ function handleFormuleImageUpload(string $baseId): ?string {
 }
 
 /* =========================
+   HELPER: Upload icon image (badge catégorie)
+   ========================= */
+function handleIconImageUpload(string $baseId): ?string {
+    if (empty($_FILES['icon_image'])) return null;
+
+    $file = $_FILES['icon_image'];
+
+    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        return null;
+    }
+
+    // Erreur upload
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    // ✅ SÉCURITÉ: Limite de taille (2MB max pour icônes)
+    $maxSize = 2 * 1024 * 1024;
+    if ($file['size'] > $maxSize) {
+        jsonError('Image icône trop volumineuse (maximum 2MB)');
+    }
+
+    // ✅ SÉCURITÉ: Validation MIME type stricte
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $mime = mime_content_type($file['tmp_name']) ?: '';
+    if (!isset($allowed[$mime])) {
+        jsonError('Format image non supporté (jpg/png/webp uniquement)');
+    }
+
+    // 🔒 SÉCURITÉ: Vérification magic bytes
+    $handle = fopen($file['tmp_name'], 'rb');
+    $header = fread($handle, 12);
+    fclose($handle);
+
+    $isValid = false;
+    if (substr($header, 0, 3) === "\xFF\xD8\xFF") $isValid = true; // JPEG
+    if (substr($header, 0, 4) === "\x89PNG") $isValid = true; // PNG
+    if (substr($header, 0, 4) === "RIFF" && substr($header, 8, 4) === "WEBP") $isValid = true; // WEBP
+
+    if (!$isValid) {
+        jsonError('Fichier image invalide');
+    }
+
+    // ✅ Créer dossier icons
+    $uploadsDir = SNACK_ROOT . '/images/icons';
+    if (!is_dir($uploadsDir)) {
+        mkdir($uploadsDir, 0755, true);
+    }
+
+    // ⚡ Convertir en WebP optimisé (petite taille pour icônes)
+    $webpTempFile = null;
+    try {
+        $webpTempFile = convertToOptimizedWebP($file['tmp_name'], 90, 200); // 200px max pour icônes
+
+        $filename = 'cat-' . $baseId . '-' . bin2hex(random_bytes(4)) . '.webp';
+        $dest = $uploadsDir . '/' . $filename;
+
+        if (!rename($webpTempFile, $dest)) {
+            jsonError('Échec sauvegarde image icône');
+        }
+
+        chmod($dest, 0644);
+        return 'images/icons/' . $filename;
+
+    } catch (Exception $e) {
+        if ($webpTempFile && file_exists($webpTempFile)) {
+            @unlink($webpTempFile);
+        }
+        jsonError('Échec conversion image icône: ' . $e->getMessage());
+    }
+}
+
+/* =========================
    HELPER: Sync formules to menu.json
    ========================= */
 function syncFormulesToMenu(array $runtime): void {
@@ -568,8 +641,12 @@ if ($useMySQL) {
                 jsonError('Flavor invalide (doit être "sale" ou "sucre")');
             }
 
+            // Gérer upload icon_image
+            $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+            $iconImage = handleIconImageUpload($baseSlug);
+
             try {
-                $result = MenuRepository::addCategory($name, $description, $icon, $flavor);
+                $result = MenuRepository::addCategory($name, $description, $icon, $flavor, $iconImage);
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // TODO: Fusionner MySQL + ancien menu.json correctement
                 // regenerateMenuJson();
@@ -589,6 +666,7 @@ if ($useMySQL) {
             $description = trim((string)($input['description'] ?? ''));
             $icon = trim((string)($input['icon'] ?? 'fa-utensils'));
             $flavor = trim((string)($input['flavor'] ?? ''));
+            $clearIconImage = !empty($input['clear_icon_image']);
 
             error_log("categoryId après (int): " . $categoryId);
             error_log("name: " . $name);
@@ -599,14 +677,26 @@ if ($useMySQL) {
                 jsonError('Paramètres manquants (categoryId=' . $categoryId . ')');
             }
 
+            // Gérer upload icon_image ou suppression
+            $iconImage = null;
+            if ($clearIconImage) {
+                $iconImage = ''; // String vide pour supprimer
+            } else {
+                $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+                $uploadedImage = handleIconImageUpload($baseSlug);
+                if ($uploadedImage) {
+                    $iconImage = $uploadedImage;
+                }
+            }
+
             try {
                 error_log("🔄 Appel MenuRepository::editCategory avec ID: " . $categoryId);
-                $success = MenuRepository::editCategory($categoryId, $name, $description, $icon, $flavor);
+                $success = MenuRepository::editCategory($categoryId, $name, $description, $icon, $flavor, $iconImage);
                 error_log("✅ Résultat editCategory: " . var_export($success, true));
 
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
-                jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon, 'flavor' => $flavor]]);
+                jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon, 'icon_image' => $iconImage, 'flavor' => $flavor]]);
             } catch (Exception $e) {
                 error_log("❌ Exception editCategory: " . $e->getMessage());
                 jsonError($e->getMessage());

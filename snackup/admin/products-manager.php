@@ -611,6 +611,22 @@ $csrfToken = getCsrfToken();
               </label>
             </div>
           </div>
+          <div class="field">
+            <label>Image badge (sidebar desktop)</label>
+            <div class="icon-image-upload" style="margin-top:8px;">
+              <div id="iconImagePreview" style="display:none;margin-bottom:10px;">
+                <img id="iconImagePreviewImg" src="" alt="Preview" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--stroke);">
+                <button type="button" class="btn btn-icon-sm btn-danger" onclick="clearIconImage()" style="margin-left:8px;" title="Supprimer">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <label class="btn" style="cursor:pointer;">
+                <i class="fas fa-upload"></i> Choisir une image
+                <input type="file" id="catIconImage" name="icon_image" accept="image/*" style="display:none;" onchange="previewIconImage(this)">
+              </label>
+              <span class="muted" style="margin-left:8px;font-size:11px;">PNG/JPG, carré recommandé</span>
+            </div>
+          </div>
           <p class="muted" style="margin:0">L'identifiant technique est généré automatiquement.</p>
         </div>
         <div class="modal-f">
@@ -1142,6 +1158,59 @@ $csrfToken = getCsrfToken();
       });
     }
 
+    // ===== ICON IMAGE UPLOAD =====
+    let pendingIconImage = null; // Fichier en attente d'upload
+    let existingIconImage = null; // Image existante (pour édition)
+    let clearIconImageFlag = false; // Flag pour supprimer l'image
+
+    function previewIconImage(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      // Valider le type
+      if (!file.type.startsWith('image/')) {
+        toast("error", "Erreur", "Veuillez sélectionner une image valide.");
+        input.value = '';
+        return;
+      }
+
+      // Valider la taille (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast("error", "Erreur", "L'image ne doit pas dépasser 2 Mo.");
+        input.value = '';
+        return;
+      }
+
+      pendingIconImage = file;
+      clearIconImageFlag = false;
+
+      // Preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        $("#iconImagePreviewImg").src = e.target.result;
+        $("#iconImagePreview").style.display = "flex";
+        $("#iconImagePreview").style.alignItems = "center";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearIconImage() {
+      pendingIconImage = null;
+      clearIconImageFlag = true;
+      $("#catIconImage").value = '';
+      $("#iconImagePreview").style.display = "none";
+      $("#iconImagePreviewImg").src = '';
+    }
+
+    function resetIconImageState() {
+      pendingIconImage = null;
+      existingIconImage = null;
+      clearIconImageFlag = false;
+      $("#catIconImage").value = '';
+      $("#iconImagePreview").style.display = "none";
+      $("#iconImagePreviewImg").src = '';
+    }
+
     // Initialize on page load
     initIconSelector();
 
@@ -1158,6 +1227,8 @@ $csrfToken = getCsrfToken();
         const input = o.querySelector("input");
         if (input) input.checked = (i === 0);
       });
+      // Reset icon image state
+      resetIconImageState();
       openModal("#modalCategory");
     });
 
@@ -1174,6 +1245,12 @@ $csrfToken = getCsrfToken();
       $("#catName").value = cat.name ?? "";
       $("#catDesc").value = cat.description ?? "";
 
+      // Sélectionner le flavor actuel
+      const flavorSelect = $("#catFlavor");
+      if (flavorSelect && cat.flavor) {
+        flavorSelect.value = cat.flavor;
+      }
+
       // Sélectionner l'icône actuelle
       const iconValue = cat.icon ?? "fa-utensils";
       const options = $$("#iconSelector .icon-option");
@@ -1185,6 +1262,15 @@ $csrfToken = getCsrfToken();
           o.classList.toggle("selected", isSelected);
         }
       });
+
+      // Gérer l'image d'icône existante
+      resetIconImageState();
+      if (cat.icon_image) {
+        existingIconImage = cat.icon_image;
+        $("#iconImagePreviewImg").src = cat.icon_image;
+        $("#iconImagePreview").style.display = "flex";
+        $("#iconImagePreview").style.alignItems = "center";
+      }
 
       openModal("#modalCategory");
     }
@@ -2205,13 +2291,30 @@ $csrfToken = getCsrfToken();
       const icon = String(fd.get("icon") ?? "fa-utensils").trim();
 
       try{
+        // Préparer FormData pour upload
+        const uploadFd = new FormData();
+        uploadFd.append("name", name);
+        uploadFd.append("description", description);
+        uploadFd.append("flavor", flavor);
+        uploadFd.append("icon", icon);
+
+        // Gérer l'image d'icône
+        if (pendingIconImage) {
+          uploadFd.append("icon_image", pendingIconImage);
+        } else if (clearIconImageFlag) {
+          uploadFd.append("clear_icon_image", "1");
+        }
+
         if (currentEditCategoryId) {
           // Mode édition
-          await apiPostJson({ action:"edit_category", category_id: currentEditCategoryId, name, description, flavor, icon });
+          uploadFd.append("action", "edit_category");
+          uploadFd.append("category_id", currentEditCategoryId);
+          await apiPostMultipart(uploadFd);
           toast("success","Catégorie modifiée", `"${name}" a été mise à jour.`);
         } else {
           // Mode ajout
-          await apiPostJson({ action:"add_category", name, description, flavor, icon });
+          uploadFd.append("action", "add_category");
+          await apiPostMultipart(uploadFd);
           toast("success","Catégorie ajoutée", `"${name}" a été enregistrée.`);
         }
         closeModal($("#modalCategory"));

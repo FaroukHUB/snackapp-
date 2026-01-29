@@ -34,6 +34,7 @@ const App = {
                 this.setupSidebar();
                 this.setupMiniCart();
                 this.setupSmoothScroll();
+                this.setupStickyNav();
                 this._setupComplete = true;
             }
 
@@ -178,6 +179,39 @@ const App = {
                 }
             });
         });
+    },
+
+    /**
+     * Setup sticky category navigation shadow on scroll
+     */
+    setupStickyNav() {
+        const categorySection = document.getElementById('categoryIconsSection');
+        if (!categorySection) return;
+
+        let ticking = false;
+
+        const updateStickyState = () => {
+            const heroSection = document.querySelector('.hero-section');
+            const heroBottom = heroSection ? heroSection.getBoundingClientRect().bottom : 0;
+
+            // Add shadow when hero is scrolled past
+            if (heroBottom <= 70) {
+                categorySection.classList.add('scrolled');
+            } else {
+                categorySection.classList.remove('scrolled');
+            }
+            ticking = false;
+        };
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(updateStickyState);
+                ticking = true;
+            }
+        }, { passive: true });
+
+        // Initial check
+        updateStickyState();
     }
 };
 

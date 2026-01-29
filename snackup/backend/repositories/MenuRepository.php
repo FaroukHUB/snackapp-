@@ -19,7 +19,7 @@ class MenuRepository {
 
         // Récupérer catégories actives
         $stmt = $pdo->prepare("
-            SELECT id, name, slug, description, icon, flavor, sort_order
+            SELECT id, name, slug, description, icon, icon_image, flavor, sort_order
             FROM categories
             WHERE restaurant_id = ? AND is_active = 1
             ORDER BY sort_order ASC, id ASC
@@ -181,7 +181,7 @@ class MenuRepository {
     /**
      * Ajoute une catégorie avec auto-assignment des suppléments
      */
-    public static function addCategory($name, $description, $icon, $flavor) {
+    public static function addCategory($name, $description, $icon, $flavor, $iconImage = null) {
         $pdo = Database::getInstance();
 
         try {
@@ -199,14 +199,15 @@ class MenuRepository {
             // Insérer la catégorie
             $stmt = $pdo->prepare("
                 INSERT INTO categories
-                (restaurant_id, name, description, icon, flavor, sort_order, is_active)
-                VALUES (?, ?, ?, ?, ?, ?, 1)
+                (restaurant_id, name, description, icon, icon_image, flavor, sort_order, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1)
             ");
             $stmt->execute([
                 self::$restaurantId,
                 $name,
                 $description,
                 $icon,
+                $iconImage,
                 $flavor ?: null,
                 $sortOrder
             ]);
@@ -225,6 +226,7 @@ class MenuRepository {
                 'name' => $name,
                 'description' => $description,
                 'icon' => $icon,
+                'icon_image' => $iconImage,
                 'flavor' => $flavor
             ];
 
@@ -285,9 +287,29 @@ class MenuRepository {
     /**
      * Modifie une catégorie
      */
-    public static function editCategory($categoryId, $name, $description, $icon, $flavor) {
+    public static function editCategory($categoryId, $name, $description, $icon, $flavor, $iconImage = null) {
         $pdo = Database::getInstance();
 
+        // Si icon_image est fourni (même vide string pour supprimer), l'inclure
+        if ($iconImage !== null) {
+            $stmt = $pdo->prepare("
+                UPDATE categories
+                SET name = ?, description = ?, icon = ?, icon_image = ?, flavor = ?
+                WHERE id = ? AND restaurant_id = ?
+            ");
+
+            return $stmt->execute([
+                $name,
+                $description,
+                $icon,
+                $iconImage ?: null,
+                $flavor ?: null,
+                $categoryId,
+                self::$restaurantId
+            ]);
+        }
+
+        // Sinon, ne pas modifier icon_image
         $stmt = $pdo->prepare("
             UPDATE categories
             SET name = ?, description = ?, icon = ?, flavor = ?
