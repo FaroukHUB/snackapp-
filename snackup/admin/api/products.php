@@ -2145,7 +2145,7 @@ switch ($action) {
             jsonError('Nom et prix requis');
         }
 
-        // Gérer l'upload d'image
+        // Gérer l'upload d'image avec conversion WebP
         $imagePath = null;
         if (!empty($_FILES['image'])) {
             $file = $_FILES['image'];
@@ -2158,19 +2158,28 @@ switch ($action) {
 
                 $uploadsDir = SNACK_ROOT . '/images/uploads';
                 if (!is_dir($uploadsDir)) {
-                    // 🔒 SÉCURITÉ: Permissions 0755 (pas writable par group)
                     mkdir($uploadsDir, 0755, true);
                 }
 
-                $newId = 'pat-' . strtolower(str_replace([' ', 'é', 'è', 'ê', 'à', 'ç'], ['', 'e', 'e', 'e', 'a', 'c'], $name));
-                $filename = $newId . '-' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
-                $dest = $uploadsDir . '/' . $filename;
+                // Conversion WebP
+                $webpTempFile = null;
+                try {
+                    $webpTempFile = convertToOptimizedWebP($file['tmp_name'], 85, 800);
+                    $newId = 'pat-' . strtolower(str_replace([' ', 'é', 'è', 'ê', 'à', 'ç'], ['', 'e', 'e', 'e', 'a', 'c'], $name));
+                    $filename = $newId . '-' . bin2hex(random_bytes(4)) . '.webp';
+                    $dest = $uploadsDir . '/' . $filename;
 
-                if (!move_uploaded_file($file['tmp_name'], $dest)) {
-                    jsonError('Échec sauvegarde image');
+                    if (!rename($webpTempFile, $dest)) {
+                        jsonError('Échec sauvegarde image WebP');
+                    }
+                    chmod($dest, 0644);
+                    $imagePath = 'images/uploads/' . $filename;
+                } catch (Exception $e) {
+                    if ($webpTempFile && file_exists($webpTempFile)) {
+                        @unlink($webpTempFile);
+                    }
+                    jsonError('Échec conversion WebP: ' . $e->getMessage());
                 }
-
-                $imagePath = 'images/uploads/' . $filename;
             }
         }
 
@@ -2247,27 +2256,44 @@ switch ($action) {
         $price = intval($input['price'] ?? 0);
         if (!$name || !$bevType || $price <= 0) jsonError('Type, nom et prix requis');
 
-        // Upload d'image optionnel
+        // Upload d'image optionnel avec conversion WebP
         $imagePath = null;
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $tmpName = $_FILES['image']['tmp_name'];
             $origName = basename($_FILES['image']['name']);
-            $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+
+            // Validation MIME type
+            $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+            $mime = mime_content_type($tmpName) ?: '';
+            if (!isset($allowed[$mime])) {
                 jsonError('Format image invalide. Utilisez JPG, PNG ou WebP.');
             }
             if ($_FILES['image']['size'] > 2 * 1024 * 1024) {
                 jsonError('Image trop volumineuse (max 2MB).');
             }
-            $safeName = preg_replace('/[^a-z0-9_-]/i', '', pathinfo($origName, PATHINFO_FILENAME));
-            $newName = $safeName . '_' . time() . '.' . $ext;
+
             $uploadDir = SNACK_ROOT . '/assets/images/beverages/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-            $targetPath = $uploadDir . $newName;
-            if (!move_uploaded_file($tmpName, $targetPath)) {
-                jsonError('Échec upload image.');
+
+            // Conversion WebP
+            $webpTempFile = null;
+            try {
+                $webpTempFile = convertToOptimizedWebP($tmpName, 85, 800);
+                $safeName = preg_replace('/[^a-z0-9_-]/i', '', pathinfo($origName, PATHINFO_FILENAME));
+                $newName = $safeName . '_' . time() . '.webp';
+                $targetPath = $uploadDir . $newName;
+
+                if (!rename($webpTempFile, $targetPath)) {
+                    jsonError('Échec sauvegarde image WebP.');
+                }
+                chmod($targetPath, 0644);
+                $imagePath = 'assets/images/beverages/' . $newName;
+            } catch (Exception $e) {
+                if ($webpTempFile && file_exists($webpTempFile)) {
+                    @unlink($webpTempFile);
+                }
+                jsonError('Échec conversion WebP: ' . $e->getMessage());
             }
-            $imagePath = 'assets/images/beverages/' . $newName;
         }
 
         $menuJsonPath = getMenuJsonPath();
