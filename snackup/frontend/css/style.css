@@ -574,163 +574,164 @@ ul {
 
 .formules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
     width: 100%;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 769px) {
     .formules-grid {
-        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
     }
 }
 
-/* CARTE FORMULE : Design vertical, plus haute que large, fond noir/rouge */
+/* CARTE FORMULE : Design identique aux cartes produits */
 .formule-card {
     background: #ffffff;
     border-radius: 16px;
     overflow: hidden;
     position: relative;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    min-height: 440px;
-    /* Fond avec accent rouge */
-    background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
 }
 
-.formule-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+.formule-card:active {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .formule-card-content {
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    flex: 1;
-    text-align: center;
+    gap: 8px;
 }
 
-/* IMAGE CENTRÉE (pas collée en haut/gauche) */
+/* IMAGE pleine largeur comme product-card */
 .formule-image-centered {
     width: 100%;
-    padding: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: block;
     position: relative;
-    min-height: 200px;
 }
 
 .formule-image {
-    width: 180px;
-    height: 180px;
-    object-fit: contain;
-    border-radius: 12px;
-    transition: transform 0.3s ease;
+    width: 100%;
+    height: auto;
+    display: block;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
 }
 
 .formule-card:hover .formule-image {
-    transform: scale(1.05);
+    /* Pas de transform sur mobile */
 }
 
 .formule-image-placeholder {
-    width: 180px;
-    height: 180px;
+    width: 100%;
+    height: 160px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    color: var(--success);
-    font-size: 64px;
-    border-radius: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    color: var(--primary);
+    font-size: 48px;
 }
 
-/* BADGE : vient de la DB, pas hardcodé */
+/* BADGE : vient de la DB */
 .formule-savings {
     position: absolute;
     top: 12px;
-    right: 12px;
-    background: var(--warning);
-    color: var(--gray-900);
+    left: 12px;
+    background: #14b8a6;
+    color: #ffffff;
     font-size: 11px;
     font-weight: 700;
-    padding: 5px 10px;
+    padding: 6px 12px;
     border-radius: 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
     z-index: 10;
 }
 
-/* NOM CENTRÉ */
+/* NOM comme product-name-new */
 .formule-name {
-    font-size: 19px;
+    font-size: 15px;
     font-weight: 700;
-    color: var(--gray-900);
-    margin: 0 0 10px 0;
+    color: #1a1a1a;
     line-height: 1.3;
-    text-align: center;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
-/* DESCRIPTION : vient de la DB */
+/* DESCRIPTION comme product-desc-new */
 .formule-description {
-    font-size: 14px;
-    color: var(--gray-600);
-    line-height: 1.5;
-    margin: 0 0 16px 0;
-    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.4;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
-/* PRIX MIS EN VALEUR (rouge OK) */
+/* Footer prix + bouton */
+.formule-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 4px;
+}
+
 .formule-price {
     display: flex;
     align-items: baseline;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
+    gap: 6px;
+    flex-shrink: 0;
 }
 
 .formule-price .current {
-    font-size: 26px;
+    font-size: 17px;
     font-weight: 800;
     color: var(--primary);
 }
 
 .formule-price .original {
-    font-size: 15px;
+    font-size: 12px;
     text-decoration: line-through;
     color: var(--gray-400);
 }
 
-/* BOUTON CTA EN BAS */
+/* BOUTON comme product-btn-new */
 .formule-cta-btn {
-    width: 100%;
     background: var(--primary);
-    color: white;
+    color: #ffffff;
     border: none;
-    padding: 13px 20px;
-    font-size: 15px;
-    font-weight: 700;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin-top: auto;
 }
 
-.formule-cta-btn:hover {
-    background: var(--primary-dark);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+.formule-cta-btn:active {
+    transform: scale(0.95);
 }
 
 .formule-cta-btn i {
-    font-size: 16px;
+    display: none;
 }
 
 .formule-add-btn {
@@ -2956,18 +2957,44 @@ ul {
         max-width: 100vw !important;
     }
 
-    /* Formules style moderne */
+    /* Formules style identique aux produits */
     .formules-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
     }
 
     .formule-card {
-        border-radius: 20px;
+        border-radius: 16px;
+        overflow: visible;
     }
 
     .formule-card-content {
-        padding: 20px;
+        padding: 10px 12px 14px;
+        gap: 6px;
+    }
+
+    .formule-name {
+        font-size: 13px;
+    }
+
+    .formule-description {
+        font-size: 11px;
+    }
+
+    .formule-price .current {
+        font-size: 15px;
+    }
+
+    .formule-cta-btn {
+        padding: 8px 14px;
+        font-size: 12px;
+        border-radius: 8px;
+        white-space: nowrap;
+    }
+
+    .formule-footer {
+        gap: 8px;
+        flex-wrap: nowrap;
     }
 
     /* Produits grille 2 colonnes */

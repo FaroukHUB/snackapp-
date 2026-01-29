@@ -529,14 +529,15 @@ const Products = {
                     <div class="formule-card-content">
                         <h3 class="formule-name">${escapeHtml(formule.name)}</h3>
                         ${descriptionHtml}
-                        <div class="formule-price">
-                            <span class="current">${Config.formatPrice(formule.price)}</span>
-                            ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
+                        <div class="formule-footer">
+                            <div class="formule-price">
+                                <span class="current">${Config.formatPrice(formule.price)}</span>
+                                ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
+                            </div>
+                            <button type="button" class="formule-cta-btn" data-add-formule="${escapeHtml(formule.id)}">
+                                Ajouter
+                            </button>
                         </div>
-                        <button type="button" class="formule-cta-btn" data-add-formule="${escapeHtml(formule.id)}">
-                            <i class="fas fa-check-circle"></i>
-                            Choisir cette formule
-                        </button>
                     </div>
                 </div>
             `;
