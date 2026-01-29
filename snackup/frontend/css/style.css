@@ -4024,6 +4024,126 @@ ul {
 }
 
 /* ==============================
+   LOYALTY BANNER SECTION
+   ============================== */
+.loyalty-banner {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 24px 20px;
+    margin: 20px;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.loyalty-content {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.loyalty-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.loyalty-icon i {
+    font-size: 24px;
+    color: #ffd700;
+}
+
+.loyalty-text {
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+}
+
+.loyalty-text h3 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+}
+
+.loyalty-text p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    margin: 0;
+}
+
+.loyalty-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: var(--primary);
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all var(--transition);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.loyalty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.loyalty-btn i {
+    font-size: 12px;
+    transition: transform var(--transition);
+}
+
+.loyalty-btn:hover i {
+    transform: translateX(4px);
+}
+
+@media (max-width: 600px) {
+    .loyalty-banner {
+        margin: 16px;
+        padding: 20px 16px;
+    }
+
+    .loyalty-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .loyalty-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .loyalty-icon i {
+        font-size: 20px;
+    }
+
+    .loyalty-text h3 {
+        font-size: 16px;
+    }
+
+    .loyalty-text p {
+        font-size: 13px;
+    }
+
+    .loyalty-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 24px;
+    }
+}
+
+/* ==============================
    GOOGLE REVIEWS SECTION - Ultra Modern Black Edition
    ============================== */
 .reviews-section {
