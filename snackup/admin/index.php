@@ -1072,13 +1072,15 @@ if (isset($_GET['export'])) {
                         <?php
                         $displayItems = array_slice($items, 0, 3);
                         foreach ($displayItems as $item):
-                            // Afficher la variante (SOLO/DUO/MENU) si présente
+                            // Afficher la variante (SOLO/DUO) si présente
                             $variantLabel = '';
                             if (!empty($item['variant'])) {
-                                $v = strtoupper($item['variant']);
-                                // Afficher SOLO, DUO, MENU, etc.
-                                if (in_array($v, ['SOLO', 'DUO', 'MENU'])) {
-                                    $variantLabel = $v . ' ';
+                                $v = strtolower($item['variant']);
+                                // 'menu' dans la BDD = DUO pour les pizzas
+                                if ($v === 'solo') {
+                                    $variantLabel = 'SOLO ';
+                                } elseif ($v === 'menu' || $v === 'duo') {
+                                    $variantLabel = 'DUO ';
                                 }
                             }
                         ?>
