@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
-$restaurantName = RESTAURANT_NAME ?? 'Restaurant';
-$currency = CURRENCY ?? 'EUR';
+$restaurant = getCurrentRestaurant();
+$restaurantName = $restaurant['name'] ?? 'Restaurant';
+$currency = defined('CURRENCY') ? CURRENCY : 'EUR';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
