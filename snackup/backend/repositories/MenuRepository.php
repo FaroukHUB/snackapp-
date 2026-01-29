@@ -342,10 +342,51 @@ class MenuRepository {
     }
 
     /**
+     * Génère un slug unique pour un produit
+     */
+    private static function generateProductSlug($name) {
+        $pdo = Database::getInstance();
+
+        // Générer le slug de base
+        $baseSlug = strtolower(trim($name));
+        $baseSlug = preg_replace('/[àáâãäå]/u', 'a', $baseSlug);
+        $baseSlug = preg_replace('/[èéêë]/u', 'e', $baseSlug);
+        $baseSlug = preg_replace('/[ìíîï]/u', 'i', $baseSlug);
+        $baseSlug = preg_replace('/[òóôõö]/u', 'o', $baseSlug);
+        $baseSlug = preg_replace('/[ùúûü]/u', 'u', $baseSlug);
+        $baseSlug = preg_replace('/[ç]/u', 'c', $baseSlug);
+        $baseSlug = preg_replace('/[^a-z0-9]+/', '-', $baseSlug);
+        $baseSlug = trim($baseSlug, '-');
+
+        if (empty($baseSlug)) {
+            $baseSlug = 'produit';
+        }
+
+        // Vérifier unicité et ajouter suffix si nécessaire
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (true) {
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE restaurant_id = ? AND slug = ?");
+            $stmt->execute([self::$restaurantId, $slug]);
+            if ($stmt->fetchColumn() == 0) {
+                break;
+            }
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
      * Ajoute un produit
      */
     public static function addProduct($categoryId, $name, $description, $image, $priceSolo, $priceMenu = null, $baseIngredients = []) {
         $pdo = Database::getInstance();
+
+        // Générer un slug unique
+        $slug = self::generateProductSlug($name);
 
         // Déterminer sort_order
         $stmt = $pdo->prepare("
@@ -361,13 +402,14 @@ class MenuRepository {
 
         $stmt = $pdo->prepare("
             INSERT INTO products
-            (restaurant_id, category_id, name, description, image, price_solo, price_menu, base_ingredients, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            (restaurant_id, category_id, slug, name, description, image, price_solo, price_menu, base_ingredients, status, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
         ");
 
         $stmt->execute([
             self::$restaurantId,
             $categoryId,
+            $slug,
             $name,
             $description,
             $image,
