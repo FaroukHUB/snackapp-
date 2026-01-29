@@ -730,9 +730,9 @@ const Products = {
                 || catNameLower.includes('creme')
                 || catNameLower.includes('originale');
             const bundleBadge = isPizza ? `
-                <div class="bundle-offer-badge">
-                    <span class="bundle-icon">🔥</span>
-                    <span class="bundle-text">2 = 13€ Solo | 15€ Duo</span>
+                <div class="bundle-offer-badge-gold">
+                    <div class="bundle-line"><span class="bundle-qty">2</span> solo = <span class="bundle-price">13€</span></div>
+                    <div class="bundle-line"><span class="bundle-qty">2</span> duo = <span class="bundle-price">15€</span></div>
                 </div>` : '';
 
             return `
