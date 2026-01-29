@@ -148,7 +148,7 @@ function renderCustomers(customers) {
                     </div>
                     <div>
                         <span class="text-gray-400">Dépensé:</span>
-                        <span class="text-white font-semibold ml-2">${Math.round(customer.total_spent)} DA</span>
+                        <span class="text-white font-semibold ml-2">${Math.round(customer.total_spent)} ${window.CURRENCY || 'EUR'}</span>
                     </div>
                 </div>
 
@@ -220,7 +220,7 @@ async function showCustomerDetails(customerId) {
                         <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Commandes</div>
                     </div>
                     <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; text-align: center;">
-                        <div style="font-size: 2rem; font-weight: 700; color: #15803d;">${Math.round(customer.total_spent)} DA</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: #15803d;">${Math.round(customer.total_spent)} ${window.CURRENCY || 'EUR'}</div>
                         <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Dépensé</div>
                     </div>
                     <div style="background: #fef3c7; border-radius: 12px; padding: 20px; text-align: center;">
@@ -228,7 +228,7 @@ async function showCustomerDetails(customerId) {
                         <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Points fidélité</div>
                     </div>
                     <div style="background: #f3f4f6; border-radius: 12px; padding: 20px; text-align: center;">
-                        <div style="font-size: 2rem; font-weight: 700; color: #1f2937;">${customer.orders_count > 0 ? Math.round(customer.total_spent / customer.orders_count) : 0} DA</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: #1f2937;">${customer.orders_count > 0 ? Math.round(customer.total_spent / customer.orders_count) : 0} ${window.CURRENCY || 'EUR'}</div>
                         <div style="font-size: 0.875rem; color: #6b7280; margin-top: 4px;">Panier moyen</div>
                     </div>
                 </div>
@@ -334,7 +334,7 @@ async function showCustomerDetails(customerId) {
                                         <span style="font-weight: 600; color: #1f2937;">${escapeHtml(order.order_number)}</span>
                                         <span style="color: #9ca3af; font-size: 0.75rem; margin-left: 8px;">${formatDate(order.created_at)}</span>
                                     </div>
-                                    <span style="font-weight: 700; color: #f59e0b;">${Math.round(order.total)} DA</span>
+                                    <span style="font-weight: 700; color: #f59e0b;">${Math.round(order.total)} ${window.CURRENCY || 'EUR'}</span>
                                 </div>
                                 ${order.items ? `<div style="color: #6b7280; font-size: 0.75rem;">${order.items.split(',').slice(0, 2).join(', ')}${order.items.split(',').length > 2 ? '...' : ''}</div>` : ''}
                             </div>
@@ -479,7 +479,7 @@ function renderOrderHistory(orders) {
                     <span class="text-white font-semibold">${escapeHtml(order.order_number)}</span>
                     <span class="text-gray-400 text-sm ml-2">${formatDate(order.created_at)}</span>
                 </div>
-                <span class="font-bold" style="color: var(--primary-color);">${Math.round(order.total)} DA</span>
+                <span class="font-bold" style="color: var(--primary-color);">${Math.round(order.total)} ${window.CURRENCY || 'EUR'}</span>
             </div>
             ${order.items ? `
                 <p class="text-gray-400 text-sm">${order.items.split(',').slice(0, 2).join(', ')}${order.items.split(',').length > 2 ? '...' : ''}</p>
@@ -690,7 +690,7 @@ function showWhatsAppTemplates(customerId) {
                         .replace('{NOM}', customer.name)
                         .replace('{POINTS}', customer.loyalty_points)
                         .replace('{LOYALTY_MSG}', loyaltyMsg)
-                        .replace('{RESTO}', window.APP_CONFIG?.restaurantName || 'Le Marvelous')
+                        .replace('{RESTO}', window.APP_CONFIG?.restaurantName || 'Votre Restaurant')
                     }</textarea>
                     <button onclick="sendWhatsApp('${customer.phone}', document.getElementById('whatsapp-template-${key}').value)"
                         class="mt-2 px-4 py-2 rounded-lg bg-green-500 text-white btn">
