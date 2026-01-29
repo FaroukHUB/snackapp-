@@ -1556,7 +1556,7 @@ if (isset($_GET['export'])) {
                 }
 
                 html += `
-                    <a href="https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Bonjour, c\'est <?php echo addslashes($restaurantName); ?> 🍕 Votre commande #' + order.id + ' est prête ! Vous pouvez venir la récupérer. À bientôt !')}" target="_blank" style="width: 60px; height: 60px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); font-size: 24px;">
+                    <a href="https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Bonjour, c\'est <?php echo addslashes($restaurantName); ?> 🍕 Votre commande est prête ! Vous pouvez venir la récupérer en vous munissant du numéro #' + order.id + '. À bientôt !')}" target="_blank" style="width: 60px; height: 60px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); font-size: 24px;">
                         <i class="fab fa-whatsapp"></i>
                     </a>
                 </div>

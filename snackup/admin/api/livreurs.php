@@ -226,7 +226,7 @@ switch ($action) {
                 $price = $item['price'] ?? 0;
 
                 $message .= "*{$qty}x {$name}*\n";
-                $message .= "   " . number_format($price * $qty, 0, '', ' ') . " DA\n";
+                $message .= "   " . number_format($price * $qty, 0, '', ' ') . " " . CURRENCY . "\n";
 
                 // Options sélectionnées (Ifri, Croissant, etc.)
                 if (!empty($item['selected_options']) && is_array($item['selected_options'])) {
@@ -242,7 +242,7 @@ switch ($action) {
                     foreach ($item['supplements'] as $sup) {
                         $supName = $sup['name'] ?? '';
                         $supPrice = $sup['price'] ?? 0;
-                        $message .= "   + {$supName} (+" . number_format($supPrice, 0, '', ' ') . " DA)\n";
+                        $message .= "   + {$supName} (+" . number_format($supPrice, 0, '', ' ') . " " . CURRENCY . ")\n";
                     }
                 }
 
@@ -257,7 +257,7 @@ switch ($action) {
 
         $total = $order['total'] ?? 0;
         $message .= "━━━━━━━━━━━━━━━━\n";
-        $message .= "💰 *TOTAL: " . number_format($total, 0, '', ' ') . " DA*\n\n";
+        $message .= "💰 *TOTAL: " . number_format($total, 0, '', ' ') . " " . CURRENCY . "*\n\n";
 
         // ========== PAIEMENT ==========
         $message .= "💳 *PAIEMENT:*\n";
@@ -265,12 +265,12 @@ switch ($action) {
         // Extraire infos de monnaie depuis notes
         if (preg_match('/l\'appoint/i', $notes)) {
             $message .= "✅ Client a l'appoint (montant exact)\n";
-        } elseif (preg_match('/Prévoir monnaie sur:\s*(\d+)\s*DA/i', $notes, $matches)) {
+        } elseif (preg_match('/Prévoir monnaie sur:\s*(\d+)\s*' . CURRENCY . '/i', $notes, $matches)) {
             $changeFor = (int)$matches[1];
             $toReturn = $changeFor - $total;
             $message .= "💵 *À PRÉPARER:*\n";
-            $message .= "   • Client donne: " . number_format($changeFor, 0, '', ' ') . " DA\n";
-            $message .= "   • *À rendre: " . number_format($toReturn, 0, '', ' ') . " DA*\n";
+            $message .= "   • Client donne: " . number_format($changeFor, 0, '', ' ') . " " . CURRENCY . "\n";
+            $message .= "   • *À rendre: " . number_format($toReturn, 0, '', ' ') . " " . CURRENCY . "*\n";
         } else {
             $message .= "💵 Espèces (montant exact non précisé)\n";
         }
