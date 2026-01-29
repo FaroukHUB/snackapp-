@@ -2322,6 +2322,17 @@
                 } else {
                     document.getElementById('deliveryFeeRow').style.display = 'none';
                 }
+
+                // Mettre à jour le montant Apple Pay / Google Pay
+                if (this.paymentRequest) {
+                    this.paymentRequest.update({
+                        total: {
+                            label: 'Votre commande',
+                            amount: Math.round(Math.max(0, total) * 100)
+                        }
+                    });
+                    console.log('[Stripe] Payment Request mis à jour:', total);
+                }
             },
 
             clearCart() {
@@ -2553,7 +2564,7 @@
              * Configure le Payment Request Button (Apple Pay / Google Pay)
              */
             async setupPaymentRequestButton() {
-                const total = Cart.getSubtotal() - this.discount + this.deliveryFee;
+                const total = Cart.getSubtotal() - this.discount - (this.bundleDiscount || 0) + (this.deliveryFee || 0);
 
                 const paymentRequest = this.stripe.paymentRequest({
                     country: 'FR',
