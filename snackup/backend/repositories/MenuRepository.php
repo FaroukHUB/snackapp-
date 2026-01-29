@@ -42,7 +42,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, name, description, image,
+            SELECT id, name, description, image, badge,
                    price_solo as priceSolo, price_menu as priceMenu,
                    status, sort_order, base_ingredients as baseIngredients
             FROM products
