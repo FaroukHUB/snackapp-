@@ -1127,6 +1127,28 @@ if (isset($_GET['export'])) {
                         </button>
                     </div>
 
+                    <?php
+                    // Détecter si c'est une livraison
+                    $orderNotes = $order['notes'] ?? '';
+                    $orderModeNotes = $order['mode_notes'] ?? '';
+                    $orderType = $order['order_type'] ?? '';
+                    $isDeliveryOrder = stripos($orderNotes, 'livraison') !== false ||
+                                       stripos($orderModeNotes, 'livraison') !== false ||
+                                       strpos($orderModeNotes, '🚗') !== false ||
+                                       $orderType === 'delivery';
+                    ?>
+                    <?php if ($isDeliveryOrder): ?>
+                    <!-- Bouton Envoyer au livreur (pour livraisons) -->
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #374151;">
+                        <button onclick="event.stopPropagation(); openSendToDeliveryModal('<?php echo htmlspecialchars($order['id'], ENT_QUOTES); ?>')"
+                                style="width: 100%; padding: 12px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;"
+                                onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 16px rgba(245, 158, 11, 0.5)'"
+                                onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
+                            <i class="fas fa-motorcycle"></i> Envoyer au livreur
+                        </button>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Bouton détails -->
                     <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #374151;">
                         <div style="text-align: center; font-size: 12px; color: #10b981; font-weight: 700;">
