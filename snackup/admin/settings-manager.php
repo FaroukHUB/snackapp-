@@ -359,8 +359,18 @@ $csrfToken = getCsrfToken();
     function setupToggle(el, value) {
       if (value) el.classList.add('active');
       else el.classList.remove('active');
-      el.onclick = () => el.classList.toggle('active');
     }
+
+    // Click handlers for toggles
+    document.querySelectorAll('.toggle').forEach(el => {
+      el.addEventListener('click', function() {
+        this.classList.toggle('active');
+        // Update Stripe visibility if it's the online toggle
+        if (this.id === 'toggleOnline') {
+          updateStripeVisibility();
+        }
+      });
+    });
 
     // Load settings
     async function loadSettings() {
@@ -404,7 +414,6 @@ $csrfToken = getCsrfToken();
       $('#stripeTestKeys').style.display = mode === 'test' ? 'block' : 'none';
       $('#stripeLiveKeys').style.display = mode === 'live' ? 'block' : 'none';
     }
-    $('#toggleOnline').addEventListener('click', updateStripeVisibility);
     $('#stripeMode').addEventListener('change', updateStripeModeVisibility);
 
     // Save general
