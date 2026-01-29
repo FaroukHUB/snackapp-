@@ -3157,6 +3157,10 @@ if (isset($_GET['export'])) {
         </div>
     </div>
 
+    <script>
+        // Global currency for all scripts
+        window.CURRENCY = '<?= CURRENCY ?>';
+    </script>
     <script src="notification-sound.js"></script>
     <script>
         // Toast notification function
