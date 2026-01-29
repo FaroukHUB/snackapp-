@@ -148,9 +148,16 @@ switch ($action) {
         try {
             // Essayer MySQL d'abord
             if (!SNACK_USE_JSON && !defined('SNACK_DB_ERROR')) {
+                // Essayer d'abord par order_number
                 $order = OrderRepository::getByNumber(SNACK_RESTAURANT_ID, $orderId);
+
+                // Si pas trouvé, essayer par ID direct
+                if (!$order && is_numeric($orderId)) {
+                    $order = OrderRepository::getById((int)$orderId);
+                }
+
                 if (!$order) {
-                    jsonError('Commande introuvable dans MySQL (ID: ' . $orderId . ')');
+                    jsonError('Commande introuvable (ID: ' . $orderId . ')');
                 }
             } else {
                 // Fallback JSON
