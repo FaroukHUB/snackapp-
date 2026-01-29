@@ -1360,9 +1360,12 @@ $csrfToken = getCsrfToken();
 
     // ===== GESTION DES SUPPLÉMENTS =====
     $("#btnManageSupplements").addEventListener("click", () => {
+      console.log('[Supplements] Opening modal...');
+      console.log('[Supplements] Catalog:', state.menu?.supplements?.catalog);
       setupSupplementsEvents();
       renderSupplementsList();
       openModal("#modalSupplements");
+      console.log('[Supplements] Modal opened');
     });
 
     // Capitalise la première lettre
@@ -1383,17 +1386,23 @@ $csrfToken = getCsrfToken();
     // Protection contre les rendus multiples
     let isRenderingSupplements = false;
     function renderSupplementsList(){
-      if (isRenderingSupplements) return;
+      console.log('[Supplements] renderSupplementsList called, isRendering:', isRenderingSupplements);
+      if (isRenderingSupplements) {
+        console.log('[Supplements] Already rendering, skipping');
+        return;
+      }
       isRenderingSupplements = true;
 
       const container = $("#supplementsList");
       if (!container) {
+        console.log('[Supplements] Container not found');
         isRenderingSupplements = false;
         return;
       }
 
       const catalog = state.menu?.supplements?.catalog || {};
       const supplements = Object.values(catalog).filter(s => s != null);
+      console.log('[Supplements] Found', supplements.length, 'supplements');
 
       // Peupler le select
       populateCategorySelect();
