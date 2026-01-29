@@ -1391,7 +1391,7 @@ ul {
 }
 
 /* ============================================
-   MODAL
+   MODAL - Optimisé pour performance
    ============================================ */
 .modal {
     position: fixed;
@@ -1402,7 +1402,9 @@ ul {
     justify-content: center;
     opacity: 0;
     visibility: hidden;
-    transition: var(--transition);
+    transition: opacity 150ms ease-out, visibility 150ms ease-out;
+    will-change: opacity, visibility;
+    contain: layout style;
 }
 
 .modal.active {
@@ -1413,8 +1415,8 @@ ul {
 .modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.65);
+    /* backdrop-filter désactivé pour performance - coûteux sur mobile */
 }
 
 .modal-content {
@@ -1426,12 +1428,19 @@ ul {
     max-height: 90vh;
     overflow: hidden;
     box-shadow: var(--shadow-xl);
-    transform: translateY(20px);
-    transition: var(--transition);
+    transform: translateY(0);
+    transition: transform 150ms ease-out;
+    will-change: transform;
+    contain: content;
 }
 
 .modal.active .modal-content {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+}
+
+/* État initial - légèrement réduit pour animation rapide */
+.modal:not(.active) .modal-content {
+    transform: translateY(10px) scale(0.98);
 }
 
 .modal-close {
