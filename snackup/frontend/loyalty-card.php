@@ -1,14 +1,96 @@
+<?php
+/**
+ * Loyalty Card - Customer Points Lookup
+ * SnackApp - Uses MySQL via CustomerRepository
+ */
+
+// Load bootstrap for MySQL access
+require_once __DIR__ . '/../admin/bootstrap.php';
+
+// Get restaurant info
+$restaurant = getCurrentRestaurant();
+$restaurantName = $restaurant['name'] ?? 'Restaurant';
+$primaryColor = $restaurant['primary_color'] ?? '#d97706';
+
+// Load loyalty rewards from database
+$loyaltyRewards = LoyaltyRepository::getAllRewards(SNACK_RESTAURANT_ID);
+
+// Handle AJAX request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'lookup') {
+    header('Content-Type: application/json');
+
+    $input = trim($_POST['phone'] ?? '');
+
+    if (empty($input) || strlen($input) < 4) {
+        echo json_encode(['success' => false, 'message' => 'Entrez votre numero de telephone ou votre code fidelite (SNACK-XXXX)']);
+        exit;
+    }
+
+    $found = null;
+
+    // Check if input is a loyalty code (SNACK-XXXX format)
+    if (preg_match('/^SNACK-[A-Z0-9]{4}$/i', strtoupper($input))) {
+        $searchCode = strtoupper($input);
+        $found = CustomerRepository::getByLoyaltyCode($searchCode);
+    } else {
+        // Search by phone number - try exact match first
+        $phone = preg_replace('/[^0-9+]/', '', $input);
+
+        if (strlen($phone) >= 6) {
+            // Try exact match
+            $found = CustomerRepository::getByPhone(SNACK_RESTAURANT_ID, $phone);
+
+            // If not found, try flexible matching via search
+            if (!$found) {
+                $results = CustomerRepository::search(SNACK_RESTAURANT_ID, $phone);
+                if (!empty($results)) {
+                    // Find best match (phone ends with search term)
+                    foreach ($results as $customer) {
+                        $customerPhone = preg_replace('/[^0-9+]/', '', $customer['phone'] ?? '');
+                        if (substr($customerPhone, -strlen($phone)) === $phone ||
+                            substr($phone, -strlen($customerPhone)) === $customerPhone) {
+                            $found = $customer;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ($found) {
+        echo json_encode([
+            'success' => true,
+            'customer' => [
+                'loyalty_code' => $found['loyalty_code'] ?? null,
+                'name' => $found['name'] ?? 'Client',
+                'points' => (int)($found['loyalty_points'] ?? 0),
+                'orders_count' => (int)($found['orders_count'] ?? 0),
+                'total_spent' => (float)($found['total_spent'] ?? 0),
+                'last_order' => $found['last_order_at'] ?? null,
+                'member_since' => $found['created_at'] ?? null
+            ]
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Aucun compte trouve. Passez votre premiere commande pour obtenir votre carte fidelite !'
+        ]);
+    }
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ma Carte Fidelite</title>
+    <title>Ma Carte Fidelite | <?php echo htmlspecialchars($restaurantName); ?></title>
     <meta name="description" content="Consultez vos points de fidelite et recompenses disponibles">
     <meta name="robots" content="noindex, nofollow">
 
     <!-- Theme -->
-    <meta name="theme-color" content="#d97706">
+    <meta name="theme-color" content="<?php echo $primaryColor; ?>">
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
@@ -19,9 +101,9 @@
 
     <style>
         :root {
-            --primary: #d97706;
-            --primary-dark: #b45309;
-            --primary-light: rgba(217, 119, 6, 0.15);
+            --primary: <?php echo $primaryColor; ?>;
+            --primary-dark: <?php echo $primaryColor; ?>dd;
+            --primary-light: <?php echo $primaryColor; ?>15;
         }
 
         * {
@@ -80,6 +162,7 @@
         /* Lookup Section */
         .lookup-section {
             background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
             border-radius: 24px;
             padding: 32px 24px;
             text-align: center;
@@ -380,7 +463,6 @@
             text-align: center;
             padding: 20px;
             color: rgba(255,255,255,0.5);
-            font-size: 14px;
         }
 
         /* Error Message */
@@ -455,7 +537,7 @@
 <body>
     <div class="page-container">
         <header class="page-header">
-            <a href="index.html" class="back-btn">
+            <a href="fidelite.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <h1 class="page-title">Ma Carte Fidelite</h1>
@@ -467,16 +549,16 @@
                 <i class="fas fa-id-card"></i>
             </div>
             <h2 class="lookup-title">Consultez vos points</h2>
-            <p class="lookup-subtitle">Entrez votre numero de telephone</p>
+            <p class="lookup-subtitle">Entrez votre numero de telephone ou votre code fidelite</p>
 
             <form id="lookupForm">
                 <div class="phone-input-group">
-                    <i class="fas fa-phone phone-icon"></i>
-                    <input type="tel"
+                    <i class="fas fa-user phone-icon"></i>
+                    <input type="text"
                            class="phone-input"
                            id="phoneInput"
-                           placeholder="06 12 34 56 78"
-                           autocomplete="tel"
+                           placeholder="Tel: 06... ou Code: SNACK-XXXX"
+                           autocomplete="off"
                            required>
                 </div>
                 <button type="submit" class="lookup-btn" id="lookupBtn">
@@ -499,7 +581,7 @@
             <div class="loyalty-card">
                 <div class="card-header">
                     <div>
-                        <div class="card-restaurant" id="restaurantName">L'Atelier Pizza</div>
+                        <div class="card-restaurant"><?php echo htmlspecialchars($restaurantName); ?></div>
                         <div class="card-type">Carte de Fidelite</div>
                     </div>
                     <div class="card-logo">
@@ -511,16 +593,44 @@
                     <div class="points-label">Points</div>
                 </div>
                 <div class="card-customer" id="customerName">Client</div>
+                <div id="customerIdDisplay" style="margin-top: 12px; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 2px; display: inline-block;"></div>
             </div>
 
-            <!-- Rewards Preview -->
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="ordersCount">0</div>
+                    <div class="stat-label">Commandes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalSpent">0</div>
+                    <div class="stat-label">€ Depenses</div>
+                </div>
+            </div>
+
+            <!-- Rewards Preview - Loaded from database -->
             <div class="rewards-preview">
                 <h3 class="rewards-title">
                     <i class="fas fa-gift"></i>
                     Recompenses Disponibles
                 </h3>
                 <div id="rewardsList">
-                    <div class="no-rewards">Chargement des recompenses...</div>
+                    <?php if (empty($loyaltyRewards)): ?>
+                        <div class="no-rewards">Aucune recompense disponible pour le moment</div>
+                    <?php else: ?>
+                        <?php foreach ($loyaltyRewards as $reward): ?>
+                            <?php if ($reward['is_active'] ?? true): ?>
+                            <div class="reward-item">
+                                <div class="reward-icon">🎁</div>
+                                <div class="reward-info">
+                                    <div class="reward-name"><?php echo htmlspecialchars($reward['name']); ?></div>
+                                    <div class="reward-points"><?php echo (int)$reward['points_required']; ?> points requis</div>
+                                </div>
+                                <span class="reward-status locked" data-points="<?php echo (int)$reward['points_required']; ?>">Verrouille</span>
+                            </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -539,24 +649,12 @@
     </div>
 
     <script>
-        const API_BASE = '../admin/api/loyalty-public.php';
-
         const form = document.getElementById('lookupForm');
         const phoneInput = document.getElementById('phoneInput');
         const lookupBtn = document.getElementById('lookupBtn');
         const lookupSection = document.getElementById('lookupSection');
         const resultsSection = document.getElementById('resultsSection');
         const errorMessage = document.getElementById('errorMessage');
-
-        // Charger le nom du restaurant
-        fetch('../admin/api/restaurant.php')
-            .then(r => r.json())
-            .then(data => {
-                if (data.name) {
-                    document.getElementById('restaurantName').textContent = data.name;
-                }
-            })
-            .catch(() => {});
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -571,13 +669,21 @@
             resultsSection.classList.remove('active');
 
             try {
-                const response = await fetch(`${API_BASE}?action=check_points&phone=${encodeURIComponent(phone)}`);
+                const formData = new FormData();
+                formData.append('action', 'lookup');
+                formData.append('phone', phone);
+
+                const response = await fetch('loyalty-card.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
                 const data = await response.json();
 
                 if (data.success && data.customer) {
                     showResults(data.customer);
                 } else {
-                    showError(data.error || 'Compte non trouve');
+                    showError(data.message || 'Compte non trouve');
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -588,71 +694,38 @@
             }
         });
 
-        async function showResults(customer) {
-            const points = customer.loyalty_points || 0;
-
+        function showResults(customer) {
             // Update card
-            document.getElementById('pointsValue').textContent = points;
+            document.getElementById('pointsValue').textContent = customer.points || 0;
             document.getElementById('customerName').textContent = customer.name || 'Client';
+            document.getElementById('ordersCount').textContent = customer.orders_count || 0;
+            document.getElementById('totalSpent').textContent = Math.round(customer.total_spent || 0);
+
+            // Show loyalty code
+            const idDisplay = document.getElementById('customerIdDisplay');
+            if (customer.loyalty_code) {
+                idDisplay.textContent = 'Code: ' + customer.loyalty_code;
+                idDisplay.style.display = 'inline-block';
+            } else {
+                idDisplay.style.display = 'none';
+            }
+
+            // Update reward status based on points
+            const points = customer.points || 0;
+            document.querySelectorAll('.reward-status').forEach(badge => {
+                const requiredPoints = parseInt(badge.dataset.points);
+                if (points >= requiredPoints) {
+                    badge.className = 'reward-status available';
+                    badge.textContent = 'Disponible';
+                } else {
+                    badge.className = 'reward-status locked';
+                    badge.textContent = (requiredPoints - points) + ' pts restants';
+                }
+            });
 
             // Show results
             lookupSection.style.display = 'none';
             resultsSection.classList.add('active');
-
-            // Load rewards
-            await loadRewards(points);
-        }
-
-        async function loadRewards(customerPoints) {
-            const rewardsList = document.getElementById('rewardsList');
-            rewardsList.innerHTML = '<div class="no-rewards">Chargement des recompenses...</div>';
-
-            try {
-                const response = await fetch(`${API_BASE}?action=get_rewards&points=${customerPoints}`);
-                const data = await response.json();
-
-                if (data.success && data.rewards && data.rewards.length > 0) {
-                    rewardsList.innerHTML = data.rewards.map(reward => {
-                        const canClaim = reward.can_claim;
-                        const pointsNeeded = reward.points_required - customerPoints;
-                        const icon = getRewardIcon(reward.reward_type);
-
-                        return `
-                            <div class="reward-item">
-                                <div class="reward-icon">${icon}</div>
-                                <div class="reward-info">
-                                    <div class="reward-name">${escapeHtml(reward.name)}</div>
-                                    <div class="reward-points">${reward.points_required} points requis</div>
-                                </div>
-                                <span class="reward-status ${canClaim ? 'available' : 'locked'}">
-                                    ${canClaim ? 'Disponible' : pointsNeeded + ' pts restants'}
-                                </span>
-                            </div>
-                        `;
-                    }).join('');
-                } else {
-                    rewardsList.innerHTML = '<div class="no-rewards">Aucune recompense disponible pour le moment</div>';
-                }
-            } catch (error) {
-                console.error('Error loading rewards:', error);
-                rewardsList.innerHTML = '<div class="no-rewards">Impossible de charger les recompenses</div>';
-            }
-        }
-
-        function getRewardIcon(type) {
-            const icons = {
-                'free_item': '🎁',
-                'discount_percent': '💰',
-                'discount_amount': '💵',
-                'free_delivery': '🚗'
-            };
-            return icons[type] || '🎁';
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
 
         function showError(message) {
