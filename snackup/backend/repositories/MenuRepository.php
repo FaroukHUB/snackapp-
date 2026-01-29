@@ -503,7 +503,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, name, description, image,
+            SELECT id, name, description, image, badge,
                    price, original_price as originalPrice,
                    includes, status, sort_order
             FROM formules
