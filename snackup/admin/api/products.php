@@ -1733,10 +1733,13 @@ switch ($action) {
 
         // Initialiser la structure si nécessaire
         if (!isset($runtime['products'])) $runtime['products'] = [];
-        if (!isset($runtime['products'][$productId])) $runtime['products'][$productId] = [];
 
-        // Mettre à jour le statut
-        $runtime['products'][$productId]['status'] = $newStatus;
+        // ✅ FIX: Ne pas écraser les données existantes, juste ajouter/modifier le statut
+        if (!isset($runtime['products'][$productId])) {
+            $runtime['products'][$productId] = ['status' => $newStatus];
+        } else {
+            $runtime['products'][$productId]['status'] = $newStatus;
+        }
         error_log("[PRODUCTS API] ✅ Statut mis à jour dans runtime pour {$productId}");
 
         // Si c'est un produit custom, mettre à jour aussi
