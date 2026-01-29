@@ -164,3 +164,21 @@ function requireCsrf(): void {
 function e(string $str): string {
     return htmlspecialchars($str, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
+
+/**
+ * Helper: Générer un lien WhatsApp avec message pré-rempli
+ * @param string $phone Numéro de téléphone au format international (ex: +33612345678)
+ * @param string $message Message à envoyer
+ * @return string URL WhatsApp
+ */
+function sendWhatsAppMessage(string $phone, string $message): string {
+    // Nettoyer le numéro de téléphone (garder que les chiffres et le +)
+    $cleanPhone = preg_replace('/[^0-9+]/', '', $phone);
+    // Enlever le + pour l'URL WhatsApp
+    $cleanPhone = ltrim($cleanPhone, '+');
+
+    // Encoder le message pour URL
+    $encodedMessage = rawurlencode($message);
+
+    return "https://wa.me/{$cleanPhone}?text={$encodedMessage}";
+}

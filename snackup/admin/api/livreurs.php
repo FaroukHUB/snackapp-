@@ -180,8 +180,12 @@ switch ($action) {
             jsonError('Erreur lors du chargement des données: ' . $e->getMessage());
         }
 
+        // Récupérer le nom du restaurant
+        $restaurant = getCurrentRestaurant();
+        $restaurantName = $restaurant['name'] ?? 'Restaurant';
+
         // Générer le message WhatsApp
-        $message = "🍽️ *NOUVELLE LIVRAISON - Le Marvelous*\n\n";
+        $message = "🍽️ *NOUVELLE LIVRAISON - {$restaurantName}*\n\n";
 
         // ========== CLIENT ==========
         $message .= "👤 *Client:* " . ($order['customer_name'] ?? 'N/A') . "\n";
@@ -192,14 +196,18 @@ switch ($action) {
         $isDelivery = str_contains($notes, 'LIVRAISON');
 
         if ($isDelivery) {
+            // Récupérer la ville du restaurant pour Google Maps
+            $restaurantCity = $restaurant['city'] ?? $restaurant['address'] ?? '';
+
             // Extraire l'adresse depuis les notes
             if (preg_match('/Adresse:\s*(.+?)(?:\n|$)/i', $notes, $matches)) {
                 $address = trim($matches[1]);
                 $message .= "📍 *Adresse de livraison:*\n";
                 $message .= $address . "\n";
 
-                // Lien Google Maps (utiliser l'adresse pour recherche)
-                $addressEncoded = urlencode($address . ', Algérie');
+                // Lien Google Maps (utiliser l'adresse + ville du restaurant)
+                $searchAddress = $restaurantCity ? "{$address}, {$restaurantCity}" : $address;
+                $addressEncoded = urlencode($searchAddress);
                 $message .= "🗺️ https://www.google.com/maps/search/?api=1&query=" . $addressEncoded . "\n\n";
             } else {
                 // Fallback: afficher toutes les notes si adresse pas trouvée
