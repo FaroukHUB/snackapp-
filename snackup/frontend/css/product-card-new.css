@@ -76,7 +76,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
 
@@ -119,6 +119,54 @@
     background: var(--primary-dark);
 }
 
+/* ========================================
+   BADGE OFFRE BUNDLE "2 PIZZAS"
+   Design ultramoderne et compact
+   ======================================== */
+
+.bundle-offer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 6px;
+    margin: 4px 0;
+}
+
+.bundle-offer-badge .bundle-icon {
+    font-size: 12px;
+}
+
+.bundle-offer-badge .bundle-text {
+    letter-spacing: -0.2px;
+}
+
+/* Variante plus visible - pour bannière section */
+.bundle-banner {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.bundle-banner .bundle-emoji {
+    font-size: 18px;
+}
+
 /* État indisponible */
 .product-card-new.unavailable {
     opacity: 0.6;
@@ -138,6 +186,52 @@
     font-size: 14px;
     font-weight: 600;
     z-index: 20;
+}
+
+/* ========================================
+   RESPONSIVE - Mobile
+   ======================================== */
+
+@media (max-width: 768px) {
+    .product-card-new {
+        overflow: visible;
+    }
+
+    .product-content-new {
+        padding: 10px 12px 14px;
+        gap: 6px;
+    }
+
+    .product-name-new {
+        font-size: 13px;
+        -webkit-line-clamp: 2;
+    }
+
+    .product-desc-new {
+        font-size: 11px;
+        -webkit-line-clamp: 3;
+    }
+
+    .product-footer-new {
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    .product-price-new {
+        font-size: 15px;
+    }
+
+    .product-btn-new {
+        padding: 8px 14px;
+        font-size: 12px;
+        border-radius: 8px;
+        white-space: nowrap;
+    }
+
+    .bundle-offer-badge {
+        font-size: 9px;
+        padding: 4px 8px;
+    }
 }
 
 /* ========================================

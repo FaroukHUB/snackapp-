@@ -1,0 +1,745 @@
+<?php
+/**
+ * Loyalty Card - Customer Points Lookup
+ * SnackApp - Uses MySQL via CustomerRepository
+ */
+
+// Load bootstrap for MySQL access
+require_once __DIR__ . '/../admin/bootstrap.php';
+
+// Get restaurant info
+$restaurant = getCurrentRestaurant();
+$restaurantName = $restaurant['name'] ?? 'Restaurant';
+$primaryColor = $restaurant['primary_color'] ?? '#d97706';
+
+// Load loyalty rewards from database
+$loyaltyRewards = LoyaltyRepository::getAllRewards(SNACK_RESTAURANT_ID);
+
+// Handle AJAX request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'lookup') {
+    header('Content-Type: application/json');
+
+    $input = trim($_POST['phone'] ?? '');
+
+    if (empty($input) || strlen($input) < 4) {
+        echo json_encode(['success' => false, 'message' => 'Entrez votre numero de telephone ou votre code fidelite (SNACK-XXXX)']);
+        exit;
+    }
+
+    $found = null;
+
+    // Check if input is a loyalty code (SNACK-XXXX format)
+    if (preg_match('/^SNACK-[A-Z0-9]{4}$/i', strtoupper($input))) {
+        $searchCode = strtoupper($input);
+        $found = CustomerRepository::getByLoyaltyCode($searchCode);
+    } else {
+        // Search by phone number - try exact match first
+        $phone = preg_replace('/[^0-9+]/', '', $input);
+
+        if (strlen($phone) >= 6) {
+            // Try exact match
+            $found = CustomerRepository::getByPhone(SNACK_RESTAURANT_ID, $phone);
+
+            // If not found, try flexible matching via search
+            if (!$found) {
+                $results = CustomerRepository::search(SNACK_RESTAURANT_ID, $phone);
+                if (!empty($results)) {
+                    // Find best match (phone ends with search term)
+                    foreach ($results as $customer) {
+                        $customerPhone = preg_replace('/[^0-9+]/', '', $customer['phone'] ?? '');
+                        if (substr($customerPhone, -strlen($phone)) === $phone ||
+                            substr($phone, -strlen($customerPhone)) === $customerPhone) {
+                            $found = $customer;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ($found) {
+        echo json_encode([
+            'success' => true,
+            'customer' => [
+                'loyalty_code' => $found['loyalty_code'] ?? null,
+                'name' => $found['name'] ?? 'Client',
+                'points' => (int)($found['loyalty_points'] ?? 0),
+                'orders_count' => (int)($found['orders_count'] ?? 0),
+                'total_spent' => (float)($found['total_spent'] ?? 0),
+                'last_order' => $found['last_order_at'] ?? null,
+                'member_since' => $found['created_at'] ?? null
+            ]
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Aucun compte trouve. Passez votre premiere commande pour obtenir votre carte fidelite !'
+        ]);
+    }
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Carte Fidelite | <?php echo htmlspecialchars($restaurantName); ?></title>
+    <meta name="description" content="Consultez vos points de fidelite et recompenses disponibles">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Theme -->
+    <meta name="theme-color" content="<?php echo $primaryColor; ?>">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: <?php echo $primaryColor; ?>;
+            --primary-dark: <?php echo $primaryColor; ?>dd;
+            --primary-light: <?php echo $primaryColor; ?>15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .page-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            margin-bottom: 24px;
+        }
+
+        .back-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* Lookup Section */
+        .lookup-section {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 32px 24px;
+            text-align: center;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .lookup-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .lookup-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .lookup-subtitle {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .phone-input-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .phone-input {
+            width: 100%;
+            padding: 16px 20px;
+            padding-left: 50px;
+            font-size: 18px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .phone-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.1);
+        }
+
+        .phone-input::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .phone-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.5);
+            font-size: 18px;
+        }
+
+        .lookup-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .lookup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .lookup-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loyalty Card */
+        .loyalty-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 24px;
+            padding: 32px 24px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .loyalty-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .card-restaurant {
+            font-size: 18px;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        .card-type {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.7;
+        }
+
+        .card-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .card-points {
+            text-align: center;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .points-value {
+            font-size: 64px;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .points-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+
+        .card-customer {
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Rewards Preview */
+        .rewards-preview {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .rewards-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reward-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .reward-item:last-child {
+            border-bottom: none;
+        }
+
+        .reward-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .reward-info {
+            flex: 1;
+        }
+
+        .reward-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .reward-points {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .reward-status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .reward-status.available {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .reward-status.locked {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+        }
+
+        .no-rewards {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .error-message i {
+            font-size: 40px;
+            color: #ef4444;
+            margin-bottom: 12px;
+        }
+
+        .error-message h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .error-message p {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+        }
+
+        /* Back to Menu Button */
+        .menu-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: auto;
+            cursor: pointer;
+        }
+
+        .menu-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <header class="page-header">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="page-title">Ma Carte Fidelite</h1>
+        </header>
+
+        <!-- Lookup Section -->
+        <section class="lookup-section" id="lookupSection">
+            <div class="lookup-icon">
+                <i class="fas fa-id-card"></i>
+            </div>
+            <h2 class="lookup-title">Consultez vos points</h2>
+            <p class="lookup-subtitle">Entrez votre numero de telephone ou votre code fidelite</p>
+
+            <form id="lookupForm">
+                <div class="phone-input-group">
+                    <i class="fas fa-user phone-icon"></i>
+                    <input type="text"
+                           class="phone-input"
+                           id="phoneInput"
+                           placeholder="Tel: 06... ou Code: SNACK-XXXX"
+                           autocomplete="off"
+                           required>
+                </div>
+                <button type="submit" class="lookup-btn" id="lookupBtn">
+                    <i class="fas fa-search"></i>
+                    Rechercher
+                </button>
+            </form>
+        </section>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-user-slash"></i>
+            <h3>Compte non trouve</h3>
+            <p id="errorText">Aucun compte trouve avec ce numero.</p>
+        </div>
+
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection">
+            <!-- Loyalty Card -->
+            <div class="loyalty-card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-restaurant"><?php echo htmlspecialchars($restaurantName); ?></div>
+                        <div class="card-type">Carte de Fidelite</div>
+                    </div>
+                    <div class="card-logo">
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                <div class="card-points">
+                    <div class="points-value" id="pointsValue">0</div>
+                    <div class="points-label">Points</div>
+                </div>
+                <div class="card-customer" id="customerName">Client</div>
+                <div id="customerIdDisplay" style="margin-top: 12px; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 2px; display: inline-block;"></div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="ordersCount">0</div>
+                    <div class="stat-label">Commandes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalSpent">0</div>
+                    <div class="stat-label">€ Depenses</div>
+                </div>
+            </div>
+
+            <!-- Rewards Preview - Loaded from database -->
+            <div class="rewards-preview">
+                <h3 class="rewards-title">
+                    <i class="fas fa-gift"></i>
+                    Recompenses Disponibles
+                </h3>
+                <div id="rewardsList">
+                    <?php if (empty($loyaltyRewards)): ?>
+                        <div class="no-rewards">Aucune recompense disponible pour le moment</div>
+                    <?php else: ?>
+                        <?php foreach ($loyaltyRewards as $reward): ?>
+                            <?php if ($reward['is_active'] ?? true): ?>
+                            <div class="reward-item">
+                                <div class="reward-icon">🎁</div>
+                                <div class="reward-info">
+                                    <div class="reward-name"><?php echo htmlspecialchars($reward['name']); ?></div>
+                                    <div class="reward-points"><?php echo (int)$reward['points_required']; ?> points requis</div>
+                                </div>
+                                <span class="reward-status locked" data-points="<?php echo (int)$reward['points_required']; ?>">Verrouille</span>
+                            </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Try Another Number -->
+            <button type="button" class="menu-btn" onclick="resetLookup()" style="margin-bottom: 12px;">
+                <i class="fas fa-redo"></i>
+                Autre numero
+            </button>
+        </section>
+
+        <!-- Back to Menu -->
+        <a href="index.html" class="menu-btn">
+            <i class="fas fa-utensils"></i>
+            Retour au menu
+        </a>
+    </div>
+
+    <script>
+        const form = document.getElementById('lookupForm');
+        const phoneInput = document.getElementById('phoneInput');
+        const lookupBtn = document.getElementById('lookupBtn');
+        const lookupSection = document.getElementById('lookupSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorMessage = document.getElementById('errorMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const phone = phoneInput.value.trim();
+            if (!phone) return;
+
+            // Show loading
+            lookupBtn.disabled = true;
+            lookupBtn.innerHTML = '<div class="spinner"></div> Recherche...';
+            errorMessage.classList.remove('active');
+            resultsSection.classList.remove('active');
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'lookup');
+                formData.append('phone', phone);
+
+                const response = await fetch('loyalty-card.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.customer) {
+                    showResults(data.customer);
+                } else {
+                    showError(data.message || 'Compte non trouve');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Erreur de connexion. Veuillez reessayer.');
+            } finally {
+                lookupBtn.disabled = false;
+                lookupBtn.innerHTML = '<i class="fas fa-search"></i> Rechercher';
+            }
+        });
+
+        function showResults(customer) {
+            // Update card
+            document.getElementById('pointsValue').textContent = customer.points || 0;
+            document.getElementById('customerName').textContent = customer.name || 'Client';
+            document.getElementById('ordersCount').textContent = customer.orders_count || 0;
+            document.getElementById('totalSpent').textContent = Math.round(customer.total_spent || 0);
+
+            // Show loyalty code
+            const idDisplay = document.getElementById('customerIdDisplay');
+            if (customer.loyalty_code) {
+                idDisplay.textContent = 'Code: ' + customer.loyalty_code;
+                idDisplay.style.display = 'inline-block';
+            } else {
+                idDisplay.style.display = 'none';
+            }
+
+            // Update reward status based on points
+            const points = customer.points || 0;
+            document.querySelectorAll('.reward-status').forEach(badge => {
+                const requiredPoints = parseInt(badge.dataset.points);
+                if (points >= requiredPoints) {
+                    badge.className = 'reward-status available';
+                    badge.textContent = 'Disponible';
+                } else {
+                    badge.className = 'reward-status locked';
+                    badge.textContent = (requiredPoints - points) + ' pts restants';
+                }
+            });
+
+            // Show results
+            lookupSection.style.display = 'none';
+            resultsSection.classList.add('active');
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            errorMessage.classList.add('active');
+        }
+
+        function resetLookup() {
+            lookupSection.style.display = 'block';
+            resultsSection.classList.remove('active');
+            errorMessage.classList.remove('active');
+            phoneInput.value = '';
+            phoneInput.focus();
+        }
+    </script>
+</body>
+</html>

@@ -27,6 +27,8 @@ try {
     // Récupérer les données du restaurant depuis la base
     $restaurant = RestaurantRepository::getById($restaurantId);
     $settings = RestaurantRepository::getSettings($restaurantId);
+    $openingHours = RestaurantRepository::getOpeningHours($restaurantId);
+    $faqItems = RestaurantRepository::getFaq($restaurantId);
 
 } catch (Exception $e) {
     http_response_code(500);
@@ -47,6 +49,7 @@ if (!$restaurant) {
 }
 
 // Construire la réponse JSON avec les données DB + config instance
+// Thème: priorité BD > InstanceManager > défaut
 $themeConfig = InstanceManager::getThemeConfig() ?? [];
 
 $response = [
@@ -59,10 +62,10 @@ $response = [
     'isHalal' => (bool)($settings['is_halal'] ?? true),
 
     'theme' => [
-        'primary' => $themeConfig['primary'] ?? '#e63946',
-        'primaryDark' => $themeConfig['primary_dark'] ?? '#d62839',
-        'secondary' => $themeConfig['secondary'] ?? '#1a1a2e',
-        'accent' => $themeConfig['accent'] ?? '#ff6fae',
+        'primary' => $settings['theme_primary'] ?? $themeConfig['primary'] ?? '#e63946',
+        'primaryDark' => $settings['theme_primary_dark'] ?? $themeConfig['primary_dark'] ?? '#d62839',
+        'secondary' => $settings['theme_secondary'] ?? $themeConfig['secondary'] ?? '#1a1a2e',
+        'accent' => $settings['theme_accent'] ?? $themeConfig['accent'] ?? '#ff6fae',
         'background' => '#f5f5f5',
         'cardBackground' => '#ffffff',
         'textPrimary' => '#111111',
@@ -82,11 +85,11 @@ $response = [
     ],
 
     'location' => [
-        'address' => $restaurant['address'],
-        'city' => $restaurant['city'] ?? '',
-        'postalCode' => $restaurant['postal_code'] ?? '',
-        'latitude' => (float)($restaurant['latitude'] ?? 0),
-        'longitude' => (float)($restaurant['longitude'] ?? 0),
+        'address' => $settings['address'] ?? $restaurant['address'] ?? '',
+        'city' => $settings['city'] ?? $restaurant['city'] ?? '',
+        'postalCode' => $settings['postal_code'] ?? $restaurant['postal_code'] ?? '',
+        'latitude' => (float)($settings['latitude'] ?? $restaurant['latitude'] ?? 0),
+        'longitude' => (float)($settings['longitude'] ?? $restaurant['longitude'] ?? 0),
         'googleMapsUrl' => $instanceConfig['location']['googleMapsUrl'] ?? '',
         'googleMapsEmbed' => $instanceConfig['location']['googleMapsEmbed'] ?? ''
     ],
@@ -96,7 +99,51 @@ $response = [
         'primaryColor' => $themeConfig['primary'] ?? '#e63946'
     ],
 
-    'social' => json_decode($settings['social_links'] ?? '{}', true)
+    // Réseaux sociaux depuis colonnes individuelles
+    'social' => [
+        'instagram' => $settings['instagram'] ?? '',
+        'facebook' => $settings['facebook'] ?? '',
+        'tiktok' => $settings['tiktok'] ?? '',
+        'snapchat' => $settings['snapchat'] ?? ''
+    ],
+
+    // Horaires d'ouverture depuis table opening_hours
+    'openingHours' => array_map(function($h) {
+        $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+        return [
+            'day' => $days[$h['day_of_week']] ?? 'jour',
+            'opens' => substr($h['opens'], 0, 5),
+            'closes' => substr($h['closes'], 0, 5),
+            'isClosed' => (bool)($h['is_closed'] ?? false)
+        ];
+    }, $openingHours),
+
+    // FAQ depuis table faq
+    'faq' => [
+        'title' => 'Questions fréquentes',
+        'items' => array_map(function($f) {
+            return [
+                'question' => $f['question'],
+                'answer' => $f['answer']
+            ];
+        }, $faqItems)
+    ],
+
+    // Plateformes de livraison depuis table delivery_platforms
+    'platforms' => array_map(function($p) {
+        return [
+            'id' => $p['slug'],
+            'name' => $p['name'],
+            'url' => $p['url'],
+            'icon' => $p['icon'] ?? $p['slug'],
+            'enabled' => (bool) $p['is_enabled']
+        ];
+    }, RestaurantRepository::getDeliveryPlatforms($restaurantId)),
+
+    // Statut livraison
+    'delivery' => [
+        'enabled' => (bool) ($settings['delivery_enabled'] ?? true)
+    ]
 ];
 
 // Injecter la config JavaScript pour le frontend

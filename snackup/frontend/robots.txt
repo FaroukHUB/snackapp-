@@ -6,7 +6,7 @@ Allow: /
 Sitemap: https://marvelous.mon-agenceweb.fr/sitemap.xml
 
 # Bloquer l'accès admin
-Disallow: /admin-panel-v2/
+Disallow: /admin/
 Disallow: /config/
 
 # Autoriser crawl des images

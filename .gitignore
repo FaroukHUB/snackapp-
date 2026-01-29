@@ -3,3 +3,13 @@ admin-panel-v2/
 images/uploads/
 snackup/admin/api/test-debug.php
 snackup/test-error-log.php
+# Runtime / prod
+php-error.log
+config/menu.runtime.json
+config/menu.*.json
+snackup/admin/data/*.json
+
+# Uploads
+images/formules/*
+snackup/admin/assets/sounds/*.mp3
+

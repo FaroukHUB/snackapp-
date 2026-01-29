@@ -1,9 +1,15 @@
+<?php
+require_once __DIR__ . '/bootstrap.php';
+$restaurant = getCurrentRestaurant();
+$restaurantName = $restaurant['name'] ?? 'Restaurant';
+$currency = defined('CURRENCY') ? CURRENCY : 'EUR';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion Clients - Le Marvelous</title>
+    <title>Gestion Clients - <?= htmlspecialchars($restaurantName) ?></title>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -419,6 +425,14 @@
     <div id="whatsapp-modal" class="modal"></div>
 
     <!-- Load JavaScript -->
+    <script>
+        // Global config for customers.js
+        window.CURRENCY = '<?= $currency ?>';
+        window.APP_CONFIG = {
+            restaurantName: '<?= addslashes($restaurantName) ?>',
+            currency: '<?= $currency ?>'
+        };
+    </script>
     <script src="assets/js/customers.js"></script>
     <script>
         // Close customer modal

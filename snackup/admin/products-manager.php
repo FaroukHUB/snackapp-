@@ -198,14 +198,13 @@ $csrfToken = getCsrfToken();
     .status[data-status="unavailable"]{background: rgba(239,68,68,.15);color:#f87171}
     .dot{width:8px;height:8px;border-radius:999px;background: currentColor}
 
-    /* ===== Modal moderne ===== */
+    /* ===== Modal moderne (optimisé: sans backdrop-filter pour éviter freeze) ===== */
     .modal-overlay{
       position:fixed;inset:0;
       display:none;
       align-items:center;justify-content:center;
       padding:12px;
-      background: rgba(0,0,0,.62);
-      backdrop-filter: blur(8px);
+      background: rgba(0,0,0,.88);
       z-index: 1000;
     }
     .modal-overlay[aria-hidden="false"]{display:flex}
@@ -221,13 +220,6 @@ $csrfToken = getCsrfToken();
       background: linear-gradient(180deg, rgba(20,25,40,.98), rgba(15,20,35,.98));
       box-shadow: var(--shadow);
       overflow:hidden;
-      transform: translateY(10px) scale(.98);
-      opacity:0;
-      transition: transform .16s ease, opacity .16s ease;
-    }
-    .modal-overlay[aria-hidden="false"] .modal{
-      transform: translateY(0) scale(1);
-      opacity:1;
     }
     .modal-h{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
     .modal-h h3{margin:0;font-size:14px;font-weight:600}
@@ -619,6 +611,22 @@ $csrfToken = getCsrfToken();
               </label>
             </div>
           </div>
+          <div class="field">
+            <label>Image badge (sidebar desktop)</label>
+            <div class="icon-image-upload" style="margin-top:8px;">
+              <div id="iconImagePreview" style="display:none;margin-bottom:10px;">
+                <img id="iconImagePreviewImg" src="" alt="Preview" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--stroke);">
+                <button type="button" class="btn btn-icon-sm btn-danger" onclick="clearIconImage()" style="margin-left:8px;" title="Supprimer">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              <label class="btn" style="cursor:pointer;">
+                <i class="fas fa-upload"></i> Choisir une image
+                <input type="file" id="catIconImage" name="icon_image" accept="image/*" style="display:none;" onchange="previewIconImage(this)">
+              </label>
+              <span class="muted" style="margin-left:8px;font-size:11px;">PNG/JPG, carré recommandé</span>
+            </div>
+          </div>
           <p class="muted" style="margin:0">L'identifiant technique est généré automatiquement.</p>
         </div>
         <div class="modal-f">
@@ -722,18 +730,7 @@ $csrfToken = getCsrfToken();
         <form id="formAddSupplement" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
           <input id="supName" name="name" class="input" type="text" placeholder="Nom du supplément" style="flex:1;min-width:140px;" required />
           <select id="supCategory" name="category" class="input" style="width:130px;" required>
-            <optgroup label="Salé">
-              <option value="fromage">Fromage</option>
-              <option value="legume">Légume</option>
-              <option value="viande">Viande</option>
-              <option value="autre">Autre (Salé)</option>
-            </optgroup>
-            <optgroup label="Sucré">
-              <option value="base">Base</option>
-              <option value="croquant">Croquant</option>
-              <option value="fruit">Fruit</option>
-              <option value="prime">Prime</option>
-            </optgroup>
+            <!-- Groupes chargés dynamiquement depuis DB -->
           </select>
           <input id="supPrice" name="price" class="input" type="number" step="0.01" min="0" placeholder="Prix <?= CURRENCY ?>" style="width:90px;" required />
           <button class="btn btn-good" type="submit">+ Ajouter</button>
@@ -1161,6 +1158,59 @@ $csrfToken = getCsrfToken();
       });
     }
 
+    // ===== ICON IMAGE UPLOAD =====
+    let pendingIconImage = null; // Fichier en attente d'upload
+    let existingIconImage = null; // Image existante (pour édition)
+    let clearIconImageFlag = false; // Flag pour supprimer l'image
+
+    function previewIconImage(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      // Valider le type
+      if (!file.type.startsWith('image/')) {
+        toast("error", "Erreur", "Veuillez sélectionner une image valide.");
+        input.value = '';
+        return;
+      }
+
+      // Valider la taille (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast("error", "Erreur", "L'image ne doit pas dépasser 2 Mo.");
+        input.value = '';
+        return;
+      }
+
+      pendingIconImage = file;
+      clearIconImageFlag = false;
+
+      // Preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        $("#iconImagePreviewImg").src = e.target.result;
+        $("#iconImagePreview").style.display = "flex";
+        $("#iconImagePreview").style.alignItems = "center";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearIconImage() {
+      pendingIconImage = null;
+      clearIconImageFlag = true;
+      $("#catIconImage").value = '';
+      $("#iconImagePreview").style.display = "none";
+      $("#iconImagePreviewImg").src = '';
+    }
+
+    function resetIconImageState() {
+      pendingIconImage = null;
+      existingIconImage = null;
+      clearIconImageFlag = false;
+      $("#catIconImage").value = '';
+      $("#iconImagePreview").style.display = "none";
+      $("#iconImagePreviewImg").src = '';
+    }
+
     // Initialize on page load
     initIconSelector();
 
@@ -1177,6 +1227,8 @@ $csrfToken = getCsrfToken();
         const input = o.querySelector("input");
         if (input) input.checked = (i === 0);
       });
+      // Reset icon image state
+      resetIconImageState();
       openModal("#modalCategory");
     });
 
@@ -1193,6 +1245,12 @@ $csrfToken = getCsrfToken();
       $("#catName").value = cat.name ?? "";
       $("#catDesc").value = cat.description ?? "";
 
+      // Sélectionner le flavor actuel
+      const flavorSelect = $("#catFlavor");
+      if (flavorSelect && cat.flavor) {
+        flavorSelect.value = cat.flavor;
+      }
+
       // Sélectionner l'icône actuelle
       const iconValue = cat.icon ?? "fa-utensils";
       const options = $$("#iconSelector .icon-option");
@@ -1204,6 +1262,15 @@ $csrfToken = getCsrfToken();
           o.classList.toggle("selected", isSelected);
         }
       });
+
+      // Gérer l'image d'icône existante
+      resetIconImageState();
+      if (cat.icon_image) {
+        existingIconImage = cat.icon_image;
+        $("#iconImagePreviewImg").src = cat.icon_image;
+        $("#iconImagePreview").style.display = "flex";
+        $("#iconImagePreview").style.alignItems = "center";
+      }
 
       openModal("#modalCategory");
     }
@@ -1240,29 +1307,11 @@ $csrfToken = getCsrfToken();
       const allSupplements = getSupplements();
       container.innerHTML = "";
 
-      // Définir les catégories de suppléments
-      const saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-      const sucreCategories = ['base', 'croquant', 'fruit', 'prime'];
-
-      // Filtrer les suppléments selon la catégorie du produit
+      // Filtrer selon defaultForCategories si categoryId fourni
       let supplements = allSupplements;
-
       if (categoryId) {
-        // Pour les crêpes salées signature : uniquement suppléments salés
-        if (categoryId === 'crepes-salees-signature') {
-          supplements = Object.values(allSupplements).filter(sup =>
-            saledCategories.includes(sup.category)
-          ).reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {});
-        }
-        // Pour les catégories sucrées : uniquement suppléments sucrés
-        else if (['crepes-sucrees', 'gaufres', 'bubble-waffle'].includes(categoryId)) {
-          supplements = Object.values(allSupplements).filter(sup =>
-            sucreCategories.includes(sup.category)
-          ).reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {});
-        }
-        // Pour les autres catégories : afficher seulement ceux de defaultForCategories
-        else {
-          const allowedIds = state.menu?.supplements?.defaultForCategories?.[categoryId] ?? [];
+        const allowedIds = state.menu?.supplements?.defaultForCategories?.[categoryId] ?? [];
+        if (allowedIds.length > 0) {
           supplements = Object.values(allSupplements).filter(sup =>
             allowedIds.includes(sup.id)
           ).reduce((acc, sup) => ({ ...acc, [sup.id]: sup }), {});
@@ -1275,7 +1324,7 @@ $csrfToken = getCsrfToken();
         const checked = selectedIds.includes(sup.id) ? "checked" : "";
         label.innerHTML = `
           <input type="checkbox" name="supplements[]" value="${escapeHtml(sup.id)}" ${checked} style="width:16px;height:16px;" />
-          ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${sup.price.toFixed(0)} ${CURRENCY})</span>
+          ${escapeHtml(sup.name)} <span style="color:var(--muted);">(+${parseFloat(sup.price).toFixed(2).replace('.', ',')} ${CURRENCY})</span>
         `;
         container.appendChild(label);
       });
@@ -1311,121 +1360,122 @@ $csrfToken = getCsrfToken();
 
     // ===== GESTION DES SUPPLÉMENTS =====
     $("#btnManageSupplements").addEventListener("click", () => {
+      setupSupplementsEvents();
       renderSupplementsList();
       openModal("#modalSupplements");
     });
 
+    // Capitalise la première lettre
+    function capitalizeStr(str) {
+      return str ? str.charAt(0).toUpperCase() + str.slice(1) : 'Autres';
+    }
+
+    // Remplit le select des catégories depuis les suppléments existants
+    function populateCategorySelect() {
+      const select = $("#supCategory");
+      if (!select) return;
+      const catalog = state.menu?.supplements?.catalog || {};
+      const groups = [...new Set(Object.values(catalog).map(s => s?.category || s?.group_name || 'autres'))];
+      if (groups.length === 0) groups.push('autres');
+      select.innerHTML = groups.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(capitalizeStr(g))}</option>`).join('');
+    }
+
     function renderSupplementsList(){
       const container = $("#supplementsList");
-      const supplements = getSupplements();
-      container.innerHTML = "";
+      if (!container) return;
 
-      // Grouper les suppléments par catégorie
-      const saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-      const sucreCategories = ['base', 'croquant', 'fruit', 'prime'];
-      const categoryLabels = {
-        'base': 'Base',
-        'croquant': 'Croquant',
-        'fruit': 'Fruit',
-        'prime': 'Prime'
-      };
+      const catalog = state.menu?.supplements?.catalog || {};
+      const supplements = Object.values(catalog);
 
-      const saled = {};
-      const sucre = {};
+      // Peupler le select
+      populateCategorySelect();
 
-      Object.values(supplements).forEach(sup => {
-        const cat = sup.category || 'autre';
-        if (saledCategories.includes(cat)) {
-          if (!saled[cat]) saled[cat] = [];
-          saled[cat].push(sup);
-        } else if (sucreCategories.includes(cat)) {
-          if (!sucre[cat]) sucre[cat] = [];
-          sucre[cat].push(sup);
-        }
+      if (supplements.length === 0) {
+        container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
+        return;
+      }
+
+      // Grouper par catégorie
+      const grouped = {};
+      supplements.forEach(sup => {
+        if (!sup) return;
+        const cat = sup.category || sup.group_name || 'autres';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(sup);
       });
 
-      // Afficher les suppléments salés
-      const hasSaled = Object.values(saled).some(arr => arr.length > 0);
-      if (hasSaled) {
-        const saledTitle = document.createElement("h4");
-        saledTitle.style.cssText = "font-size:14px;font-weight:700;color:#E91E63;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 12px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;";
-        saledTitle.textContent = "Suppléments Salés";
-        container.appendChild(saledTitle);
-
-        saledCategories.forEach(cat => {
-          if (saled[cat] && saled[cat].length > 0) {
-            saled[cat].forEach(sup => {
-              container.appendChild(createSupplementItem(sup));
-            });
-          }
+      // Construire tout le HTML d'un coup (plus rapide que multiple appendChild)
+      let html = '';
+      Object.keys(grouped).sort().forEach(group => {
+        html += `<div style="font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;">${escapeHtml(capitalizeStr(group))}</div>`;
+        grouped[group].forEach(sup => {
+          const price = (parseFloat(sup.price) || 0).toFixed(2).replace('.', ',');
+          const status = sup.status || 'available';
+          const supId = String(sup.id || '');
+          html += `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);">
+              <div style="flex:1;">
+                <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
+                <span style="color:var(--muted);margin-left:8px;">${price} ${CURRENCY}</span>
+                <span class="status" data-status="${status}" style="margin-left:8px;padding:4px 8px;"><span class="dot"></span>${status === 'available' ? 'Dispo' : 'Indispo'}</span>
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn" type="button" data-toggle-sup="${escapeHtml(supId)}" style="padding:6px 12px;font-size:12px;font-weight:600;${status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">${status === 'available' ? '✓ Disponible' : '✕ Indisponible'}</button>
+                <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(supId)}" style="padding:6px 10px;">🗑️</button>
+              </div>
+            </div>`;
         });
+      });
 
-        // Espacement entre sections
-        const spacer = document.createElement("div");
-        spacer.style.cssText = "height:24px;";
-        container.appendChild(spacer);
-      }
+      container.innerHTML = html;
+    }
 
-      // Afficher les suppléments sucrés par catégorie
-      const hasSucre = Object.values(sucre).some(arr => arr.length > 0);
-      if (hasSucre) {
-        const sucreTitle = document.createElement("h4");
-        sucreTitle.style.cssText = "font-size:14px;font-weight:700;color:#E91E63;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 12px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;";
-        sucreTitle.textContent = "Suppléments Sucrés";
-        container.appendChild(sucreTitle);
+    // Event delegation pour suppléments (attaché UNE SEULE FOIS)
+    let supplementsEventsAttached = false;
+    function setupSupplementsEvents() {
+      if (supplementsEventsAttached) return;
+      supplementsEventsAttached = true;
 
-        sucreCategories.forEach(cat => {
-          if (sucre[cat] && sucre[cat].length > 0) {
-            // Sous-titre de catégorie
-            const catTitle = document.createElement("div");
-            catTitle.style.cssText = "font-size:13px;font-weight:600;color:#F06292;margin:12px 0 8px 0;padding-left:8px;text-transform:uppercase;letter-spacing:0.3px;";
-            catTitle.textContent = categoryLabels[cat] || cat;
-            container.appendChild(catTitle);
+      const container = $("#supplementsList");
+      container.addEventListener("click", async (e) => {
+        const toggleBtn = e.target.closest("[data-toggle-sup]");
+        const deleteBtn = e.target.closest("[data-delete-sup]");
 
-            sucre[cat].forEach(sup => {
-              container.appendChild(createSupplementItem(sup));
-            });
-          }
-        });
-      }
-
-      if (!hasSaled && !hasSucre) {
-        container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
-      }
-
-      // Attacher les événements
-      $$("[data-toggle-sup]", container).forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.toggleSup;
+        if (toggleBtn) {
+          const id = toggleBtn.dataset.toggleSup;
           const sup = getSupplements()[id];
           if (!sup) return;
           const newStatus = sup.status === 'available' ? 'unavailable' : 'available';
           try {
             await apiPostJson({ action: "update_supplement", supplement_id: id, status: newStatus });
+            // Mise à jour locale du state (évite boot() complet)
+            if (state.menu?.supplements?.catalog?.[id]) {
+              state.menu.supplements.catalog[id].status = newStatus;
+            }
             toast("success", "Statut modifié", `${sup.name} est maintenant ${newStatus === 'available' ? 'disponible' : 'indisponible'}.`);
-            await boot();
             renderSupplementsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de modifier le statut.");
           }
-        });
-      });
+        }
 
-      $$("[data-delete-sup]", container).forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.deleteSup;
+        if (deleteBtn) {
+          const id = deleteBtn.dataset.deleteSup;
           const sup = getSupplements()[id];
           if (!sup) return;
           if (!confirm(`Supprimer le supplément "${sup.name}" ?`)) return;
           try {
             await apiPostJson({ action: "delete_supplement", supplement_id: id });
+            // Suppression locale du state (évite boot() complet)
+            if (state.menu?.supplements?.catalog) {
+              delete state.menu.supplements.catalog[id];
+            }
             toast("success", "Supprimé", `${sup.name} a été supprimé.`);
-            await boot();
             renderSupplementsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
           }
-        });
+        }
       });
     }
 
@@ -1433,20 +1483,24 @@ $csrfToken = getCsrfToken();
     function createSupplementItem(sup) {
       const div = document.createElement("div");
       div.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);";
+      const price = parseFloat(sup.price) || 0;
+      const priceStr = price.toFixed(2).replace('.', ',');
+      const status = sup.status || 'available';
+      const supId = String(sup.id || '');
       div.innerHTML = `
         <div style="flex:1;">
-          <strong style="font-size:13px;">${escapeHtml(sup.name)}</strong>
-          <span style="color:var(--muted);margin-left:8px;">${sup.price.toFixed(0)} ${CURRENCY}</span>
-          <span class="status" data-status="${sup.status ?? 'available'}" style="margin-left:8px;padding:4px 8px;">
-            <span class="dot"></span>${sup.status === 'available' ? 'Dispo' : 'Indispo'}
+          <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
+          <span style="color:var(--muted);margin-left:8px;">${priceStr} ${CURRENCY}</span>
+          <span class="status" data-status="${status}" style="margin-left:8px;padding:4px 8px;">
+            <span class="dot"></span>${status === 'available' ? 'Dispo' : 'Indispo'}
           </span>
         </div>
         <div style="display:flex;gap:6px;">
-          <button class="btn" type="button" data-toggle-sup="${escapeHtml(sup.id)}"
-            style="padding:6px 12px;font-size:12px;font-weight:600;${sup.status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
-            ${sup.status === 'available' ? '✓ Disponible' : '✕ Indisponible'}
+          <button class="btn" type="button" data-toggle-sup="${escapeHtml(supId)}"
+            style="padding:6px 12px;font-size:12px;font-weight:600;${status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
+            ${status === 'available' ? '✓ Disponible' : '✕ Indisponible'}
           </button>
-          <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(sup.id)}" style="padding:6px 10px;">🗑️</button>
+          <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(supId)}" style="padding:6px 10px;">🗑️</button>
         </div>
       `;
       return div;
@@ -1464,10 +1518,18 @@ $csrfToken = getCsrfToken();
       }
 
       try {
-        await apiPostJson({ action: "add_supplement", name, category, price });
-        toast("success", "Supplément ajouté", `"${name}" a été créé dans la catégorie "${category}".`);
+        const result = await apiPostJson({ action: "add_supplement", name, category, price });
+        // Ajouter le nouveau supplément au state local (évite boot() complet)
+        if (result.supplement) {
+          if (!state.menu.supplements) state.menu.supplements = { catalog: {} };
+          if (!state.menu.supplements.catalog) state.menu.supplements.catalog = {};
+          state.menu.supplements.catalog[result.supplement.id] = {
+            ...result.supplement,
+            category: category // S'assurer que la catégorie est présente
+          };
+        }
+        toast("success", "Supplément ajouté", `"${name}" a été créé.`);
         $("#formAddSupplement").reset();
-        await boot();
         renderSupplementsList();
       } catch(err) {
         toast("error", "Erreur", err?.message ?? "Impossible d'ajouter.");
@@ -2229,13 +2291,30 @@ $csrfToken = getCsrfToken();
       const icon = String(fd.get("icon") ?? "fa-utensils").trim();
 
       try{
+        // Préparer FormData pour upload
+        const uploadFd = new FormData();
+        uploadFd.append("name", name);
+        uploadFd.append("description", description);
+        uploadFd.append("flavor", flavor);
+        uploadFd.append("icon", icon);
+
+        // Gérer l'image d'icône
+        if (pendingIconImage) {
+          uploadFd.append("icon_image", pendingIconImage);
+        } else if (clearIconImageFlag) {
+          uploadFd.append("clear_icon_image", "1");
+        }
+
         if (currentEditCategoryId) {
           // Mode édition
-          await apiPostJson({ action:"edit_category", category_id: currentEditCategoryId, name, description, flavor, icon });
+          uploadFd.append("action", "edit_category");
+          uploadFd.append("category_id", currentEditCategoryId);
+          await apiPostMultipart(uploadFd);
           toast("success","Catégorie modifiée", `"${name}" a été mise à jour.`);
         } else {
           // Mode ajout
-          await apiPostJson({ action:"add_category", name, description, flavor, icon });
+          uploadFd.append("action", "add_category");
+          await apiPostMultipart(uploadFd);
           toast("success","Catégorie ajoutée", `"${name}" a été enregistrée.`);
         }
         closeModal($("#modalCategory"));
@@ -2335,6 +2414,7 @@ $csrfToken = getCsrfToken();
       const qtyVal = data?.quantity ?? 1;
       const catIdVal = data?.categoryId ?? "";
       const prodIdVal = data?.productId ?? "";
+      const choiceGroupVal = data?.choiceGroup ?? "";
 
       console.log('[addFormuleInclude] catIdVal:', catIdVal, '| prodIdVal:', prodIdVal);
 
@@ -2386,6 +2466,7 @@ $csrfToken = getCsrfToken();
           ${productOptions}
         </select>
         <input name="include_label_${idx}" class="input" type="text" placeholder="Label affiché" value="${escapeHtml(labelVal)}" style="flex:1;min-width:100px;" />
+        <input name="include_group_${idx}" class="input" type="text" placeholder="Groupe (ex: pizza)" value="${escapeHtml(choiceGroupVal)}" style="width:100px;" title="Les éléments du même groupe sont mutuellement exclusifs" />
         <input name="include_qty_${idx}" class="input" type="number" min="1" value="${qtyVal}" style="width:60px;" />
         <button type="button" class="btn btn-danger" style="padding:6px 10px;" onclick="this.closest('.formule-include-row').remove()">✕</button>
       `;
@@ -2435,10 +2516,14 @@ $csrfToken = getCsrfToken();
         const type = row.querySelector(`[name^="include_type_"]`).value;
         const label = row.querySelector(`[name^="include_label_"]`).value.trim();
         const qty = parseInt(row.querySelector(`[name^="include_qty_"]`).value) || 1;
+        const choiceGroup = row.querySelector(`[name^="include_group_"]`)?.value.trim() || "";
 
         if (!label) return;
 
         const inc = { type, label, quantity: qty };
+        if (choiceGroup) {
+          inc.choiceGroup = choiceGroup;
+        }
         if (type === 'category') {
           inc.categoryId = row.querySelector('.include-cat').value;
         } else {

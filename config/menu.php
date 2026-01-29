@@ -69,6 +69,53 @@ try {
         'items' => []
     ];
 
+    // Upsell Rules - suggestions basées sur le panier
+    // Récupère les slugs des catégories pour les règles
+    $categorySlugs = array_column($categories, 'slug');
+
+    $upsellRules = [];
+
+    // Règles pour pizzeria
+    if (in_array('pizzas', $categorySlugs) || in_array('pizza', $categorySlugs)) {
+        // Si pizza dans le panier, suggérer boissons et desserts
+        $upsellRules[] = [
+            'when' => ['pizzas', 'pizza', 'pizzas-classiques', 'pizzas-speciales', 'pizzas-signature'],
+            'suggest' => ['boissons', 'desserts', 'sodas', 'tiramisu', 'cookies'],
+            'message' => 'Une boisson ou un dessert pour accompagner ?',
+            'priority' => 1
+        ];
+    }
+
+    // Si burgers
+    if (in_array('burgers', $categorySlugs) || in_array('burger', $categorySlugs)) {
+        $upsellRules[] = [
+            'when' => ['burgers', 'burger'],
+            'suggest' => ['boissons', 'desserts', 'frites', 'sodas'],
+            'message' => 'Des frites ou une boisson avec votre burger ?',
+            'priority' => 1
+        ];
+    }
+
+    // Si tacos
+    if (in_array('tacos', $categorySlugs) || in_array('taco', $categorySlugs)) {
+        $upsellRules[] = [
+            'when' => ['tacos', 'taco'],
+            'suggest' => ['boissons', 'desserts', 'sodas'],
+            'message' => 'Une boisson fraîche pour accompagner ?',
+            'priority' => 1
+        ];
+    }
+
+    // Règle générale : si dessert, suggérer boisson chaude
+    if (in_array('desserts', $categorySlugs)) {
+        $upsellRules[] = [
+            'when' => ['desserts', 'dessert', 'patisseries'],
+            'suggest' => ['boissons-chaudes', 'cafe', 'the', 'chocolat-chaud'],
+            'message' => 'Un café ou une boisson chaude avec votre dessert ?',
+            'priority' => 2
+        ];
+    }
+
     // Construire la réponse complète
     $response = [
         'menu' => $menu,
@@ -76,6 +123,7 @@ try {
         'formules' => $formules,
         'featured' => $featured,
         'categoryIcons' => $categoryIcons,
+        'upsellRules' => $upsellRules,
         '_meta' => [
             'currency' => InstanceManager::getCurrency(),
             'restaurantId' => $restaurantId,

@@ -302,6 +302,79 @@ function handleFormuleImageUpload(string $baseId): ?string {
 }
 
 /* =========================
+   HELPER: Upload icon image (badge catégorie)
+   ========================= */
+function handleIconImageUpload(string $baseId): ?string {
+    if (empty($_FILES['icon_image'])) return null;
+
+    $file = $_FILES['icon_image'];
+
+    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+        return null;
+    }
+
+    // Erreur upload
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    // ✅ SÉCURITÉ: Limite de taille (2MB max pour icônes)
+    $maxSize = 2 * 1024 * 1024;
+    if ($file['size'] > $maxSize) {
+        jsonError('Image icône trop volumineuse (maximum 2MB)');
+    }
+
+    // ✅ SÉCURITÉ: Validation MIME type stricte
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $mime = mime_content_type($file['tmp_name']) ?: '';
+    if (!isset($allowed[$mime])) {
+        jsonError('Format image non supporté (jpg/png/webp uniquement)');
+    }
+
+    // 🔒 SÉCURITÉ: Vérification magic bytes
+    $handle = fopen($file['tmp_name'], 'rb');
+    $header = fread($handle, 12);
+    fclose($handle);
+
+    $isValid = false;
+    if (substr($header, 0, 3) === "\xFF\xD8\xFF") $isValid = true; // JPEG
+    if (substr($header, 0, 4) === "\x89PNG") $isValid = true; // PNG
+    if (substr($header, 0, 4) === "RIFF" && substr($header, 8, 4) === "WEBP") $isValid = true; // WEBP
+
+    if (!$isValid) {
+        jsonError('Fichier image invalide');
+    }
+
+    // ✅ Créer dossier icons
+    $uploadsDir = SNACK_ROOT . '/images/icons';
+    if (!is_dir($uploadsDir)) {
+        mkdir($uploadsDir, 0755, true);
+    }
+
+    // ⚡ Convertir en WebP optimisé (petite taille pour icônes)
+    $webpTempFile = null;
+    try {
+        $webpTempFile = convertToOptimizedWebP($file['tmp_name'], 90, 200); // 200px max pour icônes
+
+        $filename = 'cat-' . $baseId . '-' . bin2hex(random_bytes(4)) . '.webp';
+        $dest = $uploadsDir . '/' . $filename;
+
+        if (!rename($webpTempFile, $dest)) {
+            jsonError('Échec sauvegarde image icône');
+        }
+
+        chmod($dest, 0644);
+        return 'images/icons/' . $filename;
+
+    } catch (Exception $e) {
+        if ($webpTempFile && file_exists($webpTempFile)) {
+            @unlink($webpTempFile);
+        }
+        jsonError('Échec conversion image icône: ' . $e->getMessage());
+    }
+}
+
+/* =========================
    HELPER: Sync formules to menu.json
    ========================= */
 function syncFormulesToMenu(array $runtime): void {
@@ -434,9 +507,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             // Formater le menu pour le frontend
             $menu = ['categories' => $categories];
 
-            // Formater les suppléments
+            // Formater les suppléments (avec groupement)
+            $supplementsGrouped = MenuRepository::getSupplementsGrouped();
+            $supplementGroups = MenuRepository::getSupplementGroups();
             $supplementsFormatted = [
                 'catalog' => $supplements,
+                'grouped' => $supplementsGrouped,
+                'groups' => $supplementGroups, // Groupes distincts pour le select admin
                 'defaultForCategories' => $categorySupplements
             ];
 
@@ -564,8 +641,12 @@ if ($useMySQL) {
                 jsonError('Flavor invalide (doit être "sale" ou "sucre")');
             }
 
+            // Gérer upload icon_image
+            $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+            $iconImage = handleIconImageUpload($baseSlug);
+
             try {
-                $result = MenuRepository::addCategory($name, $description, $icon, $flavor);
+                $result = MenuRepository::addCategory($name, $description, $icon, $flavor, $iconImage);
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // TODO: Fusionner MySQL + ancien menu.json correctement
                 // regenerateMenuJson();
@@ -585,6 +666,7 @@ if ($useMySQL) {
             $description = trim((string)($input['description'] ?? ''));
             $icon = trim((string)($input['icon'] ?? 'fa-utensils'));
             $flavor = trim((string)($input['flavor'] ?? ''));
+            $clearIconImage = !empty($input['clear_icon_image']);
 
             error_log("categoryId après (int): " . $categoryId);
             error_log("name: " . $name);
@@ -595,14 +677,26 @@ if ($useMySQL) {
                 jsonError('Paramètres manquants (categoryId=' . $categoryId . ')');
             }
 
+            // Gérer upload icon_image ou suppression
+            $iconImage = null;
+            if ($clearIconImage) {
+                $iconImage = ''; // String vide pour supprimer
+            } else {
+                $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+                $uploadedImage = handleIconImageUpload($baseSlug);
+                if ($uploadedImage) {
+                    $iconImage = $uploadedImage;
+                }
+            }
+
             try {
                 error_log("🔄 Appel MenuRepository::editCategory avec ID: " . $categoryId);
-                $success = MenuRepository::editCategory($categoryId, $name, $description, $icon, $flavor);
+                $success = MenuRepository::editCategory($categoryId, $name, $description, $icon, $flavor, $iconImage);
                 error_log("✅ Résultat editCategory: " . var_export($success, true));
 
                 // ⚠️ DÉSACTIVÉ: regenerateMenuJson() - Préserve menu.json existant
                 // regenerateMenuJson();
-                jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon, 'flavor' => $flavor]]);
+                jsonSuccess(['category' => ['id' => $categoryId, 'name' => $name, 'icon' => $icon, 'icon_image' => $iconImage, 'flavor' => $flavor]]);
             } catch (Exception $e) {
                 error_log("❌ Exception editCategory: " . $e->getMessage());
                 jsonError($e->getMessage());
@@ -687,7 +781,17 @@ if ($useMySQL) {
             $baseSlug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
             $imagePath = handleImageUpload($baseSlug);
             if (!$imagePath && isset($input['image'])) {
-                $imagePath = $input['image']; // Garder l'image existante
+                $imagePath = $input['image']; // Garder l'image envoyée
+            }
+            // ✅ FIX: Si pas d'image fournie, récupérer l'existante de la BDD
+            if (!$imagePath) {
+                $pdo = Database::getInstance();
+                $stmtImg = $pdo->prepare("SELECT image FROM products WHERE id = ? AND restaurant_id = ?");
+                $stmtImg->execute([$productId, SNACK_RESTAURANT_ID]);
+                $existingImage = $stmtImg->fetchColumn();
+                if ($existingImage) {
+                    $imagePath = $existingImage;
+                }
             }
 
             // Gérer baseIngredients (peut être une chaîne JSON depuis FormData)
@@ -759,11 +863,97 @@ if ($useMySQL) {
             }
             break;
 
-        // Endpoints supplements désactivés (pas critiques pour l'instant)
+        // ===== SUPPLÉMENTS (DB-FIRST) =====
         case 'add_supplement':
+            $name = trim((string)($input['name'] ?? ''));
+            $price = normalizePrice($input['price'] ?? 0);
+            $status = $input['status'] ?? 'available';
+            $flavor = $input['flavor'] ?? 'sale';
+            // Accepter category OU group_name (admin envoie category)
+            $groupName = $input['category'] ?? $input['group_name'] ?? 'autres';
+
+            if ($name === '') {
+                jsonError('Nom du supplément requis');
+            }
+
+            try {
+                $supplementId = SupplementRepository::create(SNACK_RESTAURANT_ID, [
+                    'name' => $name,
+                    'price' => $price,
+                    'status' => $status,
+                    'flavor' => $flavor,
+                    'group_name' => $groupName
+                ]);
+
+                $supplement = SupplementRepository::getById($supplementId);
+                jsonSuccess(['supplement' => $supplement]);
+            } catch (Exception $e) {
+                jsonError('Erreur création supplément: ' . $e->getMessage());
+            }
+            break;
+
         case 'update_supplement':
+            $supplementId = (int)($input['supplement_id'] ?? $input['id'] ?? 0);
+
+            if (!$supplementId) {
+                jsonError('ID supplément manquant');
+            }
+
+            $updateData = [];
+            if (isset($input['name'])) $updateData['name'] = trim((string)$input['name']);
+            if (isset($input['price'])) $updateData['price'] = normalizePrice($input['price']);
+            if (isset($input['status'])) $updateData['status'] = $input['status'];
+            if (isset($input['flavor'])) $updateData['flavor'] = $input['flavor'];
+            // Accepter category OU group_name (admin envoie category)
+            if (isset($input['category'])) $updateData['group_name'] = $input['category'];
+            if (isset($input['group_name'])) $updateData['group_name'] = $input['group_name'];
+
+            if (empty($updateData)) {
+                jsonError('Aucune donnée à mettre à jour');
+            }
+
+            try {
+                $updated = SupplementRepository::update($supplementId, $updateData);
+                if ($updated) {
+                    $supplement = SupplementRepository::getById($supplementId);
+                    jsonSuccess(['supplement' => $supplement]);
+                } else {
+                    jsonError('Supplément non trouvé ou non modifié');
+                }
+            } catch (Exception $e) {
+                jsonError('Erreur mise à jour supplément: ' . $e->getMessage());
+            }
+            break;
+
         case 'delete_supplement':
-            jsonError('Gestion suppléments non implémentée (migration en cours)');
+            $supplementId = (int)($input['supplement_id'] ?? $input['id'] ?? 0);
+
+            if (!$supplementId) {
+                jsonError('ID supplément manquant');
+            }
+
+            try {
+                // Suppression définitive (hard delete)
+                $deleted = SupplementRepository::hardDelete($supplementId);
+                if ($deleted) {
+                    jsonSuccess(['message' => 'Supplément supprimé']);
+                } else {
+                    jsonError('Supplément non trouvé');
+                }
+            } catch (Exception $e) {
+                jsonError('Erreur suppression supplément: ' . $e->getMessage());
+            }
+            break;
+
+        case 'delete_sweet_supplements':
+            // Supprime tous les suppléments sucrés (legacy Marvelous)
+            try {
+                $count = SupplementRepository::deleteAllSweet(SNACK_RESTAURANT_ID);
+                jsonSuccess(['message' => "Suppléments sucrés supprimés: $count"]);
+            } catch (Exception $e) {
+                jsonError('Erreur suppression suppléments sucrés: ' . $e->getMessage());
+            }
+            break;
 
         // ===== FORMULES (DB-FIRST) =====
         case 'add_formule':
@@ -1080,56 +1270,44 @@ if ($useMySQL) {
             break;
         */
 
-        // Featured products section
+        // Featured products section - sauvegarde en DB
         case 'update_featured':
             error_log('[PRODUCTS API] ========== update_featured START ==========');
-            error_log('[PRODUCTS API] Input reçu: ' . json_encode($input));
 
             $featuredData = $input['featured'] ?? null;
-            error_log('[PRODUCTS API] featuredData: ' . json_encode($featuredData));
-
             if (!$featuredData || !is_array($featuredData)) {
-                error_log('[PRODUCTS API] ❌ Données featured invalides');
                 jsonError('Données featured invalides');
             }
 
-            $featured = [
-                'enabled' => $featuredData['enabled'] ?? true,
-                'title' => trim($featuredData['title'] ?? 'Sélection pour vous'),
-                'subtitle' => trim($featuredData['subtitle'] ?? 'Nos produits les plus appréciés'),
-                'items' => $featuredData['items'] ?? []
-            ];
-            error_log('[PRODUCTS API] featured construit: ' . json_encode($featured));
+            $enabled = $featuredData['enabled'] ?? true;
+            $title = trim($featuredData['title'] ?? 'Sélection pour vous');
+            $subtitle = trim($featuredData['subtitle'] ?? 'Nos produits les plus appréciés');
+            $items = $featuredData['items'] ?? [];
 
-            // Sauvegarder dans menu.json
-            $menuPath = getMenuJsonPath();
-            error_log('[PRODUCTS API] menuPath: ' . $menuPath);
+            // Convertir items en array d'entiers
+            $productIds = array_map('intval', array_filter($items, 'is_numeric'));
 
-            if (file_exists($menuPath)) {
-                error_log('[PRODUCTS API] ✅ menu.json existe');
-                $menuData = json_decode(file_get_contents($menuPath), true);
-                if ($menuData) {
-                    error_log('[PRODUCTS API] ✅ menu.json décodé correctement');
-                    error_log('[PRODUCTS API] AVANT écriture - featured ancien: ' . json_encode($menuData['featured'] ?? []));
+            try {
+                // Sauvegarder les paramètres dans featured_settings
+                MenuRepository::updateFeaturedSettings($enabled, $title, $subtitle);
 
-                    $menuData['featured'] = $featured;
-                    $written = file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                // Sauvegarder les produits featured
+                MenuRepository::updateFeaturedProducts($productIds);
 
-                    error_log('[PRODUCTS API] ✅ file_put_contents retourné: ' . ($written !== false ? $written . ' bytes' : 'ÉCHEC'));
+                error_log('[PRODUCTS API] ✅ Featured sauvegardé en DB: ' . count($productIds) . ' produits');
 
-                    // Vérifier que le fichier a bien été modifié
-                    clearstatcache(true, $menuPath);
-                    $verif = json_decode(file_get_contents($menuPath), true);
-                    error_log('[PRODUCTS API] APRÈS écriture - featured nouveau: ' . json_encode($verif['featured'] ?? []));
-                } else {
-                    error_log('[PRODUCTS API] ❌ Échec décodage menu.json');
-                }
-            } else {
-                error_log('[PRODUCTS API] ❌ menu.json introuvable');
+                jsonSuccess([
+                    'featured' => [
+                        'enabled' => $enabled,
+                        'title' => $title,
+                        'subtitle' => $subtitle,
+                        'items' => $productIds
+                    ]
+                ]);
+            } catch (Exception $e) {
+                error_log('[PRODUCTS API] ❌ Erreur featured: ' . $e->getMessage());
+                jsonError('Erreur sauvegarde featured: ' . $e->getMessage());
             }
-
-            error_log('[PRODUCTS API] ========== update_featured END ==========');
-            jsonSuccess(['featured' => $featured]);
             break;
 
         default:
@@ -1565,10 +1743,13 @@ switch ($action) {
 
         // Initialiser la structure si nécessaire
         if (!isset($runtime['products'])) $runtime['products'] = [];
-        if (!isset($runtime['products'][$productId])) $runtime['products'][$productId] = [];
 
-        // Mettre à jour le statut
-        $runtime['products'][$productId]['status'] = $newStatus;
+        // ✅ FIX: Ne pas écraser les données existantes, juste ajouter/modifier le statut
+        if (!isset($runtime['products'][$productId])) {
+            $runtime['products'][$productId] = ['status' => $newStatus];
+        } else {
+            $runtime['products'][$productId]['status'] = $newStatus;
+        }
         error_log("[PRODUCTS API] ✅ Statut mis à jour dans runtime pour {$productId}");
 
         // Si c'est un produit custom, mettre à jour aussi
@@ -1647,48 +1828,16 @@ switch ($action) {
             $i++;
         }
 
-        // Déterminer le flavor basé sur la catégorie
-        $saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-        $sucreCategories = ['base', 'croquant', 'fruit', 'prime'];
-        $flavor = in_array($category, $saledCategories) ? 'sale' : 'sucre';
-
+        // Tous les suppléments sont salés (sucrés retirés)
         $runtime['supplements']['catalog'][$id] = [
             'id' => $id,
             'name' => $name,
             'price' => $price,
             'status' => 'available',
-            'category' => $category,
-            'flavor' => $flavor
+            'category' => $category,      // Pour compatibilité admin
+            'group_name' => $category,    // Pour DB
+            'flavor' => 'sale'            // Toujours salé
         ];
-
-        // ✅ Ajouter automatiquement le supplément aux catégories de produits concernées
-        if (!isset($runtime['supplements']['defaultForCategories'])) {
-            $runtime['supplements']['defaultForCategories'] = [];
-        }
-
-        // Déterminer les catégories de produits selon le type de supplément
-        $saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-        $sucreCategories = ['base', 'croquant', 'fruit', 'prime'];
-
-        $productCategories = [];
-        if (in_array($category, $saledCategories)) {
-            // Suppléments salés → crêpes salées
-            $productCategories = ['crepes-salees-signature'];
-        } elseif (in_array($category, $sucreCategories)) {
-            // Suppléments sucrés → crêpes sucrées, gaufres, bubble waffle
-            $productCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
-        }
-
-        // Ajouter le supplément à chaque catégorie de produits
-        foreach ($productCategories as $catId) {
-            if (!isset($runtime['supplements']['defaultForCategories'][$catId])) {
-                $runtime['supplements']['defaultForCategories'][$catId] = [];
-            }
-            // Ajouter seulement si pas déjà présent
-            if (!in_array($id, $runtime['supplements']['defaultForCategories'][$catId], true)) {
-                $runtime['supplements']['defaultForCategories'][$catId][] = $id;
-            }
-        }
 
         // ⚡ OPTIMISATION: Synchronisation groupée
         saveMenuRuntime($runtime);
@@ -1718,13 +1867,12 @@ switch ($action) {
         }
 
         if (isset($input['name'])) $runtime['supplements']['catalog'][$id]['name'] = trim($input['name']);
-        if (isset($input['price'])) $runtime['supplements']['catalog'][$id]['price'] = (float)$input['price'];
+        if (isset($input['price'])) $runtime['supplements']['catalog'][$id]['price'] = normalizePrice($input['price']);
         if (isset($input['status'])) $runtime['supplements']['catalog'][$id]['status'] = $input['status'];
         if (isset($input['category'])) {
             $runtime['supplements']['catalog'][$id]['category'] = $input['category'];
-            // Mettre à jour le flavor basé sur la nouvelle catégorie
-            $saledCategories = ['fromage', 'legume', 'viande', 'autre'];
-            $runtime['supplements']['catalog'][$id]['flavor'] = in_array($input['category'], $saledCategories) ? 'sale' : 'sucre';
+            $runtime['supplements']['catalog'][$id]['group_name'] = $input['category']; // Sync avec DB
+            $runtime['supplements']['catalog'][$id]['flavor'] = 'sale'; // Toujours salé
         }
 
         // ⚡ OPTIMISATION: Synchronisation groupée
@@ -2088,7 +2236,7 @@ switch ($action) {
             jsonError('Nom et prix requis');
         }
 
-        // Gérer l'upload d'image
+        // Gérer l'upload d'image avec conversion WebP
         $imagePath = null;
         if (!empty($_FILES['image'])) {
             $file = $_FILES['image'];
@@ -2101,19 +2249,28 @@ switch ($action) {
 
                 $uploadsDir = SNACK_ROOT . '/images/uploads';
                 if (!is_dir($uploadsDir)) {
-                    // 🔒 SÉCURITÉ: Permissions 0755 (pas writable par group)
                     mkdir($uploadsDir, 0755, true);
                 }
 
-                $newId = 'pat-' . strtolower(str_replace([' ', 'é', 'è', 'ê', 'à', 'ç'], ['', 'e', 'e', 'e', 'a', 'c'], $name));
-                $filename = $newId . '-' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
-                $dest = $uploadsDir . '/' . $filename;
+                // Conversion WebP
+                $webpTempFile = null;
+                try {
+                    $webpTempFile = convertToOptimizedWebP($file['tmp_name'], 85, 800);
+                    $newId = 'pat-' . strtolower(str_replace([' ', 'é', 'è', 'ê', 'à', 'ç'], ['', 'e', 'e', 'e', 'a', 'c'], $name));
+                    $filename = $newId . '-' . bin2hex(random_bytes(4)) . '.webp';
+                    $dest = $uploadsDir . '/' . $filename;
 
-                if (!move_uploaded_file($file['tmp_name'], $dest)) {
-                    jsonError('Échec sauvegarde image');
+                    if (!rename($webpTempFile, $dest)) {
+                        jsonError('Échec sauvegarde image WebP');
+                    }
+                    chmod($dest, 0644);
+                    $imagePath = 'images/uploads/' . $filename;
+                } catch (Exception $e) {
+                    if ($webpTempFile && file_exists($webpTempFile)) {
+                        @unlink($webpTempFile);
+                    }
+                    jsonError('Échec conversion WebP: ' . $e->getMessage());
                 }
-
-                $imagePath = 'images/uploads/' . $filename;
             }
         }
 
@@ -2190,27 +2347,44 @@ switch ($action) {
         $price = intval($input['price'] ?? 0);
         if (!$name || !$bevType || $price <= 0) jsonError('Type, nom et prix requis');
 
-        // Upload d'image optionnel
+        // Upload d'image optionnel avec conversion WebP
         $imagePath = null;
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $tmpName = $_FILES['image']['tmp_name'];
             $origName = basename($_FILES['image']['name']);
-            $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+
+            // Validation MIME type
+            $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+            $mime = mime_content_type($tmpName) ?: '';
+            if (!isset($allowed[$mime])) {
                 jsonError('Format image invalide. Utilisez JPG, PNG ou WebP.');
             }
             if ($_FILES['image']['size'] > 2 * 1024 * 1024) {
                 jsonError('Image trop volumineuse (max 2MB).');
             }
-            $safeName = preg_replace('/[^a-z0-9_-]/i', '', pathinfo($origName, PATHINFO_FILENAME));
-            $newName = $safeName . '_' . time() . '.' . $ext;
+
             $uploadDir = SNACK_ROOT . '/assets/images/beverages/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-            $targetPath = $uploadDir . $newName;
-            if (!move_uploaded_file($tmpName, $targetPath)) {
-                jsonError('Échec upload image.');
+
+            // Conversion WebP
+            $webpTempFile = null;
+            try {
+                $webpTempFile = convertToOptimizedWebP($tmpName, 85, 800);
+                $safeName = preg_replace('/[^a-z0-9_-]/i', '', pathinfo($origName, PATHINFO_FILENAME));
+                $newName = $safeName . '_' . time() . '.webp';
+                $targetPath = $uploadDir . $newName;
+
+                if (!rename($webpTempFile, $targetPath)) {
+                    jsonError('Échec sauvegarde image WebP.');
+                }
+                chmod($targetPath, 0644);
+                $imagePath = 'assets/images/beverages/' . $newName;
+            } catch (Exception $e) {
+                if ($webpTempFile && file_exists($webpTempFile)) {
+                    @unlink($webpTempFile);
+                }
+                jsonError('Échec conversion WebP: ' . $e->getMessage());
             }
-            $imagePath = 'assets/images/beverages/' . $newName;
         }
 
         $menuJsonPath = getMenuJsonPath();

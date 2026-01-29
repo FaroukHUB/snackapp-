@@ -30,8 +30,56 @@ if ($useMySQL) {
     $primaryColor = $restaurant['primary_color'] ?? '#c58a3a';
     $currency = CURRENCY;
 
-    // Mode MySQL: pas besoin de restaurant.json
-    $restaurantSettings = [];
+    // Charger les settings depuis la BD
+    $settings = RestaurantRepository::getSettings(SNACK_RESTAURANT_ID);
+    $openingHours = RestaurantRepository::getOpeningHours(SNACK_RESTAURANT_ID);
+    $faqItems = RestaurantRepository::getFaq(SNACK_RESTAURANT_ID);
+
+    // Construire $restaurantSettings pour compatibilité avec les templates
+    $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+    $formattedHours = [];
+    foreach ($openingHours as $h) {
+        $formattedHours[$h['day_of_week']] = [
+            'day' => $days[$h['day_of_week']] ?? 'jour',
+            'opens' => substr($h['opens'], 0, 5),
+            'closes' => substr($h['closes'], 0, 5),
+            'slots' => [['opens' => substr($h['opens'], 0, 5), 'closes' => substr($h['closes'], 0, 5)]]
+        ];
+    }
+
+    // Charger les plateformes de livraison
+    $deliveryPlatforms = RestaurantRepository::getDeliveryPlatforms(SNACK_RESTAURANT_ID);
+
+    $restaurantSettings = [
+        'contact' => [
+            'phone' => $settings['phone'] ?? '',
+            'whatsappOrdersNumber' => $settings['whatsapp_number'] ?? '',
+            'extra_phones' => json_decode($settings['extra_phones'] ?? '[]', true) ?: []
+        ],
+        'social' => [
+            'instagram' => $settings['instagram'] ?? '',
+            'facebook' => $settings['facebook'] ?? '',
+            'tiktok' => $settings['tiktok'] ?? '',
+            'snapchat' => $settings['snapchat'] ?? '',
+            'extra' => json_decode($settings['extra_socials'] ?? '[]', true) ?: []
+        ],
+        'openingHours' => $formattedHours,
+        'faq' => [
+            'items' => array_map(fn($f) => ['question' => $f['question'], 'answer' => $f['answer']], $faqItems)
+        ],
+        'delivery' => [
+            'enabled' => (bool) ($settings['delivery_enabled'] ?? true)
+        ],
+        'platforms' => array_map(function($p) {
+            return [
+                'id' => $p['slug'],
+                'name' => $p['name'],
+                'url' => $p['url'],
+                'icon' => $p['icon'] ?? $p['slug'],
+                'enabled' => (bool) $p['is_enabled']
+            ];
+        }, $deliveryPlatforms)
+    ];
 
     // ⚡ PAGINATION: 10 commandes par page
     $ordersPage = isset($_GET['orders_page']) ? (int)$_GET['orders_page'] : 1;
@@ -414,15 +462,17 @@ $action = $_POST['action'];
                 }
             }
 
-            // Mettre à jour restaurant.json - contact et social
-            if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
-            if (isset($_POST['whatsapp'])) $restaurantSettings['contact']['whatsappOrdersNumber'] = $_POST['whatsapp'];
-            $restaurantSettings['contact']['extra_phones'] = $extraPhones;
-            $restaurantSettings['social']['instagram'] = $socials['instagram'];
-            $restaurantSettings['social']['facebook'] = $socials['facebook'];
-            $restaurantSettings['social']['tiktok'] = $socials['tiktok'];
-            $restaurantSettings['social']['snapchat'] = $socials['snapchat'];
-            $restaurantSettings['social']['extra'] = $socials['extra'];
+            // Mode JSON fallback: Mettre à jour restaurant.json
+            if (!$useMySQL) {
+                if (isset($_POST['phone'])) $restaurantSettings['contact']['phone'] = $_POST['phone'];
+                if (isset($_POST['whatsapp'])) $restaurantSettings['contact']['whatsappOrdersNumber'] = $_POST['whatsapp'];
+                $restaurantSettings['contact']['extra_phones'] = $extraPhones;
+                $restaurantSettings['social']['instagram'] = $socials['instagram'];
+                $restaurantSettings['social']['facebook'] = $socials['facebook'];
+                $restaurantSettings['social']['tiktok'] = $socials['tiktok'];
+                $restaurantSettings['social']['snapchat'] = $socials['snapchat'];
+                $restaurantSettings['social']['extra'] = $socials['extra'];
+            }
         }
 
         // Traitement des horaires (formulaire horaires)
@@ -430,47 +480,59 @@ $action = $_POST['action'];
             if ($useMySQL) {
                 $hours = [];
                 foreach ($_POST['hours'] as $i => $h) {
-                    $hours[] = [
-                        'opens' => $h['opens'] ?? '18:30',
-                        'closes' => $h['closes'] ?? '23:30'
-                    ];
+                    // Support nouveau format avec slots multiples
+                    if (isset($h['slots']) && is_array($h['slots'])) {
+                        $firstSlot = reset($h['slots']);
+                        $hours[] = [
+                            'opens' => $firstSlot['opens'] ?? '18:30',
+                            'closes' => $firstSlot['closes'] ?? '23:30'
+                        ];
+                    } else {
+                        // Ancien format direct
+                        $hours[] = [
+                            'opens' => $h['opens'] ?? '18:30',
+                            'closes' => $h['closes'] ?? '23:30'
+                        ];
+                    }
                 }
                 RestaurantRepository::updateOpeningHours(SNACK_RESTAURANT_ID, $hours);
-            }
-
-            // Mettre à jour restaurant.json - horaires
-            $restaurantSettings['openingHours'] = [];
-            $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-            foreach ($days as $i => $day) {
-                $dayData = ['day' => $day];
-                // Nouveau format avec slots multiples
-                if (isset($_POST['hours'][$i]['slots'])) {
-                    $slots = [];
-                    foreach ($_POST['hours'][$i]['slots'] as $slot) {
-                        if (!empty($slot['opens']) && !empty($slot['closes'])) {
-                            $slots[] = [
-                                'opens' => $slot['opens'],
-                                'closes' => $slot['closes']
-                            ];
+            } else {
+                // Mode JSON fallback: Mettre à jour restaurant.json - horaires
+                $restaurantSettings['openingHours'] = [];
+                $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+                foreach ($days as $i => $day) {
+                    $dayData = ['day' => $day];
+                    // Nouveau format avec slots multiples
+                    if (isset($_POST['hours'][$i]['slots'])) {
+                        $slots = [];
+                        foreach ($_POST['hours'][$i]['slots'] as $slot) {
+                            if (!empty($slot['opens']) && !empty($slot['closes'])) {
+                                $slots[] = [
+                                    'opens' => $slot['opens'],
+                                    'closes' => $slot['closes']
+                                ];
+                            }
                         }
+                        $dayData['slots'] = $slots;
+                        // Garder compatibilité avec ancien format (premier créneau)
+                        if (!empty($slots)) {
+                            $dayData['opens'] = $slots[0]['opens'];
+                            $dayData['closes'] = $slots[0]['closes'];
+                        }
+                    } else {
+                        // Ancien format
+                        $dayData['opens'] = $_POST['hours'][$i]['opens'] ?? '18:30';
+                        $dayData['closes'] = $_POST['hours'][$i]['closes'] ?? '23:30';
                     }
-                    $dayData['slots'] = $slots;
-                    // Garder compatibilité avec ancien format (premier créneau)
-                    if (!empty($slots)) {
-                        $dayData['opens'] = $slots[0]['opens'];
-                        $dayData['closes'] = $slots[0]['closes'];
-                    }
-                } else {
-                    // Ancien format
-                    $dayData['opens'] = $_POST['hours'][$i]['opens'] ?? '18:30';
-                    $dayData['closes'] = $_POST['hours'][$i]['closes'] ?? '23:30';
+                    $restaurantSettings['openingHours'][] = $dayData;
                 }
-                $restaurantSettings['openingHours'][] = $dayData;
             }
         }
 
-        // Sauvegarder restaurant.json
-        file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        // Sauvegarder restaurant.json SEULEMENT en mode JSON fallback
+        if (!$useMySQL && !empty($restaurantSettings)) {
+            file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        }
 
         header('Location: index.php#settings');
         exit;
@@ -489,10 +551,11 @@ $action = $_POST['action'];
 
         if ($useMySQL) {
             RestaurantRepository::updateFaq(SNACK_RESTAURANT_ID, $faqItemsNew);
+        } else {
+            // Mode JSON fallback: mettre à jour restaurant.json
+            $restaurantSettings['faq']['items'] = $faqItemsNew;
+            file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
-        // Toujours mettre à jour restaurant.json pour le site public
-        $restaurantSettings['faq']['items'] = $faqItemsNew;
-        file_put_contents(__DIR__ . '/../config/restaurant.json', json_encode($restaurantSettings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
         header('Location: index.php#settings');
         exit;
@@ -1009,9 +1072,23 @@ if (isset($_GET['export'])) {
                         <?php
                         $displayItems = array_slice($items, 0, 3);
                         foreach ($displayItems as $item):
+                            // Afficher la variante (SOLO/DUO) si présente
+                            $variantLabel = '';
+                            if (!empty($item['variant'])) {
+                                $v = strtolower($item['variant']);
+                                // 'menu' dans la BDD = DUO pour les pizzas
+                                if ($v === 'solo') {
+                                    $variantLabel = 'SOLO ';
+                                } elseif ($v === 'menu' || $v === 'duo') {
+                                    $variantLabel = 'DUO ';
+                                }
+                            }
                         ?>
                             <div style="font-size: 12px; color: #e5e7eb; padding: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <strong style="color: <?php echo $primaryColor; ?>;"><?php echo $item['quantity'] ?? 1; ?>x</strong>
+                                <?php if ($variantLabel): ?>
+                                    <span style="color: #f59e0b; font-weight: 600;"><?php echo $variantLabel; ?></span>
+                                <?php endif; ?>
                                 <?php echo htmlspecialchars($item['name']); ?>
                             </div>
                         <?php endforeach; ?>
@@ -1022,10 +1099,78 @@ if (isset($_GET['export'])) {
                         <?php endif; ?>
                     </div>
 
+                    <!-- Badges Mode + Monnaie à rendre -->
+                    <?php
+                    // Déterminer le mode depuis mode_notes
+                    $modeNotes = $order['mode_notes'] ?? '';
+                    $orderNotes = $order['notes'] ?? '';
+                    $modeIcon = '';
+                    $modeText = '';
+                    $modeColor = '';
+
+                    if (strpos($modeNotes, '🚗') !== false || stripos($modeNotes, 'LIVRAISON') !== false) {
+                        $modeIcon = 'motorcycle';
+                        $modeText = 'Livraison';
+                        $modeColor = '#3b82f6';
+                    } elseif (strpos($modeNotes, '📦') !== false || stripos($modeNotes, 'EMPORTER') !== false) {
+                        $modeIcon = 'shopping-bag';
+                        $modeText = 'À emporter';
+                        $modeColor = '#f59e0b';
+                    } elseif (strpos($modeNotes, '🏠') !== false || stripos($modeNotes, 'SUR PLACE') !== false) {
+                        $modeIcon = 'utensils';
+                        $modeText = 'Sur place';
+                        $modeColor = '#10b981';
+                    }
+
+                    // Extraire le montant de monnaie à rendre depuis les notes
+                    $changeAmount = 0;
+                    $hasExactChange = false;
+                    if (preg_match('/Prévoir monnaie sur:\s*(\d+(?:[.,]\d+)?)/i', $orderNotes, $matches)) {
+                        $changeAmount = (float)str_replace(',', '.', $matches[1]);
+                    } elseif (stripos($orderNotes, "l'appoint") !== false || stripos($orderNotes, "monnaie exacte") !== false) {
+                        $hasExactChange = true;
+                    }
+
+                    // Promo code info
+                    $promoCode = $order['promo_code'] ?? null;
+                    $promoDiscountType = $order['promo_discount_type'] ?? null;
+                    $promoDiscountValue = $order['promo_discount_value'] ?? null;
+                    ?>
+
+                    <?php if ($modeText || $changeAmount > 0 || $hasExactChange || $promoCode): ?>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                        <?php if ($modeText): ?>
+                        <span style="background: <?php echo $modeColor; ?>22; color: <?php echo $modeColor; ?>; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-<?php echo $modeIcon; ?>"></i> <?php echo $modeText; ?>
+                        </span>
+                        <?php endif; ?>
+
+                        <?php if ($promoCode): ?>
+                        <span style="background: #ec489922; color: #f472b6; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-tag"></i> <?php echo htmlspecialchars($promoCode); ?>
+                            <?php if ($promoDiscountType && $promoDiscountValue): ?>
+                                (<?php echo $promoDiscountType === 'percent' ? '-' . $promoDiscountValue . '%' : '-' . number_format($promoDiscountValue, 2, ',', ' ') . ' ' . CURRENCY; ?>)
+                            <?php endif; ?>
+                        </span>
+                        <?php endif; ?>
+
+                        <?php if ($changeAmount > 0): ?>
+                        <?php $changeToReturn = $changeAmount - ($order['total'] ?? 0); ?>
+                        <span style="background: #8b5cf622; color: #a78bfa; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-coins"></i> Monnaie: <?php echo number_format($changeToReturn, 2, ',', ' '); ?> <?= CURRENCY ?>
+                        </span>
+                        <?php elseif ($hasExactChange): ?>
+                        <span style="background: #10b98122; color: #10b981; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-check"></i> Appoint
+                        </span>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Total + Fidélité -->
                     <div style="margin-bottom: 12px; padding: 12px; background: #0f172a; border-radius: 12px; border: 2px solid <?php echo $primaryColor; ?>;">
                         <div style="font-size: 22px; font-weight: 800; color: <?php echo $primaryColor; ?>; text-align: center;">
-                            <i class="fas fa-coins" style="font-size: 18px; margin-right: 4px;"></i><?php echo number_format($order['total'] ?? 0, 0); ?> <?= CURRENCY ?>
+                            <i class="fas fa-coins" style="font-size: 18px; margin-right: 4px;"></i><?php echo number_format($order['total'] ?? 0, 2, ',', ' '); ?> <?= CURRENCY ?>
                         </div>
                         <?php if (!empty($order['loyalty_reward_id']) || !empty($order['loyalty_code'])): ?>
                             <div style="text-align: center; margin-top: 6px; font-size: 11px; color: #f59e0b; font-weight: 700; background: rgba(245,158,11,0.1); padding: 4px 8px; border-radius: 6px; display: inline-block; width: 100%;">
@@ -1245,18 +1390,7 @@ if (isset($_GET['export'])) {
                                     } else {
                                         paymentIcon = '<i class="fas fa-money-bill-wave" style="color: #10b981;"></i>';
                                         paymentText = ' Espèces';
-
-                                        // Info appoint/monnaie pour espèces
-                                        if (order.delivery_instructions) {
-                                            if (order.delivery_instructions.includes('monnaie exacte')) {
-                                                extraInfo = '<br><span style="color: #10b981; font-size: 12px;"><i class="fas fa-check-circle"></i> J\'ai l\'appoint</span>';
-                                            } else {
-                                                const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) (DA|EUR)/);
-                                                if (changeMatch) {
-                                                    extraInfo = `<br><span style="color: #fbbf24; font-size: 12px;"><i class="fas fa-coins"></i> Prévoir ${changeMatch[1]} ${currency}</span>`;
-                                                }
-                                            }
-                                        }
+                                        // Monnaie affichée dans sa propre box dédiée
                                     }
 
                                     return paymentIcon + paymentText + extraInfo;
@@ -1265,6 +1399,93 @@ if (isset($_GET['export'])) {
                         </div>
                     </div>
                 `;
+
+                // Box Monnaie à rendre (si applicable)
+                const changeInfo = (() => {
+                    const notes = order.notes || '';
+                    const instructions = order.delivery_instructions || '';
+
+                    // Chercher "Prévoir monnaie sur: XXX" dans les notes
+                    const changeMatch = notes.match(/Prévoir monnaie sur:\s*(\d+(?:[.,]\d+)?)/i);
+                    if (changeMatch) {
+                        const changeFor = parseFloat(changeMatch[1].replace(',', '.'));
+                        const total = parseFloat(order.total) || 0;
+                        const changeToReturn = changeFor - total;
+                        return { type: 'change', amount: changeToReturn, changeFor: changeFor };
+                    }
+
+                    // Chercher dans delivery_instructions
+                    const instrMatch = instructions.match(/Monnaie pour (\d+(?:[.,]\d+)?)/i);
+                    if (instrMatch) {
+                        const changeFor = parseFloat(instrMatch[1].replace(',', '.'));
+                        const total = parseFloat(order.total) || 0;
+                        const changeToReturn = changeFor - total;
+                        return { type: 'change', amount: changeToReturn, changeFor: changeFor };
+                    }
+
+                    // Appoint
+                    if (notes.includes("l'appoint") || notes.includes("monnaie exacte") || instructions.includes("monnaie exacte")) {
+                        return { type: 'exact' };
+                    }
+
+                    return null;
+                })();
+
+                // Box Code promo (si applicable)
+                const promoInfo = order.promo_code ? {
+                    code: order.promo_code,
+                    type: order.promo_discount_type,
+                    value: order.promo_discount_value,
+                    amount: order.promo_discount_amount
+                } : null;
+
+                if (changeInfo || promoInfo) {
+                    html += `<div style="display: grid; grid-template-columns: ${changeInfo && promoInfo ? '1fr 1fr' : '1fr'}; gap: 12px; margin-bottom: 20px;">`;
+
+                    if (changeInfo) {
+                        if (changeInfo.type === 'change') {
+                            html += `
+                                <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #a78bfa;">
+                                    <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Monnaie à rendre</div>
+                                    <div style="font-size: 14px; color: white; font-weight: 600;">
+                                        <i class="fas fa-coins" style="color: #a78bfa;"></i> ${changeInfo.amount.toFixed(2).replace('.', ',')} ${currency}
+                                    </div>
+                                    <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">
+                                        Client paie avec ${changeInfo.changeFor.toFixed(2).replace('.', ',')} ${currency}
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #10b981;">
+                                    <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Monnaie</div>
+                                    <div style="font-size: 14px; color: white; font-weight: 600;">
+                                        <i class="fas fa-check-circle" style="color: #10b981;"></i> Client a l'appoint
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    if (promoInfo) {
+                        const discountDisplay = promoInfo.type === 'percent'
+                            ? `-${promoInfo.value}%`
+                            : `-${parseFloat(promoInfo.value).toFixed(2).replace('.', ',')} ${currency}`;
+                        html += `
+                            <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #f472b6;">
+                                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Code Promo</div>
+                                <div style="font-size: 14px; color: white; font-weight: 600;">
+                                    <i class="fas fa-tag" style="color: #f472b6;"></i> ${promoInfo.code}
+                                </div>
+                                <div style="font-size: 11px; color: #f472b6; margin-top: 4px; font-weight: 600;">
+                                    ${discountDisplay}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    html += `</div>`;
+                }
 
                 // Précommande (date/heure) pour "À emporter"
                 if (order.preorder_date || order.preorder_time) {
@@ -1322,13 +1543,20 @@ if (isset($_GET['export'])) {
 
                 // Adresse de livraison si applicable
                 if (order.delivery_address) {
+                    // Filtrer les instructions pour ne pas afficher la monnaie (affichée dans sa propre box)
+                    let filteredInstructions = order.delivery_instructions || '';
+                    filteredInstructions = filteredInstructions
+                        .replace(/Monnaie pour \d+(?:[.,]\d+)?\s*(?:DA|EUR)?/gi, '')
+                        .replace(/Client a la monnaie exacte/gi, '')
+                        .trim();
+
                     html += `
                         <div style="padding: 12px; background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(37,99,235,0.05) 100%); border: 1px solid rgba(59,130,246,0.3); border-radius: 10px; margin-bottom: 20px;">
                             <div style="font-size: 11px; color: #60a5fa; margin-bottom: 6px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
                                 <i class="fas fa-map-marker-alt"></i> Adresse de livraison
                             </div>
                             <div style="font-size: 14px; color: white; font-weight: 600;">${order.delivery_address}</div>
-                            ${order.delivery_instructions ? `<div style="font-size: 12px; color: #9ca3af; margin-top: 6px; font-style: italic;"><i class="fas fa-info-circle"></i> ${order.delivery_instructions}</div>` : ''}
+                            ${filteredInstructions ? `<div style="font-size: 12px; color: #9ca3af; margin-top: 6px; font-style: italic;"><i class="fas fa-info-circle"></i> ${filteredInstructions}</div>` : ''}
                         </div>
                     `;
                 }
@@ -1400,19 +1628,27 @@ if (isset($_GET['export'])) {
 
                 html += `</div>`;
 
-                // Notes
+                // Notes (filtrer les infos monnaie qui sont dans leur propre box)
                 if (order.notes) {
-                    html += `
-                        <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border: 2px solid #ef4444; color: white; padding: 14px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
-                            <div style="display: flex; align-items: flex-start; gap: 10px;">
-                                <i class="fas fa-info-circle" style="color: white; font-size: 18px; margin-top: 2px;"></i>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 6px; color: white; font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800;">📋 INFO COMMANDE</strong>
-                                    <span style="color: white; font-weight: 600;">${order.notes}</span>
+                    let filteredNotes = order.notes
+                        .replace(/\n?Prévoir monnaie sur:\s*\d+(?:[.,]\d+)?\s*(?:DA|EUR)?/gi, '')
+                        .replace(/\n?J'ai l'appoint/gi, '')
+                        .replace(/\n?Frais de livraison:\s*\+?\d+(?:[.,]\d+)?\s*(?:DA|EUR)?/gi, '')
+                        .trim();
+
+                    if (filteredNotes) {
+                        html += `
+                            <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border: 2px solid #ef4444; color: white; padding: 14px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
+                                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                    <i class="fas fa-info-circle" style="color: white; font-size: 18px; margin-top: 2px;"></i>
+                                    <div>
+                                        <strong style="display: block; margin-bottom: 6px; color: white; font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800;">📋 INFO COMMANDE</strong>
+                                        <span style="color: white; font-weight: 600;">${filteredNotes}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 }
 
                 // Fidélité
@@ -1481,7 +1717,9 @@ if (isset($_GET['export'])) {
                 }
 
                 // Bouton "Envoyer au livreur" (seulement pour livraisons)
-                const isDelivery = order.notes && order.notes.toLowerCase().includes('livraison');
+                const isDelivery = (order.notes && order.notes.toLowerCase().includes('livraison')) ||
+                                   (order.mode_notes && (order.mode_notes.includes('🚗') || order.mode_notes.toLowerCase().includes('livraison'))) ||
+                                   (order.order_type === 'delivery');
                 if (isDelivery) {
                     html += `
                         <button onclick="openSendToDeliveryModal('${order.id}')" style="padding: 14px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
@@ -1491,7 +1729,7 @@ if (isset($_GET['export'])) {
                 }
 
                 html += `
-                    <a href="https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Salam alaykoum c\'est le Marvellous 🧇 votre commande #' + order.id + ' est prête vous pouvez venir la récupérer marhabaa 🌟')}" target="_blank" style="width: 60px; height: 60px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); font-size: 24px;">
+                    <a href="https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Bonjour, c\'est <?php echo addslashes($restaurantName); ?> 🍕 Votre commande est prête ! Vous pouvez venir la récupérer en vous munissant du numéro #' + order.id + '. À bientôt !')}" target="_blank" style="width: 60px; height: 60px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); font-size: 24px;">
                         <i class="fab fa-whatsapp"></i>
                     </a>
                 </div>
@@ -2121,7 +2359,7 @@ if (isset($_GET['export'])) {
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>; font-size: 14px;"><?php echo number_format($order['total'] ?? 0, 0); ?> <?= CURRENCY ?></div>
+                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>; font-size: 14px;"><?php echo number_format($order['total'] ?? 0, 2, ',', ' '); ?> <?= CURRENCY ?></div>
                             <span style="background: #10b98122; color: #10b981; padding: 2px 8px; border-radius: 10px; font-size: 9px;"><i class="fas fa-check"></i> Terminée</span>
                         </div>
                     </div>
@@ -2586,6 +2824,13 @@ if (isset($_GET['export'])) {
                 <a href="livreurs-manager.php" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);"><i class="fas fa-users-cog"></i> Gérer les livreurs</a>
             </div>
 
+            <!-- Paramètres -->
+            <div class="card" style="border-left: 4px solid #8b5cf6;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-cog" style="color: #8b5cf6;"></i> Paramètres</h3>
+                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Devise, zones de livraison, méthodes de paiement.</p>
+                <a href="settings-manager.php" class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);"><i class="fas fa-sliders-h"></i> Configurer</a>
+            </div>
+
             <!-- Sécurité PIN -->
             <div class="card" style="border-left: 4px solid #ef4444;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-lock" style="color: #ef4444;"></i> Code PIN (Stats & Archives)</h3>
@@ -2756,7 +3001,7 @@ if (isset($_GET['export'])) {
                         </label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <label style="color: #9ca3af;">Points par 100 <?= CURRENCY ?> :</label>
+                        <label style="color: #9ca3af;">Points par 1 <?= CURRENCY ?> :</label>
                         <input type="number" id="pointsPerEuro" value="<?= $loyaltyConfig['points_per_euro'] ?? 1 ?>" min="1" max="100" onchange="updateLoyaltyConfig()" style="width: 70px; padding: 8px; background: #1e293b; border: 1px solid #374151; border-radius: 8px; color: white; text-align: center;">
                     </div>
                 </div>
@@ -2916,8 +3161,34 @@ if (isset($_GET['export'])) {
         </div>
     </div>
 
+    <script>
+        // Global currency for all scripts
+        window.CURRENCY = '<?= CURRENCY ?>';
+    </script>
     <script src="notification-sound.js"></script>
     <script>
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            toast.style.cssText = `
+                position: fixed; bottom: 20px; right: 20px; z-index: 10000;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white; padding: 12px 20px; border-radius: 8px;
+                display: flex; align-items: center; gap: 10px;
+                animation: slideIn 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         // PIN Protection - demande le PIN à chaque accès
         const PROTECTED_SECTIONS = ['stats', 'archives'];
         let pendingSection = null;

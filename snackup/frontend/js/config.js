@@ -65,6 +65,16 @@ const Config = {
         this.categoryIcons = data.categoryIcons || {};
         this.featured = data.featured || {};
         this.menuOptions = data.menuOptions || {};
+
+        // Créer index byId normalisé (clé = String(id))
+        this.supplements.byId = {};
+        const catalog = this.supplements.catalog || {};
+        for (const key in catalog) {
+            const sup = catalog[key];
+            if (sup && sup.id !== undefined) {
+                this.supplements.byId[String(sup.id)] = sup;
+            }
+        }
     },
 
     /**
@@ -235,39 +245,40 @@ const Config = {
 
     /**
      * Get supplements for a category
-     * Filtre UNIQUEMENT par flavor (sale/sucre) - ignore defaultForCategories
+     * Source de vérité: table category_supplements en DB
+     * Si une catégorie a des suppléments assignés dans defaultForCategories, les afficher
+     * Sinon, fallback sur le flavor de la catégorie
      */
     getSupplementsForCategory(categoryId) {
-        // ❌ Catégories SANS suppléments
-        const noSupplementsCategories = [
-            'sucres-sales',
-            'boissons-chaudes',
-            'sodas-eaux',
-            'jus-cocktails',
-            'menu-enfant'
-        ];
-        if (noSupplementsCategories.includes(categoryId)) {
-            return [];
+        const catalog = this.supplements.catalog || {};
+        const categorySupplements = this.supplements.defaultForCategories || {};
+
+        // Vérifier si cette catégorie a des suppléments assignés en DB
+        const assignedSupplementIds = categorySupplements[categoryId];
+
+        if (assignedSupplementIds && assignedSupplementIds.length > 0) {
+            // Retourner uniquement les suppléments assignés à cette catégorie
+            return assignedSupplementIds
+                .map(id => catalog[id] || this.supplements.byId?.[String(id)])
+                .filter(sup => sup && sup.status === 'available');
         }
 
-        // ✅ Chercher la catégorie dans les données pour lire son flavor
+        // Fallback: utiliser le flavor de la catégorie si pas d'assignation explicite
         let categoryFlavor = null;
-
         if (this.menu && this.menu.categories) {
-            const category = this.menu.categories.find(cat => cat.id === categoryId);
+            const category = this.menu.categories.find(cat => cat.id == categoryId);
             if (category && category.flavor) {
-                categoryFlavor = category.flavor; // 'sale' ou 'sucre' défini dans l'admin
+                categoryFlavor = category.flavor;
             }
         }
 
-        // Fallback : deviner selon l'ID si pas de flavor
+        // Si pas de flavor défini, pas de suppléments
         if (!categoryFlavor) {
-            const sucreCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
-            categoryFlavor = sucreCategories.includes(categoryId) ? 'sucre' : 'sale';
+            return [];
         }
 
-        // Filtrer les suppléments par flavor
-        return Object.values(this.supplements.catalog || {})
+        // Retourner les suppléments qui correspondent au flavor
+        return Object.values(catalog)
             .filter(sup => sup.flavor === categoryFlavor && sup.status === 'available');
     },
 
@@ -431,15 +442,20 @@ const Config = {
 
     /**
      * Format price for display
-     * Currency is configured per instance (DA, EUR, USD, etc.)
+     * Currency symbol: € (euro)
      */
     formatPrice(price) {
         // Récupérer la devise depuis les données du restaurant ou du menu
-        const currency = this.restaurant?._jsConfig?.currency ||
+        const currencyCode = this.restaurant?._jsConfig?.currency ||
                         this.menu?._meta?.currency ||
                         window.SNACK_CONFIG?.currency ||
                         'EUR';
-        return Math.round(price) + ' ' + currency;
+        // Convertir code devise en symbole
+        const currencySymbols = { 'EUR': '€', 'USD': '$', 'GBP': '£', 'DA': 'DA', 'DZD': 'DA' };
+        const symbol = currencySymbols[currencyCode] || currencyCode;
+        // Afficher les décimales si nécessaire (ex: 1.50€), sinon entier (ex: 2€)
+        const formatted = Number(price).toFixed(2).replace(/\.00$/, '').replace('.', ',');
+        return formatted + ' ' + symbol;
     },
 
     /**

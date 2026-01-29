@@ -212,4 +212,114 @@ class RestaurantRepository {
 
         return null;
     }
+
+    // ==========================================
+    // DELIVERY PLATFORMS
+    // ==========================================
+
+    public static function getDeliveryPlatforms(int $restaurantId): array {
+        return Database::fetchAll(
+            "SELECT * FROM delivery_platforms WHERE restaurant_id = ? ORDER BY sort_order, id",
+            [$restaurantId]
+        );
+    }
+
+    public static function addDeliveryPlatform(int $restaurantId, array $data): int {
+        $slug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $data['name'] ?? 'platform'));
+        $slug = trim($slug, '-');
+
+        // Vérifier unicité du slug
+        $existing = Database::fetchOne(
+            "SELECT id FROM delivery_platforms WHERE restaurant_id = ? AND slug = ?",
+            [$restaurantId, $slug]
+        );
+        if ($existing) {
+            $slug .= '-' . rand(100, 999);
+        }
+
+        return Database::insert('delivery_platforms', [
+            'restaurant_id' => $restaurantId,
+            'name' => $data['name'] ?? '',
+            'slug' => $slug,
+            'url' => $data['url'] ?? '',
+            'icon' => $data['icon'] ?? $slug,
+            'is_enabled' => isset($data['enabled']) ? ($data['enabled'] ? 1 : 0) : 1,
+            'sort_order' => $data['sort_order'] ?? 0
+        ]);
+    }
+
+    public static function updateDeliveryPlatform(int $platformId, array $data): bool {
+        $updateData = [];
+        if (isset($data['name'])) $updateData['name'] = $data['name'];
+        if (isset($data['url'])) $updateData['url'] = $data['url'];
+        if (isset($data['icon'])) $updateData['icon'] = $data['icon'];
+        if (isset($data['enabled'])) $updateData['is_enabled'] = $data['enabled'] ? 1 : 0;
+        if (isset($data['sort_order'])) $updateData['sort_order'] = $data['sort_order'];
+
+        if (empty($updateData)) return false;
+
+        return Database::update('delivery_platforms', $updateData, ['id' => $platformId]) >= 0;
+    }
+
+    public static function deleteDeliveryPlatform(int $platformId): bool {
+        return Database::delete('delivery_platforms', ['id' => $platformId]) > 0;
+    }
+
+    public static function toggleDeliveryPlatform(int $platformId): bool {
+        $platform = Database::fetchOne("SELECT is_enabled FROM delivery_platforms WHERE id = ?", [$platformId]);
+        if (!$platform) return false;
+
+        $newStatus = $platform['is_enabled'] ? 0 : 1;
+        return Database::update('delivery_platforms', ['is_enabled' => $newStatus], ['id' => $platformId]) >= 0;
+    }
+
+    // ==========================================
+    // THEME SETTINGS
+    // ==========================================
+
+    public static function getTheme(int $restaurantId): array {
+        $settings = self::getSettings($restaurantId);
+        return [
+            'primary' => $settings['theme_primary'] ?? '#e63946',
+            'primaryDark' => $settings['theme_primary_dark'] ?? '#d62839',
+            'secondary' => $settings['theme_secondary'] ?? '#1a1a2e',
+            'accent' => $settings['theme_accent'] ?? '#ff6fae',
+            'background' => '#f5f5f5',
+            'cardBackground' => '#ffffff',
+            'textPrimary' => '#111111',
+            'textSecondary' => '#666666',
+            'success' => '#27ae60',
+            'error' => '#e74c3c',
+            'buttonRadius' => '12px',
+            'cardRadius' => '16px'
+        ];
+    }
+
+    public static function updateTheme(int $restaurantId, array $colors): bool {
+        $data = [];
+        if (isset($colors['primary'])) $data['theme_primary'] = $colors['primary'];
+        if (isset($colors['primaryDark'])) $data['theme_primary_dark'] = $colors['primaryDark'];
+        if (isset($colors['secondary'])) $data['theme_secondary'] = $colors['secondary'];
+        if (isset($colors['accent'])) $data['theme_accent'] = $colors['accent'];
+
+        if (empty($data)) return false;
+
+        return self::updateSettings($restaurantId, $data);
+    }
+
+    // ==========================================
+    // DELIVERY TOGGLE
+    // ==========================================
+
+    public static function isDeliveryEnabled(int $restaurantId): bool {
+        $settings = self::getSettings($restaurantId);
+        return (bool) ($settings['delivery_enabled'] ?? true);
+    }
+
+    public static function toggleDelivery(int $restaurantId): bool {
+        $current = self::isDeliveryEnabled($restaurantId);
+        $newStatus = !$current;
+        self::updateSettings($restaurantId, ['delivery_enabled' => $newStatus ? 1 : 0]);
+        return $newStatus;
+    }
 }

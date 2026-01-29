@@ -5,21 +5,6 @@
  * Support MySQL avec fallback JSON
  */
 
-// 🐛 DEBUG: Activer les erreurs temporairement
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
-ini_set('log_errors', 1);
-
-// 🐛 DEBUG: Capturer toutes les erreurs fatales
-register_shutdown_function(function() {
-    $error = error_get_last();
-    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
-        error_log('[FATAL] ' . json_encode($error));
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'error' => 'Erreur serveur: ' . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']]);
-    }
-});
-
 require_once __DIR__ . '/../bootstrap.php';
 
 header('Content-Type: application/json');
@@ -359,13 +344,13 @@ function addOrder(bool $useMySQL) {
                 $notes .= "\nJ'ai l'appoint";
             } elseif (!empty($requestData['change_for'])) {
                 $changeFor = (int)$requestData['change_for'];
-                $notes .= "\nPrévoir monnaie sur: {$changeFor} DA";
+                $notes .= "\nPrévoir monnaie sur: {$changeFor} " . CURRENCY;
             }
 
             // Ajouter les frais de livraison dans les notes si applicable
             $deliveryFee = (float)($requestData['delivery_fee'] ?? 0);
             if ($deliveryFee > 0) {
-                $notes .= "\nFrais de livraison: +{$deliveryFee} DA";
+                $notes .= "\nFrais de livraison: +" . number_format($deliveryFee, 2, ',', ' ') . " " . CURRENCY;
             }
 
             // Créer la commande
@@ -385,7 +370,12 @@ function addOrder(bool $useMySQL) {
                 // ⚡ NOUVEAU: Précommande et mode séparés
                 'preorder_date' => $requestData['preorder_date'] ?? null,
                 'preorder_time' => $requestData['preorder_time'] ?? null,
-                'mode_notes' => $requestData['mode_notes'] ?? null
+                'mode_notes' => $requestData['mode_notes'] ?? null,
+                // ⚡ NOUVEAU: Code promo
+                'promo_code' => $requestData['promo_code'] ?? null,
+                'promo_discount_type' => $requestData['promo_discount_type'] ?? null,
+                'promo_discount_value' => $requestData['promo_discount_value'] ?? null,
+                'promo_discount_amount' => $requestData['promo_discount_amount'] ?? null
             ]);
 
             // ✅ Créer ou récupérer le client avec son adresse
@@ -457,7 +447,7 @@ function addOrder(bool $useMySQL) {
             $notes .= "\nJ'ai l'appoint";
         } elseif (!empty($requestData['change_for'])) {
             $changeFor = (int)$requestData['change_for'];
-            $notes .= "\nPrévoir monnaie sur: {$changeFor} DA";
+            $notes .= "\nPrévoir monnaie sur: {$changeFor} " . CURRENCY;
         }
 
         $newOrder = [

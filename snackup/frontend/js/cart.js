@@ -29,8 +29,8 @@ const Cart = {
      */
     init() {
         this.load();
+        this.checkLegacyData();
         this.updateUI();
-        console.log('Cart initialized with', this.items.length, 'items');
     },
 
     /**
@@ -43,9 +43,31 @@ const Cart = {
                 this.items = JSON.parse(saved);
             }
         } catch (e) {
-            console.error('Failed to load cart:', e);
             this.items = [];
         }
+    },
+
+    /**
+     * Detect legacy data with "(, )" pattern and purge cart if found
+     */
+    checkLegacyData() {
+        const hasLegacy = this.items.some(item => item.name && /\(\s*,\s*\)/.test(item.name));
+        if (hasLegacy) {
+            this.items = [];
+            this.save();
+            this.showLegacyResetMessage();
+        }
+    },
+
+    /**
+     * Show message to user after legacy data purge
+     */
+    showLegacyResetMessage() {
+        const message = document.createElement('div');
+        message.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#fff;padding:16px 24px;border-radius:8px;z-index:9999;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+        message.textContent = 'Votre panier a été réinitialisé suite à une mise à jour des formules.';
+        document.body.appendChild(message);
+        setTimeout(() => message.remove(), 5000);
     },
 
     /**
@@ -77,18 +99,19 @@ const Cart = {
             // Update quantity
             this.items[existingIndex].quantity += quantity;
         } else {
-            // Add new item
+            // Add new item - parseFloat pour garantir des nombres
             this.items.push({
                 key: itemKey,
                 id: item.id,
                 name: item.name,
                 image: item.image,
-                basePrice: item.price || item.priceSolo || 0,
-                supplements: supplements,
+                basePrice: parseFloat(item.price || item.priceSolo) || 0,
+                supplements: supplements.map(s => ({...s, price: parseFloat(s.price) || 0})),
                 options: options,
                 quantity: quantity,
                 isFormule: !!item.includes,
                 categoryId: item.categoryId || null,
+                categoryName: item.categoryName || null,
                 addedAt: Date.now()
             });
         }
@@ -189,23 +212,23 @@ const Cart = {
 
         // Si variant sélectionné (cafe-caps, cafe-lor), utiliser SON prix
         if (item.options && item.options.selectedVariant && item.options.selectedVariant.price) {
-            total = item.options.selectedVariant.price;
+            total = parseFloat(item.options.selectedVariant.price) || 0;
         }
         // Si pâtisserie sélectionnée, utiliser SON prix (REMPLACE le basePrice, ne s'additionne pas!)
         else if (item.options && item.options.selectedPatisserie && item.options.selectedPatisserie.price) {
-            total = item.options.selectedPatisserie.price;
+            total = parseFloat(item.options.selectedPatisserie.price) || 0;
         }
         // ✅ FIX: Si beverage sélectionné (jus, smoothie, salade), utiliser SON prix
         else if (item.options && item.options.selectedBeverage && item.options.selectedBeverage.price) {
-            total = item.options.selectedBeverage.price;
+            total = parseFloat(item.options.selectedBeverage.price) || 0;
         } else {
             // Sinon, utiliser le prix de base
-            total = item.basePrice;
+            total = parseFloat(item.basePrice) || 0;
         }
 
-        // Add supplements prices
+        // Add supplements prices (parseFloat pour éviter concaténation de strings)
         if (item.supplements && item.supplements.length > 0) {
-            total += item.supplements.reduce((sum, sup) => sum + (sup.price || 0), 0);
+            total += item.supplements.reduce((sum, sup) => sum + (parseFloat(sup.price) || 0), 0);
         }
 
         return total * item.quantity;
@@ -216,6 +239,81 @@ const Cart = {
      */
     getSubtotal() {
         return this.items.reduce((sum, item) => sum + this.getItemTotal(item), 0);
+    },
+
+    /**
+     * Calcule la remise bundle "2 Pizzas"
+     * - 2 Pizzas Solo = 13€ (au lieu de 15€, économie 2€)
+     * - 2 Pizzas Duo = 15€ (au lieu de 18€, économie 3€)
+     */
+    calculateBundleDiscount() {
+        // Prix configurables (from settings if available)
+        const BUNDLE_SOLO_PRICE = 13.00;  // 2 pizzas solo
+        const BUNDLE_DUO_PRICE = 15.00;   // 2 pizzas duo
+        const PIZZA_SOLO_PRICE = 7.50;
+        const PIZZA_DUO_PRICE = 9.00;
+
+        // Filtrer les pizzas (nom de catégorie contient "pizza")
+        const pizzas = this.items.filter(item => {
+            // D'abord essayer categoryName stocké
+            let catName = item.categoryName || '';
+            // Fallback: chercher dans Config si categoryName manque (anciens items)
+            if (!catName && item.id && typeof Config !== 'undefined') {
+                const product = Config.getProduct(item.id);
+                catName = product?.categoryName || '';
+            }
+            return catName.toLowerCase().includes('pizza');
+        });
+
+        if (pizzas.length === 0) return { discount: 0, details: [] };
+
+        // Séparer par taille (menuType: 'solo' ou 'duo')
+        let soloCount = 0;
+        let duoCount = 0;
+
+        pizzas.forEach(item => {
+            const menuType = item.options?.menuType || 'solo';
+            const qty = item.quantity || 1;
+            if (menuType === 'duo' || menuType === 'menu') {
+                duoCount += qty;
+            } else {
+                soloCount += qty;
+            }
+        });
+
+        let discount = 0;
+        const details = [];
+
+        // Calculer remise Solo
+        if (soloCount >= 2) {
+            const bundles = Math.floor(soloCount / 2);
+            const soloDiscount = bundles * ((PIZZA_SOLO_PRICE * 2) - BUNDLE_SOLO_PRICE);
+            discount += soloDiscount;
+            if (soloDiscount > 0) {
+                details.push({ type: 'solo', count: bundles * 2, saved: soloDiscount });
+            }
+        }
+
+        // Calculer remise Duo
+        if (duoCount >= 2) {
+            const bundles = Math.floor(duoCount / 2);
+            const duoDiscount = bundles * ((PIZZA_DUO_PRICE * 2) - BUNDLE_DUO_PRICE);
+            discount += duoDiscount;
+            if (duoDiscount > 0) {
+                details.push({ type: 'duo', count: bundles * 2, saved: duoDiscount });
+            }
+        }
+
+        return { discount, details, soloCount, duoCount };
+    },
+
+    /**
+     * Get total with bundle discount applied
+     */
+    getTotalWithBundle() {
+        const subtotal = this.getSubtotal();
+        const { discount } = this.calculateBundleDiscount();
+        return subtotal - discount;
     },
 
     /**
@@ -250,16 +348,19 @@ const Cart = {
             badge.dataset.count = count;
         }
 
+        // Calculer le total avec remise bundle
+        const totalWithBundle = this.getTotalWithBundle();
+
         // Update total in header
         const total = document.getElementById('cartTotal');
         if (total) {
-            total.textContent = Config.formatPrice(this.getSubtotal());
+            total.textContent = Config.formatPrice(totalWithBundle);
         }
 
         // Update mini cart total
         const miniTotal = document.getElementById('miniCartTotal');
         if (miniTotal) {
-            miniTotal.textContent = Config.formatPrice(this.getSubtotal());
+            miniTotal.textContent = Config.formatPrice(totalWithBundle);
         }
 
         // Update mini cart items
@@ -267,7 +368,7 @@ const Cart = {
 
         // Call custom callback if defined
         if (typeof this.onUpdate === 'function') {
-            this.onUpdate(this.items, this.getSubtotal());
+            this.onUpdate(this.items, totalWithBundle);
         }
     },
 
@@ -299,6 +400,7 @@ const Cart = {
             const selectedBeverage = item.options?.selectedBeverage;
             const selectedVariant = item.options?.selectedVariant;
             const selectedCapsule = item.options?.selectedCapsule;
+            const formuleSelections = item.options?.formuleSelections || [];
 
             return `
             <div class="mini-cart-item" data-index="${index}">
@@ -307,8 +409,12 @@ const Cart = {
                 <div class="mini-cart-item-info">
                     <div class="mini-cart-item-name">
                         ${escapeHtml(item.name)}
-                        ${menuType === 'menu' ? '<span style="background: var(--primary); color: white; font-size: 9px; padding: 1px 4px; border-radius: 3px; margin-left: 4px;">MENU</span>' : ''}
                     </div>
+                    ${formuleSelections.length > 0 ? `
+                        <div class="mini-cart-item-formule" style="font-size: 11px; color: var(--primary); margin-top: 4px;">
+                            ${formuleSelections.map(p => `<div>📦 ${escapeHtml(p.product?.name || p.label)}</div>`).join('')}
+                        </div>
+                    ` : ''}
                     ${selectedSauce ? `
                         <div class="mini-cart-item-sauce" style="font-size: 11px; color: var(--warning);">
                             🌶️ ${escapeHtml(selectedSauce.name)}
@@ -459,8 +565,12 @@ const Cart = {
             const selectedBeverage = item.options?.selectedBeverage;
 
             message += `${item.quantity}x ${item.name}`;
-            if (menuType === 'menu') {
-                message += ` (MENU)`;
+            // Afficher les produits de formule
+            const formuleSelections = item.options?.formuleSelections || [];
+            if (formuleSelections.length > 0) {
+                formuleSelections.forEach(p => {
+                    message += `\n   📦 ${p.product?.name || p.label}`;
+                });
             }
             if (selectedSauce) {
                 message += `\n   🌶️ Sauce: ${selectedSauce.name}`;

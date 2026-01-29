@@ -3,6 +3,8 @@
    Template V2 - SnackApp
    ============================================ */
 
+// products.js loaded
+
 // 🔒 SÉCURITÉ: Fonction pour échapper le HTML et prévenir les attaques XSS
 function escapeHtml(unsafe) {
     if (unsafe === null || unsafe === undefined) return '';
@@ -33,6 +35,9 @@ const Products = {
     // Protection flags pour éviter la multiplication des event listeners
     modalSetup: false,
     searchSetup: false,
+
+    // Cache suppléments: ne reconstruire que si catégorie change
+    _supplementsCategoryId: null,
 
     /**
      * Capitalize first letter of a string
@@ -101,18 +106,51 @@ const Products = {
         // Add category icons with alternating colors
         nonEmptyCategories.forEach((cat, index) => {
             const icon = cat.icon || 'fa-utensils';
+            const iconImage = cat.icon_image;
             const colorClass = index % 2 === 0 ? 'color-primary' : 'color-black';
-            const iconHtml = icon.startsWith("fa-") ? `<i class="fas ${icon}"></i>` : icon;
+
+            // Retirer "Pizza " ou "Pizzas " du nom pour affichage compact
+            let displayName = cat.name
+                .replace(/^Pizzas?\s+/i, '')  // Retire "Pizza " ou "Pizzas " au début
+                .trim();
+
+            // Priority: icon_image > emoji/text > FontAwesome
+            let iconHtml;
+            if (iconImage) {
+                // Image badge (style hashtagbangers.fr)
+                // Ajouter ../../ si le chemin ne commence pas par http ou /
+                const imgSrc = iconImage.startsWith('http') || iconImage.startsWith('/') ? iconImage : `../../${iconImage}`;
+                iconHtml = `<img src="${imgSrc}" alt="" class="category-icon-img">`;
+            } else if (icon.startsWith("fa-")) {
+                iconHtml = `<i class="fas ${icon}"></i>`;
+            } else {
+                // Emoji or text
+                iconHtml = icon;
+            }
 
             html += `
                 <div class="category-icon-item" data-category="${cat.id}" onclick="Products.filterByCategory('${cat.id}')">
-                    <div class="category-icon-circle ${colorClass}">
+                    <div class="category-icon-circle ${colorClass}${iconImage ? ' has-image' : ''}">
                         ${iconHtml}
                     </div>
-                    <span class="category-icon-name">${cat.name}</span>
+                    <span class="category-icon-name">${displayName}</span>
                 </div>
             `;
         });
+
+        // Ajouter "Nos Formules" si des formules sont disponibles
+        const formules = Config.getAvailableFormules();
+        if (formules && formules.length > 0) {
+            const formulesColorClass = nonEmptyCategories.length % 2 === 0 ? 'color-primary' : 'color-black';
+            html += `
+                <div class="category-icon-item" data-category="formules" onclick="Products.scrollToFormules()">
+                    <div class="category-icon-circle ${formulesColorClass}">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <span class="category-icon-name">Formules</span>
+                </div>
+            `;
+        }
 
         container.innerHTML = html;
     },
@@ -160,6 +198,29 @@ const Products = {
     },
 
     /**
+     * Scroll to formules section
+     */
+    scrollToFormules() {
+        // Update active state on icons
+        document.querySelectorAll('.category-icon-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.category === 'formules');
+        });
+
+        // Show all sections (formules is part of the main flow)
+        document.querySelectorAll('.product-section, .featured-section').forEach(section => {
+            section.style.display = '';
+        });
+
+        // Scroll to formules section
+        const formulesSection = document.getElementById('formulesSection');
+        if (formulesSection) {
+            setTimeout(() => {
+                formulesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    },
+
+    /**
      * Render featured products section
      */
     renderFeatured() {
@@ -198,7 +259,7 @@ const Products = {
             // Si pricePrefix existe (ex: "À partir de 500 Da"), afficher SEULEMENT ça
             if (product.pricePrefix) {
                 const priceText = product.pricePrefix;
-                const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
+                const desc = product.description ? product.description.substring(0, 100) + (product.description.length > 100 ? '...' : '') : '';
                 return `
                     <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
                         ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
@@ -234,7 +295,7 @@ const Products = {
             }
 
             const priceText = Config.formatPrice(price);
-            const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
+            const desc = product.description ? product.description.substring(0, 100) + (product.description.length > 100 ? '...' : '') : '';
             return `
                 <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
                     ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
@@ -331,14 +392,25 @@ const Products = {
         // Add category links
         categories.forEach(cat => {
             const icon = cat.icon || 'fa-utensils';
+            const iconImage = cat.icon_image;
             // Only add if category has items
             if (cat.items && cat.items.length > 0) {
-                const iconHtml = icon.startsWith("fa-") ? `<i class="fas ${icon}"></i>` : icon;
+                // Priority: icon_image > emoji/text > FontAwesome
+                let iconHtml;
+                if (iconImage) {
+                    // Image badge (style hashtagbangers.fr)
+                    const imgSrc = iconImage.startsWith('http') || iconImage.startsWith('/') ? iconImage : `../../${iconImage}`;
+                    iconHtml = `<img src="${imgSrc}" alt="" class="sidebar-icon-img">`;
+                } else if (icon.startsWith("fa-")) {
+                    iconHtml = `<i class="fas ${icon}"></i>`;
+                } else {
+                    iconHtml = `<span class="sidebar-icon-emoji">${icon}</span>`;
+                }
                 html += `
                     <li>
                         <a href="#${cat.id}" data-section="${cat.id}" onclick="Products.scrollToSection('${cat.id}', event)">
                             ${iconHtml}
-                            ${cat.name}
+                            <span class="sidebar-cat-name">${cat.name}</span>
                         </a>
                     </li>
                 `;
@@ -573,25 +645,39 @@ const Products = {
 
         console.log('✅ Non-empty categories:', nonEmptyCategories.length);
 
-        // Render categories
+        // Préparer le HTML des formules
+        const formulesHtml = this.renderFormulesSection();
+
+        // Trouver l'index de "Pizza originale" (recherche insensible à la casse)
+        const pizzaOriginaleIndex = nonEmptyCategories.findIndex(cat =>
+            cat.name && cat.name.toLowerCase().includes('originale')
+        );
+
+        console.log('🍕 Pizza originale index:', pizzaOriginaleIndex,
+            pizzaOriginaleIndex >= 0 ? `(${nonEmptyCategories[pizzaOriginaleIndex].name})` : '(non trouvée - fallback fin)');
+
+        // Render categories avec insertion formules après Pizza originale
         let html = '';
-        nonEmptyCategories.forEach(cat => {
+        nonEmptyCategories.forEach((cat, index) => {
             html += `
                 <section class="product-section" id="${cat.id}">
-                    <h2>
-                        <i class="fas ${icons[cat.id] || 'fa-utensils'}"></i>
-                        ${cat.name}
-                    </h2>
+                    <h2>${cat.name}</h2>
                     <div class="products-grid">
-                        ${this.renderProducts(cat.items || [], cat.id)}
+                        ${this.renderProducts(cat.items || [], cat.id, cat.name)}
                     </div>
                 </section>
             `;
+
+            // Insérer formules APRÈS Pizza originale
+            if (index === pizzaOriginaleIndex && formulesHtml) {
+                console.log('✅ FORMULES: Insérées après', cat.name);
+                html += formulesHtml;
+            }
         });
 
-        // Insérer la section formules APRÈS toutes les catégories
-        const formulesHtml = this.renderFormulesSection();
-        if (formulesHtml) {
+        // Fallback: si Pizza originale non trouvée, ajouter formules à la fin
+        if (pizzaOriginaleIndex < 0 && formulesHtml) {
+            console.log('⚠️ FORMULES: Fallback - ajoutées à la fin (Pizza originale non trouvée)');
             html += formulesHtml;
         }
 
@@ -603,12 +689,12 @@ const Products = {
     /**
      * Render products for a category
      */
-    renderProducts(products, categoryId) {
+    renderProducts(products, categoryId, categoryName = '') {
         if (!products || !Array.isArray(products)) {
             console.warn(`⚠️ No products array for category: ${categoryId}`);
             return '';
         }
-        console.log(`🍽️ Rendering ${products.length} products for category: ${categoryId}`);
+        console.log(`🍽️ Rendering ${products.length} products for category: ${categoryId} (${categoryName})`);
         return products.map(product => {
             const isUnavailable = product.status === 'unavailable';
 
@@ -629,7 +715,16 @@ const Products = {
 
                 priceText = Config.formatPrice(price);
             }
-            const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
+            const desc = product.description ? product.description.substring(0, 100) + (product.description.length > 100 ? '...' : '') : '';
+
+            // Badge bundle pour pizzas
+            const catNameLower = String(categoryName || '').toLowerCase();
+            const isPizza = catNameLower.includes('pizza');
+            const bundleBadge = isPizza ? `
+                <div class="bundle-offer-badge">
+                    <span class="bundle-icon">🔥</span>
+                    <span class="bundle-text">2 = 13€ Solo | 15€ Duo</span>
+                </div>` : '';
 
             return `
                 <article class="product-card-new ${isUnavailable ? 'unavailable' : ''}" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
@@ -644,6 +739,7 @@ const Products = {
                     <div class="product-content-new">
                         <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
                         <p class="product-desc-new">${escapeHtml(desc)}</p>
+                        ${bundleBadge}
                         <div class="product-footer-new">
                             <span class="product-price-new">${priceText}</span>
                             <button class="product-btn-new" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">
@@ -950,45 +1046,51 @@ const Products = {
      * Open product modal
      */
     openProductModal(productId) {
-        console.log('Opening modal for product:', productId);
         const product = Config.getProduct(productId);
-        console.log('Product found:', product);
         if (!product) return;
 
-        // Ouvrir le modal IMMÉDIATEMENT pour un feedback visuel instantané
+        // Ouvrir le modal immédiatement (visuel d'abord)
         const modal = document.getElementById('productModal');
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
 
-        // Remplir le contenu dans le prochain frame (non-bloquant)
-        requestAnimationFrame(() => {
-            // Reset state
-            this.currentProduct = product;
-            this.currentQuantity = 1;
-            this.selectedSupplements = [];
-            this.removedIngredients = [];
-            this.menuType = 'solo';
-            this.selectedDrink = null;
-            this.selectedSauce = null;
-            this.selectedAccompagnement = null;
-            this.selectedViennoiserie = null;
-            this.selectedPatisserie = null;
-            this.selectedBeverage = null;
-            this.selectedKidsCrepe = null;
-            this.selectedKidsSauce = null;
-            this.selectedVariant = null;
-            this.selectedCapsule = null;
+        // Reset state
+        this.currentProduct = product;
+        this.currentQuantity = 1;
+        this.selectedSupplements = [];
+        this.removedIngredients = [];
+        this.menuType = 'solo';
+        this.selectedDrink = null;
+        this.selectedSauce = null;
+        this.selectedAccompagnement = null;
+        this.selectedViennoiserie = null;
+        this.selectedPatisserie = null;
+        this.selectedBeverage = null;
+        this.selectedKidsCrepe = null;
+        this.selectedKidsSauce = null;
+        this.selectedVariant = null;
+        this.selectedCapsule = null;
 
-            // Update modal content
-            const imgEl = document.getElementById('modalImage');
-            if (product.image) {
-                imgEl.src = '../../' + product.image;
-                imgEl.style.display = '';
-            } else {
-                imgEl.src = '';
-                imgEl.style.display = 'none';
+        // Charger le contenu essentiel immédiatement
+        document.getElementById('modalTitle').textContent = product.name;
+        const imgEl = document.getElementById('modalImage');
+        if (product.image) {
+            imgEl.src = '../../' + product.image;
+            imgEl.style.display = '';
+        } else {
+            imgEl.src = '';
+            imgEl.style.display = 'none';
+        }
+
+        // Différer le reste du chargement pour afficher le modal plus vite
+        requestAnimationFrame(() => {
+            // Masquer l'encart "Cette formule comprend" (produits non-formule)
+            const formuleIncludesSection = document.getElementById('modalFormuleIncludes');
+            if (formuleIncludesSection) {
+                formuleIncludesSection.classList.add('hidden');
+                formuleIncludesSection.style.display = 'none';
             }
-            document.getElementById('modalTitle').textContent = product.name;
+
             document.getElementById('modalDescription').textContent = product.description || '';
 
             // Menu/Solo toggle
@@ -1039,53 +1141,58 @@ const Products = {
                 ingredientsSection.style.display = 'none';
             }
 
-            // Render supplements
-            const supplements = Config.getSupplementsForCategory(product.categoryId);
+            // Render supplements (uniquement si catégorie différente)
             const supplementsContainer = document.getElementById('modalSupplements');
             const supplementsList = document.getElementById('supplementsList');
 
-            if (supplements.length > 0) {
-                supplementsContainer.classList.remove('hidden');
-                supplementsContainer.style.display = '';
+            if (this._supplementsCategoryId !== product.categoryId) {
+                this._supplementsCategoryId = product.categoryId;
+                const supplements = Config.getSupplementsForCategory(product.categoryId);
 
-                // Grouper les suppléments par catégorie
-                const saledCategoryOrder = ['fromage', 'legume', 'viande', 'autre'];
-                const sucreCategoryOrder = ['base', 'croquant', 'fruit', 'prime'];
-                const categoryLabels = {
-                    // Salés
-                    'fromage': 'Fromages',
-                    'legume': 'Légumes',
-                    'viande': 'Viandes',
-                    'autre': 'Autres',
-                    // Sucrés
-                    'base': 'Base',
-                    'croquant': 'Croquant',
-                    'fruit': 'Fruit',
-                    'prime': 'Prime'
-                };
+                if (supplements.length > 0) {
+                    supplementsContainer.classList.remove('hidden');
+                    supplementsContainer.style.display = '';
 
-                const grouped = {};
-                supplements.forEach(sup => {
-                    const cat = sup.category || 'autre';
-                    if (!grouped[cat]) grouped[cat] = [];
-                    grouped[cat].push(sup);
-                });
+                    // Ordre préféré pour les groupes (les autres seront ajoutés à la fin)
+                    const groupOrder = ['viande', 'viandes', 'fromages', 'fromage', 'legumes', 'légumes', 'sauces', 'sauce', 'autres'];
+                    const groupLabels = {
+                        'viande': 'Viandes',
+                        'viandes': 'Viandes',
+                        'fromages': 'Fromages',
+                        'fromage': 'Fromages',
+                        'legumes': 'Légumes',
+                        'légumes': 'Légumes',
+                        'sauces': 'Sauces',
+                        'sauce': 'Sauces',
+                        'autres': 'Autres'
+                    };
 
-                // Déterminer si c'est salé ou sucré
-                const hasSaled = saledCategoryOrder.some(cat => grouped[cat] && grouped[cat].length > 0);
-                const hasSucre = sucreCategoryOrder.some(cat => grouped[cat] && grouped[cat].length > 0);
+                    const grouped = {};
+                    supplements.forEach(sup => {
+                        const group = (sup.group_name || 'autres').toLowerCase();
+                        if (!grouped[group]) grouped[group] = [];
+                        grouped[group].push(sup);
+                    });
 
-                let html = '';
+                    // Collecter tous les groupes présents
+                    const allGroups = Object.keys(grouped);
+                    // Trier: d'abord ceux dans groupOrder, puis les autres
+                    const sortedGroups = [
+                        ...groupOrder.filter(g => allGroups.includes(g)),
+                        ...allGroups.filter(g => !groupOrder.includes(g))
+                    ];
+                    // Enlever les doublons
+                    const uniqueGroups = [...new Set(sortedGroups)];
 
-                // Afficher les suppléments salés
-                if (hasSaled) {
-                    saledCategoryOrder.forEach(cat => {
-                        if (grouped[cat] && grouped[cat].length > 0) {
+                    let html = '';
+                    uniqueGroups.forEach(group => {
+                        if (grouped[group] && grouped[group].length > 0) {
+                            const label = groupLabels[group] || this.capitalize(group);
                             html += `
                                 <div class="supplement-category">
-                                    <h4 class="supplement-category-title">${categoryLabels[cat]}</h4>
+                                    <h4 class="supplement-category-title">${label}</h4>
                                     <div class="supplement-category-items">
-                                        ${grouped[cat].map(sup => `
+                                        ${grouped[group].map(sup => `
                                             <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
                                                 <div class="supplement-info">
                                                     <div class="supplement-checkbox">
@@ -1101,39 +1208,17 @@ const Products = {
                             `;
                         }
                     });
-                }
 
-                // Afficher les suppléments sucrés
-                if (hasSucre) {
-                    sucreCategoryOrder.forEach(cat => {
-                        if (grouped[cat] && grouped[cat].length > 0) {
-                            html += `
-                                <div class="supplement-category">
-                                    <h4 class="supplement-category-title">${categoryLabels[cat]}</h4>
-                                    <div class="supplement-category-items">
-                                        ${grouped[cat].map(sup => `
-                                            <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
-                                                <div class="supplement-info">
-                                                    <div class="supplement-checkbox">
-                                                        <i class="fas fa-check" style="font-size: 12px;"></i>
-                                                    </div>
-                                                    <span class="supplement-name">${sup.name}</span>
-                                                </div>
-                                                <span class="supplement-price">+${Config.formatPrice(sup.price)}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    });
+                    supplementsList.innerHTML = html;
+                    console.log('[Products] Supplements rendered:', uniqueGroups, 'total items:', supplements.length);
+                } else {
+                    supplementsContainer.classList.add('hidden');
+                    supplementsContainer.style.display = 'none';
                 }
-
-                supplementsList.innerHTML = html;
-            } else {
-                supplementsContainer.classList.add('hidden');
-                supplementsContainer.style.display = 'none';
             }
+
+            // Reset sélection visuelle (nouvelle ouverture)
+            document.querySelectorAll('.supplement-item').forEach(item => item.classList.remove('selected'));
 
             // Drinks selection désactivée (plus de boisson avec menu/duo)
             const drinksContainer = document.getElementById('modalDrinks');
@@ -1410,7 +1495,7 @@ const Products = {
             }
 
             this.updateModalUI();
-        }); // Fin requestAnimationFrame
+        }); // Fin du requestAnimationFrame
     },
 
     /**
@@ -1708,6 +1793,7 @@ const Products = {
 
         // Initialize formule selections
         this.formuleSelections = {};
+        this.isFormuleValid = false;
         if (formule.includes && formule.includes.length > 0) {
             formule.includes.forEach((include, index) => {
                 this.formuleSelections[index] = null;
@@ -1819,8 +1905,9 @@ const Products = {
 
         console.log('[renderFormuleSelectorsInteractive] Found', formule.includes.length, 'includes');
 
-        // Show the section
+        // Show the section (DOIT reset display car openProductModal() le cache)
         includesSection.classList.remove('hidden');
+        includesSection.style.display = '';
 
         // Render interactive selectors for each include
         includesList.innerHTML = formule.includes.map((include, index) => {
@@ -1850,6 +1937,9 @@ const Products = {
             // Determine icon based on categoryId or productId
             const iconName = this.getIconForInclude(include);
 
+            // Add choiceGroup data attribute if defined
+            const choiceGroupAttr = include.choiceGroup ? `data-choice-group="${include.choiceGroup}"` : '';
+
             return `
                 <div class="formule-include-item">
                     <i class="fas fa-${iconName}"></i>
@@ -1857,7 +1947,7 @@ const Products = {
                         <label for="${selectId}" class="formule-include-title">
                             ${includeLabel}
                         </label>
-                        <select id="${selectId}" class="formule-selector" data-include-index="${index}" data-include-type="${include.type}">
+                        <select id="${selectId}" class="formule-selector" data-include-index="${index}" data-include-type="${include.type}" ${choiceGroupAttr}>
                             <option value="">-- Choisissez --</option>
                             ${optionsHtml}
                         </select>
@@ -1871,6 +1961,24 @@ const Products = {
             selector.addEventListener('change', (e) => {
                 const includeIndex = parseInt(e.target.dataset.includeIndex);
                 const selectedProductId = e.target.value;
+                const choiceGroup = e.target.dataset.choiceGroup;
+
+                // If this selector has a choiceGroup and a value is selected,
+                // clear all other selections in the same group (replacement logic)
+                if (choiceGroup && selectedProductId) {
+                    includesList.querySelectorAll(`.formule-selector[data-choice-group="${choiceGroup}"]`).forEach(otherSelector => {
+                        const otherIndex = parseInt(otherSelector.dataset.includeIndex);
+                        if (otherIndex !== includeIndex) {
+                            // Clear other selections in the same group
+                            if (this.formuleSelections[otherIndex]) {
+                                console.log(`[REMPLACEMENT] choiceGroup="${choiceGroup}" : index ${otherIndex} EFFACÉ (remplacé par index ${includeIndex})`);
+                            }
+                            this.formuleSelections[otherIndex] = null;
+                            otherSelector.value = '';
+                        }
+                    });
+                }
+
                 this.formuleSelections[includeIndex] = selectedProductId || null;
                 this.updateFormuleSelectorStates(formule);
                 this.validateFormuleSelections();
@@ -1883,57 +1991,63 @@ const Products = {
 
     /**
      * Update formule selector states based on selections and limits
-     * Disables selectors of the same category/product once the quantity limit is reached
+     * Uses choiceGroup for grouping if available, otherwise falls back to categoryId
      */
     updateFormuleSelectorStates(formule) {
         if (!formule.includes || formule.includes.length === 0) return;
 
-        // Calculate selection counts and limits for each unique category/product
-        const categoryLimits = {};
-        const categorySelectionCounts = {};
+        // Calculate selection counts and limits for each group
+        const groupLimits = {};
+        const groupSelectionCounts = {};
 
-        // Helper function to get unique key for an include
-        const getIncludeKey = (include) => {
+        // Helper function to get group key for an include
+        // Priority: choiceGroup > categoryId > productId > type
+        const getGroupKey = (include) => {
+            // If choiceGroup is defined, use it (primary grouping mechanism)
+            if (include.choiceGroup) {
+                return `group-${include.choiceGroup}`;
+            }
+            // Fallback to legacy behavior for backwards compatibility
             if (include.type === 'category' && include.categoryId) {
                 return `category-${include.categoryId}`;
             } else if (include.type === 'product' && include.productId) {
                 return `product-${include.productId}`;
             }
-            return `type-${include.type}`; // Fallback
+            return `type-${include.type}`;
         };
 
-        // Calculate limits for each unique category/product
-        // If multiple includes share the same categoryId, they share ONE global limit (not summed)
+        // Calculate limits for each group
+        // If multiple includes share the same choiceGroup, they share ONE global limit
         formule.includes.forEach((include, index) => {
-            const key = getIncludeKey(include);
+            const key = getGroupKey(include);
             const quantity = include.quantity || 1;
 
-            if (!categoryLimits[key]) {
-                // Use the first quantity found for this category, don't sum multiple includes
-                categoryLimits[key] = quantity;
-                categorySelectionCounts[key] = 0;
+            if (!groupLimits[key]) {
+                // Use the first quantity found for this group
+                groupLimits[key] = quantity;
+                groupSelectionCounts[key] = 0;
             }
 
             // Count current selections
             if (this.formuleSelections[index]) {
-                categorySelectionCounts[key]++;
+                groupSelectionCounts[key]++;
             }
         });
 
-        console.log('[updateFormuleSelectorStates] Limits par catégorie:', categoryLimits);
-        console.log('[updateFormuleSelectorStates] Sélections par catégorie:', categorySelectionCounts);
+        console.log('[updateFormuleSelectorStates] Limits par groupe:', groupLimits);
+        console.log('[updateFormuleSelectorStates] Sélections par groupe:', groupSelectionCounts);
 
         // Update selector states for each include
         formule.includes.forEach((include, index) => {
-            const key = getIncludeKey(include);
+            const key = getGroupKey(include);
             const selector = document.querySelector(`[data-include-index="${index}"]`);
 
             if (!selector) return;
 
             const hasSelection = !!this.formuleSelections[index];
-            const limitReached = categorySelectionCounts[key] >= categoryLimits[key];
+            const limitReached = groupSelectionCounts[key] >= groupLimits[key];
 
-            // Disable if: no selection AND limit reached for this category/product
+            // Disable if: no selection AND limit reached for this group
             if (!hasSelection && limitReached) {
                 selector.disabled = true;
                 selector.style.opacity = '0.5';
@@ -2045,58 +2159,121 @@ const Products = {
 
     /**
      * Validate that all required formule selections are made
+     * Validates by choiceGroup: each group needs at least 1 selection
      */
     validateFormuleSelections() {
+        console.log("🔥🔥🔥 TRACE: validateFormuleSelections APPELÉ", {file: "products.js"});
         if (!this.currentProduct?.isFormule) return true;
 
         const formule = this.currentProduct;
         if (!formule.includes || formule.includes.length === 0) return true;
 
-        // Check if all selections are made
-        const allSelected = Object.values(this.formuleSelections).every(selection => selection !== null);
+        // Build list of required groups and check selections per group
+        const requiredGroups = new Set();
+        const selectedByGroup = {};
 
-        // Enable/disable add to cart button
+        formule.includes.forEach((include, index) => {
+            // 🔥 TRACE: Voir include AVANT fallback
+            console.log(`🔥 INCLUDE[${index}]:`, {
+                label: include.label,
+                choiceGroup: include.choiceGroup,
+                categoryId: include.categoryId,
+                type: include.type
+            });
+            // Determine group key (choiceGroup if defined, otherwise unique per include)
+            const groupKey = include.choiceGroup || `include-${index}`;
+            console.log(`🔥 GROUPKEY[${index}]:`, groupKey, include.choiceGroup ? "(choiceGroup)" : "(FALLBACK)");
+            requiredGroups.add(groupKey);
+
+            if (!selectedByGroup[groupKey]) {
+                selectedByGroup[groupKey] = [];
+            }
+
+            // If this include has a selection, add it to the group
+            if (this.formuleSelections[index]) {
+                selectedByGroup[groupKey].push({
+                    index,
+                    productId: this.formuleSelections[index]
+                });
+            }
+        });
+
+        // Validate: each required group must have at least 1 selection
+        let allGroupsValid = true;
+        requiredGroups.forEach(group => {
+            if (!selectedByGroup[group] || selectedByGroup[group].length === 0) {
+                allGroupsValid = false;
+            }
+        });
+
+        console.log('[validateFormuleSelections] Groupes requis:', Array.from(requiredGroups));
+        console.log('[validateFormuleSelections] Sélections par groupe:', selectedByGroup);
+        console.log('[validateFormuleSelections] Formule valide:', allGroupsValid);
+
+        // STOCKER LE RÉSULTAT DANS UNE VARIABLE CENTRALE
+        this.isFormuleValid = allGroupsValid;
+
+        // Enable/disable add to cart button - SYNCHRONISÉ AVEC this.isFormuleValid
         const addButton = document.getElementById('addToCartBtn');
         if (addButton) {
-            if (allSelected) {
-                addButton.disabled = false;
+            addButton.disabled = !this.isFormuleValid;
+            if (this.isFormuleValid) {
                 addButton.classList.remove('disabled');
+                console.log('🔥 BOUTON ACTIVÉ (isFormuleValid=true)');
             } else {
-                addButton.disabled = true;
                 addButton.classList.add('disabled');
+                console.log('🔥 BOUTON DÉSACTIVÉ (isFormuleValid=false)');
             }
         }
 
-        return allSelected;
+        return this.isFormuleValid;
     },
 
     /**
      * Resolve formule selections to actual product objects
+     * Only includes ONE product per choiceGroup (no duplicates)
      */
     resolveFormuleSelections() {
+        console.log("🔥🔥🔥 TRACE: resolveFormuleSelections APPELÉ", {file: "products.js"});
         const resolved = [];
         const formule = this.currentProduct;
 
         if (!formule?.includes || !this.formuleSelections) return resolved;
 
+        // Track which groups have already been added to avoid duplicates
+        const addedGroups = new Set();
+
         formule.includes.forEach((include, index) => {
             const selectedProductId = this.formuleSelections[index];
-            if (selectedProductId) {
-                const product = Config.getProduct(selectedProductId);
-                if (product) {
-                    resolved.push({
-                        type: include.type,
-                        label: include.label || include.type,
-                        product: {
-                            id: product.id,
-                            name: product.name,
-                            price: product.priceSolo || product.price
-                        }
-                    });
-                }
+            if (!selectedProductId) return;
+
+            // Determine group key
+            const groupKey = include.choiceGroup || `include-${index}`;
+
+            // Skip if this group already has a product added
+            if (addedGroups.has(groupKey)) {
+                console.log(`[resolveFormuleSelections] Groupe "${groupKey}" déjà ajouté, skip index ${index}`);
+                return;
+            }
+
+            const product = Config.getProduct(selectedProductId);
+            if (product) {
+                resolved.push({
+                    type: include.type,
+                    label: include.choiceGroup || include.label || include.type,
+                    choiceGroup: include.choiceGroup,
+                    product: {
+                        id: product.id,
+                        name: product.name,
+                        price: product.priceSolo || product.price
+                    }
+                });
+                addedGroups.add(groupKey);
+                console.log(`[resolveFormuleSelections] Ajouté: groupe="${groupKey}", produit="${product.name}"`);
             }
         });
 
+        console.log('[resolveFormuleSelections] Total produits résolus:', resolved.length);
         return resolved;
     },
 
@@ -2104,24 +2281,32 @@ const Products = {
      * Toggle supplement selection
      */
     toggleSupplement(supId) {
-        const sup = Config.supplements.catalog?.[supId];
-        if (!sup) return;
+        const supIdStr = String(supId);
 
-        const index = this.selectedSupplements.findIndex(s => s.id === supId);
+        // Lookup UNIQUE via byId (pas de fallback)
+        const sup = Config.supplements.byId?.[supIdStr];
+        if (!sup) {
+            console.error('[toggleSupplement] ERREUR: supplément absent de byId:', supIdStr);
+            return;
+        }
+
+        const price = parseFloat(sup.price);
+        if (isNaN(price) || price < 0) {
+            console.error('[toggleSupplement] ERREUR: prix invalide:', sup.name, sup.price);
+            return;
+        }
+
+        // Toggle dans selectedSupplements
+        const index = this.selectedSupplements.findIndex(s => String(s.id) === supIdStr);
         if (index >= 0) {
             this.selectedSupplements.splice(index, 1);
         } else {
             this.selectedSupplements.push(sup);
         }
 
-        // Update UI
+        // Sync UI
         document.querySelectorAll('.supplement-item').forEach(item => {
-            const id = item.dataset.id;
-            if (this.selectedSupplements.find(s => s.id === id)) {
-                item.classList.add('selected');
-            } else {
-                item.classList.remove('selected');
-            }
+            item.classList.toggle('selected', this.selectedSupplements.some(s => String(s.id) === item.dataset.id));
         });
 
         this.updateModalUI();
@@ -2153,14 +2338,18 @@ const Products = {
             basePrice = this.currentProduct?.price || this.currentProduct?.priceSolo || 0;
         }
 
-        let total = basePrice;
+        let total = parseFloat(basePrice) || 0;
 
-        // Add supplements
+        // Add supplements (normaliser chaque prix en Number)
         this.selectedSupplements.forEach(sup => {
-            total += sup.price || 0;
+            const supPrice = parseFloat(sup.price) || 0;
+            total += supPrice;
         });
 
         total *= this.currentQuantity;
+
+        // Log simplifié (évite overhead DevTools)
+        // console.log("🧪 TOTAL:", total);
 
         document.getElementById('addToCartPrice').textContent = Config.formatPrice(total);
     },
@@ -2171,30 +2360,26 @@ const Products = {
     addCurrentToCart() {
         if (!this.currentProduct) return;
 
-        // Validate formule selections if it's a formule
-        if (this.currentProduct.isFormule && !this.validateFormuleSelections()) {
-            alert('Veuillez sélectionner tous les composants de la formule');
+        // VÉRIFICATION CENTRALE: Si c'est une formule, utiliser this.isFormuleValid (pas de re-validation)
+        if (this.currentProduct.isFormule && this.isFormuleValid !== true) {
             return;
         }
 
         // Create product with correct price based on menu type
         const productToAdd = { ...this.currentProduct };
 
+        // Utiliser le prix menu si sélectionné, sinon prix solo
         if (this.menuType === 'menu' && this.currentProduct.priceMenu) {
             productToAdd.price = this.currentProduct.priceMenu;
-            productToAdd.name = this.currentProduct.name + ' (Menu)';
         } else {
             productToAdd.price = this.currentProduct.priceSolo || this.currentProduct.price;
         }
 
-        // For formules, resolve the selected products and add to name
+        // For formules, resolve the selected products
         let formuleProducts = null;
         if (this.currentProduct.isFormule && this.formuleSelections) {
             formuleProducts = this.resolveFormuleSelections();
-
-            // Add selected products to formule name
-            const selectionNames = formuleProducts.map(p => p.name).join(', ');
-            productToAdd.name = `${productToAdd.name} (${selectionNames})`;
+            // NE PAS modifier le nom - les produits seront affichés séparément dans le panier
         }
 
         Cart.addItem(

@@ -13,7 +13,7 @@ class OrderNotificationSystem {
         this.activationShown = localStorage.getItem('audio_activated') === 'true';
 
         // MP3 notification
-        this.audioFile = new Audio('assets/sounds/commande.mp3');
+        this.audioFile = new Audio('assets/sounds/ateliersounds.mp3');
         this.audioFile.loop = true;
         this.audioFile.volume = 0.9;
         this.audioFile.load();
@@ -59,8 +59,21 @@ class OrderNotificationSystem {
     /* =======================
        LECTURE / ARRÊT
        ======================= */
-    playSound() {
-        if (this.isPlaying || !this.audioEnabled) return;
+    async playSound() {
+        if (this.isPlaying) return;
+
+        // Activer l'audio automatiquement si pas encore fait
+        if (!this.audioEnabled) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+                await ctx.resume();
+                this.audioEnabled = true;
+                console.log('[Audio] ✅ Activé automatiquement lors nouvelle commande');
+            } catch (e) {
+                console.warn('[Audio] Activation auto échouée:', e);
+            }
+        }
 
         this.isPlaying = true;
 
@@ -171,7 +184,7 @@ class OrderNotificationSystem {
                 <h2 style="color:#fff;margin:15px 0;">NOUVELLE COMMANDE</h2>
                 <p style="font-size:24px;color:#fff;font-weight:bold;margin:10px 0;">${customerName}</p>
                 <p style="color:#9ca3af;font-size:12px;margin:5px 0;">#${order.id}</p>
-                <p style="font-size:36px;color:#10b981;font-weight:bold;margin:20px 0;">${total.toLocaleString('fr-FR')} DA</p>
+                <p style="font-size:36px;color:#10b981;font-weight:bold;margin:20px 0;">${total.toLocaleString('fr-FR')} ${window.CURRENCY || 'EUR'}</p>
                 <button onclick="orderNotificationSystem.acceptOrder()"
                     style="padding:15px 40px;border-radius:50px;background:#10b981;color:white;border:none;font-size:18px;cursor:pointer;">
                     ✅ ACCEPTER

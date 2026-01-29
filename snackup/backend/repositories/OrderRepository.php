@@ -127,8 +127,8 @@ class OrderRepository {
         $pointsUsed = (int)($data['points_used'] ?? 0);
         $finalLoyaltyPointsUsed = $pointsUsed > 0 ? $pointsUsed : $legacyLoyaltyPointsUsed;
 
-        // Créer la commande
-        $orderId = Database::insert('orders', [
+        // Préparer les données de la commande
+        $orderData = [
             'restaurant_id' => $restaurantId,
             'customer_id' => $customerId,
             'order_number' => $orderNumber,
@@ -151,7 +151,18 @@ class OrderRepository {
             'loyalty_reward_id' => $loyaltyRewardId,
             'loyalty_points_used' => $finalLoyaltyPointsUsed,
             'loyalty_redeemed' => 0
-        ]);
+        ];
+
+        // ⚡ NOUVEAU: Promo code info (si colonnes existent)
+        if (!empty($data['promo_code'])) {
+            $orderData['promo_code'] = $data['promo_code'];
+            $orderData['promo_discount_type'] = $data['promo_discount_type'] ?? null;
+            $orderData['promo_discount_value'] = $data['promo_discount_value'] ?? null;
+            $orderData['promo_discount_amount'] = $data['promo_discount_amount'] ?? null;
+        }
+
+        // Créer la commande
+        $orderId = Database::insert('orders', $orderData);
 
         // Ajouter les items
         if (!empty($data['items'])) {
