@@ -1544,7 +1544,9 @@ if (isset($_GET['export'])) {
                 }
 
                 // Bouton "Envoyer au livreur" (seulement pour livraisons)
-                const isDelivery = order.notes && order.notes.toLowerCase().includes('livraison');
+                const isDelivery = (order.notes && order.notes.toLowerCase().includes('livraison')) ||
+                                   (order.mode_notes && (order.mode_notes.includes('🚗') || order.mode_notes.toLowerCase().includes('livraison'))) ||
+                                   (order.order_type === 'delivery');
                 if (isDelivery) {
                     html += `
                         <button onclick="openSendToDeliveryModal('${order.id}')" style="padding: 14px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
@@ -1554,7 +1556,7 @@ if (isset($_GET['export'])) {
                 }
 
                 html += `
-                    <a href="https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Salam alaykoum c\'est le Marvellous 🧇 votre commande #' + order.id + ' est prête vous pouvez venir la récupérer marhabaa 🌟')}" target="_blank" style="width: 60px; height: 60px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); font-size: 24px;">
+                    <a href="https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Bonjour, c\'est <?php echo addslashes($restaurantName); ?> 🍕 Votre commande #' + order.id + ' est prête ! Vous pouvez venir la récupérer. À bientôt !')}" target="_blank" style="width: 60px; height: 60px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); font-size: 24px;">
                         <i class="fab fa-whatsapp"></i>
                     </a>
                 </div>
