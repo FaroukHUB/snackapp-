@@ -245,40 +245,44 @@ const Config = {
 
     /**
      * Get supplements for a category
-     * Filtre UNIQUEMENT par flavor (sale/sucre) - ignore defaultForCategories
+     * Les suppléments sont exclusifs aux catégories de type "pizza"
+     * Les autres catégories (pates, gratin, tex mex, dessert, boisson, burger) n'ont pas de suppléments
      */
     getSupplementsForCategory(categoryId) {
-        // ❌ Catégories SANS suppléments
-        const noSupplementsCategories = [
-            'sucres-sales',
-            'boissons-chaudes',
-            'sodas-eaux',
-            'jus-cocktails',
-            'menu-enfant'
+        // Normaliser l'ID en minuscules pour la comparaison
+        const catIdLower = String(categoryId).toLowerCase();
+
+        // ✅ Catégories AVEC suppléments (uniquement les pizzas)
+        const pizzaCategories = [
+            'pizzas',
+            'pizza',
+            'pizzas-classiques',
+            'pizzas-speciales',
+            'pizzas-signature',
+            'pizzas-premium'
         ];
-        if (noSupplementsCategories.includes(categoryId)) {
-            return [];
-        }
 
-        // ✅ Chercher la catégorie dans les données pour lire son flavor
-        let categoryFlavor = null;
+        // Vérifier aussi si le nom de la catégorie contient "pizza"
+        let isPizzaCategory = pizzaCategories.includes(catIdLower) || catIdLower.includes('pizza');
 
-        if (this.menu && this.menu.categories) {
-            const category = this.menu.categories.find(cat => cat.id === categoryId);
-            if (category && category.flavor) {
-                categoryFlavor = category.flavor; // 'sale' ou 'sucre' défini dans l'admin
+        // Vérifier également via les données de la catégorie (slug ou name)
+        if (!isPizzaCategory && this.menu && this.menu.categories) {
+            const category = this.menu.categories.find(cat => cat.id == categoryId);
+            if (category) {
+                const catName = (category.name || '').toLowerCase();
+                const catSlug = (category.slug || '').toLowerCase();
+                isPizzaCategory = catName.includes('pizza') || catSlug.includes('pizza');
             }
         }
 
-        // Fallback : deviner selon l'ID si pas de flavor
-        if (!categoryFlavor) {
-            const sucreCategories = ['crepes-sucrees', 'gaufres', 'bubble-waffle'];
-            categoryFlavor = sucreCategories.includes(categoryId) ? 'sucre' : 'sale';
+        // Si ce n'est pas une catégorie pizza, pas de suppléments
+        if (!isPizzaCategory) {
+            return [];
         }
 
-        // Filtrer les suppléments par flavor
+        // Pour les pizzas, retourner tous les suppléments "sale" disponibles
         return Object.values(this.supplements.catalog || {})
-            .filter(sup => sup.flavor === categoryFlavor && sup.status === 'available');
+            .filter(sup => sup.flavor === 'sale' && sup.status === 'available');
     },
 
     /**

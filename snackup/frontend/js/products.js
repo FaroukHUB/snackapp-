@@ -106,12 +106,24 @@ const Products = {
         // Add category icons with alternating colors
         nonEmptyCategories.forEach((cat, index) => {
             const icon = cat.icon || 'fa-utensils';
+            const iconImage = cat.icon_image;
             const colorClass = index % 2 === 0 ? 'color-primary' : 'color-black';
-            const iconHtml = icon.startsWith("fa-") ? `<i class="fas ${icon}"></i>` : icon;
+
+            // Priority: icon_image > emoji/text > FontAwesome
+            let iconHtml;
+            if (iconImage) {
+                // Image badge (style hashtagbangers.fr)
+                iconHtml = `<img src="${iconImage}" alt="" class="category-icon-img">`;
+            } else if (icon.startsWith("fa-")) {
+                iconHtml = `<i class="fas ${icon}"></i>`;
+            } else {
+                // Emoji or text
+                iconHtml = icon;
+            }
 
             html += `
                 <div class="category-icon-item" data-category="${cat.id}" onclick="Products.filterByCategory('${cat.id}')">
-                    <div class="category-icon-circle ${colorClass}">
+                    <div class="category-icon-circle ${colorClass}${iconImage ? ' has-image' : ''}">
                         ${iconHtml}
                     </div>
                     <span class="category-icon-name">${cat.name}</span>
@@ -1099,28 +1111,44 @@ const Products = {
                     supplementsContainer.classList.remove('hidden');
                     supplementsContainer.style.display = '';
 
-                    const groupOrder = ['viande', 'fromages', 'legumes', 'sauces', 'autres'];
+                    // Ordre préféré pour les groupes (les autres seront ajoutés à la fin)
+                    const groupOrder = ['viande', 'viandes', 'fromages', 'fromage', 'legumes', 'légumes', 'sauces', 'sauce', 'autres'];
                     const groupLabels = {
                         'viande': 'Viandes',
+                        'viandes': 'Viandes',
                         'fromages': 'Fromages',
+                        'fromage': 'Fromages',
                         'legumes': 'Légumes',
+                        'légumes': 'Légumes',
                         'sauces': 'Sauces',
+                        'sauce': 'Sauces',
                         'autres': 'Autres'
                     };
 
                     const grouped = {};
                     supplements.forEach(sup => {
-                        const group = sup.group_name || 'autres';
+                        const group = (sup.group_name || 'autres').toLowerCase();
                         if (!grouped[group]) grouped[group] = [];
                         grouped[group].push(sup);
                     });
 
+                    // Collecter tous les groupes présents
+                    const allGroups = Object.keys(grouped);
+                    // Trier: d'abord ceux dans groupOrder, puis les autres
+                    const sortedGroups = [
+                        ...groupOrder.filter(g => allGroups.includes(g)),
+                        ...allGroups.filter(g => !groupOrder.includes(g))
+                    ];
+                    // Enlever les doublons
+                    const uniqueGroups = [...new Set(sortedGroups)];
+
                     let html = '';
-                    groupOrder.forEach(group => {
+                    uniqueGroups.forEach(group => {
                         if (grouped[group] && grouped[group].length > 0) {
+                            const label = groupLabels[group] || this.capitalize(group);
                             html += `
                                 <div class="supplement-category">
-                                    <h4 class="supplement-category-title">${groupLabels[group]}</h4>
+                                    <h4 class="supplement-category-title">${label}</h4>
                                     <div class="supplement-category-items">
                                         ${grouped[group].map(sup => `
                                             <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
@@ -1140,6 +1168,7 @@ const Products = {
                     });
 
                     supplementsList.innerHTML = html;
+                    console.log('[Products] Supplements rendered:', uniqueGroups, 'total items:', supplements.length);
                 } else {
                     supplementsContainer.classList.add('hidden');
                     supplementsContainer.style.display = 'none';
