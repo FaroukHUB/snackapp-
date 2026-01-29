@@ -13,7 +13,7 @@ class OrderNotificationSystem {
         this.activationShown = localStorage.getItem('audio_activated') === 'true';
 
         // MP3 notification
-        this.audioFile = new Audio('assets/sounds/ateliersonds.mp3');
+        this.audioFile = new Audio('assets/sounds/ateliersounds.mp3');
         this.audioFile.loop = true;
         this.audioFile.volume = 0.9;
         this.audioFile.load();
