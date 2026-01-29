@@ -94,7 +94,7 @@ switch ($action) {
         }
 
         // Vérifier que le SDK Stripe est installé
-        $vendorPath = __DIR__ . '/../../vendor/autoload.php';
+        $vendorPath = __DIR__ . '/../../../vendor/autoload.php';
         if (!file_exists($vendorPath)) {
             error_log('[Payment] Stripe SDK non installé: ' . $vendorPath);
             jsonError('SDK Stripe non installé. Exécutez: composer require stripe/stripe-php');
@@ -160,7 +160,7 @@ switch ($action) {
             jsonError('Configuration Stripe incomplète');
         }
 
-        require_once __DIR__ . '/../../vendor/autoload.php';
+        require_once __DIR__ . '/../../../vendor/autoload.php';
 
         try {
             \Stripe\Stripe::setApiKey($secretKey);
@@ -193,7 +193,7 @@ switch ($action) {
             exit;
         }
 
-        require_once __DIR__ . '/../../vendor/autoload.php';
+        require_once __DIR__ . '/../../../vendor/autoload.php';
 
         $mode = $paymentSettings['stripe_mode'] ?? 'test';
         $secretKey = ($mode === 'live')
