@@ -387,6 +387,10 @@ $csrfToken = getCsrfToken();
 
       updateStripeVisibility();
       $('#stripeMode').value = paymentSettings.stripe_mode || 'test';
+      $('#stripePublicTest').value = paymentSettings.stripe_public_key_test || '';
+      $('#stripeSecretTest').value = paymentSettings.stripe_secret_key_test || '';
+      $('#stripePublicLive').value = paymentSettings.stripe_public_key_live || '';
+      $('#stripeSecretLive').value = paymentSettings.stripe_secret_key_live || '';
       updateStripeModeVisibility();
 
       renderCities();
@@ -427,7 +431,11 @@ $csrfToken = getCsrfToken();
         cash_enabled: $('#toggleCash').classList.contains('active') ? 1 : 0,
         card_on_delivery_enabled: $('#toggleCardDelivery').classList.contains('active') ? 1 : 0,
         online_payment_enabled: $('#toggleOnline').classList.contains('active') ? 1 : 0,
-        stripe_mode: $('#stripeMode').value
+        stripe_mode: $('#stripeMode').value,
+        stripe_public_key_test: $('#stripePublicTest').value || null,
+        stripe_secret_key_test: $('#stripeSecretTest').value || null,
+        stripe_public_key_live: $('#stripePublicLive').value || null,
+        stripe_secret_key_live: $('#stripeSecretLive').value || null
       };
       const res = await api('update_payment_settings', data);
       toast(res.success ? 'Configuration paiement enregistrée' : (res.error || res.message), res.success ? 'success' : 'error');
