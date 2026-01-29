@@ -370,7 +370,12 @@ function addOrder(bool $useMySQL) {
                 // ⚡ NOUVEAU: Précommande et mode séparés
                 'preorder_date' => $requestData['preorder_date'] ?? null,
                 'preorder_time' => $requestData['preorder_time'] ?? null,
-                'mode_notes' => $requestData['mode_notes'] ?? null
+                'mode_notes' => $requestData['mode_notes'] ?? null,
+                // ⚡ NOUVEAU: Code promo
+                'promo_code' => $requestData['promo_code'] ?? null,
+                'promo_discount_type' => $requestData['promo_discount_type'] ?? null,
+                'promo_discount_value' => $requestData['promo_discount_value'] ?? null,
+                'promo_discount_amount' => $requestData['promo_discount_amount'] ?? null
             ]);
 
             // ✅ Créer ou récupérer le client avec son adresse

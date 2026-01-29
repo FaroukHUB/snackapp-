@@ -1390,18 +1390,7 @@ if (isset($_GET['export'])) {
                                     } else {
                                         paymentIcon = '<i class="fas fa-money-bill-wave" style="color: #10b981;"></i>';
                                         paymentText = ' Espèces';
-
-                                        // Info appoint/monnaie pour espèces
-                                        if (order.delivery_instructions) {
-                                            if (order.delivery_instructions.includes('monnaie exacte')) {
-                                                extraInfo = '<br><span style="color: #10b981; font-size: 12px;"><i class="fas fa-check-circle"></i> J\'ai l\'appoint</span>';
-                                            } else {
-                                                const changeMatch = order.delivery_instructions.match(/Monnaie pour (\d+) (DA|EUR)/);
-                                                if (changeMatch) {
-                                                    extraInfo = `<br><span style="color: #fbbf24; font-size: 12px;"><i class="fas fa-coins"></i> Prévoir ${changeMatch[1]} ${currency}</span>`;
-                                                }
-                                            }
-                                        }
+                                        // Monnaie affichée dans sa propre box dédiée
                                     }
 
                                     return paymentIcon + paymentText + extraInfo;
@@ -1554,13 +1543,20 @@ if (isset($_GET['export'])) {
 
                 // Adresse de livraison si applicable
                 if (order.delivery_address) {
+                    // Filtrer les instructions pour ne pas afficher la monnaie (affichée dans sa propre box)
+                    let filteredInstructions = order.delivery_instructions || '';
+                    filteredInstructions = filteredInstructions
+                        .replace(/Monnaie pour \d+(?:[.,]\d+)?\s*(?:DA|EUR)?/gi, '')
+                        .replace(/Client a la monnaie exacte/gi, '')
+                        .trim();
+
                     html += `
                         <div style="padding: 12px; background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(37,99,235,0.05) 100%); border: 1px solid rgba(59,130,246,0.3); border-radius: 10px; margin-bottom: 20px;">
                             <div style="font-size: 11px; color: #60a5fa; margin-bottom: 6px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
                                 <i class="fas fa-map-marker-alt"></i> Adresse de livraison
                             </div>
                             <div style="font-size: 14px; color: white; font-weight: 600;">${order.delivery_address}</div>
-                            ${order.delivery_instructions ? `<div style="font-size: 12px; color: #9ca3af; margin-top: 6px; font-style: italic;"><i class="fas fa-info-circle"></i> ${order.delivery_instructions}</div>` : ''}
+                            ${filteredInstructions ? `<div style="font-size: 12px; color: #9ca3af; margin-top: 6px; font-style: italic;"><i class="fas fa-info-circle"></i> ${filteredInstructions}</div>` : ''}
                         </div>
                     `;
                 }
@@ -1632,19 +1628,27 @@ if (isset($_GET['export'])) {
 
                 html += `</div>`;
 
-                // Notes
+                // Notes (filtrer les infos monnaie qui sont dans leur propre box)
                 if (order.notes) {
-                    html += `
-                        <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border: 2px solid #ef4444; color: white; padding: 14px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
-                            <div style="display: flex; align-items: flex-start; gap: 10px;">
-                                <i class="fas fa-info-circle" style="color: white; font-size: 18px; margin-top: 2px;"></i>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 6px; color: white; font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800;">📋 INFO COMMANDE</strong>
-                                    <span style="color: white; font-weight: 600;">${order.notes}</span>
+                    let filteredNotes = order.notes
+                        .replace(/\n?Prévoir monnaie sur:\s*\d+(?:[.,]\d+)?\s*(?:DA|EUR)?/gi, '')
+                        .replace(/\n?J'ai l'appoint/gi, '')
+                        .replace(/\n?Frais de livraison:\s*\+?\d+(?:[.,]\d+)?\s*(?:DA|EUR)?/gi, '')
+                        .trim();
+
+                    if (filteredNotes) {
+                        html += `
+                            <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border: 2px solid #ef4444; color: white; padding: 14px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
+                                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                    <i class="fas fa-info-circle" style="color: white; font-size: 18px; margin-top: 2px;"></i>
+                                    <div>
+                                        <strong style="display: block; margin-bottom: 6px; color: white; font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800;">📋 INFO COMMANDE</strong>
+                                        <span style="color: white; font-weight: 600;">${filteredNotes}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 }
 
                 // Fidélité
