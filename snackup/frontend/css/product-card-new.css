@@ -189,6 +189,52 @@
 }
 
 /* ========================================
+   RESPONSIVE - Mobile
+   ======================================== */
+
+@media (max-width: 768px) {
+    .product-card-new {
+        overflow: visible;
+    }
+
+    .product-content-new {
+        padding: 10px 12px 14px;
+        gap: 6px;
+    }
+
+    .product-name-new {
+        font-size: 13px;
+        -webkit-line-clamp: 2;
+    }
+
+    .product-desc-new {
+        font-size: 11px;
+        -webkit-line-clamp: 1;
+    }
+
+    .product-footer-new {
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    .product-price-new {
+        font-size: 15px;
+    }
+
+    .product-btn-new {
+        padding: 8px 14px;
+        font-size: 12px;
+        border-radius: 8px;
+        white-space: nowrap;
+    }
+
+    .bundle-offer-badge {
+        font-size: 9px;
+        padding: 4px 8px;
+    }
+}
+
+/* ========================================
    RESPONSIVE - Desktop
    ======================================== */
 
