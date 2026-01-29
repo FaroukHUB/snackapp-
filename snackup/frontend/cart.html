@@ -1393,25 +1393,33 @@
             <!-- Message d'appel conditionnel (seulement pour livraison/emporter) -->
             <p id="confirmationCallMessage" style="color: var(--gray-500); font-size: 14px; margin: 0 0 12px 0; display: none;">
                 <i class="fas fa-phone" style="color: var(--primary);"></i>
-                <strong>Le restaurant va vous appeler</strong> dans quelques instants pour confirmer votre commande
+                <strong>Le restaurant peut éventuellement vous appeler</strong> dans quelques instants pour confirmer votre commande
             </p>
 
             <!-- Order Number - Big & Prominent -->
             <div class="order-number" id="confirmationOrderNumber" style="margin: 10px 0;">#0000</div>
 
-            <!-- Loyalty Card Number -->
-            <div id="confirmationLoyaltyCard" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 600; margin: 8px 0;">
-                <i class="fas fa-id-card"></i> Carte : <span id="confirmationLoyaltyCardNumber"></span>
+            <!-- Loyalty Card Section - Encadré amélioré -->
+            <div id="confirmationLoyaltyCard" style="display: none; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 12px; padding: 16px; margin: 12px 0; text-align: center;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
+                    <i class="fas fa-id-card" style="color: #d97706; font-size: 20px;"></i>
+                    <span style="color: #92400e; font-weight: 700; font-size: 14px;">Ma Carte Fidélité</span>
+                </div>
+                <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 8px 16px; border-radius: 8px; font-size: 16px; font-weight: 700; letter-spacing: 1px;">
+                    <span id="confirmationLoyaltyCardNumber"></span>
+                </div>
+                <a href="loyalty-card.html" style="display: inline-block; margin-top: 10px; color: #d97706; font-size: 13px; font-weight: 600; text-decoration: none; padding: 6px 12px; border: 1px solid #d97706; border-radius: 20px; transition: all 0.3s ease;">
+                    <i class="fas fa-star" style="margin-right: 4px;"></i> Consulter mes points fidélité
+                </a>
             </div>
 
             <!-- Loyalty Points Earned -->
             <div class="loyalty-earned" id="loyaltyEarned" style="display: none; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 10px 16px; border-radius: 10px; margin: 10px 0; text-align: center;">
                 <i class="fas fa-star" style="margin-right: 6px;"></i>
                 <span id="loyaltyPointsText">+10 points fidélité</span>
-                <a href="../loyalty-card.php" style="display: block; margin-top: 4px; color: white; font-size: 11px; text-decoration: underline;">Voir ma carte fidélité</a>
             </div>
 
-            <!-- Google Review - Prominent Section (remonté) -->
+            <!-- Google Review - Prominent Section -->
             <div class="google-review-prompt" style="background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%); border: 2px solid #ffc107; border-radius: 12px; padding: 16px; margin: 16px 0; text-align: center; box-shadow: 0 4px 12px rgba(255, 193, 7, 0.25);">
                 <div class="review-stars" style="font-size: 28px; margin-bottom: 8px;">⭐⭐⭐⭐⭐</div>
                 <p style="color: #5d4037; font-size: 14px; font-weight: 600; margin: 0 0 6px 0; line-height: 1.4;">
@@ -1420,7 +1428,7 @@
                 <p style="color: #795548; font-size: 12px; margin: 0 0 12px 0; line-height: 1.4;">
                     Votre avis compte beaucoup pour nous 💛
                 </p>
-                <a href="https://search.google.com/local/writereview?placeid=ChIJZXUA6vldjhIRSIaM5qqp6WE" target="_blank" class="google-review-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #4285f4; color: white; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 50px; box-shadow: 0 3px 10px rgba(66, 133, 244, 0.35); transition: all 0.3s ease;">
+                <a href="https://www.google.com/search?sca_esv=02d96f4dae5a5963&rlz=1C5CHFA_enDZ1142DZ1143&sxsrf=ANbL-n4h5FRy5QXqJa72FgnarPY6woeI_A:1769681958185&si=AL3DRZFIhG6pAqfNLal55wUTwygCG0fClF3UxiOmgw9Hq7nbWTR-BB1RxEHR737kt6lTP10KH9Rqgsw3GGDaFWptFH294b7VPkJKt1iPgD5KDgRTGz_7TEbOBJoSLiB-t8OIzaGk21KosuehxR16qhOLYdBS8iPltlSRzcSZCe3n6OVWG3-fgUY%3D&q=L%27Atelier+Pizza+Roubaix+-+Pizzeria+Halal+Roubaix+Avis" target="_blank" class="google-review-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #4285f4; color: white; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 50px; box-shadow: 0 3px 10px rgba(66, 133, 244, 0.35); transition: all 0.3s ease;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
