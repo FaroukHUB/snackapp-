@@ -4,7 +4,7 @@
  * Gestion des commandes
  * Support MySQL avec fallback JSON
  *
- * VERSION: 2026-01-29-v2 (avec delivery_address)
+ * VERSION: 2026-01-29-v3 (avec delivery_address + file logging)
  */
 
 // 🔄 FORCE OPCACHE RESET pour ce fichier et les dépendances
@@ -14,6 +14,13 @@ if (function_exists('opcache_invalidate')) {
     opcache_invalidate(__DIR__ . '/../config.php', true);
     opcache_invalidate(__DIR__ . '/../../backend/Database.php', true);
     opcache_invalidate(__DIR__ . '/../../backend/repositories/OrderRepository.php', true);
+}
+
+// 🐛 DEBUG: Écrire dans un fichier car error_log va vers /dev/null
+function debugLog($message) {
+    $logFile = __DIR__ . '/../debug_orders.log';
+    $timestamp = date('Y-m-d H:i:s');
+    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
 }
 
 // 🐛 DEBUG: Activer les erreurs temporairement
@@ -360,19 +367,23 @@ function addOrder(bool $useMySQL) {
     if ($useMySQL) {
         try {
             // 🐛 DEBUG: Log version et DB info
-            error_log('[ADD_ORDER] VERSION: 2026-01-29-v2');
-            error_log('[ADD_ORDER] Database: ' . DB_NAME);
-            error_log('[ADD_ORDER] Restaurant ID: ' . SNACK_RESTAURANT_ID);
+            debugLog('[ADD_ORDER] VERSION: 2026-01-29-v3');
+            debugLog('[ADD_ORDER] Database: ' . DB_NAME);
+            debugLog('[ADD_ORDER] Restaurant ID: ' . SNACK_RESTAURANT_ID);
 
             // 🐛 DEBUG: Vérifier que delivery_address existe dans la table
             try {
                 $dbCheck = Database::fetchOne("SELECT DATABASE() as db");
-                error_log('[ADD_ORDER] Active DB: ' . ($dbCheck['db'] ?? 'NULL'));
+                debugLog('[ADD_ORDER] Active DB: ' . ($dbCheck['db'] ?? 'NULL'));
 
                 $cols = Database::fetchAll("SHOW COLUMNS FROM orders LIKE 'delivery_address'");
-                error_log('[ADD_ORDER] delivery_address column exists: ' . (count($cols) > 0 ? 'YES' : 'NO'));
+                debugLog('[ADD_ORDER] delivery_address column exists: ' . (count($cols) > 0 ? 'YES' : 'NO'));
+
+                // Log le chemin du fichier Database.php chargé
+                $dbReflection = new ReflectionClass('Database');
+                debugLog('[ADD_ORDER] Database class loaded from: ' . $dbReflection->getFileName());
             } catch (Exception $dbErr) {
-                error_log('[ADD_ORDER] DB Check Error: ' . $dbErr->getMessage());
+                debugLog('[ADD_ORDER] DB Check Error: ' . $dbErr->getMessage());
             }
 
             $loyaltyRewardId = $requestData['loyalty_reward_id'] ?? null;
