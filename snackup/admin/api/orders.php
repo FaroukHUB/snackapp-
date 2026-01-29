@@ -344,13 +344,13 @@ function addOrder(bool $useMySQL) {
                 $notes .= "\nJ'ai l'appoint";
             } elseif (!empty($requestData['change_for'])) {
                 $changeFor = (int)$requestData['change_for'];
-                $notes .= "\nPrévoir monnaie sur: {$changeFor} DA";
+                $notes .= "\nPrévoir monnaie sur: {$changeFor} " . CURRENCY;
             }
 
             // Ajouter les frais de livraison dans les notes si applicable
             $deliveryFee = (float)($requestData['delivery_fee'] ?? 0);
             if ($deliveryFee > 0) {
-                $notes .= "\nFrais de livraison: +{$deliveryFee} DA";
+                $notes .= "\nFrais de livraison: +" . number_format($deliveryFee, 2, ',', ' ') . " " . CURRENCY;
             }
 
             // Créer la commande
@@ -442,7 +442,7 @@ function addOrder(bool $useMySQL) {
             $notes .= "\nJ'ai l'appoint";
         } elseif (!empty($requestData['change_for'])) {
             $changeFor = (int)$requestData['change_for'];
-            $notes .= "\nPrévoir monnaie sur: {$changeFor} DA";
+            $notes .= "\nPrévoir monnaie sur: {$changeFor} " . CURRENCY;
         }
 
         $newOrder = [

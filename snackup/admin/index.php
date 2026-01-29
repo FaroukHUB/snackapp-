@@ -1072,9 +1072,21 @@ if (isset($_GET['export'])) {
                         <?php
                         $displayItems = array_slice($items, 0, 3);
                         foreach ($displayItems as $item):
+                            // Afficher la variante (SOLO/DUO/MENU) si présente
+                            $variantLabel = '';
+                            if (!empty($item['variant'])) {
+                                $v = strtoupper($item['variant']);
+                                // Afficher SOLO, DUO, MENU, etc.
+                                if (in_array($v, ['SOLO', 'DUO', 'MENU'])) {
+                                    $variantLabel = $v . ' ';
+                                }
+                            }
                         ?>
                             <div style="font-size: 12px; color: #e5e7eb; padding: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <strong style="color: <?php echo $primaryColor; ?>;"><?php echo $item['quantity'] ?? 1; ?>x</strong>
+                                <?php if ($variantLabel): ?>
+                                    <span style="color: #f59e0b; font-weight: 600;"><?php echo $variantLabel; ?></span>
+                                <?php endif; ?>
                                 <?php echo htmlspecialchars($item['name']); ?>
                             </div>
                         <?php endforeach; ?>
@@ -1084,6 +1096,74 @@ if (isset($_GET['export'])) {
                             </div>
                         <?php endif; ?>
                     </div>
+
+                    <!-- Badges Mode + Monnaie à rendre -->
+                    <?php
+                    // Déterminer le mode depuis mode_notes
+                    $modeNotes = $order['mode_notes'] ?? '';
+                    $orderNotes = $order['notes'] ?? '';
+                    $modeIcon = '';
+                    $modeText = '';
+                    $modeColor = '';
+
+                    if (strpos($modeNotes, '🚗') !== false || stripos($modeNotes, 'LIVRAISON') !== false) {
+                        $modeIcon = 'motorcycle';
+                        $modeText = 'Livraison';
+                        $modeColor = '#3b82f6';
+                    } elseif (strpos($modeNotes, '📦') !== false || stripos($modeNotes, 'EMPORTER') !== false) {
+                        $modeIcon = 'shopping-bag';
+                        $modeText = 'À emporter';
+                        $modeColor = '#f59e0b';
+                    } elseif (strpos($modeNotes, '🏠') !== false || stripos($modeNotes, 'SUR PLACE') !== false) {
+                        $modeIcon = 'utensils';
+                        $modeText = 'Sur place';
+                        $modeColor = '#10b981';
+                    }
+
+                    // Extraire le montant de monnaie à rendre depuis les notes
+                    $changeAmount = 0;
+                    $hasExactChange = false;
+                    if (preg_match('/Prévoir monnaie sur:\s*(\d+(?:[.,]\d+)?)/i', $orderNotes, $matches)) {
+                        $changeAmount = (float)str_replace(',', '.', $matches[1]);
+                    } elseif (stripos($orderNotes, "l'appoint") !== false || stripos($orderNotes, "monnaie exacte") !== false) {
+                        $hasExactChange = true;
+                    }
+
+                    // Promo code info
+                    $promoCode = $order['promo_code'] ?? null;
+                    $promoDiscountType = $order['promo_discount_type'] ?? null;
+                    $promoDiscountValue = $order['promo_discount_value'] ?? null;
+                    ?>
+
+                    <?php if ($modeText || $changeAmount > 0 || $hasExactChange || $promoCode): ?>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                        <?php if ($modeText): ?>
+                        <span style="background: <?php echo $modeColor; ?>22; color: <?php echo $modeColor; ?>; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-<?php echo $modeIcon; ?>"></i> <?php echo $modeText; ?>
+                        </span>
+                        <?php endif; ?>
+
+                        <?php if ($promoCode): ?>
+                        <span style="background: #ec489922; color: #f472b6; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-tag"></i> <?php echo htmlspecialchars($promoCode); ?>
+                            <?php if ($promoDiscountType && $promoDiscountValue): ?>
+                                (<?php echo $promoDiscountType === 'percent' ? '-' . $promoDiscountValue . '%' : '-' . number_format($promoDiscountValue, 2, ',', ' ') . ' ' . CURRENCY; ?>)
+                            <?php endif; ?>
+                        </span>
+                        <?php endif; ?>
+
+                        <?php if ($changeAmount > 0): ?>
+                        <?php $changeToReturn = $changeAmount - ($order['total'] ?? 0); ?>
+                        <span style="background: #8b5cf622; color: #a78bfa; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-coins"></i> Monnaie: <?php echo number_format($changeToReturn, 2, ',', ' '); ?> <?= CURRENCY ?>
+                        </span>
+                        <?php elseif ($hasExactChange): ?>
+                        <span style="background: #10b98122; color: #10b981; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-check"></i> Appoint
+                        </span>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
 
                     <!-- Total + Fidélité -->
                     <div style="margin-bottom: 12px; padding: 12px; background: #0f172a; border-radius: 12px; border: 2px solid <?php echo $primaryColor; ?>;">
