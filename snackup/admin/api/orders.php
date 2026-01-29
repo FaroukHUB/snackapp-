@@ -3,7 +3,18 @@
  * SnackApp v1 - Orders API
  * Gestion des commandes
  * Support MySQL avec fallback JSON
+ *
+ * VERSION: 2026-01-29-v2 (avec delivery_address)
  */
+
+// 🔄 FORCE OPCACHE RESET pour ce fichier et les dépendances
+if (function_exists('opcache_invalidate')) {
+    opcache_invalidate(__FILE__, true);
+    opcache_invalidate(__DIR__ . '/../bootstrap.php', true);
+    opcache_invalidate(__DIR__ . '/../config.php', true);
+    opcache_invalidate(__DIR__ . '/../../backend/Database.php', true);
+    opcache_invalidate(__DIR__ . '/../../backend/repositories/OrderRepository.php', true);
+}
 
 // 🐛 DEBUG: Activer les erreurs temporairement
 ini_set('display_errors', 0);
@@ -348,6 +359,22 @@ function addOrder(bool $useMySQL) {
 
     if ($useMySQL) {
         try {
+            // 🐛 DEBUG: Log version et DB info
+            error_log('[ADD_ORDER] VERSION: 2026-01-29-v2');
+            error_log('[ADD_ORDER] Database: ' . DB_NAME);
+            error_log('[ADD_ORDER] Restaurant ID: ' . SNACK_RESTAURANT_ID);
+
+            // 🐛 DEBUG: Vérifier que delivery_address existe dans la table
+            try {
+                $dbCheck = Database::fetchOne("SELECT DATABASE() as db");
+                error_log('[ADD_ORDER] Active DB: ' . ($dbCheck['db'] ?? 'NULL'));
+
+                $cols = Database::fetchAll("SHOW COLUMNS FROM orders LIKE 'delivery_address'");
+                error_log('[ADD_ORDER] delivery_address column exists: ' . (count($cols) > 0 ? 'YES' : 'NO'));
+            } catch (Exception $dbErr) {
+                error_log('[ADD_ORDER] DB Check Error: ' . $dbErr->getMessage());
+            }
+
             $loyaltyRewardId = $requestData['loyalty_reward_id'] ?? null;
             $loyaltyCustomerId = $requestData['loyalty_customer_id'] ?? null;
 
