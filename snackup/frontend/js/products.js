@@ -1141,11 +1141,22 @@ const Products = {
                 ingredientsSection.style.display = 'none';
             }
 
-            // Render supplements (uniquement si catégorie différente)
+            // Render supplements (uniquement pour les pizzas)
             const supplementsContainer = document.getElementById('modalSupplements');
             const supplementsList = document.getElementById('supplementsList');
 
-            if (this._supplementsCategoryId !== product.categoryId) {
+            // Vérifier si c'est une catégorie pizza
+            const productCategory = Config.getCategories().find(c => c.id === product.categoryId);
+            const categoryNameLower = (productCategory?.name || '').toLowerCase();
+            const isPizzaCategory = categoryNameLower.includes('pizza');
+
+            if (!isPizzaCategory) {
+                // Masquer les suppléments pour les catégories non-pizza
+                supplementsContainer.classList.add('hidden');
+                supplementsContainer.style.display = 'none';
+                supplementsList.innerHTML = '';
+                this._supplementsCategoryId = null;
+            } else if (this._supplementsCategoryId !== product.categoryId) {
                 this._supplementsCategoryId = product.categoryId;
                 const supplements = Config.getSupplementsForCategory(product.categoryId);
 
