@@ -253,16 +253,26 @@ const Cart = {
         const PIZZA_SOLO_PRICE = 7.50;
         const PIZZA_DUO_PRICE = 9.00;
 
-        // Filtrer les pizzas (nom de catégorie contient "pizza")
+        // Filtrer les pizzas (nom ou slug de catégorie contient pizza/tomate/crème/originale)
         const pizzas = this.items.filter(item => {
             // D'abord essayer categoryName stocké
             let catName = item.categoryName || '';
+            let catId = item.categoryId || '';
             // Fallback: chercher dans Config si categoryName manque (anciens items)
             if (!catName && item.id && typeof Config !== 'undefined') {
                 const product = Config.getProduct(item.id);
                 catName = product?.categoryName || '';
+                catId = product?.categoryId || '';
             }
-            return catName.toLowerCase().includes('pizza');
+            const catNameLower = catName.toLowerCase();
+            const catIdLower = String(catId).toLowerCase();
+            // Même détection élargie que pour le badge
+            return catNameLower.includes('pizza')
+                || catIdLower.includes('pizza')
+                || catNameLower.includes('tomate')
+                || catNameLower.includes('crème')
+                || catNameLower.includes('creme')
+                || catNameLower.includes('originale');
         });
 
         if (pizzas.length === 0) return { discount: 0, details: [] };
