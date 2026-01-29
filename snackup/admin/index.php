@@ -1411,6 +1411,93 @@ if (isset($_GET['export'])) {
                     </div>
                 `;
 
+                // Box Monnaie à rendre (si applicable)
+                const changeInfo = (() => {
+                    const notes = order.notes || '';
+                    const instructions = order.delivery_instructions || '';
+
+                    // Chercher "Prévoir monnaie sur: XXX" dans les notes
+                    const changeMatch = notes.match(/Prévoir monnaie sur:\s*(\d+(?:[.,]\d+)?)/i);
+                    if (changeMatch) {
+                        const changeFor = parseFloat(changeMatch[1].replace(',', '.'));
+                        const total = parseFloat(order.total) || 0;
+                        const changeToReturn = changeFor - total;
+                        return { type: 'change', amount: changeToReturn, changeFor: changeFor };
+                    }
+
+                    // Chercher dans delivery_instructions
+                    const instrMatch = instructions.match(/Monnaie pour (\d+(?:[.,]\d+)?)/i);
+                    if (instrMatch) {
+                        const changeFor = parseFloat(instrMatch[1].replace(',', '.'));
+                        const total = parseFloat(order.total) || 0;
+                        const changeToReturn = changeFor - total;
+                        return { type: 'change', amount: changeToReturn, changeFor: changeFor };
+                    }
+
+                    // Appoint
+                    if (notes.includes("l'appoint") || notes.includes("monnaie exacte") || instructions.includes("monnaie exacte")) {
+                        return { type: 'exact' };
+                    }
+
+                    return null;
+                })();
+
+                // Box Code promo (si applicable)
+                const promoInfo = order.promo_code ? {
+                    code: order.promo_code,
+                    type: order.promo_discount_type,
+                    value: order.promo_discount_value,
+                    amount: order.promo_discount_amount
+                } : null;
+
+                if (changeInfo || promoInfo) {
+                    html += `<div style="display: grid; grid-template-columns: ${changeInfo && promoInfo ? '1fr 1fr' : '1fr'}; gap: 12px; margin-bottom: 20px;">`;
+
+                    if (changeInfo) {
+                        if (changeInfo.type === 'change') {
+                            html += `
+                                <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #a78bfa;">
+                                    <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Monnaie à rendre</div>
+                                    <div style="font-size: 14px; color: white; font-weight: 600;">
+                                        <i class="fas fa-coins" style="color: #a78bfa;"></i> ${changeInfo.amount.toFixed(2).replace('.', ',')} ${currency}
+                                    </div>
+                                    <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">
+                                        Client paie avec ${changeInfo.changeFor.toFixed(2).replace('.', ',')} ${currency}
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #10b981;">
+                                    <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Monnaie</div>
+                                    <div style="font-size: 14px; color: white; font-weight: 600;">
+                                        <i class="fas fa-check-circle" style="color: #10b981;"></i> Client a l'appoint
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    if (promoInfo) {
+                        const discountDisplay = promoInfo.type === 'percent'
+                            ? `-${promoInfo.value}%`
+                            : `-${parseFloat(promoInfo.value).toFixed(2).replace('.', ',')} ${currency}`;
+                        html += `
+                            <div style="padding: 12px; background: #2a2a3e; border-radius: 10px; border-left: 3px solid #f472b6;">
+                                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Code Promo</div>
+                                <div style="font-size: 14px; color: white; font-weight: 600;">
+                                    <i class="fas fa-tag" style="color: #f472b6;"></i> ${promoInfo.code}
+                                </div>
+                                <div style="font-size: 11px; color: #f472b6; margin-top: 4px; font-weight: 600;">
+                                    ${discountDisplay}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    html += `</div>`;
+                }
+
                 // Précommande (date/heure) pour "À emporter"
                 if (order.preorder_date || order.preorder_time) {
                     let preorderDisplay = '';
