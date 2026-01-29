@@ -1088,7 +1088,7 @@ if (isset($_GET['export'])) {
                     <!-- Total + Fidélité -->
                     <div style="margin-bottom: 12px; padding: 12px; background: #0f172a; border-radius: 12px; border: 2px solid <?php echo $primaryColor; ?>;">
                         <div style="font-size: 22px; font-weight: 800; color: <?php echo $primaryColor; ?>; text-align: center;">
-                            <i class="fas fa-coins" style="font-size: 18px; margin-right: 4px;"></i><?php echo number_format($order['total'] ?? 0, 0); ?> <?= CURRENCY ?>
+                            <i class="fas fa-coins" style="font-size: 18px; margin-right: 4px;"></i><?php echo number_format($order['total'] ?? 0, 2, ',', ' '); ?> <?= CURRENCY ?>
                         </div>
                         <?php if (!empty($order['loyalty_reward_id']) || !empty($order['loyalty_code'])): ?>
                             <div style="text-align: center; margin-top: 6px; font-size: 11px; color: #f59e0b; font-weight: 700; background: rgba(245,158,11,0.1); padding: 4px 8px; border-radius: 6px; display: inline-block; width: 100%;">
@@ -2186,7 +2186,7 @@ if (isset($_GET['export'])) {
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>; font-size: 14px;"><?php echo number_format($order['total'] ?? 0, 0); ?> <?= CURRENCY ?></div>
+                            <div style="font-weight: bold; color: <?php echo $primaryColor; ?>; font-size: 14px;"><?php echo number_format($order['total'] ?? 0, 2, ',', ' '); ?> <?= CURRENCY ?></div>
                             <span style="background: #10b98122; color: #10b981; padding: 2px 8px; border-radius: 10px; font-size: 9px;"><i class="fas fa-check"></i> Terminée</span>
                         </div>
                     </div>

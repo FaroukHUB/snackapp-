@@ -190,35 +190,44 @@ switch ($action) {
         // Récupérer le nom du restaurant
         $restaurant = getCurrentRestaurant();
         $restaurantName = $restaurant['name'] ?? 'Restaurant';
+        $restaurantCity = $restaurant['city'] ?? $restaurant['address'] ?? '';
+
+        // Formater le numéro de téléphone pour lien cliquable
+        $customerPhone = $order['customer_phone'] ?? 'N/A';
+        $phoneClean = preg_replace('/[^0-9+]/', '', $customerPhone);
 
         // Générer le message WhatsApp
         $message = "🍽️ *NOUVELLE LIVRAISON - {$restaurantName}*\n\n";
 
         // ========== CLIENT ==========
         $message .= "👤 *Client:* " . ($order['customer_name'] ?? 'N/A') . "\n";
-        $message .= "📞 *Tel:* " . ($order['customer_phone'] ?? 'N/A') . "\n\n";
+        $message .= "📞 *Tel:* {$customerPhone}\n";
+        // Lien cliquable pour appeler
+        $message .= "📱 Appeler: https://wa.me/{$phoneClean}\n\n";
 
         // ========== ADRESSE ==========
         $notes = $order['notes'] ?? '';
-        $isDelivery = str_contains($notes, 'LIVRAISON');
+        $deliveryAddress = $order['delivery_address'] ?? null;
+        $isDelivery = str_contains($notes, 'LIVRAISON') || !empty($deliveryAddress);
 
         if ($isDelivery) {
-            // Récupérer la ville du restaurant pour Google Maps
-            $restaurantCity = $restaurant['city'] ?? $restaurant['address'] ?? '';
-
-            // Extraire l'adresse depuis les notes
-            if (preg_match('/Adresse:\s*(.+?)(?:\n|$)/i', $notes, $matches)) {
+            // Utiliser delivery_address si disponible, sinon extraire des notes
+            $address = $deliveryAddress;
+            if (empty($address) && preg_match('/Adresse:\s*(.+?)(?:\n|$)/i', $notes, $matches)) {
                 $address = trim($matches[1]);
-                $message .= "📍 *Adresse de livraison:*\n";
-                $message .= $address . "\n";
+            }
 
-                // Lien Google Maps (utiliser l'adresse + ville du restaurant)
+            if (!empty($address)) {
+                $message .= "📍 *ADRESSE DE LIVRAISON:*\n";
+                $message .= "*{$address}*\n";
+
+                // Lien Google Maps cliquable
                 $searchAddress = $restaurantCity ? "{$address}, {$restaurantCity}" : $address;
                 $addressEncoded = urlencode($searchAddress);
-                $message .= "🗺️ https://www.google.com/maps/search/?api=1&query=" . $addressEncoded . "\n\n";
+                $message .= "🗺️ *Ouvrir dans Maps:*\nhttps://www.google.com/maps/search/?api=1&query=" . $addressEncoded . "\n\n";
             } else {
                 // Fallback: afficher toutes les notes si adresse pas trouvée
-                $message .= "📍 *Adresse:*\n" . $notes . "\n\n";
+                $message .= "📍 *Infos:*\n" . $notes . "\n\n";
             }
         }
 
@@ -233,7 +242,7 @@ switch ($action) {
                 $price = $item['price'] ?? 0;
 
                 $message .= "*{$qty}x {$name}*\n";
-                $message .= "   " . number_format($price * $qty, 0, '', ' ') . " " . CURRENCY . "\n";
+                $message .= "   " . number_format($price * $qty, 2, ',', ' ') . " " . CURRENCY . "\n";
 
                 // Options sélectionnées (Ifri, Croissant, etc.)
                 if (!empty($item['selected_options']) && is_array($item['selected_options'])) {
@@ -249,7 +258,7 @@ switch ($action) {
                     foreach ($item['supplements'] as $sup) {
                         $supName = $sup['name'] ?? '';
                         $supPrice = $sup['price'] ?? 0;
-                        $message .= "   + {$supName} (+" . number_format($supPrice, 0, '', ' ') . " " . CURRENCY . ")\n";
+                        $message .= "   + {$supName} (+" . number_format($supPrice, 2, ',', ' ') . " " . CURRENCY . ")\n";
                     }
                 }
 
@@ -264,7 +273,7 @@ switch ($action) {
 
         $total = $order['total'] ?? 0;
         $message .= "━━━━━━━━━━━━━━━━\n";
-        $message .= "💰 *TOTAL: " . number_format($total, 0, '', ' ') . " " . CURRENCY . "*\n\n";
+        $message .= "💰 *TOTAL: " . number_format($total, 2, ',', ' ') . " " . CURRENCY . "*\n\n";
 
         // ========== PAIEMENT ==========
         $message .= "💳 *PAIEMENT:*\n";
@@ -276,8 +285,8 @@ switch ($action) {
             $changeFor = (int)$matches[1];
             $toReturn = $changeFor - $total;
             $message .= "💵 *À PRÉPARER:*\n";
-            $message .= "   • Client donne: " . number_format($changeFor, 0, '', ' ') . " " . CURRENCY . "\n";
-            $message .= "   • *À rendre: " . number_format($toReturn, 0, '', ' ') . " " . CURRENCY . "*\n";
+            $message .= "   • Client donne: " . number_format($changeFor, 2, ',', ' ') . " " . CURRENCY . "\n";
+            $message .= "   • *À rendre: " . number_format($toReturn, 2, ',', ' ') . " " . CURRENCY . "*\n";
         } else {
             $message .= "💵 Espèces (montant exact non précisé)\n";
         }
