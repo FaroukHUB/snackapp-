@@ -1636,15 +1636,16 @@
                 this.selectedCityName = cityName;
 
                 // Mettre à jour l'UI
-                document.querySelectorAll('.city-option-card').forEach(card => {
-                    card.classList.remove('selected');
-                    if (card.dataset.cityId == cityId) {
-                        card.classList.add('selected');
-                        card.querySelector('input[type="radio"]').checked = true;
+                document.querySelectorAll('.city-chip').forEach(chip => {
+                    chip.classList.remove('selected');
+                    if (chip.dataset.cityId == cityId) {
+                        chip.classList.add('selected');
+                        const radio = chip.querySelector('input[type="radio"]');
+                        if (radio) radio.checked = true;
                     }
                 });
 
-                // Recalculer le total
+                // Recalculer le total avec frais de livraison
                 this.updateSummary();
             },
 
