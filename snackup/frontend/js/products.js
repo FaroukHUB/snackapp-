@@ -113,7 +113,9 @@ const Products = {
             let iconHtml;
             if (iconImage) {
                 // Image badge (style hashtagbangers.fr)
-                iconHtml = `<img src="${iconImage}" alt="" class="category-icon-img">`;
+                // Ajouter ../../ si le chemin ne commence pas par http ou /
+                const imgSrc = iconImage.startsWith('http') || iconImage.startsWith('/') ? iconImage : `../../${iconImage}`;
+                iconHtml = `<img src="${imgSrc}" alt="" class="category-icon-img">`;
             } else if (icon.startsWith("fa-")) {
                 iconHtml = `<i class="fas ${icon}"></i>`;
             } else {
@@ -355,7 +357,8 @@ const Products = {
                 let iconHtml;
                 if (iconImage) {
                     // Image badge (style hashtagbangers.fr)
-                    iconHtml = `<img src="${iconImage}" alt="" class="sidebar-icon-img">`;
+                    const imgSrc = iconImage.startsWith('http') || iconImage.startsWith('/') ? iconImage : `../../${iconImage}`;
+                    iconHtml = `<img src="${imgSrc}" alt="" class="sidebar-icon-img">`;
                 } else if (icon.startsWith("fa-")) {
                     iconHtml = `<i class="fas ${icon}"></i>`;
                 } else {

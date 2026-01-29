@@ -182,24 +182,58 @@ const App = {
     },
 
     /**
-     * Setup sticky category navigation shadow on scroll
+     * Setup sticky category navigation with fixed position fallback
+     * Plus robuste que CSS sticky qui peut casser avec overflow:hidden
      */
     setupStickyNav() {
         const categorySection = document.getElementById('categoryIconsSection');
         if (!categorySection) return;
 
+        // Seulement sur mobile (< 1025px)
+        if (window.innerWidth >= 1025) return;
+
+        const heroSection = document.querySelector('.hero-section');
+        const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 70;
+
+        // Créer un placeholder pour maintenir la hauteur quand fixed
+        const placeholder = document.createElement('div');
+        placeholder.id = 'categorySectionPlaceholder';
+        placeholder.style.display = 'none';
+        categorySection.parentNode.insertBefore(placeholder, categorySection.nextSibling);
+
+        let isFixed = false;
         let ticking = false;
+        let sectionTop = null;
+
+        const calculateSectionTop = () => {
+            // Calculer la position originale de la section
+            if (!isFixed) {
+                sectionTop = categorySection.getBoundingClientRect().top + window.scrollY;
+            }
+        };
 
         const updateStickyState = () => {
-            const heroSection = document.querySelector('.hero-section');
-            const heroBottom = heroSection ? heroSection.getBoundingClientRect().bottom : 0;
+            calculateSectionTop();
 
-            // Add shadow when hero is scrolled past
-            if (heroBottom <= 70) {
+            const scrollY = window.scrollY;
+            const triggerPoint = sectionTop - headerHeight;
+
+            if (scrollY >= triggerPoint && !isFixed) {
+                // Activer le mode fixed
+                isFixed = true;
+                const sectionHeight = categorySection.offsetHeight;
+                placeholder.style.height = sectionHeight + 'px';
+                placeholder.style.display = 'block';
+                categorySection.classList.add('is-fixed');
                 categorySection.classList.add('scrolled');
-            } else {
+            } else if (scrollY < triggerPoint && isFixed) {
+                // Désactiver le mode fixed
+                isFixed = false;
+                placeholder.style.display = 'none';
+                categorySection.classList.remove('is-fixed');
                 categorySection.classList.remove('scrolled');
             }
+
             ticking = false;
         };
 
@@ -210,7 +244,22 @@ const App = {
             }
         }, { passive: true });
 
+        // Recalculer sur resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1025) {
+                // Desktop: désactiver le fixed
+                isFixed = false;
+                placeholder.style.display = 'none';
+                categorySection.classList.remove('is-fixed');
+                categorySection.classList.remove('scrolled');
+            } else {
+                sectionTop = null; // Reset pour recalculer
+                updateStickyState();
+            }
+        });
+
         // Initial check
+        calculateSectionTop();
         updateStickyState();
     }
 };
