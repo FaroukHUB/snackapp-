@@ -23,6 +23,9 @@ function debugLog($message) {
     file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
 }
 
+// 🐛 TEST IMMEDIAT: Écrire au démarrage pour vérifier que le fichier peut être créé
+debugLog('=== ORDERS.PHP STARTED === Action: ' . ($_GET['action'] ?? $_POST['action'] ?? 'unknown'));
+
 // 🐛 DEBUG: Activer les erreurs temporairement
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
