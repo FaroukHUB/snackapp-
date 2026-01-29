@@ -718,9 +718,15 @@ const Products = {
             }
             const desc = product.description ? product.description.substring(0, 100) + (product.description.length > 100 ? '...' : '') : '';
 
-            // Badge bundle pour pizzas
+            // Badge bundle pour pizzas - vérifier nom de catégorie ET slug
             const catNameLower = String(categoryName || '').toLowerCase();
-            const isPizza = catNameLower.includes('pizza');
+            const catSlugLower = String(categoryId || '').toLowerCase();
+            const isPizza = catNameLower.includes('pizza')
+                || catSlugLower.includes('pizza')
+                || catNameLower.includes('tomate')
+                || catNameLower.includes('crème')
+                || catNameLower.includes('creme')
+                || catNameLower.includes('originale');
             const bundleBadge = isPizza ? `
                 <div class="bundle-offer-badge">
                     <span class="bundle-icon">🔥</span>
