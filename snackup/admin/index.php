@@ -2827,7 +2827,7 @@ if (isset($_GET['export'])) {
             <!-- Paramètres -->
             <div class="card" style="border-left: 4px solid #8b5cf6;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-cog" style="color: #8b5cf6;"></i> Paramètres</h3>
-                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Devise, zones de livraison, programme fidélité, méthodes de paiement.</p>
+                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Devise, zones de livraison, méthodes de paiement.</p>
                 <a href="settings-manager.php" class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);"><i class="fas fa-sliders-h"></i> Configurer</a>
             </div>
 
@@ -3001,7 +3001,7 @@ if (isset($_GET['export'])) {
                         </label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <label style="color: #9ca3af;">Points par 100 <?= CURRENCY ?> :</label>
+                        <label style="color: #9ca3af;">Points par 1 <?= CURRENCY ?> :</label>
                         <input type="number" id="pointsPerEuro" value="<?= $loyaltyConfig['points_per_euro'] ?? 1 ?>" min="1" max="100" onchange="updateLoyaltyConfig()" style="width: 70px; padding: 8px; background: #1e293b; border: 1px solid #374151; border-radius: 8px; color: white; text-align: center;">
                     </div>
                 </div>

@@ -174,25 +174,6 @@ $csrfToken = getCsrfToken();
           </div>
         </div>
 
-        <h3 class="panel-title" style="margin-top:32px"><i class="fas fa-star"></i> Programme fidélité</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Euros par point</label>
-            <input type="number" name="loyalty_euro_per_point" id="loyaltyEuroPerPoint" step="0.01" min="0" placeholder="10">
-            <div class="hint">Combien d'euros = 1 point (ex: 10€ = 1 point)</div>
-          </div>
-          <div class="form-group">
-            <label>Valeur d'un point (€)</label>
-            <input type="number" name="loyalty_point_value" id="loyaltyPointValue" step="0.01" min="0" placeholder="1">
-          </div>
-        </div>
-        <div class="form-group">
-          <div class="toggle-group">
-            <div class="toggle" id="toggleLoyalty" data-field="loyalty_enabled"></div>
-            <span class="toggle-label">Programme fidélité activé</span>
-          </div>
-        </div>
-
         <h3 class="panel-title" style="margin-top:32px"><i class="fas fa-shopping-cart"></i> Commandes</h3>
         <div class="form-row">
           <div class="form-group">
@@ -395,12 +376,9 @@ $csrfToken = getCsrfToken();
       $('#currencyPosition').value = settings.currency_position || 'after';
       $('#countryCode').value = settings.country_code || '+33';
       $('#countryName').value = settings.country_name || 'France';
-      $('#loyaltyEuroPerPoint').value = settings.loyalty_euro_per_point || 10;
-      $('#loyaltyPointValue').value = settings.loyalty_point_value || 1;
       $('#minOrderAmount').value = settings.min_order_amount || 0;
       $('#freeDeliveryThreshold').value = settings.free_delivery_threshold || '';
 
-      setupToggle($('#toggleLoyalty'), settings.loyalty_enabled == 1);
       setupToggle($('#toggleDelivery'), settings.delivery_enabled == 1);
       setupToggle($('#togglePickup'), settings.pickup_enabled == 1);
       setupToggle($('#toggleCash'), paymentSettings.cash_enabled == 1);
@@ -434,9 +412,6 @@ $csrfToken = getCsrfToken();
         currency_position: $('#currencyPosition').value,
         country_code: $('#countryCode').value,
         country_name: $('#countryName').value,
-        loyalty_euro_per_point: parseFloat($('#loyaltyEuroPerPoint').value) || 10,
-        loyalty_point_value: parseFloat($('#loyaltyPointValue').value) || 1,
-        loyalty_enabled: $('#toggleLoyalty').classList.contains('active') ? 1 : 0,
         delivery_enabled: $('#toggleDelivery').classList.contains('active') ? 1 : 0,
         pickup_enabled: $('#togglePickup').classList.contains('active') ? 1 : 0,
         min_order_amount: parseFloat($('#minOrderAmount').value) || 0,
