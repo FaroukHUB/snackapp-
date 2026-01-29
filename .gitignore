@@ -1,6 +1,6 @@
 *.zip
 admin-panel-v2/
-images/uploads/
+# images/uploads/ - autorisé pour le repo
 snackup/admin/api/test-debug.php
 snackup/test-error-log.php
 # Runtime / prod
