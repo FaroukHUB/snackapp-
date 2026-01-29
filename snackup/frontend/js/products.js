@@ -259,7 +259,7 @@ const Products = {
             // Si pricePrefix existe (ex: "À partir de 500 Da"), afficher SEULEMENT ça
             if (product.pricePrefix) {
                 const priceText = product.pricePrefix;
-                const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
+                const desc = product.description ? product.description.substring(0, 100) + (product.description.length > 100 ? '...' : '') : '';
                 return `
                     <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
                         ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
@@ -295,7 +295,7 @@ const Products = {
             }
 
             const priceText = Config.formatPrice(price);
-            const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
+            const desc = product.description ? product.description.substring(0, 100) + (product.description.length > 100 ? '...' : '') : '';
             return `
                 <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
                     ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
@@ -715,7 +715,7 @@ const Products = {
 
                 priceText = Config.formatPrice(price);
             }
-            const desc = product.description ? product.description.substring(0, 60) + (product.description.length > 60 ? '...' : '') : '';
+            const desc = product.description ? product.description.substring(0, 100) + (product.description.length > 100 ? '...' : '') : '';
 
             // Badge bundle pour pizzas
             const catNameLower = String(categoryName || '').toLowerCase();
