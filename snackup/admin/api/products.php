@@ -1170,56 +1170,44 @@ if ($useMySQL) {
             break;
         */
 
-        // Featured products section
+        // Featured products section - sauvegarde en DB
         case 'update_featured':
             error_log('[PRODUCTS API] ========== update_featured START ==========');
-            error_log('[PRODUCTS API] Input reçu: ' . json_encode($input));
 
             $featuredData = $input['featured'] ?? null;
-            error_log('[PRODUCTS API] featuredData: ' . json_encode($featuredData));
-
             if (!$featuredData || !is_array($featuredData)) {
-                error_log('[PRODUCTS API] ❌ Données featured invalides');
                 jsonError('Données featured invalides');
             }
 
-            $featured = [
-                'enabled' => $featuredData['enabled'] ?? true,
-                'title' => trim($featuredData['title'] ?? 'Sélection pour vous'),
-                'subtitle' => trim($featuredData['subtitle'] ?? 'Nos produits les plus appréciés'),
-                'items' => $featuredData['items'] ?? []
-            ];
-            error_log('[PRODUCTS API] featured construit: ' . json_encode($featured));
+            $enabled = $featuredData['enabled'] ?? true;
+            $title = trim($featuredData['title'] ?? 'Sélection pour vous');
+            $subtitle = trim($featuredData['subtitle'] ?? 'Nos produits les plus appréciés');
+            $items = $featuredData['items'] ?? [];
 
-            // Sauvegarder dans menu.json
-            $menuPath = getMenuJsonPath();
-            error_log('[PRODUCTS API] menuPath: ' . $menuPath);
+            // Convertir items en array d'entiers
+            $productIds = array_map('intval', array_filter($items, 'is_numeric'));
 
-            if (file_exists($menuPath)) {
-                error_log('[PRODUCTS API] ✅ menu.json existe');
-                $menuData = json_decode(file_get_contents($menuPath), true);
-                if ($menuData) {
-                    error_log('[PRODUCTS API] ✅ menu.json décodé correctement');
-                    error_log('[PRODUCTS API] AVANT écriture - featured ancien: ' . json_encode($menuData['featured'] ?? []));
+            try {
+                // Sauvegarder les paramètres dans featured_settings
+                MenuRepository::updateFeaturedSettings($enabled, $title, $subtitle);
 
-                    $menuData['featured'] = $featured;
-                    $written = file_put_contents($menuPath, json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                // Sauvegarder les produits featured
+                MenuRepository::updateFeaturedProducts($productIds);
 
-                    error_log('[PRODUCTS API] ✅ file_put_contents retourné: ' . ($written !== false ? $written . ' bytes' : 'ÉCHEC'));
+                error_log('[PRODUCTS API] ✅ Featured sauvegardé en DB: ' . count($productIds) . ' produits');
 
-                    // Vérifier que le fichier a bien été modifié
-                    clearstatcache(true, $menuPath);
-                    $verif = json_decode(file_get_contents($menuPath), true);
-                    error_log('[PRODUCTS API] APRÈS écriture - featured nouveau: ' . json_encode($verif['featured'] ?? []));
-                } else {
-                    error_log('[PRODUCTS API] ❌ Échec décodage menu.json');
-                }
-            } else {
-                error_log('[PRODUCTS API] ❌ menu.json introuvable');
+                jsonSuccess([
+                    'featured' => [
+                        'enabled' => $enabled,
+                        'title' => $title,
+                        'subtitle' => $subtitle,
+                        'items' => $productIds
+                    ]
+                ]);
+            } catch (Exception $e) {
+                error_log('[PRODUCTS API] ❌ Erreur featured: ' . $e->getMessage());
+                jsonError('Erreur sauvegarde featured: ' . $e->getMessage());
             }
-
-            error_log('[PRODUCTS API] ========== update_featured END ==========');
-            jsonSuccess(['featured' => $featured]);
             break;
 
         default:
