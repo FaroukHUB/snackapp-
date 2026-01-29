@@ -761,10 +761,20 @@ ul {
    PRODUCT SECTION
    ============================================ */
 .product-section {
-    margin-bottom: 64px;
-    padding-bottom: 48px;
-    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: 0;
+    padding: 32px 24px 40px;
+    border-bottom: none;
     scroll-margin-top: calc(var(--header-height) + var(--sticky-nav-height) + 24px);
+    border-radius: 0;
+}
+
+/* Effet zebra - fond gris clair une catégorie sur deux */
+.product-section:nth-child(even) {
+    background-color: #f5f5f5;
+}
+
+.product-section:nth-child(odd) {
+    background-color: #ffffff;
 }
 
 .product-section:last-child {
@@ -785,6 +795,12 @@ ul {
 .product-section h2 i {
     color: var(--success);
     font-size: 20px;
+}
+
+/* Support des emojis comme icônes de catégorie */
+.product-section h2 .category-emoji {
+    font-size: 24px;
+    line-height: 1;
 }
 
 .products-grid {

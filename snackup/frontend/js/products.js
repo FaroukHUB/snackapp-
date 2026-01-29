@@ -659,10 +659,18 @@ const Products = {
         // Render categories avec insertion formules après Pizza originale
         let html = '';
         nonEmptyCategories.forEach((cat, index) => {
+            // Récupérer l'icône - peut être une classe FontAwesome ou un emoji
+            const iconValue = icons[cat.id] || 'fa-utensils';
+            // Si l'icône commence par "fa-", c'est FontAwesome, sinon c'est un emoji
+            const isEmoji = !iconValue.startsWith('fa-');
+            const iconHtml = isEmoji
+                ? `<span class="category-emoji">${iconValue}</span>`
+                : `<i class="fas ${iconValue}"></i>`;
+
             html += `
                 <section class="product-section" id="${cat.id}">
                     <h2>
-                        <i class="fas ${icons[cat.id] || 'fa-utensils'}"></i>
+                        ${iconHtml}
                         ${cat.name}
                     </h2>
                     <div class="products-grid">
