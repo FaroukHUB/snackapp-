@@ -523,34 +523,36 @@ const Products = {
                 ? `<p class="formule-description">${escapeHtml(formule.description)}</p>`
                 : '';
 
+            // Utiliser exactement les mêmes classes que product-card-new
             return `
-                <div class="formule-card" onclick="Products.openFormuleModal('${escapeHtml(formule.id)}')">
-                    ${imageHtml}
-                    <div class="formule-card-content">
-                        <h3 class="formule-name">${escapeHtml(formule.name)}</h3>
-                        ${descriptionHtml}
-                        <div class="formule-footer">
-                            <div class="formule-price">
-                                <span class="current">${Config.formatPrice(formule.price)}</span>
-                                ${formule.originalPrice ? `<span class="original">${Config.formatPrice(formule.originalPrice)}</span>` : ''}
-                            </div>
-                            <button type="button" class="formule-cta-btn" data-add-formule="${escapeHtml(formule.id)}">
-                                Ajouter
+                <article class="product-card-new" onclick="Products.openFormuleModal('${escapeHtml(formule.id)}')">
+                    ${formule.badge ? `<span class="product-badge-new">${escapeHtml(formule.badge)}</span>` : ''}
+                    ${hasImage
+                        ? `<img src="../../${escapeHtml(formule.image)}" alt="${escapeHtml(formule.name)}" class="product-image-new" loading="lazy" onerror="this.style.display='none'">`
+                        : `<div style="width:100%;height:120px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;"><i class="fas fa-fire" style="font-size:40px;color:var(--primary);"></i></div>`
+                    }
+                    <div class="product-content-new">
+                        <h3 class="product-name-new">${escapeHtml(formule.name)}</h3>
+                        ${formule.description ? `<p class="product-desc-new">${escapeHtml(formule.description)}</p>` : ''}
+                        <div class="product-footer-new">
+                            <span class="product-price-new">${Config.formatPrice(formule.price)}</span>
+                            <button class="product-btn-new" onclick="event.stopPropagation(); Products.openFormuleModal('${escapeHtml(formule.id)}')">
+                                <span>Ajouter</span>
                             </button>
                         </div>
                     </div>
-                </div>
+                </article>
             `;
         }).join('');
 
-        // Retourner la section complète avec styles alignés sur product-section
+        // Retourner la section complète - utiliser products-grid comme les autres catégories
         return `
             <section class="product-section formules-section" id="formulesSection">
                 <h2>
                     <i class="fas fa-fire"></i>
                     Nos Formules
                 </h2>
-                <div class="formules-grid">
+                <div class="products-grid">
                     ${cardsHtml}
                 </div>
             </section>
