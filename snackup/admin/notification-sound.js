@@ -59,8 +59,21 @@ class OrderNotificationSystem {
     /* =======================
        LECTURE / ARRÊT
        ======================= */
-    playSound() {
-        if (this.isPlaying || !this.audioEnabled) return;
+    async playSound() {
+        if (this.isPlaying) return;
+
+        // Activer l'audio automatiquement si pas encore fait
+        if (!this.audioEnabled) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioCtx();
+                await ctx.resume();
+                this.audioEnabled = true;
+                console.log('[Audio] ✅ Activé automatiquement lors nouvelle commande');
+            } catch (e) {
+                console.warn('[Audio] Activation auto échouée:', e);
+            }
+        }
 
         this.isPlaying = true;
 
