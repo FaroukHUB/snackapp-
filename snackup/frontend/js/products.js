@@ -109,6 +109,11 @@ const Products = {
             const iconImage = cat.icon_image;
             const colorClass = index % 2 === 0 ? 'color-primary' : 'color-black';
 
+            // Retirer "Pizza " ou "Pizzas " du nom pour affichage compact
+            let displayName = cat.name
+                .replace(/^Pizzas?\s+/i, '')  // Retire "Pizza " ou "Pizzas " au début
+                .trim();
+
             // Priority: icon_image > emoji/text > FontAwesome
             let iconHtml;
             if (iconImage) {
@@ -128,7 +133,7 @@ const Products = {
                     <div class="category-icon-circle ${colorClass}${iconImage ? ' has-image' : ''}">
                         ${iconHtml}
                     </div>
-                    <span class="category-icon-name">${cat.name}</span>
+                    <span class="category-icon-name">${displayName}</span>
                 </div>
             `;
         });
