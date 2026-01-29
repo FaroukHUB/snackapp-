@@ -138,6 +138,20 @@ const Products = {
             `;
         });
 
+        // Ajouter "Nos Formules" si des formules sont disponibles
+        const formules = Config.getAvailableFormules();
+        if (formules && formules.length > 0) {
+            const formulesColorClass = nonEmptyCategories.length % 2 === 0 ? 'color-primary' : 'color-black';
+            html += `
+                <div class="category-icon-item" data-category="formules" onclick="Products.scrollToFormules()">
+                    <div class="category-icon-circle ${formulesColorClass}">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <span class="category-icon-name">Formules</span>
+                </div>
+            `;
+        }
+
         container.innerHTML = html;
     },
 
@@ -179,6 +193,29 @@ const Products = {
         if (firstVisibleSection) {
             setTimeout(() => {
                 firstVisibleSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    },
+
+    /**
+     * Scroll to formules section
+     */
+    scrollToFormules() {
+        // Update active state on icons
+        document.querySelectorAll('.category-icon-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.category === 'formules');
+        });
+
+        // Show all sections (formules is part of the main flow)
+        document.querySelectorAll('.product-section, .featured-section').forEach(section => {
+            section.style.display = '';
+        });
+
+        // Scroll to formules section
+        const formulesSection = document.getElementById('formulesSection');
+        if (formulesSection) {
+            setTimeout(() => {
+                formulesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
         }
     },
