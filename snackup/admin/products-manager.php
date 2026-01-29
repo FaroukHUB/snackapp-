@@ -2122,7 +2122,9 @@ $csrfToken = getCsrfToken();
     function money(v){
       const n = Number(v);
       if (!Number.isFinite(n)) return "—";
-      return n.toFixed(0) + " " + CURRENCY;
+      // Afficher les décimales si nécessaire (ex: 7,50€), sinon entier (ex: 8€)
+      const formatted = n.toFixed(2).replace(/\.00$/, '').replace('.', ',');
+      return formatted + " " + CURRENCY;
     }
 
     function getCategories(){
