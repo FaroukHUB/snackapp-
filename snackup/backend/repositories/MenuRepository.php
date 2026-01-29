@@ -438,14 +438,14 @@ class MenuRepository {
     }
 
     /**
-     * Supprime un produit (désactivation)
+     * Supprime un produit définitivement
      */
     public static function deleteProduct($productId) {
         $pdo = Database::getInstance();
 
+        // Suppression définitive (hard delete)
         $stmt = $pdo->prepare("
-            UPDATE products
-            SET status = 'unavailable'
+            DELETE FROM products
             WHERE id = ? AND restaurant_id = ?
         ");
 
