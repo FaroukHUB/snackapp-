@@ -3,21 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programme Fidélité | L'Atelier Pizza</title>
-    <meta name="description" content="Rejoignez le programme fidélité L'Atelier Pizza ! Cumulez 1 point par euro dépensé et débloquez des récompenses : tiramisu, pizza, boissons offerts.">
-    <meta name="keywords" content="programme fidélité pizza, carte fidélité, récompenses restaurant, points fidélité atelier pizza">
+    <title>Programme Fidelite | L'Atelier Pizza</title>
+    <meta name="description" content="Rejoignez le programme fidelite L'Atelier Pizza ! Cumulez 1 point par euro depense et debloquez des recompenses : tiramisu, pizza, boissons offerts.">
+    <meta name="keywords" content="programme fidelite pizza, carte fidelite, recompenses restaurant, points fidelite atelier pizza">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Programme Fidélité - L'Atelier Pizza">
-    <meta property="og:description" content="Cumulez des points à chaque commande et gagnez des récompenses exclusives !">
+    <meta property="og:title" content="Programme Fidelite - L'Atelier Pizza">
+    <meta property="og:description" content="Cumulez des points a chaque commande et gagnez des recompenses exclusives !">
     <meta property="og:locale" content="fr_FR">
-
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Programme Fidélité - L'Atelier Pizza">
-    <meta name="twitter:description" content="Cumulez des points et gagnez des récompenses exclusives !">
 
     <!-- Favicon & Theme -->
     <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
@@ -26,11 +21,575 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/pages.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #e63946;
+            --primary-dark: #d62839;
+            --black: #111111;
+            --dark-bg: #1a1a1a;
+            --card-bg: #222222;
+            --text-light: #ffffff;
+            --text-muted: #9ca3af;
+            --gold: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--black);
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .loyalty-header {
+            background: linear-gradient(180deg, var(--dark-bg) 0%, var(--black) 100%);
+            padding: 20px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #333;
+        }
+
+        .header-content {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 20px;
+            padding: 8px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .cart-btn {
+            position: relative;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 20px;
+            padding: 8px;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--primary);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Container */
+        .loyalty-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 16px 100px;
+        }
+
+        /* Points Section */
+        .points-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .points-title {
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .points-value {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .points-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Phone Input */
+        .phone-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .phone-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+
+        .phone-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .phone-input {
+            flex: 1;
+            padding: 14px 16px;
+            background: var(--dark-bg);
+            border: 2px solid #333;
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .phone-input:focus {
+            border-color: var(--primary);
+        }
+
+        .phone-input::placeholder {
+            color: #666;
+        }
+
+        .phone-btn {
+            padding: 14px 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .phone-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .phone-btn:active {
+            transform: scale(0.95);
+        }
+
+        .phone-error {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .phone-success {
+            color: #22c55e;
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* Rewards Section */
+        .rewards-section {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--primary);
+        }
+
+        /* Rewards Grid */
+        .rewards-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .reward-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .reward-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .reward-card.locked {
+            opacity: 0.6;
+        }
+
+        .reward-card.locked .reward-image {
+            filter: blur(4px) grayscale(50%);
+        }
+
+        .reward-image-container {
+            position: relative;
+            height: 140px;
+            overflow: hidden;
+        }
+
+        .reward-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: filter 0.3s;
+        }
+
+        .reward-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .reward-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--black);
+            color: var(--gold);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .reward-badge i {
+            font-size: 10px;
+        }
+
+        .reward-lock {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--text-muted);
+        }
+
+        .reward-content {
+            padding: 16px;
+        }
+
+        .reward-name {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .reward-description {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .reward-action {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reward-action.available {
+            background: var(--primary);
+            color: white;
+        }
+
+        .reward-action.available:hover {
+            background: var(--primary-dark);
+        }
+
+        .reward-action.locked {
+            background: #333;
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .reward-action .points-needed {
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        /* Points Groups */
+        .points-group {
+            margin-bottom: 24px;
+        }
+
+        .points-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .points-group-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* How It Works */
+        .how-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .how-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .how-section h2 i {
+            color: var(--primary);
+        }
+
+        .steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .step-content p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Points Visual */
+        .points-visual {
+            background: var(--dark-bg);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .points-visual-item {
+            text-align: center;
+        }
+
+        .points-visual-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .points-visual-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .points-visual-equals {
+            font-size: 24px;
+            color: var(--text-muted);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            margin-bottom: 24px;
+        }
+
+        .faq-section h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .faq-section h2 i {
+            color: var(--primary);
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .faq-item summary {
+            padding: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .faq-item summary::after {
+            content: '+';
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .faq-item[open] summary::after {
+            content: '-';
+        }
+
+        .faq-item p {
+            padding: 0 16px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Back Button */
+        .back-to-menu {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .back-to-menu:hover {
+            background: #333;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-rewards {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-rewards i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #444;
+        }
+
+        .empty-rewards p {
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (min-width: 480px) {
+            .rewards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
 
     <!-- Schema.org FAQ -->
     <script type="application/ld+json">
@@ -40,10 +599,10 @@
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": "Comment créer mon compte fidélité ?",
+                "name": "Comment creer mon compte fidelite ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Votre compte est créé automatiquement avec votre numéro de téléphone lors de votre première commande. Pas besoin d'inscription !"
+                    "text": "Votre compte est cree automatiquement avec votre numero de telephone lors de votre premiere commande. Pas besoin d'inscription !"
                 }
             },
             {
@@ -51,15 +610,7 @@
                 "name": "Mes points expirent-ils ?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Vos points sont valables 12 mois à partir de votre dernière commande."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Combien de points gagne-t-on par euro ?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Vous gagnez 1 point par euro dépensé chez L'Atelier Pizza."
+                    "text": "Vos points sont valables 12 mois a partir de votre derniere commande."
                 }
             }
         ]
@@ -68,16 +619,12 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <a href="index.html" class="back-link">
+    <header class="loyalty-header">
+        <div class="header-content">
+            <a href="index.html" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <div class="logo">
-                <span class="logo-text">Programme Fidélité</span>
-            </div>
-        </div>
-        <div class="header-right">
+            <span class="header-title">Programme Fidelite</span>
             <a href="cart.html" class="cart-btn">
                 <i class="fas fa-shopping-bag"></i>
                 <span class="cart-badge" id="cartBadge">0</span>
@@ -85,159 +632,153 @@
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="page-content">
-        <!-- Hero Section -->
-        <section class="page-hero">
-            <div class="hero-icon">
-                <i class="fas fa-star"></i>
-            </div>
-            <h1>Programme Fidélité</h1>
-            <p>Cumulez des points à chaque commande et débloquez des récompenses exclusives</p>
+    <main class="loyalty-container">
+        <!-- Points Display -->
+        <section class="points-section" id="pointsSection">
+            <div class="points-title">Vos points fidelite</div>
+            <div class="points-value" id="pointsValue">--</div>
+            <div class="points-label">Entrez votre numero pour voir vos points</div>
         </section>
 
-        <!-- Comment ça marche -->
-        <section class="info-section">
-            <h2><i class="fas fa-question-circle"></i> Comment ça marche ?</h2>
-            <div class="steps-grid">
-                <div class="step-card">
+        <!-- Phone Input -->
+        <section class="phone-section">
+            <h3><i class="fas fa-mobile-alt"></i> Consulter mes points</h3>
+            <div class="phone-input-group">
+                <input type="tel" id="phoneInput" class="phone-input" placeholder="06 XX XX XX XX" maxlength="14">
+                <button id="checkPointsBtn" class="phone-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="phone-error" id="phoneError">Numero non trouve</div>
+            <div class="phone-success" id="phoneSuccess">Points charges !</div>
+        </section>
+
+        <!-- Rewards Section -->
+        <section class="rewards-section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-gift"></i> Recompenses</h2>
+            </div>
+
+            <div id="rewardsContainer">
+                <div class="empty-rewards">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Chargement des recompenses...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section class="how-section">
+            <h2><i class="fas fa-question-circle"></i> Comment ca marche ?</h2>
+            <div class="steps-list">
+                <div class="step-item">
                     <div class="step-number">1</div>
-                    <div class="step-icon"><i class="fas fa-pizza-slice"></i></div>
-                    <h3>Commandez</h3>
-                    <p>Passez votre commande en Click & Collect ou en livraison</p>
+                    <div class="step-content">
+                        <h4>Commandez</h4>
+                        <p>Passez votre commande en Click & Collect ou en livraison</p>
+                    </div>
                 </div>
-                <div class="step-card">
+                <div class="step-item">
                     <div class="step-number">2</div>
-                    <div class="step-icon"><i class="fas fa-coins"></i></div>
-                    <h3>Cumulez</h3>
-                    <p>Gagnez <strong>1 point</strong> par euro dépensé</p>
+                    <div class="step-content">
+                        <h4>Cumulez des points</h4>
+                        <p>Gagnez 1 point par euro depense a chaque commande</p>
+                    </div>
                 </div>
-                <div class="step-card">
+                <div class="step-item">
                     <div class="step-number">3</div>
-                    <div class="step-icon"><i class="fas fa-gift"></i></div>
-                    <h3>Profitez</h3>
-                    <p>Échangez vos points contre des récompenses</p>
+                    <div class="step-content">
+                        <h4>Echangez vos recompenses</h4>
+                        <p>Utilisez vos points pour debloquer des produits gratuits</p>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Points Visual -->
-        <section class="info-section highlight-section">
             <div class="points-visual">
-                <div class="points-item">
-                    <span class="points-value">1 €</span>
-                    <span class="points-label">dépensé</span>
+                <div class="points-visual-item">
+                    <div class="points-visual-value">1 EUR</div>
+                    <div class="points-visual-label">depense</div>
                 </div>
-                <div class="points-equals">=</div>
-                <div class="points-item accent">
-                    <span class="points-value">1</span>
-                    <span class="points-label">POINT</span>
+                <div class="points-visual-equals">=</div>
+                <div class="points-visual-item">
+                    <div class="points-visual-value">1 PT</div>
+                    <div class="points-visual-label">cumule</div>
                 </div>
-            </div>
-            <p class="points-example">
-                <i class="fas fa-lightbulb"></i>
-                Exemple : Une commande de <strong>15 €</strong> = <strong>15 points</strong> cumulés !
-            </p>
-        </section>
-
-        <!-- Récompenses -->
-        <section class="info-section">
-            <h2><i class="fas fa-gift"></i> Les Récompenses</h2>
-            <p class="section-desc">Échangez vos points contre ces récompenses exclusives</p>
-            <div class="rewards-grid">
-                <div class="reward-card">
-                    <div class="reward-badge">5 pts</div>
-                    <div class="reward-icon"><i class="fas fa-glass-whiskey"></i></div>
-                    <h3>Boisson offerte</h3>
-                    <p>Canette au choix</p>
-                </div>
-                <div class="reward-card">
-                    <div class="reward-badge">10 pts</div>
-                    <div class="reward-icon"><i class="fas fa-ice-cream"></i></div>
-                    <h3>Tiramisu offert</h3>
-                    <p>Notre tiramisu maison</p>
-                </div>
-                <div class="reward-card featured">
-                    <div class="reward-badge">15 pts</div>
-                    <div class="reward-icon"><i class="fas fa-pizza-slice"></i></div>
-                    <h3>Pizza + Boisson</h3>
-                    <p>Pizza au choix + 1 boisson</p>
-                </div>
-                <div class="reward-card">
-                    <div class="reward-badge">25 pts</div>
-                    <div class="reward-icon"><i class="fas fa-box-open"></i></div>
-                    <h3>Formule complète</h3>
-                    <p>Pizza + Dessert + Boisson</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- CTA -->
-        <section class="info-section cta-section">
-            <div class="cta-card">
-                <h2>Consultez vos points</h2>
-                <p>Accédez à votre carte de fidélité pour voir vos points et récompenses disponibles</p>
-                <a href="loyalty-card.php" class="btn-primary">
-                    <i class="fas fa-id-card"></i> Ma carte fidélité
-                </a>
             </div>
         </section>
 
         <!-- FAQ -->
-        <section class="info-section">
-            <h2><i class="fas fa-question"></i> Questions fréquentes</h2>
-            <div class="faq-list">
-                <details class="faq-item">
-                    <summary>Comment créer mon compte fidélité ?</summary>
-                    <p>Votre compte est créé automatiquement avec votre numéro de téléphone lors de votre première commande. Pas besoin d'inscription !</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Mes points expirent-ils ?</summary>
-                    <p>Vos points sont valables 12 mois à partir de votre dernière commande. Commandez régulièrement pour les conserver !</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Comment utiliser mes récompenses ?</summary>
-                    <p>Lors de votre prochaine commande, indiquez que vous souhaitez utiliser vos points. Nous appliquerons automatiquement la récompense.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Les points sont-ils valables en livraison ?</summary>
-                    <p>Oui ! Les points fidélité sont valables pour toutes vos commandes : Click & Collect et livraison.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Puis-je cumuler plusieurs récompenses ?</summary>
-                    <p>Oui, vous pouvez utiliser plusieurs récompenses sur une même commande si vous avez assez de points.</p>
-                </details>
-            </div>
+        <section class="faq-section">
+            <h2><i class="fas fa-question"></i> Questions frequentes</h2>
+
+            <details class="faq-item">
+                <summary>Comment creer mon compte fidelite ?</summary>
+                <p>Votre compte est cree automatiquement avec votre numero de telephone lors de votre premiere commande. Pas besoin d'inscription !</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>Mes points expirent-ils ?</summary>
+                <p>Vos points sont valables 12 mois a partir de votre derniere commande. Commandez regulierement pour les conserver !</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>Comment utiliser mes recompenses ?</summary>
+                <p>Lors de votre prochaine commande dans le panier, selectionnez la recompense que vous souhaitez utiliser. Elle sera automatiquement appliquee.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>Les points sont-ils valables en livraison ?</summary>
+                <p>Oui ! Les points fidelite sont valables pour toutes vos commandes : Click & Collect et livraison.</p>
+            </details>
         </section>
 
-        <!-- Footer -->
-        <footer class="page-footer">
-            <a href="index.html" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Retour au menu
-            </a>
-        </footer>
+        <!-- Back to Menu -->
+        <a href="index.html" class="back-to-menu">
+            <i class="fas fa-arrow-left"></i> Retour au menu
+        </a>
     </main>
-
-    <!-- Meta tags dynamiques multi-instance -->
-    <script src="js/init-meta.js"></script>
-
-    <!-- Contenu dynamique multi-instance -->
-    <script src="js/dynamic-content.js"></script>
 
     <script src="js/config.js"></script>
     <script src="js/cart.js"></script>
     <script>
-        // Apply theme and update cart badge
+        // State
+        let customerPoints = 0;
+        let rewards = [];
+
+        // DOM Elements
+        const phoneInput = document.getElementById('phoneInput');
+        const checkPointsBtn = document.getElementById('checkPointsBtn');
+        const pointsValue = document.getElementById('pointsValue');
+        const pointsSection = document.getElementById('pointsSection');
+        const phoneError = document.getElementById('phoneError');
+        const phoneSuccess = document.getElementById('phoneSuccess');
+        const rewardsContainer = document.getElementById('rewardsContainer');
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
-            // Load config and apply theme
             await Config.init();
 
             // Update page title
             if (Config.restaurant?.name) {
-                document.title = `Programme Fidélité | ${Config.restaurant.name}`;
+                document.title = `Programme Fidelite | ${Config.restaurant.name}`;
             }
 
             // Update cart badge
+            updateCartBadge();
+
+            // Load rewards
+            loadRewards();
+
+            // Check if phone is saved
+            const savedPhone = localStorage.getItem('loyalty_phone');
+            if (savedPhone) {
+                phoneInput.value = savedPhone;
+                checkPoints(savedPhone);
+            }
+        });
+
+        // Update cart badge
+        function updateCartBadge() {
             const badge = document.getElementById('cartBadge');
             if (badge) {
                 const cart = JSON.parse(localStorage.getItem('snackapp_cart') || '[]');
@@ -245,7 +786,213 @@
                 badge.textContent = count;
                 badge.style.display = count > 0 ? 'flex' : 'none';
             }
+        }
+
+        // Format phone number as user types
+        phoneInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) value = value.slice(0, 10);
+
+            // Format: 06 XX XX XX XX
+            if (value.length > 0) {
+                let formatted = value.slice(0, 2);
+                if (value.length > 2) formatted += ' ' + value.slice(2, 4);
+                if (value.length > 4) formatted += ' ' + value.slice(4, 6);
+                if (value.length > 6) formatted += ' ' + value.slice(6, 8);
+                if (value.length > 8) formatted += ' ' + value.slice(8, 10);
+                e.target.value = formatted;
+            }
+
+            // Hide messages
+            phoneError.style.display = 'none';
+            phoneSuccess.style.display = 'none';
         });
+
+        // Check points on button click
+        checkPointsBtn.addEventListener('click', () => {
+            const phone = phoneInput.value.replace(/\s/g, '');
+            if (phone.length >= 10) {
+                checkPoints(phone);
+            }
+        });
+
+        // Check points on Enter
+        phoneInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const phone = phoneInput.value.replace(/\s/g, '');
+                if (phone.length >= 10) {
+                    checkPoints(phone);
+                }
+            }
+        });
+
+        // Check points API call
+        async function checkPoints(phone) {
+            checkPointsBtn.innerHTML = '<span class="loading-spinner"></span>';
+            phoneError.style.display = 'none';
+            phoneSuccess.style.display = 'none';
+
+            try {
+                const response = await fetch(`../admin/api/loyalty-public.php?action=check_points&phone=${encodeURIComponent(phone)}`);
+                const data = await response.json();
+
+                if (data.success && data.customer) {
+                    customerPoints = data.customer.loyalty_points || 0;
+                    pointsValue.textContent = customerPoints;
+                    phoneSuccess.style.display = 'block';
+                    phoneSuccess.textContent = `Bienvenue ${data.customer.name || ''} !`;
+
+                    // Save phone for later
+                    localStorage.setItem('loyalty_phone', phoneInput.value);
+
+                    // Refresh rewards display
+                    renderRewards();
+                } else {
+                    phoneError.style.display = 'block';
+                    phoneError.textContent = data.error || 'Numero non trouve';
+                    pointsValue.textContent = '--';
+                    customerPoints = 0;
+                    renderRewards();
+                }
+            } catch (error) {
+                console.error('Error checking points:', error);
+                phoneError.style.display = 'block';
+                phoneError.textContent = 'Erreur de connexion';
+            }
+
+            checkPointsBtn.innerHTML = '<i class="fas fa-search"></i>';
+        }
+
+        // Load rewards from API
+        async function loadRewards() {
+            try {
+                const response = await fetch(`../admin/api/loyalty-public.php?action=get_rewards&points=${customerPoints}`);
+                const data = await response.json();
+
+                if (data.success && data.rewards) {
+                    rewards = data.rewards;
+                    renderRewards();
+                } else {
+                    rewardsContainer.innerHTML = `
+                        <div class="empty-rewards">
+                            <i class="fas fa-gift"></i>
+                            <p>Aucune recompense disponible pour le moment</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading rewards:', error);
+                rewardsContainer.innerHTML = `
+                    <div class="empty-rewards">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Erreur lors du chargement</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render rewards grouped by points
+        function renderRewards() {
+            if (!rewards.length) {
+                rewardsContainer.innerHTML = `
+                    <div class="empty-rewards">
+                        <i class="fas fa-gift"></i>
+                        <p>Aucune recompense configuree</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by points
+            const groups = {};
+            rewards.forEach(reward => {
+                const pts = reward.points_required;
+                if (!groups[pts]) {
+                    groups[pts] = [];
+                }
+                groups[pts].push(reward);
+            });
+
+            // Sort keys
+            const sortedPoints = Object.keys(groups).map(Number).sort((a, b) => a - b);
+
+            let html = '';
+            sortedPoints.forEach(pts => {
+                const groupRewards = groups[pts];
+                const canClaim = customerPoints >= pts;
+
+                html += `
+                    <div class="points-group">
+                        <div class="points-group-header">
+                            <i class="fas fa-star" style="color: var(--gold);"></i>
+                            <span class="points-group-title">${pts} points</span>
+                            ${canClaim ? '<span style="color: #22c55e; font-size: 12px; margin-left: auto;"><i class="fas fa-check-circle"></i> Disponible</span>' : ''}
+                        </div>
+                        <div class="rewards-grid">
+                `;
+
+                groupRewards.forEach(reward => {
+                    const isLocked = customerPoints < reward.points_required;
+                    const pointsNeeded = reward.points_required - customerPoints;
+
+                    // Determine image
+                    let imageHtml;
+                    if (reward.product_image) {
+                        imageHtml = `<img src="../images/menu/${reward.product_image}" alt="${reward.name}" class="reward-image" onerror="this.parentElement.innerHTML='<div class=\\'reward-image-placeholder\\'><i class=\\'fas fa-gift\\'></i></div>'">`;
+                    } else {
+                        // Default icon based on type
+                        const icons = {
+                            'free_product': 'fa-pizza-slice',
+                            'discount_percent': 'fa-percent',
+                            'discount_amount': 'fa-tag',
+                            'free_delivery': 'fa-motorcycle'
+                        };
+                        const icon = icons[reward.reward_type] || 'fa-gift';
+                        imageHtml = `<div class="reward-image-placeholder"><i class="fas ${icon}"></i></div>`;
+                    }
+
+                    html += `
+                        <div class="reward-card ${isLocked ? 'locked' : ''}">
+                            <div class="reward-image-container">
+                                ${imageHtml}
+                                <div class="reward-badge">
+                                    <i class="fas fa-star"></i> ${reward.points_required} pts
+                                </div>
+                                ${isLocked ? '<div class="reward-lock"><i class="fas fa-lock"></i></div>' : ''}
+                            </div>
+                            <div class="reward-content">
+                                <div class="reward-name">${reward.product_name || reward.name}</div>
+                                <div class="reward-description">${reward.description || ''}</div>
+                                ${isLocked
+                                    ? `<button class="reward-action locked" disabled>
+                                         <i class="fas fa-lock"></i> Encore ${pointsNeeded} pts
+                                       </button>`
+                                    : `<button class="reward-action available" onclick="claimReward(${reward.id}, '${(reward.product_name || reward.name).replace(/'/g, "\\'")}')">
+                                         <i class="fas fa-check"></i> Choisir dans le panier
+                                       </button>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
+            });
+
+            rewardsContainer.innerHTML = html;
+        }
+
+        // Claim reward - redirect to cart
+        function claimReward(rewardId, rewardName) {
+            // Save selected reward to localStorage for cart page
+            localStorage.setItem('selected_reward', JSON.stringify({
+                id: rewardId,
+                name: rewardName
+            }));
+
+            // Redirect to cart
+            window.location.href = 'cart.html?reward=' + rewardId;
+        }
     </script>
 </body>
 </html>

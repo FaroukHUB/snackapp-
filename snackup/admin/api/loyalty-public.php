@@ -103,12 +103,14 @@ function checkPoints() {
 function getRewards() {
     $customerPoints = (int)($_GET['points'] ?? 0);
 
-    // Récupérer toutes les récompenses actives
+    // Récupérer toutes les récompenses actives avec infos produit
     $rewards = Database::fetchAll(
-        "SELECT id, name, description, points_required, reward_type, reward_value
-         FROM loyalty_rewards
-         WHERE restaurant_id = ? AND is_active = 1
-         ORDER BY points_required ASC",
+        "SELECT lr.id, lr.name, lr.description, lr.points_required, lr.reward_type, lr.reward_value,
+                lr.product_id, p.name AS product_name, p.image AS product_image
+         FROM loyalty_rewards lr
+         LEFT JOIN products p ON lr.product_id = p.id
+         WHERE lr.restaurant_id = ? AND lr.is_active = 1
+         ORDER BY lr.points_required ASC",
         [SNACK_RESTAURANT_ID]
     );
 

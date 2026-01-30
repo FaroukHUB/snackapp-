@@ -128,6 +128,7 @@ if ($useMySQL) {
      $loyaltyConfig = LoyaltyRepository::getConfig(SNACK_RESTAURANT_ID);
      $loyaltyRewards = LoyaltyRepository::getAllRewards(SNACK_RESTAURANT_ID);
      $loyaltyLeaderboard = LoyaltyRepository::getLeaderboard(SNACK_RESTAURANT_ID, 10);
+     $loyaltyProducts = LoyaltyRepository::getAllProducts(SNACK_RESTAURANT_ID);
 
 
 } else {
@@ -203,7 +204,8 @@ $action = $_POST['action'];
                 'description' => $_POST['reward_description'] ?? '',
                 'points_required' => (int) ($_POST['points_required'] ?? 100),
                 'reward_type' => $_POST['reward_type'] ?? 'discount_percent',
-                'reward_value' => (float) ($_POST['reward_value'] ?? 10)
+                'reward_value' => (float) ($_POST['reward_value'] ?? 10),
+                'product_id' => !empty($_POST['product_id']) ? (int) $_POST['product_id'] : null
             ]);
             echo json_encode(['success' => true, 'reward_id' => $rewardId]);
         } catch (Exception $e) {
@@ -2196,10 +2198,30 @@ if (isset($_GET['export'])) {
                     <option value="free_delivery">Livraison gratuite</option>
                 </select>
             </div>
-            <div style="margin-bottom: 20px;" id="rewardValueContainer">
+            <div style="margin-bottom: 15px;" id="rewardValueContainer">
                 <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #d1d5db;">Valeur de la réduction</label>
                 <input type="number" id="rewardValue" value="10" min="1"
                        style="width: 100%; padding: 12px; border: 1px solid #374151; border-radius: 10px; font-size: 1em; box-sizing: border-box; background: #1e293b; color: white;">
+            </div>
+            <div style="margin-bottom: 20px;" id="rewardProductContainer">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #d1d5db;"><i class="fas fa-pizza-slice"></i> Produit lié (optionnel)</label>
+                <select id="rewardProductId"
+                       style="width: 100%; padding: 12px; border: 1px solid #374151; border-radius: 10px; font-size: 1em; box-sizing: border-box; background: #1e293b; color: white;">
+                    <option value="">-- Aucun produit (icône par défaut) --</option>
+                    <?php
+                    $currentCategory = '';
+                    foreach ($loyaltyProducts ?? [] as $prod):
+                        if ($prod['category_name'] !== $currentCategory) {
+                            if ($currentCategory !== '') echo '</optgroup>';
+                            $currentCategory = $prod['category_name'];
+                            echo '<optgroup label="' . htmlspecialchars($currentCategory) . '">';
+                        }
+                    ?>
+                    <option value="<?= $prod['id'] ?>"><?= htmlspecialchars($prod['name']) ?> (<?= number_format($prod['price_solo'], 2, ',', '') ?> <?= CURRENCY ?>)</option>
+                    <?php endforeach; ?>
+                    <?php if ($currentCategory !== '') echo '</optgroup>'; ?>
+                </select>
+                <p style="color: #6b7280; font-size: 11px; margin-top: 5px;"><i class="fas fa-info-circle"></i> Si un produit est lié, son image sera affichée sur la page fidélité</p>
             </div>
             <div style="display: flex; gap: 10px;">
                 <button type="button" onclick="closeAddRewardModal()"
@@ -3742,7 +3764,7 @@ function toggleRewardValue() {
 
 function submitAddReward(event) {
     event.preventDefault();
-    
+
     const formData = new FormData();
     formData.append('action', 'add_reward');
     formData.append('reward_name', document.getElementById('rewardName').value);
@@ -3750,7 +3772,8 @@ function submitAddReward(event) {
     formData.append('points_required', document.getElementById('rewardPoints').value);
     formData.append('reward_type', document.getElementById('rewardType').value);
     formData.append('reward_value', document.getElementById('rewardValue').value);
-    
+    formData.append('product_id', document.getElementById('rewardProductId').value);
+
     fetch('', { method: 'POST', body: formData })
         .then(r => r.json())
         .then(data => {

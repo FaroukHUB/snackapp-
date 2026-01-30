@@ -73,21 +73,34 @@ class LoyaltyRepository {
     }
     
     /**
-     * Récupère toutes les récompenses actives
+     * Récupère toutes les récompenses actives avec infos produit
      */
     public static function getRewards(int $restaurantId): array {
         return Database::fetchAll(
-            "SELECT * FROM loyalty_rewards WHERE restaurant_id = ? AND is_active = 1 ORDER BY points_required ASC",
+            "SELECT lr.*,
+                    p.name AS product_name,
+                    p.image AS product_image,
+                    p.price_solo AS product_price
+             FROM loyalty_rewards lr
+             LEFT JOIN products p ON lr.product_id = p.id
+             WHERE lr.restaurant_id = ? AND lr.is_active = 1
+             ORDER BY lr.points_required ASC",
             [$restaurantId]
         );
     }
-    
+
     /**
      * Récupère toutes les récompenses (actives et inactives) pour l'admin
      */
     public static function getAllRewards(int $restaurantId): array {
         return Database::fetchAll(
-            "SELECT * FROM loyalty_rewards WHERE restaurant_id = ? ORDER BY points_required ASC",
+            "SELECT lr.*,
+                    p.name AS product_name,
+                    p.image AS product_image
+             FROM loyalty_rewards lr
+             LEFT JOIN products p ON lr.product_id = p.id
+             WHERE lr.restaurant_id = ?
+             ORDER BY lr.points_required ASC",
             [$restaurantId]
         );
     }
@@ -96,7 +109,7 @@ class LoyaltyRepository {
      * Ajoute une récompense
      */
     public static function addReward(int $restaurantId, array $data): int {
-        return Database::insert('loyalty_rewards', [
+        $insertData = [
             'restaurant_id' => $restaurantId,
             'name' => $data['name'],
             'description' => $data['description'] ?? '',
@@ -104,21 +117,47 @@ class LoyaltyRepository {
             'reward_type' => $data['reward_type'] ?? 'discount_percent',
             'reward_value' => (float) ($data['reward_value'] ?? 0),
             'is_active' => 1
-        ]);
+        ];
+
+        // Ajouter product_id si fourni
+        if (!empty($data['product_id'])) {
+            $insertData['product_id'] = (int) $data['product_id'];
+        }
+
+        return Database::insert('loyalty_rewards', $insertData);
     }
-    
+
     /**
      * Modifie une récompense
      */
     public static function updateReward(int $rewardId, array $data): bool {
-        return Database::update('loyalty_rewards', [
+        $updateData = [
             'name' => $data['name'],
             'description' => $data['description'] ?? '',
             'points_required' => (int) $data['points_required'],
             'reward_type' => $data['reward_type'],
             'reward_value' => (float) ($data['reward_value'] ?? 0),
             'is_active' => (int) ($data['is_active'] ?? 1)
-        ], ['id' => $rewardId]) > 0;
+        ];
+
+        // Mettre à jour product_id (peut être null pour désassocier)
+        $updateData['product_id'] = !empty($data['product_id']) ? (int) $data['product_id'] : null;
+
+        return Database::update('loyalty_rewards', $updateData, ['id' => $rewardId]) > 0;
+    }
+
+    /**
+     * Récupère tous les produits pour le dropdown de sélection
+     */
+    public static function getAllProducts(int $restaurantId): array {
+        return Database::fetchAll(
+            "SELECT p.id, p.name, p.image, p.price_solo, c.name AS category_name
+             FROM products p
+             LEFT JOIN categories c ON p.category_id = c.id
+             WHERE p.restaurant_id = ? AND p.status = 'available'
+             ORDER BY c.sort_order, p.sort_order, p.name",
+            [$restaurantId]
+        );
     }
     
     /**
