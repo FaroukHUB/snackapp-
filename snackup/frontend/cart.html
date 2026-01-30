@@ -3375,31 +3375,7 @@
                 let hasPayment = false;
                 let firstMethod = null;
 
-                // Paiement en ligne (CB)
-                if (payment.online_payment_enabled) {
-                    hasPayment = true;
-                    if (!firstMethod) firstMethod = 'online';
-                    html += `
-                        <label class="payment-method-card" data-method="online" onclick="CartPage.selectPaymentMethod('online')">
-                            <input type="radio" name="paymentMethod" value="online">
-                            <div class="payment-method-icon online">
-                                <i class="fas fa-credit-card"></i>
-                            </div>
-                            <div class="payment-method-info">
-                                <div class="payment-method-name">Carte bancaire</div>
-                                <div class="payment-method-desc">Paiement sécurisé en ligne</div>
-                                <div class="card-logos">
-                                    <img src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4bdb47b03ac81d9945bfe.svg" alt="Visa">
-                                    <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" alt="Mastercard">
-                                </div>
-                            </div>
-                            <div class="payment-method-check">
-                                <i class="fas fa-check"></i>
-                            </div>
-                        </label>`;
-                }
-
-                // CB à la livraison
+                // CB à la livraison (EN PREMIER - pas de modal requis)
                 if (payment.card_on_delivery_enabled) {
                     hasPayment = true;
                     if (!firstMethod) firstMethod = 'card_delivery';
@@ -3407,7 +3383,7 @@
                         <label class="payment-method-card" data-method="card_delivery" onclick="CartPage.selectPaymentMethod('card_delivery')">
                             <input type="radio" name="paymentMethod" value="card_delivery">
                             <div class="payment-method-icon card">
-                                <i class="fas fa-motorcycle"></i>
+                                <i class="fas fa-credit-card"></i>
                             </div>
                             <div class="payment-method-info">
                                 <div class="payment-method-name">CB à la livraison</div>
@@ -3419,7 +3395,7 @@
                         </label>`;
                 }
 
-                // Espèces
+                // Espèces (EN DEUXIÈME)
                 if (payment.cash_enabled) {
                     hasPayment = true;
                     if (!firstMethod) firstMethod = 'cash';
@@ -3432,6 +3408,30 @@
                             <div class="payment-method-info">
                                 <div class="payment-method-name">Espèces</div>
                                 <div class="payment-method-desc">Payez en espèces à la livraison</div>
+                            </div>
+                            <div class="payment-method-check">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </label>`;
+                }
+
+                // Paiement en ligne CB (EN DERNIER - ouvre un modal)
+                if (payment.online_payment_enabled) {
+                    hasPayment = true;
+                    if (!firstMethod) firstMethod = 'online';
+                    html += `
+                        <label class="payment-method-card" data-method="online" onclick="CartPage.selectPaymentMethod('online')">
+                            <input type="radio" name="paymentMethod" value="online">
+                            <div class="payment-method-icon online">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="payment-method-info">
+                                <div class="payment-method-name">Payer maintenant</div>
+                                <div class="payment-method-desc">Paiement sécurisé en ligne</div>
+                                <div class="card-logos">
+                                    <img src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4bdb47b03ac81d9945bfe.svg" alt="Visa">
+                                    <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" alt="Mastercard">
+                                </div>
                             </div>
                             <div class="payment-method-check">
                                 <i class="fas fa-check"></i>
