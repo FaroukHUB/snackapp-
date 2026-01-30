@@ -484,6 +484,58 @@ ul {
     color: #f59e0b;
 }
 
+/* Sidebar Categories (PC only) */
+.sidebar-categories-section {
+    display: block;
+}
+
+.sidebar-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-categories li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--gray-600);
+    transition: var(--transition);
+}
+
+.sidebar-categories li a:hover {
+    background: var(--gray-100);
+    color: var(--gray-900);
+}
+
+.sidebar-categories li a.active {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.sidebar-categories li a img {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.sidebar-categories li a .sidebar-cat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+}
+
 .sidebar-footer {
     padding: 20px 16px;
     border-top: 1px solid var(--gray-200);
@@ -3086,6 +3138,11 @@ ul {
 
     .main-layout {
         padding-left: 0;
+    }
+
+    /* Cacher les catégories dans la sidebar sur mobile (on utilise le slider horizontal) */
+    .sidebar-categories-section {
+        display: none;
     }
 
     .sidebar {

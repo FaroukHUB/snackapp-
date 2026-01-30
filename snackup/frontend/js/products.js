@@ -154,6 +154,72 @@ const Products = {
         }
 
         container.innerHTML = html;
+
+        // Also populate sidebar categories for desktop
+        this.renderSidebarCategories();
+    },
+
+    /**
+     * Render category list in sidebar (desktop only)
+     */
+    renderSidebarCategories() {
+        const container = document.getElementById('sidebarCategories');
+        if (!container) return;
+
+        const categories = Config.getCategories();
+        const nonEmptyCategories = categories.filter(cat => cat.items && cat.items.length > 0);
+
+        if (nonEmptyCategories.length === 0) return;
+
+        // Add "All" button first
+        let html = `
+            <li>
+                <a href="#" class="active" data-category="all" onclick="Products.filterByCategory('all'); return false;">
+                    <span class="sidebar-cat-icon"><i class="fas fa-th"></i></span>
+                    Tout
+                </a>
+            </li>
+        `;
+
+        // Add category items
+        nonEmptyCategories.forEach(cat => {
+            const iconImage = cat.icon_image;
+            const icon = cat.icon || 'fa-utensils';
+
+            let iconHtml;
+            if (iconImage) {
+                const imgSrc = iconImage.startsWith('http') || iconImage.startsWith('/') ? iconImage : `../../${iconImage}`;
+                iconHtml = `<img src="${imgSrc}" alt="">`;
+            } else if (icon.startsWith("fa-")) {
+                iconHtml = `<span class="sidebar-cat-icon"><i class="fas ${icon}"></i></span>`;
+            } else {
+                iconHtml = `<span class="sidebar-cat-icon">${icon}</span>`;
+            }
+
+            html += `
+                <li>
+                    <a href="#" data-category="${cat.id}" onclick="Products.filterByCategory('${cat.id}'); return false;">
+                        ${iconHtml}
+                        ${cat.name}
+                    </a>
+                </li>
+            `;
+        });
+
+        // Add Formules if available
+        const formules = Config.getAvailableFormules();
+        if (formules && formules.length > 0) {
+            html += `
+                <li>
+                    <a href="#" data-category="formules" onclick="Products.scrollToFormules(); return false;">
+                        <span class="sidebar-cat-icon"><i class="fas fa-fire"></i></span>
+                        Nos Formules
+                    </a>
+                </li>
+            `;
+        }
+
+        container.innerHTML = html;
     },
 
     /**
@@ -162,8 +228,13 @@ const Products = {
     filterByCategory(categoryId) {
         console.log('Filtering by category:', categoryId);
 
-        // Update active state on icons
+        // Update active state on horizontal icons
         document.querySelectorAll('.category-icon-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.category === categoryId);
+        });
+
+        // Update active state on sidebar categories
+        document.querySelectorAll('#sidebarCategories a').forEach(item => {
             item.classList.toggle('active', item.dataset.category === categoryId);
         });
 
@@ -202,8 +273,13 @@ const Products = {
      * Scroll to formules section
      */
     scrollToFormules() {
-        // Update active state on icons
+        // Update active state on horizontal icons
         document.querySelectorAll('.category-icon-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.category === 'formules');
+        });
+
+        // Update active state on sidebar categories
+        document.querySelectorAll('#sidebarCategories a').forEach(item => {
             item.classList.toggle('active', item.dataset.category === 'formules');
         });
 
