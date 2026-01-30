@@ -555,7 +555,7 @@ ul {
 }
 
 .section-header h2 {
-    font-size: 18px;
+    font-size: 34px;
     font-weight: 800;
     color: var(--gray-900);
     display: flex;
@@ -565,6 +565,7 @@ ul {
 
 .section-header h2 i {
     color: var(--primary);
+    font-size: 32px;
 }
 
 .section-subtitle {
@@ -816,7 +817,7 @@ ul {
 .product-section h2 {
     font-size: 34px;
     font-weight: 800;
-    color: var(--success);
+    color: var(--gray-900);
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -824,7 +825,7 @@ ul {
 }
 
 .product-section h2 i {
-    color: var(--success);
+    color: var(--primary);
     font-size: 32px;
 }
 
@@ -3861,7 +3862,7 @@ ul {
 .product-section h2 {
     font-size: 34px;
     font-weight: 800;
-    color: var(--success);
+    color: var(--gray-900);
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -3869,7 +3870,7 @@ ul {
 }
 
 .product-section h2 i {
-    color: var(--success);
+    color: var(--primary);
     font-size: 32px;
 }
 
