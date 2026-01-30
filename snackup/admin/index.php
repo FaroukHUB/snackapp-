@@ -2625,7 +2625,8 @@ if (isset($_GET['export'])) {
                     </div>
                     <div id="platforms-list">
                         <?php foreach (($restaurantSettings['platforms'] ?? []) as $platform): ?>
-                        <div class="platform-row" data-id="<?php echo htmlspecialchars($platform['id']); ?>" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px;">
+                        <div class="platform-row" data-id="<?php echo htmlspecialchars($platform['id']); ?>" data-name="<?php echo htmlspecialchars($platform['name']); ?>" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px;">
+                            <div class="platform-logo"></div>
                             <div style="flex: 1;">
                                 <strong style="font-size: 13px;"><?php echo htmlspecialchars($platform['name']); ?></strong>
                                 <a href="<?php echo htmlspecialchars($platform['url']); ?>" target="_blank" style="display: block; color: #60a5fa; font-size: 11px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"><?php echo htmlspecialchars($platform['url']); ?></a>
@@ -4127,6 +4128,43 @@ function closeAddPlatformModal() {
     document.getElementById('add-platform-modal').style.display = 'none';
 }
 
+// Logos des plateformes de livraison connues
+const platformLogos = {
+    'uber eats': 'https://d3i4yxtzktqr9n.cloudfront.net/web-eats-v2/ee037401cb5d31b23cf780808ee4ec1f.svg',
+    'uber': 'https://d3i4yxtzktqr9n.cloudfront.net/web-eats-v2/ee037401cb5d31b23cf780808ee4ec1f.svg',
+    'deliveroo': 'https://consumer-component-library.roocdn.com/30.2.0/static/images/logo-teal.svg',
+    'just eat': 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Just_Eat_logo.svg',
+    'justeat': 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Just_Eat_logo.svg',
+    'glovo': 'https://res.cloudinary.com/glovoapp/image/fetch/f_svg/https://glovoapp.com/images/glovo-logo.svg',
+    'doordash': 'https://cdn.doordash.com/static/img/doordash-logo.svg',
+    'grubhub': 'https://assets.grubhub.com/assets/img/grubhub_logo_primary.svg',
+    'bolt food': 'https://bolt.eu/static/bolt-food-logo.svg',
+    'bolt': 'https://bolt.eu/static/bolt-food-logo.svg',
+    'wolt': 'https://wolt.com/static/wolt-logo.svg',
+    'foodora': 'https://www.foodora.com/static/foodora-logo.svg',
+    'takeaway': 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Just_Eat_logo.svg',
+};
+
+function getPlatformLogo(name) {
+    const key = name.toLowerCase().trim();
+    for (const [platform, logo] of Object.entries(platformLogos)) {
+        if (key.includes(platform) || platform.includes(key)) {
+            return logo;
+        }
+    }
+    return null; // Pas de logo connu
+}
+
+function getPlatformLogoHtml(name) {
+    const logo = getPlatformLogo(name);
+    if (logo) {
+        return `<img src="${logo}" alt="${name}" style="width: 32px; height: 32px; object-fit: contain; border-radius: 6px; background: white; padding: 4px;">`;
+    }
+    // Fallback: première lettre
+    const initial = name.charAt(0).toUpperCase();
+    return `<div style="width: 32px; height: 32px; background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; color: white;">${initial}</div>`;
+}
+
 function addPlatform() {
     const name = document.getElementById('new-platform-name').value.trim();
     const url = document.getElementById('new-platform-url').value.trim();
@@ -5068,6 +5106,17 @@ if (printerHelpIcon && printerHelpContent && printerHelpOverlay) {
         }
     });
 }
+
+// Initialiser les logos des plateformes au chargement
+(function initPlatformLogos() {
+    document.querySelectorAll('.platform-row').forEach(row => {
+        const name = row.dataset.name;
+        const logoContainer = row.querySelector('.platform-logo');
+        if (name && logoContainer) {
+            logoContainer.innerHTML = getPlatformLogoHtml(name);
+        }
+    });
+})();
 
     </script>
 
