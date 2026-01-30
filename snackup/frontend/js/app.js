@@ -182,8 +182,8 @@ const App = {
     },
 
     /**
-     * Setup sticky category navigation - CSS sticky only (plus fiable)
-     * Ajoute juste la classe 'scrolled' pour le shadow quand on scroll
+     * Setup sticky category navigation with fixed position
+     * IMPORTANT: Ne remonte JAMAIS au-dessus de sa position naturelle (sous le hero)
      */
     setupStickyNav() {
         const categorySection = document.getElementById('categoryIconsSection');
@@ -192,28 +192,71 @@ const App = {
         // Seulement sur mobile (< 1025px)
         if (window.innerWidth >= 1025) return;
 
-        let ticking = false;
+        const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 70;
 
-        const updateScrolledState = () => {
-            const scrollY = window.scrollY;
-            // Ajouter shadow quand on a scrollé un peu
-            if (scrollY > 100) {
-                categorySection.classList.add('scrolled');
-            } else {
-                categorySection.classList.remove('scrolled');
+        // Attendre que le layout soit stable pour calculer la position originale
+        setTimeout(() => {
+            const originalTop = categorySection.getBoundingClientRect().top + window.scrollY;
+            const sectionHeight = categorySection.offsetHeight;
+
+            // Créer un placeholder pour maintenir l'espace quand fixed
+            let placeholder = document.getElementById('categorySectionPlaceholder');
+            if (!placeholder) {
+                placeholder = document.createElement('div');
+                placeholder.id = 'categorySectionPlaceholder';
+                placeholder.style.display = 'none';
+                placeholder.style.height = sectionHeight + 'px';
+                categorySection.parentNode.insertBefore(placeholder, categorySection.nextSibling);
             }
-            ticking = false;
-        };
 
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                requestAnimationFrame(updateScrolledState);
-                ticking = true;
-            }
-        }, { passive: true });
+            let isFixed = false;
+            let ticking = false;
 
-        // Initial check
-        updateScrolledState();
+            const updateStickyState = () => {
+                const scrollY = window.scrollY;
+                const triggerPoint = originalTop - headerHeight;
+
+                if (scrollY >= triggerPoint) {
+                    // On a scrollé assez → fixed en haut (sous le header)
+                    if (!isFixed) {
+                        isFixed = true;
+                        placeholder.style.display = 'block';
+                        categorySection.classList.add('is-fixed');
+                        categorySection.classList.add('scrolled');
+                    }
+                } else {
+                    // On est remonté → retour position normale (sous le hero)
+                    if (isFixed) {
+                        isFixed = false;
+                        placeholder.style.display = 'none';
+                        categorySection.classList.remove('is-fixed');
+                        categorySection.classList.remove('scrolled');
+                    }
+                }
+
+                ticking = false;
+            };
+
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    requestAnimationFrame(updateStickyState);
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            // Recalculer sur resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 1025) {
+                    isFixed = false;
+                    placeholder.style.display = 'none';
+                    categorySection.classList.remove('is-fixed');
+                    categorySection.classList.remove('scrolled');
+                }
+            });
+
+            // Initial check
+            updateStickyState();
+        }, 100);
     }
 };
 
