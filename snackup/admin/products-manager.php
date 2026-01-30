@@ -1532,6 +1532,7 @@ $csrfToken = getCsrfToken();
         formData.append("action", "upload_supplement_image");
         formData.append("supplement_id", supplementId);
         formData.append("imageFile", file);
+        formData.append("csrf_token", CSRF_TOKEN);
 
         try {
           const resp = await fetch("./api/products.php", { method: "POST", body: formData });
