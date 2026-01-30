@@ -887,6 +887,16 @@ if ($useMySQL) {
                     'group_name' => $groupName
                 ]);
 
+                // Auto-assigner aux catégories qui ont déjà des suppléments
+                $pdo = Database::getInstance();
+                $stmt = $pdo->query("SELECT DISTINCT category_id FROM category_supplements");
+                $categoryIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+                foreach ($categoryIds as $catId) {
+                    $insertStmt = $pdo->prepare("INSERT IGNORE INTO category_supplements (category_id, supplement_id) VALUES (?, ?)");
+                    $insertStmt->execute([$catId, $supplementId]);
+                }
+
                 $supplement = SupplementRepository::getById($supplementId);
                 jsonSuccess(['supplement' => $supplement]);
             } catch (Exception $e) {
