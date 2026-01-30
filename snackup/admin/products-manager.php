@@ -2711,7 +2711,7 @@ $csrfToken = getCsrfToken();
           toast("success", "Ajouté", "Nouvelle règle d'upsell créée.");
         }
 
-        closeModal("#modalUpsell");
+        closeModal($("#modalUpsell"));
         // Recharger les upsells
         const data = await apiGet();
         upsellRules = data.upsellRules || [];
