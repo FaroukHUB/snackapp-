@@ -256,13 +256,27 @@ const Products = {
         }
 
         grid.innerHTML = featuredProducts.map((product, index) => {
+            // Badge bundle pour pizzas - même logique que renderAllCategories
+            const catNameLower = String(product.categoryName || '').toLowerCase();
+            const catIdLower = String(product.categoryId || '').toLowerCase();
+            const isPizza = catNameLower.includes('pizza')
+                || catIdLower.includes('pizza')
+                || catNameLower.includes('tomate')
+                || catNameLower.includes('crème')
+                || catNameLower.includes('creme')
+                || catNameLower.includes('originale');
+            const bundleBadge = isPizza ? `
+                <div class="bundle-offer-badge-gold">
+                    <div class="bundle-line"><span class="bundle-qty">2</span> solo = <span class="bundle-price">13€</span></div>
+                    <div class="bundle-line"><span class="bundle-qty">2</span> duo = <span class="bundle-price">15€</span></div>
+                </div>` : '';
+
             // Si pricePrefix existe (ex: "À partir de 500 Da"), afficher SEULEMENT ça
             if (product.pricePrefix) {
                 const priceText = product.pricePrefix;
                 const desc = product.description ? product.description.substring(0, 100) + (product.description.length > 100 ? '...' : '') : '';
                 return `
                     <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
-                        ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
                         <img src="../../${escapeHtml(product.image)}"
                              alt="${escapeHtml(product.name)}"
                              class="product-image-new"
@@ -273,6 +287,7 @@ const Products = {
                         <div class="product-content-new">
                             <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
                             <p class="product-desc-new">${escapeHtml(desc)}</p>
+                            ${bundleBadge}
                             <div class="product-footer-new">
                                 <span class="product-price-new">${priceText}</span>
                                 <button class="product-btn-new" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">
@@ -298,7 +313,6 @@ const Products = {
             const desc = product.description ? product.description.substring(0, 100) + (product.description.length > 100 ? '...' : '') : '';
             return `
                 <article class="product-card-new" data-product-id="${escapeHtml(product.id)}" onclick="Products.openProductModal('${escapeHtml(product.id)}')">
-                    ${product.badge ? `<span class="product-badge-new">${escapeHtml(product.badge)}</span>` : ''}
                     <img src="../../${escapeHtml(product.image)}"
                          alt="${escapeHtml(product.name)}"
                          class="product-image-new"
@@ -309,6 +323,7 @@ const Products = {
                     <div class="product-content-new">
                         <h3 class="product-name-new">${escapeHtml(product.name)}</h3>
                         <p class="product-desc-new">${escapeHtml(desc)}</p>
+                        ${bundleBadge}
                         <div class="product-footer-new">
                             <span class="product-price-new">${priceText}</span>
                             <button class="product-btn-new" onclick="event.stopPropagation(); Products.openProductModal('${escapeHtml(product.id)}')">
