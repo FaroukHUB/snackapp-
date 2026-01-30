@@ -1562,9 +1562,18 @@
                         <span>Réduction</span>
                         <span id="summaryDiscount" style="color: var(--success);">-</span>
                     </div>
-                    <div class="cart-summary-row bundle-row" id="bundleRow" style="display: none;">
-                        <span id="bundleLabel">🍕 Offre 2 pizzas</span>
-                        <span id="summaryBundle" style="color: var(--success); font-weight: 700;">-</span>
+                    <!-- Réduction Solo/Duo bien visible -->
+                    <div id="bundleRow" style="display: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; padding: 12px 16px; margin: 12px 0; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 15px;" id="bundleLabel">🍕 Offre 2 pizzas</div>
+                                <div style="font-size: 12px; opacity: 0.9;">Réduction automatique appliquée !</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 18px; font-weight: 800;" id="summaryBundle">-0,00 €</div>
+                                <div style="font-size: 11px; opacity: 0.9;">Économisé</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="cart-summary-row" id="deliveryFeeRow" style="display: none;">
                         <span>Frais de livraison</span>
@@ -2854,6 +2863,18 @@
                     // Encoder la key complètement pour éviter toute troncature
                     const encodedKey = encodeURIComponent(item.key || '');
 
+                    // Construire le nom avec Solo/Duo si applicable
+                    let displayName = item.name;
+                    if (menuType === 'solo' || menuType === 'duo') {
+                        const sizeLabel = menuType === 'solo' ? 'Solo' : 'Duo';
+                        // Insérer après "Pizza" si c'est une pizza
+                        if (item.name.toLowerCase().startsWith('pizza')) {
+                            displayName = item.name.replace(/^(pizza)\s*/i, `$1 ${sizeLabel} `);
+                        } else {
+                            displayName = `${item.name} (${sizeLabel})`;
+                        }
+                    }
+
                     return `
                     <div class="cart-item" data-key="${encodedKey}">
                         <img src="../${item.image}" alt="${item.name}" class="cart-item-image"
@@ -2863,7 +2884,7 @@
                              onerror="this.style.display='none'">
                         <div class="cart-item-details">
                             <div class="cart-item-name">
-                                ${item.name}
+                                ${displayName}
                             </div>
                             ${item.options?.formuleSelections?.length > 0 ? `
                                 <div class="cart-item-formule" style="color: var(--primary); font-size: 13px; margin-top: 4px;">
@@ -3339,16 +3360,16 @@
                     document.getElementById('discountRow').style.display = 'none';
                 }
 
-                // Afficher/masquer la remise bundle "2 pizzas"
+                // Afficher/masquer la remise bundle "2 pizzas" - BIEN VISIBLE
                 const bundleRow = document.getElementById('bundleRow');
                 if (this.bundleDiscount > 0 && bundleRow) {
-                    bundleRow.style.display = 'flex';
+                    bundleRow.style.display = 'block';
                     document.getElementById('summaryBundle').textContent = `-${Config.formatPrice(this.bundleDiscount)}`;
-                    // Label dynamique
+                    // Label dynamique avec Solo/Duo
                     let label = '🍕 Offre 2 pizzas';
                     if (bundle.details.length > 0) {
                         const parts = bundle.details.map(d => d.type === 'solo' ? `${d.count} Solo` : `${d.count} Duo`);
-                        label = `🍕 ${parts.join(' + ')}`;
+                        label = `🍕 Offre ${parts.join(' + ')}`;
                     }
                     document.getElementById('bundleLabel').textContent = label;
                 } else if (bundleRow) {
