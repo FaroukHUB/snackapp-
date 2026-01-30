@@ -1389,72 +1389,134 @@
                                 <i class="fas fa-wallet" style="color: #10b981; margin-right: 8px;"></i>
                                 Mode de paiement *
                             </label>
-                            <div class="payment-options-container" id="paymentMethodContainer">
+                            <div class="payment-methods-list" id="paymentMethodContainer">
                                 <!-- Généré dynamiquement par renderPaymentMethods() -->
                             </div>
                         </div>
 
-                        <!-- Option monnaie (affiché seulement si espèces) -->
-                        <div id="cashChangeSection" style="display: none; margin-top: 12px;">
-                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                                <span style="font-size: 13px; color: var(--gray-600);">Appoint ?</span>
-                                <label class="change-chip selected" data-change="exact">
-                                    <input type="radio" name="changeOption" value="exact" onchange="CartPage.setChangeOption('exact')" checked>
-                                    <i class="fas fa-check"></i> Oui
-                                </label>
-                                <label class="change-chip" data-change="change">
-                                    <input type="radio" name="changeOption" value="change" onchange="CartPage.setChangeOption('change')">
-                                    <i class="fas fa-coins"></i> Non, je paie
-                                </label>
-                                <input type="number" id="changeForAmount" placeholder="50" min="0" step="1" disabled
-                                    style="width: 70px; padding: 8px 10px; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 13px;">
-                                <span id="currencyBadge" style="font-weight: 600; color: var(--gray-600);">€</span>
-                            </div>
-                            <style>
-                            .change-chip {
-                                display: inline-flex; align-items: center; gap: 4px;
-                                padding: 8px 12px; background: var(--gray-50); border: 2px solid var(--gray-200);
-                                border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--gray-600);
-                            }
-                            .change-chip input { display: none; }
-                            .change-chip:hover { border-color: var(--gray-300); }
-                            .change-chip.selected { border-color: var(--primary); background: rgba(230,57,70,0.08); color: var(--primary); }
-                            </style>
-                        </div>
-                    </div>
+                        <!-- Styles pour les cartes de paiement style McDonald's -->
+                        <style>
+                        .payment-methods-list {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 12px;
+                        }
 
-                    <!-- Stripe Payment Element (affiché si paiement en ligne) -->
-                    <div id="stripePaymentSection" style="display: none; margin-top: 16px;">
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 20px; color: white;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                                <i class="fas fa-lock" style="font-size: 20px;"></i>
-                                <span style="font-weight: 700; font-size: 16px;">Paiement sécurisé</span>
-                                <img src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4bdb47b03ac81d9945bfe.svg" alt="Visa" style="height: 20px; margin-left: auto;">
-                                <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" alt="Mastercard" style="height: 20px;">
-                            </div>
+                        .payment-method-card {
+                            display: flex;
+                            align-items: center;
+                            gap: 16px;
+                            padding: 18px 20px;
+                            background: white;
+                            border: 2px solid #e5e7eb;
+                            border-radius: 12px;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        }
 
-                            <!-- Payment Request Button (Apple Pay / Google Pay) -->
-                            <div id="payment-request-button-container" style="margin-bottom: 16px;">
-                                <div id="payment-request-button"></div>
-                                <div id="payment-request-separator" style="display: none; text-align: center; margin: 12px 0; color: rgba(255,255,255,0.7); font-size: 13px;">
-                                    <span style="display: inline-flex; align-items: center; gap: 10px;">
-                                        <span style="width: 40px; height: 1px; background: rgba(255,255,255,0.3);"></span>
-                                        ou payer par carte
-                                        <span style="width: 40px; height: 1px; background: rgba(255,255,255,0.3);"></span>
-                                    </span>
-                                </div>
-                            </div>
+                        .payment-method-card:hover {
+                            border-color: #d1d5db;
+                            background: #fafafa;
+                        }
 
-                            <!-- Card Element (fallback) -->
-                            <div id="card-element-container" style="background: white; border-radius: 12px; padding: 16px;">
-                                <div id="card-element"></div>
-                                <div id="card-errors" style="color: #e63946; font-size: 13px; margin-top: 8px; display: none;"></div>
-                            </div>
+                        .payment-method-card.selected {
+                            border-color: #10b981;
+                            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.02) 100%);
+                        }
 
-                            <p style="font-size: 12px; opacity: 0.8; margin-top: 12px; text-align: center;">
-                                <i class="fas fa-shield-alt"></i> Paiement sécurisé par Stripe - Vos données sont chiffrées
-                            </p>
-                        </div>
+                        .payment-method-card input[type="radio"] {
+                            display: none;
+                        }
+
+                        .payment-method-icon {
+                            width: 48px;
+                            height: 48px;
+                            border-radius: 10px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                        }
+
+                        .payment-method-icon.online {
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                        }
+
+                        .payment-method-icon.card {
+                            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                            color: white;
+                        }
+
+                        .payment-method-icon.cash {
+                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                            color: white;
+                        }
+
+                        .payment-method-icon i {
+                            font-size: 20px;
+                        }
+
+                        .payment-method-icon img {
+                            height: 24px;
+                        }
+
+                        .payment-method-info {
+                            flex: 1;
+                        }
+
+                        .payment-method-name {
+                            font-weight: 600;
+                            font-size: 15px;
+                            color: #1f2937;
+                            margin-bottom: 2px;
+                        }
+
+                        .payment-method-desc {
+                            font-size: 13px;
+                            color: #6b7280;
+                        }
+
+                        .payment-method-check {
+                            width: 24px;
+                            height: 24px;
+                            border-radius: 50%;
+                            border: 2px solid #d1d5db;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: all 0.2s ease;
+                            flex-shrink: 0;
+                        }
+
+                        .payment-method-check i {
+                            font-size: 12px;
+                            color: white;
+                            opacity: 0;
+                            transition: opacity 0.2s ease;
+                        }
+
+                        .payment-method-card.selected .payment-method-check {
+                            background: #10b981;
+                            border-color: #10b981;
+                        }
+
+                        .payment-method-card.selected .payment-method-check i {
+                            opacity: 1;
+                        }
+
+                        /* Logos cartes bancaires */
+                        .card-logos {
+                            display: flex;
+                            gap: 6px;
+                            margin-top: 4px;
+                        }
+
+                        .card-logos img {
+                            height: 18px;
+                            opacity: 0.8;
+                        }
+                        </style>
                     </div>
 
                     <!-- Note avec mise en évidence -->
@@ -1646,6 +1708,555 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Paiement CB (Stripe) -->
+    <div id="cbPaymentModal" class="payment-modal" style="display: none;">
+        <div class="payment-modal-overlay" onclick="CartPage.closeCbModal()"></div>
+        <div class="payment-modal-content">
+            <button type="button" class="payment-modal-close" onclick="CartPage.closeCbModal()">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="payment-modal-header">
+                <i class="fas fa-lock"></i>
+                <h2>Paiement sécurisé</h2>
+            </div>
+
+            <div class="payment-modal-logos">
+                <img src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4bdb47b03ac81d9945bfe.svg" alt="Visa">
+                <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" alt="Mastercard">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Cartes_Bancaires.svg/1200px-Cartes_Bancaires.svg.png" alt="CB" style="height: 28px;">
+            </div>
+
+            <div class="payment-modal-amount">
+                <span>Montant à payer</span>
+                <strong id="cbModalAmount">0,00 €</strong>
+            </div>
+
+            <!-- Payment Request Button (Apple Pay / Google Pay) -->
+            <div id="modal-payment-request-container" style="margin-bottom: 16px;">
+                <div id="modal-payment-request-button"></div>
+                <div id="modal-payment-separator" style="display: none; text-align: center; margin: 16px 0; color: #6b7280; font-size: 13px;">
+                    <span style="display: inline-flex; align-items: center; gap: 10px;">
+                        <span style="flex: 1; height: 1px; background: #e5e7eb;"></span>
+                        ou payer par carte
+                        <span style="flex: 1; height: 1px; background: #e5e7eb;"></span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stripe Card Element -->
+            <div class="payment-modal-form">
+                <div id="modal-card-element"></div>
+                <div id="modal-card-errors" class="payment-modal-error"></div>
+            </div>
+
+            <p class="payment-modal-secure">
+                <i class="fas fa-shield-alt"></i> Paiement sécurisé par Stripe - Vos données sont chiffrées
+            </p>
+
+            <div class="payment-modal-actions">
+                <button type="button" class="btn-validate" id="cbModalValidate" onclick="CartPage.confirmCbPayment()">
+                    <i class="fas fa-lock"></i> Valider le paiement
+                </button>
+                <button type="button" class="btn-cancel" onclick="CartPage.closeCbModal()">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Paiement Espèces -->
+    <div id="cashPaymentModal" class="payment-modal" style="display: none;">
+        <div class="payment-modal-overlay" onclick="CartPage.closeCashModal()"></div>
+        <div class="payment-modal-content">
+            <button type="button" class="payment-modal-close" onclick="CartPage.closeCashModal()">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="payment-modal-header cash">
+                <i class="fas fa-money-bill-wave"></i>
+                <h2>Paiement en espèces</h2>
+            </div>
+
+            <div class="payment-modal-amount">
+                <span>Montant à payer</span>
+                <strong id="cashModalAmount">0,00 €</strong>
+            </div>
+
+            <div class="cash-options">
+                <p class="cash-question">Avez-vous l'appoint ?</p>
+
+                <div class="cash-option-cards">
+                    <label class="cash-option-card selected" data-option="exact">
+                        <input type="radio" name="cashOption" value="exact" checked onchange="CartPage.setCashOption('exact')">
+                        <div class="cash-option-icon exact">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="cash-option-text">
+                            <strong>Oui, j'ai l'appoint</strong>
+                            <span>Je paierai le montant exact</span>
+                        </div>
+                        <div class="cash-option-check">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </label>
+
+                    <label class="cash-option-card" data-option="change">
+                        <input type="radio" name="cashOption" value="change" onchange="CartPage.setCashOption('change')">
+                        <div class="cash-option-icon change">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="cash-option-text">
+                            <strong>Non, je paie avec</strong>
+                            <span>Indiquez le montant du billet</span>
+                        </div>
+                        <div class="cash-option-check">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Champ montant (visible seulement si "change") -->
+                <div id="cashAmountField" class="cash-amount-field" style="display: none;">
+                    <label>Je paie avec un billet de :</label>
+                    <div class="cash-amount-input">
+                        <input type="number" id="cashModalAmount" placeholder="50" min="0" step="1">
+                        <span class="cash-currency" id="cashModalCurrency">€</span>
+                    </div>
+                    <div class="cash-quick-amounts">
+                        <button type="button" onclick="CartPage.setCashQuickAmount(10)">10€</button>
+                        <button type="button" onclick="CartPage.setCashQuickAmount(20)">20€</button>
+                        <button type="button" onclick="CartPage.setCashQuickAmount(50)">50€</button>
+                        <button type="button" onclick="CartPage.setCashQuickAmount(100)">100€</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-modal-actions">
+                <button type="button" class="btn-validate cash" onclick="CartPage.confirmCashPayment()">
+                    <i class="fas fa-check"></i> Confirmer
+                </button>
+                <button type="button" class="btn-cancel" onclick="CartPage.closeCashModal()">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Styles des modals de paiement -->
+    <style>
+    .payment-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .payment-modal-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+    }
+
+    .payment-modal-content {
+        position: relative;
+        background: white;
+        border-radius: 20px;
+        max-width: 480px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .payment-modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: #f3f4f6;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: #6b7280;
+        transition: all 0.2s;
+    }
+
+    .payment-modal-close:hover {
+        background: #e5e7eb;
+        color: #1f2937;
+    }
+
+    .payment-modal-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .payment-modal-header i {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .payment-modal-header.cash i {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .payment-modal-header h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .payment-modal-logos {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        padding: 16px;
+        background: #f9fafb;
+        border-radius: 12px;
+    }
+
+    .payment-modal-logos img {
+        height: 32px;
+    }
+
+    .payment-modal-amount {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+
+    .payment-modal-amount span {
+        font-size: 14px;
+        color: #92400e;
+        font-weight: 500;
+    }
+
+    .payment-modal-amount strong {
+        font-size: 24px;
+        font-weight: 800;
+        color: #78350f;
+    }
+
+    .payment-modal-form {
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+
+    .payment-modal-error {
+        color: #dc2626;
+        font-size: 13px;
+        margin-top: 12px;
+        display: none;
+    }
+
+    .payment-modal-secure {
+        text-align: center;
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 24px;
+    }
+
+    .payment-modal-secure i {
+        color: #10b981;
+        margin-right: 6px;
+    }
+
+    .payment-modal-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn-validate {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s;
+    }
+
+    .btn-validate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-validate:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .btn-validate.cash {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .btn-validate.cash:hover {
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-cancel {
+        width: 100%;
+        padding: 14px;
+        background: #f3f4f6;
+        color: #4b5563;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: #e5e7eb;
+    }
+
+    /* Styles modal espèces */
+    .cash-options {
+        margin-bottom: 24px;
+    }
+
+    .cash-question {
+        font-size: 15px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+
+    .cash-option-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .cash-option-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .cash-option-card:hover {
+        border-color: #d1d5db;
+    }
+
+    .cash-option-card.selected {
+        border-color: #10b981;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.02) 100%);
+    }
+
+    .cash-option-card input[type="radio"] {
+        display: none;
+    }
+
+    .cash-option-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .cash-option-icon.exact {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .cash-option-icon.change {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .cash-option-icon i {
+        font-size: 18px;
+    }
+
+    .cash-option-text {
+        flex: 1;
+    }
+
+    .cash-option-text strong {
+        display: block;
+        font-size: 14px;
+        color: #1f2937;
+        margin-bottom: 2px;
+    }
+
+    .cash-option-text span {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .cash-option-check {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid #d1d5db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .cash-option-check i {
+        font-size: 10px;
+        color: white;
+        opacity: 0;
+    }
+
+    .cash-option-card.selected .cash-option-check {
+        background: #10b981;
+        border-color: #10b981;
+    }
+
+    .cash-option-card.selected .cash-option-check i {
+        opacity: 1;
+    }
+
+    .cash-amount-field {
+        margin-top: 20px;
+        padding: 20px;
+        background: #fffbeb;
+        border: 2px solid #fde68a;
+        border-radius: 12px;
+    }
+
+    .cash-amount-field label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 12px;
+    }
+
+    .cash-amount-input {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .cash-amount-input input {
+        flex: 1;
+        padding: 14px 16px;
+        border: 2px solid #fde68a;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #78350f;
+        background: white;
+    }
+
+    .cash-amount-input input:focus {
+        outline: none;
+        border-color: #f59e0b;
+    }
+
+    .cash-currency {
+        font-size: 20px;
+        font-weight: 700;
+        color: #92400e;
+    }
+
+    .cash-quick-amounts {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .cash-quick-amounts button {
+        padding: 8px 16px;
+        background: white;
+        border: 2px solid #fde68a;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #92400e;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .cash-quick-amounts button:hover {
+        background: #fef3c7;
+        border-color: #f59e0b;
+    }
+
+    @media (max-width: 640px) {
+        .payment-modal-content {
+            padding: 24px;
+        }
+
+        .payment-modal-header h2 {
+            font-size: 18px;
+        }
+
+        .payment-modal-amount strong {
+            font-size: 20px;
+        }
+    }
+    </style>
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
@@ -2753,127 +3364,164 @@
             },
 
             /**
-             * Affiche les modes de paiement depuis les settings (chips compacts)
+             * Affiche les modes de paiement (style McDonald's cards)
              */
             renderPaymentMethods() {
                 const container = document.getElementById('paymentMethodContainer');
                 if (!container) return;
 
                 const payment = this.settings.payment || {};
-                let html = '<div class="pay-grid">';
+                let html = '';
                 let hasPayment = false;
+                let firstMethod = null;
 
-                // Paiement en ligne
+                // Paiement en ligne (CB)
                 if (payment.online_payment_enabled) {
                     hasPayment = true;
+                    if (!firstMethod) firstMethod = 'online';
                     html += `
-                        <label class="pay-chip" data-method="online">
-                            <input type="radio" name="paymentMethod" value="online" onchange="CartPage.setPaymentMethod('online')">
-                            <i class="fas fa-lock"></i> En ligne
+                        <label class="payment-method-card" data-method="online" onclick="CartPage.selectPaymentMethod('online')">
+                            <input type="radio" name="paymentMethod" value="online">
+                            <div class="payment-method-icon online">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="payment-method-info">
+                                <div class="payment-method-name">Carte bancaire</div>
+                                <div class="payment-method-desc">Paiement sécurisé en ligne</div>
+                                <div class="card-logos">
+                                    <img src="https://js.stripe.com/v3/fingerprinted/img/visa-729c05c240c4bdb47b03ac81d9945bfe.svg" alt="Visa">
+                                    <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" alt="Mastercard">
+                                </div>
+                            </div>
+                            <div class="payment-method-check">
+                                <i class="fas fa-check"></i>
+                            </div>
                         </label>`;
                 }
 
                 // CB à la livraison
                 if (payment.card_on_delivery_enabled) {
                     hasPayment = true;
+                    if (!firstMethod) firstMethod = 'card_delivery';
                     html += `
-                        <label class="pay-chip" data-method="card_delivery">
-                            <input type="radio" name="paymentMethod" value="card_delivery" onchange="CartPage.setPaymentMethod('card_delivery')">
-                            <i class="fas fa-credit-card"></i> CB livraison
+                        <label class="payment-method-card" data-method="card_delivery" onclick="CartPage.selectPaymentMethod('card_delivery')">
+                            <input type="radio" name="paymentMethod" value="card_delivery">
+                            <div class="payment-method-icon card">
+                                <i class="fas fa-motorcycle"></i>
+                            </div>
+                            <div class="payment-method-info">
+                                <div class="payment-method-name">CB à la livraison</div>
+                                <div class="payment-method-desc">Payez au livreur par carte</div>
+                            </div>
+                            <div class="payment-method-check">
+                                <i class="fas fa-check"></i>
+                            </div>
                         </label>`;
                 }
 
                 // Espèces
                 if (payment.cash_enabled) {
                     hasPayment = true;
+                    if (!firstMethod) firstMethod = 'cash';
                     html += `
-                        <label class="pay-chip" data-method="cash">
-                            <input type="radio" name="paymentMethod" value="cash" onchange="CartPage.setPaymentMethod('cash')">
-                            <i class="fas fa-money-bill-wave"></i> Espèces
+                        <label class="payment-method-card" data-method="cash" onclick="CartPage.selectPaymentMethod('cash')">
+                            <input type="radio" name="paymentMethod" value="cash">
+                            <div class="payment-method-icon cash">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="payment-method-info">
+                                <div class="payment-method-name">Espèces</div>
+                                <div class="payment-method-desc">Payez en espèces à la livraison</div>
+                            </div>
+                            <div class="payment-method-check">
+                                <i class="fas fa-check"></i>
+                            </div>
                         </label>`;
                 }
 
-                html += `</div>
-                <style>
-                .pay-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-                .pay-chip {
-                    display: inline-flex; align-items: center; gap: 6px;
-                    padding: 10px 16px; background: var(--gray-50); border: 2px solid var(--gray-200);
-                    border-radius: 25px; cursor: pointer; transition: all 0.2s;
-                    font-weight: 600; font-size: 13px; color: var(--gray-700);
-                }
-                .pay-chip input { display: none; }
-                .pay-chip:hover { border-color: var(--gray-300); background: var(--gray-100); }
-                .pay-chip.selected { border-color: var(--primary); background: rgba(230,57,70,0.08); color: var(--primary); }
-                .pay-chip i { font-size: 14px; }
-                </style>`;
-
                 if (!hasPayment) {
-                    html = '<p style="color:var(--gray-500);font-size:13px;padding:12px 0;">Aucun mode de paiement configuré</p>';
+                    html = '<p style="color:#6b7280;font-size:14px;padding:16px 0;text-align:center;"><i class="fas fa-info-circle"></i> Aucun mode de paiement configuré</p>';
                 }
 
                 container.innerHTML = html;
 
-                // Sélectionner le premier par défaut
-                const firstRadio = container.querySelector('input[type="radio"]');
-                if (firstRadio) {
-                    firstRadio.checked = true;
-                    this.setPaymentMethod(firstRadio.value);
+                // Sélectionner le premier par défaut (sans ouvrir le modal)
+                if (firstMethod) {
+                    this.paymentMethod = firstMethod;
+                    const firstCard = container.querySelector(`[data-method="${firstMethod}"]`);
+                    if (firstCard) {
+                        firstCard.classList.add('selected');
+                        const radio = firstCard.querySelector('input[type="radio"]');
+                        if (radio) radio.checked = true;
+                    }
                 }
             },
 
             /**
-             * Définit le mode de paiement
+             * Sélectionne un mode de paiement et ouvre le modal si nécessaire
              */
-            setPaymentMethod(method) {
+            selectPaymentMethod(method) {
                 this.paymentMethod = method;
 
-                // Update UI selection
-                document.querySelectorAll('.pay-chip').forEach(chip => {
-                    chip.classList.toggle('selected', chip.dataset.method === method);
+                // Mettre à jour la sélection visuelle
+                document.querySelectorAll('.payment-method-card').forEach(card => {
+                    card.classList.toggle('selected', card.dataset.method === method);
+                    const radio = card.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = card.dataset.method === method;
                 });
 
-                // Afficher/masquer l'option monnaie (seulement pour espèces)
-                const cashSection = document.getElementById('cashChangeSection');
-                if (cashSection) {
-                    cashSection.style.display = method === 'cash' ? 'block' : 'none';
+                // Ouvrir le modal correspondant
+                if (method === 'online') {
+                    this.openCbModal();
+                } else if (method === 'cash') {
+                    this.openCashModal();
                 }
+                // card_delivery : pas de modal, juste sélectionner
+            },
 
-                // Afficher/masquer la section Stripe (seulement pour paiement en ligne)
-                const stripeSection = document.getElementById('stripePaymentSection');
-                if (stripeSection) {
-                    stripeSection.style.display = method === 'online' ? 'block' : 'none';
+            // ============================================
+            // MODAL PAIEMENT CB (Stripe)
+            // ============================================
 
-                    // Initialiser Stripe si pas encore fait
-                    if (method === 'online' && !this.stripeInitialized) {
-                        this.initStripe();
-                    }
-                }
+            modalStripeInitialized: false,
+            modalCardElement: null,
 
-                // Mettre à jour le texte du bouton selon le mode de paiement
-                const submitBtn = document.getElementById('submitOrder');
-                if (submitBtn) {
-                    if (method === 'online') {
-                        submitBtn.innerHTML = '<i class="fas fa-lock"></i> Payer et commander';
-                    } else {
-                        submitBtn.innerHTML = '<i class="fas fa-check"></i> Confirmer la commande';
-                    }
-                }
+            /**
+             * Ouvre le modal de paiement CB
+             */
+            openCbModal() {
+                const modal = document.getElementById('cbPaymentModal');
+                if (!modal) return;
 
-                // Reset Stripe payment state when changing payment method
-                this.stripePaymentCompleted = false;
-                this.stripeClientSecret = null;
+                // Mettre à jour le montant
+                const total = this.getOrderTotal();
+                document.getElementById('cbModalAmount').textContent = Config.formatPrice(total);
 
-                // Reset change option when not cash
-                if (method !== 'cash') {
-                    this.changeOption = null;
+                // Afficher le modal
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+
+                // Initialiser Stripe si pas encore fait
+                if (!this.modalStripeInitialized) {
+                    this.initModalStripe();
                 }
             },
 
             /**
-             * Initialise Stripe Elements
+             * Ferme le modal CB
              */
-            async initStripe() {
+            closeCbModal() {
+                const modal = document.getElementById('cbPaymentModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            },
+
+            /**
+             * Initialise Stripe dans le modal
+             */
+            async initModalStripe() {
                 const stripeKey = this.settings.payment?.stripe_public_key;
 
                 if (!stripeKey) {
@@ -2883,17 +3531,19 @@
                 }
 
                 try {
-                    // Initialiser Stripe
-                    this.stripe = Stripe(stripeKey);
+                    // Initialiser Stripe si pas déjà fait
+                    if (!this.stripe) {
+                        this.stripe = Stripe(stripeKey);
+                    }
 
-                    // Créer les Elements avec apparence personnalisée
+                    // Créer les Elements
                     const appearance = {
                         theme: 'stripe',
                         variables: {
                             colorPrimary: '#667eea',
                             colorBackground: '#ffffff',
                             colorText: '#1f2937',
-                            colorDanger: '#e63946',
+                            colorDanger: '#dc2626',
                             fontFamily: 'Inter, system-ui, sans-serif',
                             borderRadius: '8px'
                         }
@@ -2901,30 +3551,28 @@
 
                     this.stripeElements = this.stripe.elements({ appearance });
 
-                    // Créer le Card Element
-                    this.cardElement = this.stripeElements.create('card', {
+                    // Créer le Card Element pour le modal
+                    this.modalCardElement = this.stripeElements.create('card', {
                         style: {
                             base: {
                                 fontSize: '16px',
                                 color: '#1f2937',
-                                '::placeholder': {
-                                    color: '#9ca3af'
-                                }
+                                '::placeholder': { color: '#9ca3af' }
                             },
                             invalid: {
-                                color: '#e63946',
-                                iconColor: '#e63946'
+                                color: '#dc2626',
+                                iconColor: '#dc2626'
                             }
                         },
                         hidePostalCode: true
                     });
 
-                    // Monter le Card Element
-                    this.cardElement.mount('#card-element');
+                    // Monter le Card Element dans le modal
+                    this.modalCardElement.mount('#modal-card-element');
 
-                    // Gérer les erreurs de carte
-                    this.cardElement.on('change', (event) => {
-                        const errorDiv = document.getElementById('card-errors');
+                    // Gérer les erreurs
+                    this.modalCardElement.on('change', (event) => {
+                        const errorDiv = document.getElementById('modal-card-errors');
                         if (event.error) {
                             errorDiv.textContent = event.error.message;
                             errorDiv.style.display = 'block';
@@ -2933,104 +3581,224 @@
                         }
                     });
 
-                    // Configurer Payment Request Button (Apple Pay / Google Pay)
-                    await this.setupPaymentRequestButton();
-
-                    this.stripeInitialized = true;
-                    console.log('[Stripe] ✅ Initialisé avec succès');
+                    this.modalStripeInitialized = true;
+                    console.log('[Stripe] ✅ Modal initialisé');
 
                 } catch (error) {
-                    console.error('[Stripe] Erreur initialisation:', error);
+                    console.error('[Stripe] Erreur initialisation modal:', error);
                     this.showToast('Erreur lors de l\'initialisation du paiement', 'error');
                 }
             },
 
             /**
-             * Configure le Payment Request Button (Apple Pay / Google Pay)
+             * Confirme le paiement CB
              */
-            async setupPaymentRequestButton() {
-                const total = Cart.getSubtotal() - this.discount - (this.bundleDiscount || 0) + (this.deliveryFee || 0);
+            async confirmCbPayment() {
+                const validateBtn = document.getElementById('cbModalValidate');
+                validateBtn.disabled = true;
+                validateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Paiement en cours...';
 
-                const paymentRequest = this.stripe.paymentRequest({
-                    country: 'FR',
-                    currency: 'eur',
-                    total: {
-                        label: 'Votre commande',
-                        amount: Math.round(total * 100)
-                    },
-                    requestPayerName: true,
-                    requestPayerEmail: false,
-                    requestPayerPhone: false
-                });
+                try {
+                    // Créer le PaymentIntent
+                    const intentResult = await this.createPaymentIntent();
+                    if (!intentResult.success) {
+                        throw new Error('Erreur lors de la création du paiement');
+                    }
 
-                // Vérifier si Apple Pay / Google Pay est disponible
-                const result = await paymentRequest.canMakePayment();
-
-                if (result) {
-                    console.log('[Stripe] ✅ Apple Pay/Google Pay disponible:', result);
-
-                    // Créer et monter le bouton
-                    const prButton = this.stripeElements.create('paymentRequestButton', {
-                        paymentRequest: paymentRequest,
-                        style: {
-                            paymentRequestButton: {
-                                type: 'default',
-                                theme: 'dark',
-                                height: '48px'
-                            }
-                        }
-                    });
-
-                    prButton.mount('#payment-request-button');
-                    document.getElementById('payment-request-separator').style.display = 'block';
-
-                    // Gérer le paiement via Payment Request
-                    paymentRequest.on('paymentmethod', async (ev) => {
-                        try {
-                            // Créer le PaymentIntent
-                            const intentResult = await this.createPaymentIntent();
-                            if (!intentResult.success) {
-                                ev.complete('fail');
-                                return;
-                            }
-
-                            // Confirmer le paiement
-                            const { error, paymentIntent } = await this.stripe.confirmCardPayment(
-                                this.stripeClientSecret,
-                                { payment_method: ev.paymentMethod.id },
-                                { handleActions: false }
-                            );
-
-                            if (error) {
-                                ev.complete('fail');
-                                this.showToast(error.message, 'error');
-                            } else {
-                                ev.complete('success');
-
-                                if (paymentIntent.status === 'requires_action') {
-                                    const { error: actionError } = await this.stripe.confirmCardPayment(this.stripeClientSecret);
-                                    if (actionError) {
-                                        this.showToast(actionError.message, 'error');
-                                    } else {
-                                        await this.completeOrderAfterPayment();
-                                    }
-                                } else {
-                                    await this.completeOrderAfterPayment();
+                    // Confirmer le paiement
+                    const { error, paymentIntent } = await this.stripe.confirmCardPayment(
+                        this.stripeClientSecret,
+                        {
+                            payment_method: {
+                                card: this.modalCardElement,
+                                billing_details: {
+                                    name: document.getElementById('customerName')?.value || 'Client'
                                 }
                             }
-                        } catch (err) {
-                            console.error('[Stripe] Erreur Payment Request:', err);
-                            ev.complete('fail');
-                            this.showToast('Erreur lors du paiement', 'error');
                         }
-                    });
+                    );
 
-                    this.paymentRequest = paymentRequest;
-                } else {
-                    console.log('[Stripe] Apple Pay/Google Pay non disponible');
-                    document.getElementById('payment-request-button-container').style.display = 'none';
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+
+                    if (paymentIntent.status === 'succeeded') {
+                        console.log('[Stripe] ✅ Paiement réussi:', paymentIntent.id);
+                        this.stripePaymentCompleted = true;
+                        this.stripePaymentIntentId = paymentIntent.id;
+                        this.closeCbModal();
+                        this.showToast('Paiement accepté !', 'success');
+                        // Soumettre la commande
+                        await this.submitOrder();
+                    }
+
+                } catch (error) {
+                    console.error('[Stripe] Erreur paiement:', error);
+                    this.showToast(error.message || 'Erreur lors du paiement', 'error');
+                    validateBtn.disabled = false;
+                    validateBtn.innerHTML = '<i class="fas fa-lock"></i> Valider le paiement';
                 }
             },
+
+            // ============================================
+            // MODAL PAIEMENT ESPÈCES
+            // ============================================
+
+            cashModalOption: 'exact',
+            cashModalAmount: null,
+
+            /**
+             * Ouvre le modal de paiement espèces
+             */
+            openCashModal() {
+                const modal = document.getElementById('cashPaymentModal');
+                if (!modal) return;
+
+                // Mettre à jour le montant
+                const total = this.getOrderTotal();
+                document.getElementById('cashModalAmount').textContent = Config.formatPrice(total);
+
+                // Reset les options
+                this.cashModalOption = 'exact';
+                this.cashModalAmount = null;
+                document.querySelectorAll('.cash-option-card').forEach(card => {
+                    card.classList.toggle('selected', card.dataset.option === 'exact');
+                });
+                document.getElementById('cashAmountField').style.display = 'none';
+
+                // Mettre à jour la devise
+                const currency = this.settings.currency_symbol || '€';
+                document.getElementById('cashModalCurrency').textContent = currency;
+
+                // Afficher le modal
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            },
+
+            /**
+             * Ferme le modal espèces
+             */
+            closeCashModal() {
+                const modal = document.getElementById('cashPaymentModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            },
+
+            /**
+             * Définit l'option de paiement espèces (appoint ou monnaie)
+             */
+            setCashOption(option) {
+                this.cashModalOption = option;
+
+                // Mettre à jour la sélection visuelle
+                document.querySelectorAll('.cash-option-card').forEach(card => {
+                    card.classList.toggle('selected', card.dataset.option === option);
+                });
+
+                // Afficher/masquer le champ montant
+                document.getElementById('cashAmountField').style.display = option === 'change' ? 'block' : 'none';
+            },
+
+            /**
+             * Définit un montant rapide pour les espèces
+             */
+            setCashQuickAmount(amount) {
+                const input = document.querySelector('#cashAmountField input');
+                if (input) {
+                    input.value = amount;
+                    this.cashModalAmount = amount;
+                }
+            },
+
+            /**
+             * Confirme le paiement espèces
+             */
+            confirmCashPayment() {
+                const total = this.getOrderTotal();
+
+                // Si option "change", vérifier le montant
+                if (this.cashModalOption === 'change') {
+                    const amountInput = document.querySelector('#cashAmountField input');
+                    const amount = parseFloat(amountInput?.value || 0);
+
+                    if (!amount || amount <= 0) {
+                        this.showToast('Veuillez indiquer le montant du billet', 'error');
+                        return;
+                    }
+
+                    if (amount < total) {
+                        this.showToast('Le montant doit être supérieur au total', 'error');
+                        return;
+                    }
+
+                    this.cashModalAmount = amount;
+                }
+
+                // Sauvegarder l'option
+                this.changeOption = this.cashModalOption;
+                if (this.cashModalOption === 'change') {
+                    // Stocker pour la commande
+                    this.changeForAmount = this.cashModalAmount;
+                }
+
+                this.closeCashModal();
+                this.showToast('Mode de paiement confirmé', 'success');
+            },
+
+            /**
+             * Calcule le total de la commande
+             */
+            getOrderTotal() {
+                const subtotal = Cart.getSubtotal();
+                const bundle = Cart.calculateBundleDiscount();
+                const deliveryFee = this.mode === 'delivery' ? (this.selectedCityFee || 0) : 0;
+                return Math.max(0, subtotal - this.discount - bundle.discount + deliveryFee);
+            },
+
+            // ============================================
+            // ANCIEN CODE - conservé pour compatibilité
+            // ============================================
+
+            /**
+             * @deprecated Utilisé pour la rétrocompatibilité
+             */
+            setPaymentMethod(method) {
+                this.selectPaymentMethod(method);
+            },
+
+            /**
+             * @deprecated Remplacé par setCashOption dans le modal
+             */
+            setChangeOption(option) {
+                this.changeOption = option;
+                const changeInput = document.getElementById('changeForAmount');
+                if (changeInput) {
+                    changeInput.disabled = option !== 'change';
+                    if (option !== 'change') changeInput.value = '';
+                }
+            },
+
+            // Garder la référence pour éviter les erreurs
+            cardElement: null,
+            stripeInitialized: false,
+            // Les anciennes fonctions Stripe sont maintenant dans le modal
+            async initStripe() {
+                // Redirigé vers le modal
+                await this.initModalStripe();
+            },
+
+            /**
+             * Ancien selecteur (pas de premier radio)
+             */
+            _oldSetPaymentMethodSelection: function(method) {
+                document.querySelectorAll('.pay-chip').forEach(chip => {
+                    chip.classList.toggle('selected', chip.dataset.method === method);
+                });
+            },
+
+            /* Les anciennes fonctions Stripe inline ont été remplacées par le modal */
 
             /**
              * Crée un PaymentIntent sur le serveur
