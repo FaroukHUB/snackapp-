@@ -176,6 +176,14 @@ h1, h2, h3, h4, h5, h6,
     letter-spacing: 0.3px;
 }
 
+/* Titres des sections catégories - Plus grands */
+.product-section > h2,
+.formules-section > h2,
+#featuredTitle {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
 /* Prices - Poppins Bold */
 .product-price,
 .product-price-new,
