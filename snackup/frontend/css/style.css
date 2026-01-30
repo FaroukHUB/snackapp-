@@ -607,6 +607,82 @@ ul {
     font-size: 26px;
 }
 
+/* Formules Slider */
+.formules-slider-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.formules-slider {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 8px 4px 16px 4px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.formules-slider::-webkit-scrollbar {
+    display: none;
+}
+
+.formules-slider .formule-slide {
+    flex: 0 0 auto;
+    width: 260px;
+    scroll-snap-align: start;
+}
+
+.formules-slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.2s ease;
+    color: #333;
+}
+
+.formules-slider-btn:hover {
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.formules-slider-prev {
+    left: -8px;
+}
+
+.formules-slider-next {
+    right: -8px;
+}
+
+@media (max-width: 768px) {
+    .formules-slider .formule-slide {
+        width: 220px;
+    }
+
+    .formules-slider-btn {
+        display: none;
+    }
+}
+
+@media (min-width: 769px) {
+    .formules-slider .formule-slide {
+        width: 280px;
+    }
+}
+
 .formules-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

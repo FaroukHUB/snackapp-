@@ -503,7 +503,7 @@ const Products = {
     },
 
     /**
-     * Render formules section - NOUVEAU: retourne HTML complet de la section
+     * Render formules section - NOUVEAU: retourne HTML complet de la section en SLIDER
      */
     renderFormulesSection() {
         const formules = Config.getAvailableFormules();
@@ -540,7 +540,7 @@ const Products = {
 
             // Utiliser exactement les mêmes classes que product-card-new
             return `
-                <article class="product-card-new" onclick="Products.openFormuleModal('${escapeHtml(formule.id)}')">
+                <article class="product-card-new formule-slide" onclick="Products.openFormuleModal('${escapeHtml(formule.id)}')">
                     ${formule.badge ? `<span class="product-badge-new">${escapeHtml(formule.badge)}</span>` : ''}
                     ${hasImage
                         ? `<img src="../../${escapeHtml(formule.image)}" alt="${escapeHtml(formule.name)}" class="product-image-new" loading="lazy" onerror="this.style.display='none'">`
@@ -560,18 +560,42 @@ const Products = {
             `;
         }).join('');
 
-        // Retourner la section complète - utiliser products-grid comme les autres catégories
+        // Retourner la section complète avec slider
         return `
             <section class="product-section formules-section" id="formulesSection">
                 <h2>
                     <i class="fas fa-fire"></i>
                     Nos Formules
                 </h2>
-                <div class="products-grid">
-                    ${cardsHtml}
+                <div class="formules-slider-wrapper">
+                    <div class="formules-slider" id="formulesSlider">
+                        ${cardsHtml}
+                    </div>
+                    ${formules.length > 2 ? `
+                    <button class="formules-slider-btn formules-slider-prev" onclick="Products.slideFormules(-1)" aria-label="Précédent">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="formules-slider-btn formules-slider-next" onclick="Products.slideFormules(1)" aria-label="Suivant">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    ` : ''}
                 </div>
             </section>
         `;
+    },
+
+    /**
+     * Slide formules slider
+     */
+    slideFormules(direction) {
+        const slider = document.getElementById('formulesSlider');
+        if (!slider) return;
+
+        const slideWidth = slider.querySelector('.formule-slide')?.offsetWidth || 280;
+        const gap = 16;
+        const scrollAmount = (slideWidth + gap) * direction;
+
+        slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     },
 
     /**
