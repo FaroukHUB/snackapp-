@@ -1782,7 +1782,7 @@
 
             <div class="payment-modal-amount">
                 <span>Montant à payer</span>
-                <strong id="cashModalAmount">0,00 €</strong>
+                <strong id="cashModalTotal">0,00 €</strong>
             </div>
 
             <div class="cash-options">
@@ -1822,7 +1822,7 @@
                 <div id="cashAmountField" class="cash-amount-field" style="display: none;">
                     <label>Je paie avec un billet de :</label>
                     <div class="cash-amount-input">
-                        <input type="number" id="cashModalAmount" placeholder="50" min="0" step="1">
+                        <input type="number" id="cashAmountInput" placeholder="50" min="0" step="1">
                         <span class="cash-currency" id="cashModalCurrency">€</span>
                     </div>
                     <div class="cash-quick-amounts">
@@ -3702,7 +3702,7 @@
 
                 // Mettre à jour le montant
                 const total = this.getOrderTotal();
-                document.getElementById('cashModalAmount').textContent = Config.formatPrice(total);
+                document.getElementById('cashModalTotal').textContent = Config.formatPrice(total);
 
                 // Reset les options
                 this.cashModalOption = 'exact';
@@ -3751,7 +3751,7 @@
              * Définit un montant rapide pour les espèces
              */
             setCashQuickAmount(amount) {
-                const input = document.querySelector('#cashAmountField input');
+                const input = document.getElementById('cashAmountInput');
                 if (input) {
                     input.value = amount;
                     this.cashModalAmount = amount;
@@ -3766,7 +3766,7 @@
 
                 // Si option "change", vérifier le montant
                 if (this.cashModalOption === 'change') {
-                    const amountInput = document.querySelector('#cashAmountField input');
+                    const amountInput = document.getElementById('cashAmountInput');
                     const amount = parseFloat(amountInput?.value || 0);
 
                     if (!amount || amount <= 0) {
