@@ -887,6 +887,18 @@ if ($useMySQL) {
                     'group_name' => $groupName
                 ]);
 
+                // Auto-assigner le supplément à toutes les catégories existantes
+                $pdo = Database::getInstance();
+                $categories = MenuRepository::getAllCategories();
+                foreach ($categories as $category) {
+                    try {
+                        $stmt = $pdo->prepare("INSERT IGNORE INTO category_supplements (category_id, supplement_id) VALUES (?, ?)");
+                        $stmt->execute([$category['id'], $supplementId]);
+                    } catch (Exception $e) {
+                        // Ignorer les erreurs d'insertion (doublon possible)
+                    }
+                }
+
                 $supplement = SupplementRepository::getById($supplementId);
                 jsonSuccess(['supplement' => $supplement]);
             } catch (Exception $e) {
@@ -954,6 +966,32 @@ if ($useMySQL) {
                 jsonSuccess(['message' => "Suppléments sucrés supprimés: $count"]);
             } catch (Exception $e) {
                 jsonError('Erreur suppression suppléments sucrés: ' . $e->getMessage());
+            }
+            break;
+
+        case 'sync_supplements_to_categories':
+            // Assigne tous les suppléments existants à toutes les catégories
+            try {
+                $pdo = Database::getInstance();
+                $supplements = MenuRepository::getAllSupplements();
+                $categories = MenuRepository::getAllCategories();
+                $count = 0;
+
+                foreach ($supplements as $supId => $supplement) {
+                    foreach ($categories as $category) {
+                        try {
+                            $stmt = $pdo->prepare("INSERT IGNORE INTO category_supplements (category_id, supplement_id) VALUES (?, ?)");
+                            $stmt->execute([$category['id'], $supId]);
+                            if ($stmt->rowCount() > 0) $count++;
+                        } catch (Exception $e) {
+                            // Ignorer
+                        }
+                    }
+                }
+
+                jsonSuccess(['message' => "Synchronisation terminée: $count nouvelles associations créées"]);
+            } catch (Exception $e) {
+                jsonError('Erreur synchronisation: ' . $e->getMessage());
             }
             break;
 
