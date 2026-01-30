@@ -931,6 +931,61 @@ if (isset($_GET['export'])) {
             .nav-btn i { font-size: 14px; }
             .nav-btn div { font-size: 8px; }
         }
+
+        /* ===== SETTINGS LAYOUT - Grid 2 colonnes ===== */
+        .settings-quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .settings-quick-links a {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 14px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .settings-category {
+            margin-bottom: 24px;
+        }
+        .settings-category-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #9ca3af;
+            margin-bottom: 12px;
+            padding-left: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .settings-grid > .card {
+            margin-bottom: 0;
+        }
+        .settings-grid-full {
+            grid-column: 1 / -1;
+        }
+        @media (max-width: 768px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            .settings-quick-links a {
+                min-width: calc(50% - 5px);
+            }
+        }
     </style>
 </head>
 <body>
@@ -2383,22 +2438,40 @@ if (isset($_GET['export'])) {
                 <h2><i class="fas fa-cog" style="color: #6b7280;"></i> Réglages</h2>
             </div>
 
+            <!-- Accès rapides -->
+            <div class="settings-quick-links">
+                <a href="products-manager.php" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"><i class="fas fa-burger"></i> Menu</a>
+                <a href="promo-manager.php" class="btn" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);"><i class="fas fa-tag"></i> Promos</a>
+                <a href="livreurs-manager.php" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);"><i class="fas fa-motorcycle"></i> Livreurs</a>
+                <a href="settings-manager.php" class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);"><i class="fas fa-sliders-h"></i> Paramètres</a>
+            </div>
+
+            <!-- Catégorie: Sécurité -->
             <?php if (($_SESSION['admin_role'] ?? 'staff') === 'owner'): ?>
-            <!-- Gestion des Admins (seulement pour owner) -->
-            <div class="card" style="border-left: 4px solid #dc2626; margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3 style="margin-bottom: 8px;"><i class="fas fa-user-shield" style="color: #dc2626;"></i> Utilisateurs Administrateurs</h3>
-                        <p style="color: #9ca3af; font-size: 12px;">Gérer les comptes admin (créer, modifier, supprimer)</p>
+            <div class="settings-category">
+                <div class="settings-category-title"><i class="fas fa-shield-alt"></i> SÉCURITÉ</div>
+                <div class="settings-grid">
+                    <!-- Gestion des Admins (seulement pour owner) -->
+                    <div class="card" style="border-left: 4px solid #dc2626;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 style="margin-bottom: 8px;"><i class="fas fa-user-shield" style="color: #dc2626;"></i> Utilisateurs Administrateurs</h3>
+                                <p style="color: #9ca3af; font-size: 12px;">Gérer les comptes admin (créer, modifier, supprimer)</p>
+                            </div>
+                            <a href="admin-users.php" class="btn" style="background: #dc2626; color: white; text-decoration: none;">
+                                <i class="fas fa-users-cog"></i> Gérer
+                            </a>
+                        </div>
                     </div>
-                    <a href="admin-users.php" class="btn" style="background: #dc2626; color: white; text-decoration: none;">
-                        <i class="fas fa-users-cog"></i> Gérer les admins
-                    </a>
                 </div>
             </div>
             <?php endif; ?>
 
-            <!-- Gestion de l'Imprimante -->
+            <!-- Catégorie: Technique -->
+            <div class="settings-category">
+                <div class="settings-category-title"><i class="fas fa-tools"></i> TECHNIQUE</div>
+                <div class="settings-grid">
+                    <!-- Gestion de l'Imprimante -->
             <div class="card" style="border-left: 4px solid #10b981; margin-bottom: 20px;">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                     <h3 style="margin: 0;"><i class="fas fa-print" style="color: #10b981;"></i> Imprimante de Tickets</h3>
@@ -2473,8 +2546,14 @@ if (isset($_GET['export'])) {
                     </button>
                 </div>
             </div>
+                </div>
+            </div>
 
-            <!-- Horaires -->
+            <!-- Catégorie: Restaurant -->
+            <div class="settings-category">
+                <div class="settings-category-title"><i class="fas fa-store"></i> RESTAURANT</div>
+                <div class="settings-grid">
+                    <!-- Horaires -->
             <div class="card" style="border-left: 4px solid #3b82f6;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-clock" style="color: #3b82f6;"></i> Horaires d'ouverture</h3>
                 <p style="color: #9ca3af; font-size: 12px; margin-bottom: 15px;">Ajoutez plusieurs créneaux par jour (midi + soir)</p>
@@ -2514,8 +2593,14 @@ if (isset($_GET['export'])) {
                     <button type="submit" class="btn" style="margin-top: 15px;"><i class="fas fa-save"></i> Enregistrer</button>
                 </form>
             </div>
+                </div>
+            </div>
 
-            <!-- Livraison & Plateformes -->
+            <!-- Catégorie: Livraison -->
+            <div class="settings-category">
+                <div class="settings-category-title"><i class="fas fa-truck"></i> LIVRAISON</div>
+                <div class="settings-grid">
+                    <!-- Livraison & Plateformes -->
             <div class="card" style="border-left: 4px solid #f59e0b;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-truck" style="color: #f59e0b;"></i> Livraison & Plateformes</h3>
 
@@ -2575,8 +2660,14 @@ if (isset($_GET['export'])) {
                     </div>
                 </div>
             </div>
+                </div>
+            </div>
 
-            <!-- Contact -->
+            <!-- Catégorie: Communication -->
+            <div class="settings-category">
+                <div class="settings-category-title"><i class="fas fa-comments"></i> COMMUNICATION</div>
+                <div class="settings-grid">
+                    <!-- Contact -->
             <div class="card" style="border-left: 4px solid #10b981;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-phone" style="color: #10b981;"></i> Contact & Réseaux</h3>
                 <form method="POST" id="contact-form">
@@ -2802,33 +2893,7 @@ if (isset($_GET['export'])) {
                     <button type="submit" class="btn"><i class="fas fa-save"></i> Enregistrer FAQ</button>
                 </form>
             </div>
-
-            <!-- Produits -->
-            <div class="card" style="border-left: 4px solid #f59e0b;">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-utensils" style="color: #f59e0b;"></i> Gestion des produits</h3>
-                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Gérez votre menu, ajoutez des produits, modifiez les prix et les catégories.</p>
-                <a href="products-manager.php" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"><i class="fas fa-burger"></i> Gérer le menu</a>
-            </div>
-
-            <!-- Codes Promo -->
-            <div class="card" style="border-left: 4px solid #22c55e;">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-tags" style="color: #22c55e;"></i> Codes Promo</h3>
-                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Créez et gérez vos codes de réduction pour fidéliser vos clients.</p>
-                <a href="promo-manager.php" class="btn" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);"><i class="fas fa-tag"></i> Gérer les codes promo</a>
-            </div>
-
-            <!-- Gestion des Livreurs -->
-            <div class="card" style="border-left: 4px solid #3b82f6;">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-motorcycle" style="color: #3b82f6;"></i> Gestion des livreurs</h3>
-                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Gérez vos livreurs, ajoutez leurs contacts WhatsApp et envoyez-leur des notifications de commandes.</p>
-                <a href="livreurs-manager.php" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);"><i class="fas fa-users-cog"></i> Gérer les livreurs</a>
-            </div>
-
-            <!-- Paramètres -->
-            <div class="card" style="border-left: 4px solid #8b5cf6;">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-cog" style="color: #8b5cf6;"></i> Paramètres</h3>
-                <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Devise, zones de livraison, méthodes de paiement.</p>
-                <a href="settings-manager.php" class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);"><i class="fas fa-sliders-h"></i> Configurer</a>
+                </div>
             </div>
 
             <!-- Sécurité PIN -->
