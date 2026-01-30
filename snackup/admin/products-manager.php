@@ -1348,23 +1348,12 @@ $csrfToken = getCsrfToken();
 
     // ===== GESTION DES SUPPLÉMENTS =====
     $("#btnManageSupplements").addEventListener("click", () => {
-      console.log('[DIAG] 1. Clic bouton suppléments');
-      // Ouvrir le modal d'abord (évite le freeze)
       openModal("#modalSupplements");
-      console.log('[DIAG] 2. Modal ouvert');
-      // Rendu différé
+      // Rendu différé pour éviter le freeze
       requestAnimationFrame(() => {
-        console.log('[DIAG] 3. RAF callback start');
-        console.time('[DIAG] setupSupplementsEvents');
         setupSupplementsEvents();
-        console.timeEnd('[DIAG] setupSupplementsEvents');
-        console.time('[DIAG] populateCategorySelect');
         populateCategorySelect();
-        console.timeEnd('[DIAG] populateCategorySelect');
-        console.time('[DIAG] renderSupplementsList');
         renderSupplementsList();
-        console.timeEnd('[DIAG] renderSupplementsList');
-        console.log('[DIAG] 4. RAF callback end');
       });
     });
 
@@ -1386,79 +1375,56 @@ $csrfToken = getCsrfToken();
     // Protection contre les rendus multiples
     let isRenderingSupplements = false;
     function renderSupplementsList(){
-      console.log('[DIAG] renderSupplementsList() called, isRenderingSupplements:', isRenderingSupplements);
-      if (isRenderingSupplements) {
-        console.log('[DIAG] ⚠️ Already rendering, skipping');
-        return;
-      }
+      if (isRenderingSupplements) return;
       isRenderingSupplements = true;
 
       try {
         const container = $("#supplementsList");
         if (!container) {
-          console.log('[DIAG] ❌ Container not found');
           isRenderingSupplements = false;
           return;
         }
-        console.log('[DIAG] Container found');
 
         const catalog = state.menu?.supplements?.catalog || {};
         const supplements = Object.values(catalog).filter(s => s != null);
-        console.log('[DIAG] Supplements count:', supplements.length, 'Catalog type:', typeof catalog, 'Keys:', Object.keys(catalog).length);
 
-      // Note: populateCategorySelect() est appelé séparément (modal open + ajout)
-      // pour éviter les recalculs inutiles lors de toggle/delete/edit
+        if (supplements.length === 0) {
+          container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
+          isRenderingSupplements = false;
+          return;
+        }
 
-      if (supplements.length === 0) {
-        container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
-        console.log('[DIAG] No supplements, showing empty message');
-        isRenderingSupplements = false;
-        return;
-      }
-
-      // Grouper par catégorie
-      console.log('[DIAG] Grouping supplements...');
-      const grouped = {};
-      supplements.forEach(sup => {
-        if (!sup) return;
-        const cat = sup.category || sup.group_name || 'autres';
-        if (!grouped[cat]) grouped[cat] = [];
-        grouped[cat].push(sup);
-      });
-      console.log('[DIAG] Groups:', Object.keys(grouped));
-
-      // Construire tout le HTML d'un coup (plus rapide que multiple appendChild)
-      console.log('[DIAG] Building HTML...');
-      let html = '';
-      Object.keys(grouped).sort().forEach(group => {
-        html += `<div style="font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;">${escapeHtml(capitalizeStr(group))}</div>`;
-        grouped[group].forEach(sup => {
-          html += createSupplementItemHTML(sup);
+        // Grouper par catégorie
+        const grouped = {};
+        supplements.forEach(sup => {
+          if (!sup) return;
+          const cat = sup.category || sup.group_name || 'autres';
+          if (!grouped[cat]) grouped[cat] = [];
+          grouped[cat].push(sup);
         });
-      });
-      console.log('[DIAG] HTML built, length:', html.length);
 
-      console.log('[DIAG] Setting innerHTML...');
-      container.innerHTML = html;
-      console.log('[DIAG] ✓ innerHTML set');
+        // Construire le HTML
+        let html = '';
+        Object.keys(grouped).sort().forEach(group => {
+          html += `<div style="font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;">${escapeHtml(capitalizeStr(group))}</div>`;
+          grouped[group].forEach(sup => {
+            html += createSupplementItemHTML(sup);
+          });
+        });
+
+        container.innerHTML = html;
       } catch(e) {
         console.error('[Supplements] Erreur rendu:', e);
       } finally {
         isRenderingSupplements = false;
-        console.log('[DIAG] renderSupplementsList() finished');
       }
     }
 
     // Event delegation pour suppléments (attaché UNE SEULE FOIS)
     let supplementsEventsAttached = false;
     function setupSupplementsEvents() {
-      console.log('[DIAG] setupSupplementsEvents() called, attached:', supplementsEventsAttached);
-      if (supplementsEventsAttached) {
-        console.log('[DIAG] ⚠️ Events already attached, skipping');
-        return;
-      }
+      if (supplementsEventsAttached) return;
       supplementsEventsAttached = true;
-      console.log('[DIAG] Attaching event listener...');
 
       const container = $("#supplementsList");
       container.addEventListener("click", async (e) => {
@@ -1598,7 +1564,7 @@ $csrfToken = getCsrfToken();
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);">
           <div style="display:flex;align-items:center;gap:10px;flex:1;">
             <div class="sup-img-container" data-sup-id="${escapeHtml(supId)}" style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;border:1px dashed var(--stroke);flex-shrink:0;" title="Cliquer pour ${hasImage ? 'changer' : 'ajouter'} l'image">
-              ${hasImage ? `<img src="${escapeHtml(imageUrl)}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fas fa-camera" style="color:var(--muted);font-size:14px;"></i>'}
+              ${hasImage ? `<img src="${escapeHtml(imageUrl)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" style="width:100%;height:100%;object-fit:cover;"><i class="fas fa-camera" style="display:none;color:var(--muted);font-size:14px;"></i>` : '<i class="fas fa-camera" style="color:var(--muted);font-size:14px;"></i>'}
             </div>
             <div>
               <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
