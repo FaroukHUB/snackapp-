@@ -11,6 +11,7 @@ const Config = {
     supplements: {},
     upsellRules: [],
     categoryIcons: {},
+    pizzaBases: [],
 
     // State
     isLoaded: false,
@@ -65,6 +66,7 @@ const Config = {
         this.categoryIcons = data.categoryIcons || {};
         this.featured = data.featured || {};
         this.menuOptions = data.menuOptions || {};
+        this.pizzaBases = data.pizzaBases || [];
 
         // Créer index byId normalisé (clé = String(id))
         this.supplements.byId = {};

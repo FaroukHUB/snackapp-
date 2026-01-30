@@ -1867,6 +1867,23 @@ switch ($action) {
             $patch['capsuleColors'] = is_array($capsuleColors) ? $capsuleColors : [];
         }
 
+        // Gérer la base pizza par défaut
+        if (array_key_exists('default_base_id', $input)) {
+            $defaultBaseId = $input['default_base_id'] !== '' && $input['default_base_id'] !== null
+                ? (int)$input['default_base_id']
+                : null;
+            $patch['default_base_id'] = $defaultBaseId;
+
+            // Stocker aussi en base de données (si le produit existe dans products)
+            try {
+                $pdo = Database::getInstance();
+                $stmt = $pdo->prepare("UPDATE products SET default_base_id = ? WHERE id = ?");
+                $stmt->execute([$defaultBaseId, $productId]);
+            } catch (Exception $e) {
+                // Silently ignore if product doesn't exist in DB (custom products)
+            }
+        }
+
         // Gérer l'upload d'image
         $imagePath = handleImageUpload($productId);
         if ($imagePath) {

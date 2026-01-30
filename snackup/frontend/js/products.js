@@ -31,6 +31,7 @@ const Products = {
     selectedBeverage: null, // For beverage selection (Soda/Jus/Jus Frais/Smoothie)
     selectedVariant: null, // For variant selection (Court/Long)
     selectedCapsule: null, // For capsule number selection
+    selectedBase: null, // For pizza base selection
 
     // Protection flags pour éviter la multiplication des event listeners
     modalSetup: false,
@@ -1114,6 +1115,7 @@ const Products = {
         this.selectedKidsSauce = null;
         this.selectedVariant = null;
         this.selectedCapsule = null;
+        this.selectedBase = null;
 
         // Charger le contenu essentiel immédiatement
         document.getElementById('modalTitle').textContent = product.name;
@@ -1204,6 +1206,38 @@ const Products = {
                 || categoryName.includes('originale');
 
             console.log('[Supplements] isPizzaCategory:', isPizzaCategory);
+
+            // Render pizza base selector (uniquement pour les pizzas)
+            const pizzaBaseContainer = document.getElementById('modalPizzaBase');
+            const pizzaBaseList = document.getElementById('pizzaBaseList');
+
+            if (isPizzaCategory && Config.pizzaBases && Config.pizzaBases.length > 0) {
+                pizzaBaseContainer.classList.remove('hidden');
+                pizzaBaseContainer.style.display = '';
+
+                // Trouver la base par défaut du produit
+                const defaultBaseId = product.default_base_id;
+                this.selectedBase = defaultBaseId ? Config.pizzaBases.find(b => String(b.id) === String(defaultBaseId)) : Config.pizzaBases[0];
+
+                let baseHtml = '';
+                Config.pizzaBases.forEach(base => {
+                    const isSelected = this.selectedBase && String(this.selectedBase.id) === String(base.id);
+                    const hasImage = base.image && base.image.trim() !== '';
+                    const imageUrl = hasImage ? `../../${base.image}` : '';
+                    baseHtml += `
+                        <div class="pizza-base-item ${isSelected ? 'selected' : ''}" data-base-id="${base.id}" onclick="Products.selectBase(${base.id})">
+                            ${hasImage ? `<img src="${imageUrl}" class="pizza-base-img" alt="${escapeHtml(base.name)}" onerror="this.style.display='none'">` : '<div class="pizza-base-img" style="display:flex;align-items:center;justify-content:center;color:#999;font-size:20px;">🍕</div>'}
+                            <span class="pizza-base-name">${escapeHtml(base.name)}</span>
+                        </div>
+                    `;
+                });
+                pizzaBaseList.innerHTML = baseHtml;
+            } else {
+                pizzaBaseContainer.classList.add('hidden');
+                pizzaBaseContainer.style.display = 'none';
+                pizzaBaseList.innerHTML = '';
+                this.selectedBase = null;
+            }
 
             if (!isPizzaCategory) {
                 // Masquer les suppléments pour les catégories non-pizza
@@ -2345,6 +2379,23 @@ const Products = {
     },
 
     /**
+     * Select pizza base
+     */
+    selectBase(baseId) {
+        const base = Config.pizzaBases.find(b => String(b.id) === String(baseId));
+        if (!base) return;
+
+        this.selectedBase = base;
+
+        // Update UI
+        document.querySelectorAll('.pizza-base-item').forEach(item => {
+            item.classList.toggle('selected', String(item.dataset.baseId) === String(baseId));
+        });
+
+        this.updateModalUI();
+    },
+
+    /**
      * Toggle supplement selection
      */
     toggleSupplement(supId) {
@@ -2466,7 +2517,8 @@ const Products = {
                 selectedKidsSauce: this.selectedKidsSauce ? { ...this.selectedKidsSauce } : null,
                 selectedVariant: this.selectedVariant ? { ...this.selectedVariant } : null,
                 selectedCapsule: this.selectedCapsule,
-                formuleSelections: formuleProducts
+                formuleSelections: formuleProducts,
+                selectedBase: this.selectedBase ? { ...this.selectedBase } : null
             }
         );
 

@@ -420,6 +420,11 @@ function showOrderDetails(orderId) {
                                     <i class="fas fa-minus-circle text-xs"></i> Sans: ${item.removed_ingredients.join(', ')}
                                 </div>
                             ` : ''}
+                            ${item.selected_base ? `
+                                <div class="text-orange-400 text-sm ml-4">
+                                    <i class="fas fa-circle text-xs"></i> Base: ${item.selected_base}
+                                </div>
+                            ` : ''}
                             ${item.selected_options ? `
                                 <div class="text-gray-400 text-sm ml-4">
                                     <i class="fas fa-info-circle text-xs"></i> ${Object.entries(item.selected_options).map(([k, v]) => v).join(', ')}

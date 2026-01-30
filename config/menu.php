@@ -23,9 +23,11 @@ try {
     Database::init(InstanceManager::getDatabaseConfig());
 
     require_once __DIR__ . '/../snackup/backend/repositories/MenuRepository.php';
+    require_once __DIR__ . '/../snackup/backend/repositories/PizzaBaseRepository.php';
 
     // Définir le restaurant ID
     MenuRepository::$restaurantId = $restaurantId;
+    PizzaBaseRepository::$restaurantId = $restaurantId;
 
 } catch (Exception $e) {
     http_response_code(500);
@@ -74,6 +76,9 @@ try {
     // Upsell Rules - chargé depuis la base de données
     $upsellRules = MenuRepository::getUpsellRules();
 
+    // Pizza Bases - chargé depuis la base de données
+    $pizzaBases = PizzaBaseRepository::getAll();
+
     // Construire la réponse complète
     $response = [
         'menu' => $menu,
@@ -82,6 +87,7 @@ try {
         'featured' => $featured,
         'categoryIcons' => $categoryIcons,
         'upsellRules' => $upsellRules,
+        'pizzaBases' => $pizzaBases,
         '_meta' => [
             'currency' => InstanceManager::getCurrency(),
             'restaurantId' => $restaurantId,

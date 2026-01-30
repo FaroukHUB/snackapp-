@@ -2879,6 +2879,11 @@
                                     <i class="fas fa-minus-circle" style="font-size: 11px;"></i> Sans: ${removedIngredients.join(', ')}
                                 </div>
                             ` : ''}
+                            ${item.options?.selectedBase ? `
+                                <div class="cart-item-base" style="color: #c53030; font-size: 13px;">
+                                    <i class="fas fa-circle" style="font-size: 11px;"></i> Base: ${item.options.selectedBase.name}
+                                </div>
+                            ` : ''}
                             ${item.options?.selectedKidsCrepe || item.options?.selectedKidsSauce ? `
                                 <div class="cart-item-options" style="color: var(--gray-600); font-size: 13px;">
                                     <i class="fas fa-info-circle" style="font-size: 11px;"></i> ${item.options?.selectedKidsCrepe ? item.options.selectedKidsCrepe.name : ''}${item.options?.selectedKidsCrepe && item.options?.selectedKidsSauce ? ', ' : ''}${item.options?.selectedKidsSauce ? item.options.selectedKidsSauce.name : ''}
@@ -4331,6 +4336,7 @@
                     // ✅ Nouveau système cafés
                     if (item.options?.selectedCapsuleNumber) options.selectedCapsuleNumber = item.options.selectedCapsuleNumber;
                     if (item.options?.selectedCapsuleColor) options.selectedCapsuleColor = item.options.selectedCapsuleColor;
+                    if (item.options?.selectedBase) options.selectedBase = item.options.selectedBase;
 
                     return {
                         name: item.name,
@@ -4340,6 +4346,7 @@
                         supplements: item.supplements || [],
                         removed_ingredients: item.options?.removedIngredients || [],
                         selected_drink: item.options?.selectedDrink?.name || null,
+                        selected_base: item.options?.selectedBase?.name || null,
                         selected_options: Object.keys(options).length > 0 ? options : null
                     };
                 });

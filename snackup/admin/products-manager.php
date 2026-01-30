@@ -393,6 +393,7 @@ $csrfToken = getCsrfToken();
         <button class="btn btn-primary" type="button" id="btnAddProduct">+ Produit</button>
         <button class="btn" type="button" id="btnAddFormule" style="background:rgba(168,85,247,.14);border-color:rgba(168,85,247,.35);">📦 + Formule</button>
         <button class="btn" type="button" id="btnManageSupplements" style="background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.35);">🧀 Suppléments</button>
+        <button class="btn" type="button" id="btnManageBases" style="background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.35);">🍕 Bases Pizza</button>
         <button class="btn" type="button" id="btnManageUpsells" style="background:rgba(236,72,153,.14);border-color:rgba(236,72,153,.35);">🎯 Upsells</button>
       </div>
     </div>
@@ -750,6 +751,29 @@ $csrfToken = getCsrfToken();
     </div>
   </div>
 
+  <!-- MODAL: Bases Pizza -->
+  <div id="modalBases" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalBasesTitle" style="max-width:500px;">
+      <div class="modal-h">
+        <h3 id="modalBasesTitle">Gestion des bases pizza</h3>
+        <button class="btn btn-ghost" type="button" data-close aria-label="Fermer">✕</button>
+      </div>
+      <div class="modal-b">
+        <p class="muted" style="margin-bottom:14px;">Définissez les bases disponibles pour vos pizzas (tomate, crème fraîche, etc.)</p>
+
+        <form id="formAddBase" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+          <input id="baseName" name="name" class="input" type="text" placeholder="Nom de la base" style="flex:1;min-width:180px;" required />
+          <button class="btn btn-good" type="submit">+ Ajouter</button>
+        </form>
+
+        <div id="basesList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;"></div>
+      </div>
+      <div class="modal-f">
+        <button class="btn btn-ghost" type="button" data-close>Fermer</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Éditer Produit -->
   <div id="modalEditProduct" class="modal-overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalEditProductTitle">
@@ -827,6 +851,15 @@ $csrfToken = getCsrfToken();
             <label for="editBaseIngredients">🥘 Ingrédients retirables (optionnel)</label>
             <textarea id="editBaseIngredients" name="baseIngredients" class="textarea" rows="3" placeholder="Ex: oignons, poivrons, fromage, sauce"></textarea>
             <span class="muted">Ingrédients que le client peut retirer. Séparez par des virgules.</span>
+          </div>
+
+          <!-- Base pizza par défaut (uniquement pour catégories pizza) -->
+          <div class="field" id="editDefaultBaseField" style="display:none;">
+            <label for="editDefaultBase">🍕 Base par défaut</label>
+            <select id="editDefaultBase" name="default_base_id" class="select">
+              <option value="">-- Aucune base --</option>
+            </select>
+            <span class="muted">La base qui sera pré-sélectionnée pour ce produit.</span>
           </div>
 
           <div class="field">
@@ -1612,6 +1645,135 @@ $csrfToken = getCsrfToken();
       }
     });
 
+    // ===== GESTION DES BASES PIZZA =====
+    let pizzaBases = [];
+
+    $("#btnManageBases").addEventListener("click", () => {
+      openModal("#modalBases");
+      loadPizzaBases();
+    });
+
+    async function loadPizzaBases() {
+      try {
+        const result = await apiPostJson({ action: "get_pizza_bases" });
+        pizzaBases = result.bases || [];
+        renderBasesList();
+      } catch(err) {
+        toast("error", "Erreur", err?.message ?? "Impossible de charger les bases.");
+      }
+    }
+
+    function renderBasesList() {
+      const container = $("#basesList");
+      if (!container) return;
+
+      if (pizzaBases.length === 0) {
+        container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucune base configurée.</p>';
+        return;
+      }
+
+      let html = '';
+      pizzaBases.forEach(base => {
+        const hasImage = base.image && base.image.trim() !== '';
+        const imageUrl = hasImage ? `../../${base.image}` : '';
+        html += `
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);">
+            <div style="display:flex;align-items:center;gap:10px;flex:1;">
+              <div class="base-img-container" data-base-id="${escapeHtml(String(base.id))}" style="width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;border:1px dashed var(--stroke);flex-shrink:0;" title="Cliquer pour ${hasImage ? 'changer' : 'ajouter'} l'image">
+                ${hasImage ? `<img src="${escapeHtml(imageUrl)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" style="width:100%;height:100%;object-fit:cover;"><i class="fas fa-image" style="display:none;color:var(--muted);font-size:16px;"></i>` : '<i class="fas fa-image" style="color:var(--muted);font-size:16px;"></i>'}
+              </div>
+              <strong style="font-size:14px;">${escapeHtml(base.name)}</strong>
+            </div>
+            <button class="btn btn-danger" type="button" data-delete-base="${escapeHtml(String(base.id))}" style="padding:6px 10px;">🗑️</button>
+          </div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Event delegation pour bases
+    $("#basesList").addEventListener("click", async (e) => {
+      // Upload image
+      const imgContainer = e.target.closest(".base-img-container");
+      if (imgContainer) {
+        const id = imgContainer.dataset.baseId;
+        if (id) uploadBaseImage(id);
+        return;
+      }
+
+      // Supprimer
+      const deleteBtn = e.target.closest("[data-delete-base]");
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.deleteBase;
+        const base = pizzaBases.find(b => String(b.id) === id);
+        if (!base) return;
+        if (!confirm(`Supprimer la base "${base.name}" ?`)) return;
+        try {
+          await apiPostJson({ action: "delete_pizza_base", base_id: id });
+          pizzaBases = pizzaBases.filter(b => String(b.id) !== id);
+          toast("success", "Supprimée", `Base "${base.name}" supprimée.`);
+          renderBasesList();
+        } catch(err) {
+          toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
+        }
+      }
+    });
+
+    function uploadBaseImage(baseId) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/png,image/jpeg,image/webp";
+      input.onchange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("action", "upload_pizza_base_image");
+        formData.append("base_id", baseId);
+        formData.append("imageFile", file);
+        formData.append("csrf_token", CSRF_TOKEN);
+
+        try {
+          const resp = await fetch("./api/products.php", { method: "POST", body: formData });
+          const result = await resp.json();
+          if (!result.success) throw new Error(result.message || result.error || "Erreur upload");
+
+          // Mettre à jour localement
+          const idx = pizzaBases.findIndex(b => String(b.id) === baseId);
+          if (idx !== -1) {
+            pizzaBases[idx].image = result.image;
+          }
+          toast("success", "Image ajoutée", "L'image de la base a été mise à jour.");
+          renderBasesList();
+        } catch (err) {
+          toast("error", "Erreur", err?.message ?? "Impossible d'uploader l'image.");
+        }
+      };
+      input.click();
+    }
+
+    $("#formAddBase").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = $("#baseName").value.trim();
+
+      if (!name) {
+        toast("error", "Erreur", "Nom requis");
+        return;
+      }
+
+      try {
+        const result = await apiPostJson({ action: "add_pizza_base", name });
+        if (result.base) {
+          pizzaBases.push(result.base);
+        }
+        toast("success", "Base ajoutée", `"${name}" a été créée.`);
+        $("#formAddBase").reset();
+        renderBasesList();
+      } catch(err) {
+        toast("error", "Erreur", err?.message ?? "Impossible d'ajouter.");
+      }
+    });
+
     // ===== ÉDITION PRODUIT =====
     let currentEditProduct = null;
 
@@ -1681,7 +1843,37 @@ $csrfToken = getCsrfToken();
         capsuleColorsField.style.display = "none";
       }
 
+      // Base pizza par défaut (uniquement pour catégories pizza)
+      const defaultBaseField = $("#editDefaultBaseField");
+      const category = getCategories().find(c => c.id === categoryId);
+      const isPizzaCategory = category && category.icon === 'fa-pizza-slice';
+
+      if (isPizzaCategory) {
+        defaultBaseField.style.display = "";
+        populateBaseSelect(product.default_base_id);
+      } else {
+        defaultBaseField.style.display = "none";
+      }
+
       openModal("#modalEditProduct");
+    }
+
+    // Remplit le select des bases pizza
+    async function populateBaseSelect(selectedBaseId) {
+      const select = $("#editDefaultBase");
+
+      // Charger les bases si pas encore chargées
+      if (pizzaBases.length === 0) {
+        try {
+          const result = await apiPostJson({ action: "get_pizza_bases" });
+          pizzaBases = result.bases || [];
+        } catch(e) {
+          console.error("Erreur chargement bases:", e);
+        }
+      }
+
+      select.innerHTML = '<option value="">-- Aucune base --</option>' +
+        pizzaBases.map(b => `<option value="${b.id}" ${String(b.id) === String(selectedBaseId) ? 'selected' : ''}>${escapeHtml(b.name)}</option>`).join('');
     }
 
     // Fonction pour afficher la liste des variants
@@ -1854,6 +2046,9 @@ $csrfToken = getCsrfToken();
       const capsuleNumbers = currentEditProduct?.capsuleNumbers || null;
       const capsuleColors = currentEditProduct?.capsuleColors || null;
 
+      // Base pizza par défaut
+      const defaultBaseId = $("#editDefaultBase").value || null;
+
       try {
         // Si une image est sélectionnée, utiliser FormData
         if (imageFile) {
@@ -1871,6 +2066,7 @@ $csrfToken = getCsrfToken();
           if (variants) formData.set("variants", JSON.stringify(variants));
           if (capsuleNumbers) formData.set("capsuleNumbers", JSON.stringify(capsuleNumbers));
           if (capsuleColors) formData.set("capsuleColors", JSON.stringify(capsuleColors));
+          if (defaultBaseId) formData.set("default_base_id", defaultBaseId);
           formData.set("image", imageFile);
 
           await apiPostMultipart(formData, "update_product");
@@ -1886,7 +2082,8 @@ $csrfToken = getCsrfToken();
             pricePrefix: pricePrefix || null,
             status,
             supplements,
-            baseIngredients
+            baseIngredients,
+            default_base_id: defaultBaseId
           };
           if (variants) payload.variants = variants;
           if (capsuleNumbers) payload.capsuleNumbers = capsuleNumbers;

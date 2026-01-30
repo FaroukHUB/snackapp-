@@ -1713,6 +1713,76 @@ ul {
     gap: 8px;
 }
 
+/* Pizza Base Selection */
+.modal-pizza-base {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+    border-radius: 12px;
+    border: 2px solid #fc8181;
+}
+
+.modal-pizza-base h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #c53030;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pizza-base-list {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pizza-base-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    min-width: 90px;
+    flex: 1;
+    max-width: 150px;
+}
+
+.pizza-base-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.pizza-base-item.selected {
+    border-color: #c53030;
+    background: #fff5f5;
+}
+
+.pizza-base-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 8px;
+    background: #f5f5f5;
+}
+
+.pizza-base-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.pizza-base-item.selected .pizza-base-name {
+    color: #c53030;
+}
+
 /* Formule Includes Section */
 .modal-formule-includes {
     margin-bottom: 20px;
