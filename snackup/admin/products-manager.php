@@ -1542,7 +1542,7 @@ $csrfToken = getCsrfToken();
         try {
           const resp = await fetch("./api/products.php", { method: "POST", body: formData });
           const result = await resp.json();
-          if (!result.success) throw new Error(result.error || "Erreur upload");
+          if (!result.success) throw new Error(result.message || result.error || "Erreur upload");
 
           // Mettre à jour le state local
           if (state.menu?.supplements?.catalog?.[supplementId]) {
