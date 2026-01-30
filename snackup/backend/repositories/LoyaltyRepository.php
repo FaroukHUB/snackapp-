@@ -124,6 +124,11 @@ class LoyaltyRepository {
             $insertData['product_id'] = (int) $data['product_id'];
         }
 
+        // Ajouter image personnalisée si fournie
+        if (!empty($data['image'])) {
+            $insertData['image'] = $data['image'];
+        }
+
         return Database::insert('loyalty_rewards', $insertData);
     }
 
@@ -142,6 +147,11 @@ class LoyaltyRepository {
 
         // Mettre à jour product_id (peut être null pour désassocier)
         $updateData['product_id'] = !empty($data['product_id']) ? (int) $data['product_id'] : null;
+
+        // Mettre à jour image si fournie (peut être vide pour supprimer)
+        if (isset($data['image'])) {
+            $updateData['image'] = $data['image'] ?: null;
+        }
 
         return Database::update('loyalty_rewards', $updateData, ['id' => $rewardId]) > 0;
     }

@@ -199,14 +199,39 @@ $action = $_POST['action'];
     if ($action === 'add_reward') {
         header('Content-Type: application/json');
         try {
-            $rewardId = LoyaltyRepository::addReward(SNACK_RESTAURANT_ID, [
+            $rewardData = [
                 'name' => $_POST['reward_name'] ?? '',
                 'description' => $_POST['reward_description'] ?? '',
                 'points_required' => (int) ($_POST['points_required'] ?? 100),
                 'reward_type' => $_POST['reward_type'] ?? 'discount_percent',
                 'reward_value' => (float) ($_POST['reward_value'] ?? 10),
                 'product_id' => !empty($_POST['product_id']) ? (int) $_POST['product_id'] : null
-            ]);
+            ];
+
+            // Gérer l'image uploadée (base64)
+            if (!empty($_POST['reward_image']) && strpos($_POST['reward_image'], 'data:image') === 0) {
+                $imageData = $_POST['reward_image'];
+                $imageParts = explode(',', $imageData);
+                $imageBase64 = $imageParts[1] ?? '';
+                $imageType = 'jpg';
+                if (strpos($imageParts[0], 'png') !== false) $imageType = 'png';
+                elseif (strpos($imageParts[0], 'gif') !== false) $imageType = 'gif';
+                elseif (strpos($imageParts[0], 'webp') !== false) $imageType = 'webp';
+
+                $imageName = 'reward_' . time() . '_' . uniqid() . '.' . $imageType;
+                $imagePath = __DIR__ . '/../images/rewards/' . $imageName;
+
+                // Créer le dossier si nécessaire
+                if (!is_dir(dirname($imagePath))) {
+                    mkdir(dirname($imagePath), 0755, true);
+                }
+
+                // Sauvegarder l'image
+                file_put_contents($imagePath, base64_decode($imageBase64));
+                $rewardData['image'] = $imageName;
+            }
+
+            $rewardId = LoyaltyRepository::addReward(SNACK_RESTAURANT_ID, $rewardData);
             echo json_encode(['success' => true, 'reward_id' => $rewardId]);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
@@ -2203,11 +2228,11 @@ if (isset($_GET['export'])) {
                 <input type="number" id="rewardValue" value="10" min="1"
                        style="width: 100%; padding: 12px; border: 1px solid #374151; border-radius: 10px; font-size: 1em; box-sizing: border-box; background: #1e293b; color: white;">
             </div>
-            <div style="margin-bottom: 20px;" id="rewardProductContainer">
+            <div style="margin-bottom: 15px;" id="rewardProductContainer">
                 <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #d1d5db;"><i class="fas fa-pizza-slice"></i> Produit lié (optionnel)</label>
                 <select id="rewardProductId"
                        style="width: 100%; padding: 12px; border: 1px solid #374151; border-radius: 10px; font-size: 1em; box-sizing: border-box; background: #1e293b; color: white;">
-                    <option value="">-- Aucun produit (icône par défaut) --</option>
+                    <option value="">-- Aucun produit --</option>
                     <?php
                     $currentCategory = '';
                     foreach ($loyaltyProducts ?? [] as $prod):
@@ -2221,7 +2246,26 @@ if (isset($_GET['export'])) {
                     <?php endforeach; ?>
                     <?php if ($currentCategory !== '') echo '</optgroup>'; ?>
                 </select>
-                <p style="color: #6b7280; font-size: 11px; margin-top: 5px;"><i class="fas fa-info-circle"></i> Si un produit est lié, son image sera affichée sur la page fidélité</p>
+            </div>
+            <div style="margin-bottom: 20px;" id="rewardImageContainer">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #d1d5db;"><i class="fas fa-image"></i> Image personnalisée (optionnel)</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="file" id="rewardImageFile" accept="image/*" onchange="previewRewardImage(this)"
+                           style="display: none;">
+                    <button type="button" onclick="document.getElementById('rewardImageFile').click()"
+                           style="padding: 10px 16px; background: #374151; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px;">
+                        <i class="fas fa-upload"></i> Choisir image
+                    </button>
+                    <span id="rewardImageName" style="color: #9ca3af; font-size: 12px;">Aucune image</span>
+                </div>
+                <div id="rewardImagePreview" style="margin-top: 10px; display: none;">
+                    <img id="rewardImagePreviewImg" style="max-width: 100px; max-height: 80px; border-radius: 8px; object-fit: cover;">
+                    <button type="button" onclick="clearRewardImage()" style="margin-left: 10px; background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <input type="hidden" id="rewardImageBase64">
+                <p style="color: #6b7280; font-size: 11px; margin-top: 5px;"><i class="fas fa-info-circle"></i> L'image custom est prioritaire sur l'image produit</p>
             </div>
             <div style="display: flex; gap: 10px;">
                 <button type="button" onclick="closeAddRewardModal()"
@@ -3749,6 +3793,8 @@ function openAddRewardModal() {
     document.getElementById('rewardPoints').value = '100';
     document.getElementById('rewardType').value = 'discount_percent';
     document.getElementById('rewardValue').value = '10';
+    document.getElementById('rewardProductId').value = '';
+    clearRewardImage();
     toggleRewardValue();
 }
 
@@ -3762,6 +3808,31 @@ function toggleRewardValue() {
     container.style.display = type === 'free_product' ? 'none' : 'block';
 }
 
+// Preview reward image
+function previewRewardImage(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            document.getElementById('rewardImagePreviewImg').src = e.target.result;
+            document.getElementById('rewardImagePreview').style.display = 'block';
+            document.getElementById('rewardImageName').textContent = file.name;
+            document.getElementById('rewardImageBase64').value = e.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    }
+}
+
+// Clear reward image
+function clearRewardImage() {
+    document.getElementById('rewardImageFile').value = '';
+    document.getElementById('rewardImagePreview').style.display = 'none';
+    document.getElementById('rewardImageName').textContent = 'Aucune image';
+    document.getElementById('rewardImageBase64').value = '';
+}
+
 function submitAddReward(event) {
     event.preventDefault();
 
@@ -3773,6 +3844,7 @@ function submitAddReward(event) {
     formData.append('reward_type', document.getElementById('rewardType').value);
     formData.append('reward_value', document.getElementById('rewardValue').value);
     formData.append('product_id', document.getElementById('rewardProductId').value);
+    formData.append('reward_image', document.getElementById('rewardImageBase64').value);
 
     fetch('', { method: 'POST', body: formData })
         .then(r => r.json())

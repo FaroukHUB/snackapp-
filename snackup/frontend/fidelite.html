@@ -975,12 +975,16 @@
                     const isLocked = customerPoints < reward.points_required;
                     const pointsNeeded = reward.points_required - customerPoints;
 
-                    // Determine image
+                    // Determine image (priorité: image custom > image produit > icône)
                     let imageHtml;
-                    if (reward.product_image) {
+                    if (reward.reward_image) {
+                        // Image personnalisée de la récompense
+                        imageHtml = `<img src="../images/rewards/${reward.reward_image}" alt="${reward.name}" class="reward-image" onerror="this.parentElement.innerHTML='<div class=\\'reward-image-placeholder\\'><i class=\\'fas fa-gift\\'></i></div>'">`;
+                    } else if (reward.product_image) {
+                        // Image du produit lié
                         imageHtml = `<img src="../images/menu/${reward.product_image}" alt="${reward.name}" class="reward-image" onerror="this.parentElement.innerHTML='<div class=\\'reward-image-placeholder\\'><i class=\\'fas fa-gift\\'></i></div>'">`;
                     } else {
-                        // Default icon based on type
+                        // Icône par défaut selon le type
                         const icons = {
                             'free_product': 'fa-pizza-slice',
                             'discount_percent': 'fa-percent',
