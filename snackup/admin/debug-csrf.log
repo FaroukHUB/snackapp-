@@ -1,0 +1,113 @@
+{
+    "timestamp": "2026-01-29 12:04:46",
+    "session_id": "cdmflvbhn4eb8j3tvjni8pdha4",
+    "token_recu": "eb072b6f16",
+    "token_session": "eb072b6f16",
+    "cookies": {
+        "PHPSESSID": "cdmflvbhn4eb8j3tvjni8pdha4"
+    },
+    "post_keys": [
+        "action",
+        "order_id",
+        "livreur_id",
+        "csrf_token"
+    ]
+}
+---
+{
+    "timestamp": "2026-01-29 12:19:50",
+    "session_id": "cdmflvbhn4eb8j3tvjni8pdha4",
+    "token_recu": "eb072b6f16",
+    "token_session": "eb072b6f16",
+    "cookies": {
+        "PHPSESSID": "cdmflvbhn4eb8j3tvjni8pdha4"
+    },
+    "post_keys": [
+        "action",
+        "order_id",
+        "livreur_id",
+        "csrf_token"
+    ]
+}
+---
+{
+    "timestamp": "2026-01-29 12:21:04",
+    "session_id": "cdmflvbhn4eb8j3tvjni8pdha4",
+    "token_recu": "eb072b6f16",
+    "token_session": "eb072b6f16",
+    "cookies": {
+        "PHPSESSID": "cdmflvbhn4eb8j3tvjni8pdha4"
+    },
+    "post_keys": [
+        "action",
+        "order_id",
+        "livreur_id",
+        "csrf_token"
+    ]
+}
+---
+{
+    "timestamp": "2026-01-29 12:27:51",
+    "session_id": "cdmflvbhn4eb8j3tvjni8pdha4",
+    "token_recu": "eb072b6f16",
+    "token_session": "eb072b6f16",
+    "cookies": {
+        "PHPSESSID": "cdmflvbhn4eb8j3tvjni8pdha4"
+    },
+    "post_keys": [
+        "action",
+        "order_id",
+        "livreur_id",
+        "csrf_token"
+    ]
+}
+---
+{
+    "timestamp": "2026-01-29 12:29:10",
+    "session_id": "cdmflvbhn4eb8j3tvjni8pdha4",
+    "token_recu": "eb072b6f16",
+    "token_session": "eb072b6f16",
+    "cookies": {
+        "PHPSESSID": "cdmflvbhn4eb8j3tvjni8pdha4"
+    },
+    "post_keys": [
+        "action",
+        "order_id",
+        "livreur_id",
+        "csrf_token"
+    ]
+}
+---
+{
+    "timestamp": "2026-01-29 12:40:21",
+    "session_id": "4c7q0a4oge7i60r83qgac5h5bn",
+    "token_recu": "154858ae0d",
+    "token_session": "154858ae0d",
+    "cookies": {
+        "PHPSESSID": "4c7q0a4oge7i60r83qgac5h5bn"
+    },
+    "post_keys": [
+        "action",
+        "order_id",
+        "livreur_id",
+        "csrf_token"
+    ]
+}
+---
+{
+    "timestamp": "2026-01-29 20:41:43",
+    "session_id": "e411m5a40flrl1tvgck8j48jtf",
+    "token_recu": "203d518bcc",
+    "token_session": "203d518bcc",
+    "cookies": {
+        "__stripe_mid": "692b60b1-05f0-4efd-92d6-888ab0409163b25a56",
+        "PHPSESSID": "e411m5a40flrl1tvgck8j48jtf"
+    },
+    "post_keys": [
+        "action",
+        "order_id",
+        "livreur_id",
+        "csrf_token"
+    ]
+}
+---

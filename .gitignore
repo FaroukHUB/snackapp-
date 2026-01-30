@@ -13,3 +13,4 @@ snackup/admin/data/*.json
 images/formules/*
 snackup/admin/assets/sounds/*.mp3
 
+vendor/
