@@ -1411,21 +1411,7 @@ $csrfToken = getCsrfToken();
       Object.keys(grouped).sort().forEach(group => {
         html += `<div style="font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;">${escapeHtml(capitalizeStr(group))}</div>`;
         grouped[group].forEach(sup => {
-          const price = (parseFloat(sup.price) || 0).toFixed(2).replace('.', ',');
-          const status = sup.status || 'available';
-          const supId = String(sup.id || '');
-          html += `
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);">
-              <div style="flex:1;">
-                <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
-                <span style="color:var(--muted);margin-left:8px;">${price} ${CURRENCY}</span>
-                <span class="status" data-status="${status}" style="margin-left:8px;padding:4px 8px;"><span class="dot"></span>${status === 'available' ? 'Dispo' : 'Indispo'}</span>
-              </div>
-              <div style="display:flex;gap:6px;">
-                <button class="btn" type="button" data-toggle-sup="${escapeHtml(supId)}" style="padding:6px 12px;font-size:12px;font-weight:600;${status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">${status === 'available' ? '✓ Disponible' : '✕ Indisponible'}</button>
-                <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(supId)}" style="padding:6px 10px;">🗑️</button>
-              </div>
-            </div>`;
+          html += createSupplementItemHTML(sup);
         });
       });
 
@@ -1490,8 +1476,48 @@ $csrfToken = getCsrfToken();
           const id = imgContainer.dataset.supId;
           if (!id) return;
           uploadSupplementImage(id);
+          return;
+        }
+
+        // Modifier le prix du supplément
+        const editPriceBtn = e.target.closest("[data-edit-price-sup]");
+        const priceDisplay = e.target.closest(".sup-price-display");
+        if (editPriceBtn || priceDisplay) {
+          const id = editPriceBtn ? editPriceBtn.dataset.editPriceSup : priceDisplay.dataset.supId;
+          if (!id) return;
+          editSupplementPrice(id);
+          return;
         }
       });
+    }
+
+    // Modifier le prix d'un supplément
+    function editSupplementPrice(supplementId) {
+      const sup = getSupplements()[supplementId];
+      if (!sup) return;
+
+      const currentPrice = parseFloat(sup.price) || 0;
+      const newPriceStr = prompt(`Nouveau prix pour "${sup.name}" (actuel: ${currentPrice.toFixed(2).replace('.', ',')} ${CURRENCY}):`, currentPrice.toFixed(2));
+
+      if (newPriceStr === null) return; // Annulé
+
+      const newPrice = parseFloat(newPriceStr.replace(',', '.'));
+      if (isNaN(newPrice) || newPrice < 0) {
+        toast("error", "Erreur", "Prix invalide");
+        return;
+      }
+
+      apiPostJson({ action: "update_supplement", supplement_id: supplementId, price: newPrice })
+        .then(() => {
+          if (state.menu?.supplements?.catalog?.[supplementId]) {
+            state.menu.supplements.catalog[supplementId].price = newPrice;
+          }
+          toast("success", "Prix modifié", `${sup.name}: ${newPrice.toFixed(2).replace('.', ',')} ${CURRENCY}`);
+          renderSupplementsList();
+        })
+        .catch(err => {
+          toast("error", "Erreur", err?.message ?? "Impossible de modifier le prix.");
+        });
     }
 
     // Upload image pour un supplément
@@ -1526,38 +1552,33 @@ $csrfToken = getCsrfToken();
       input.click();
     }
 
-    // Helper pour créer un item de supplément
-    function createSupplementItem(sup) {
-      const div = document.createElement("div");
-      div.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);";
+    // Helper pour créer le HTML d'un item de supplément (retourne string)
+    function createSupplementItemHTML(sup) {
       const price = parseFloat(sup.price) || 0;
       const priceStr = price.toFixed(2).replace('.', ',');
       const status = sup.status || 'available';
       const supId = String(sup.id || '');
       const hasImage = sup.image && sup.image.trim() !== '';
       const imageUrl = hasImage ? `../../${sup.image}` : '';
-      div.innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px;flex:1;">
-          <div class="sup-img-container" data-sup-id="${escapeHtml(supId)}" style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;border:1px dashed var(--stroke);flex-shrink:0;" title="Cliquer pour ${hasImage ? 'changer' : 'ajouter'} l'image">
-            ${hasImage ? `<img src="${escapeHtml(imageUrl)}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fas fa-camera" style="color:var(--muted);font-size:14px;"></i>'}
+
+      return `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;">
+            <div class="sup-img-container" data-sup-id="${escapeHtml(supId)}" style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;border:1px dashed var(--stroke);flex-shrink:0;" title="Cliquer pour ${hasImage ? 'changer' : 'ajouter'} l'image">
+              ${hasImage ? `<img src="${escapeHtml(imageUrl)}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fas fa-camera" style="color:var(--muted);font-size:14px;"></i>'}
+            </div>
+            <div>
+              <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
+              <span class="sup-price-display" data-sup-id="${escapeHtml(supId)}" style="color:var(--muted);margin-left:8px;cursor:pointer;" title="Cliquer pour modifier le prix">${priceStr} ${CURRENCY}</span>
+              <span class="status" data-status="${status}" style="margin-left:8px;padding:4px 8px;"><span class="dot"></span>${status === 'available' ? 'Dispo' : 'Indispo'}</span>
+            </div>
           </div>
-          <div>
-            <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
-            <span style="color:var(--muted);margin-left:8px;">${priceStr} ${CURRENCY}</span>
-            <span class="status" data-status="${status}" style="margin-left:8px;padding:4px 8px;">
-              <span class="dot"></span>${status === 'available' ? 'Dispo' : 'Indispo'}
-            </span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn" type="button" data-edit-price-sup="${escapeHtml(supId)}" style="padding:6px 10px;font-size:12px;background:rgba(59,130,246,.15);color:#3b82f6;border:none;" title="Modifier le prix">✏️</button>
+            <button class="btn" type="button" data-toggle-sup="${escapeHtml(supId)}" style="padding:6px 12px;font-size:12px;font-weight:600;${status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">${status === 'available' ? '✓ Dispo' : '✕ Indispo'}</button>
+            <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(supId)}" style="padding:6px 10px;">🗑️</button>
           </div>
-        </div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn" type="button" data-toggle-sup="${escapeHtml(supId)}"
-            style="padding:6px 12px;font-size:12px;font-weight:600;${status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">
-            ${status === 'available' ? '✓ Disponible' : '✕ Indisponible'}
-          </button>
-          <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(supId)}" style="padding:6px 10px;">🗑️</button>
-        </div>
-      `;
-      return div;
+        </div>`;
     }
 
     $("#formAddSupplement").addEventListener("submit", async (e) => {
