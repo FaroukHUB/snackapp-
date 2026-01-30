@@ -2347,6 +2347,9 @@
                 Cart.init();
                 Cart.onUpdate = () => this.render();
 
+                // 🔄 Migration: ajouter categorySlug aux anciens items (pour upsells)
+                Cart.migrateCategorySlugs();
+
                 // Initial render
                 this.render();
 

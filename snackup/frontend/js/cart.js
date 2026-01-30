@@ -60,6 +60,45 @@ const Cart = {
     },
 
     /**
+     * Migration: ajoute categorySlug aux anciens items qui ne l'ont pas
+     * Doit être appelé après que Config soit chargé
+     */
+    migrateCategorySlugs() {
+        if (typeof Config === 'undefined' || !Config.isLoaded) {
+            console.warn('⚠️ Cart.migrateCategorySlugs: Config pas encore chargé');
+            return false;
+        }
+
+        let migrated = false;
+        this.items.forEach(item => {
+            if (!item.categorySlug && item.id) {
+                const product = Config.getProduct(item.id);
+                if (product) {
+                    if (product.categorySlug) {
+                        item.categorySlug = product.categorySlug;
+                        migrated = true;
+                        console.log(`✅ Migration: categorySlug ajouté à ${item.name}`);
+                    }
+                    // Aussi migrer categoryId et categoryName si manquants
+                    if (!item.categoryId && product.categoryId) {
+                        item.categoryId = product.categoryId;
+                    }
+                    if (!item.categoryName && product.categoryName) {
+                        item.categoryName = product.categoryName;
+                    }
+                }
+            }
+        });
+
+        if (migrated) {
+            this.save();
+            console.log('💾 Cart sauvegardé après migration');
+        }
+
+        return migrated;
+    },
+
+    /**
      * Show message to user after legacy data purge
      */
     showLegacyResetMessage() {
@@ -329,12 +368,34 @@ const Cart = {
 
     /**
      * Get all unique category slugs in cart (pour upsells)
+     * Avec fallback pour les anciens items sans categorySlug
      */
     getCartCategories() {
         const categories = new Set();
         this.items.forEach(item => {
-            if (item.categorySlug) {
-                categories.add(item.categorySlug);
+            let slug = item.categorySlug;
+
+            // Fallback: chercher dans Config si categorySlug manque
+            if (!slug && item.id && typeof Config !== 'undefined' && Config.isLoaded) {
+                const product = Config.getProduct(item.id);
+                if (product && product.categorySlug) {
+                    slug = product.categorySlug;
+                    // Mettre à jour l'item pour éviter de refaire la recherche
+                    item.categorySlug = slug;
+                }
+            }
+
+            // Fallback 2: utiliser categoryId si disponible
+            if (!slug && item.categoryId && typeof Config !== 'undefined' && Config.isLoaded) {
+                const category = Config.menu?.categories?.find(c => c.id === item.categoryId);
+                if (category && category.slug) {
+                    slug = category.slug;
+                    item.categorySlug = slug;
+                }
+            }
+
+            if (slug) {
+                categories.add(slug);
             }
         });
         return Array.from(categories);
