@@ -176,10 +176,9 @@ h1, h2, h3, h4, h5, h6,
     letter-spacing: 0.3px;
 }
 
-/* Titres des sections catégories - Plus grands */
+/* Titres des sections catégories - Taille uniforme */
 .product-section > h2,
-.formules-section > h2,
-#featuredTitle {
+.formules-section > h2 {
     font-size: 2rem;
     margin-bottom: 20px;
 }
@@ -556,7 +555,7 @@ ul {
 }
 
 .section-header h2 {
-    font-size: 24px;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--gray-900);
     display: flex;
