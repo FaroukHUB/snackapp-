@@ -397,7 +397,6 @@ const Products = {
             html += `
                 <li>
                     <a href="#featuredSection" data-section="featuredSection" onclick="Products.scrollToSection('featuredSection', event)" class="active">
-                        <i class="fas fa-star"></i>
                         ${featured.title || 'Sélection pour vous'}
                     </a>
                 </li>
