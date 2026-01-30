@@ -1961,7 +1961,7 @@
 
                     return `
                         <div class="upsell-card" onclick="CartPage.quickAddUpsell('${safeId}')">
-                            ${hasImage ? `<img src="../${safeImage}" alt="${safeName}" width="60" height="60" loading="lazy" onerror="this.style.display='none'">` : '<div class="upsell-placeholder"><i class="fas fa-utensils"></i></div>'}
+                            ${hasImage ? `<img src="../../${safeImage}" alt="${safeName}" width="60" height="60" loading="lazy" onerror="this.style.display='none'">` : '<div class="upsell-placeholder"><i class="fas fa-utensils"></i></div>'}
                             <div class="upsell-card-name">${product.name}</div>
                             <div class="upsell-card-price">${priceText}</div>
                         </div>
