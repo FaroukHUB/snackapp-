@@ -197,6 +197,13 @@ $csrfToken = getCsrfToken();
     .status[data-status="unavailable"]{background: rgba(239,68,68,.15);color:#f87171}
     .dot{width:8px;height:8px;border-radius:999px;background: currentColor}
 
+    /* ===== Optimisation performance modal suppléments ===== */
+    #modalSupplements *,
+    #supplementsList * {
+      transition: none !important;
+      animation: none !important;
+    }
+
     /* ===== Modal moderne (optimisé: sans backdrop-filter pour éviter freeze) ===== */
     .modal-overlay{
       position:fixed;inset:0;
