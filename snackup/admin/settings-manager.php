@@ -302,12 +302,6 @@ $csrfToken = getCsrfToken();
             <span class="toggle-label">Livraison active dans cette ville</span>
           </div>
         </div>
-        <div class="form-group">
-          <div class="toggle-group">
-            <div class="toggle" id="toggleCityHome"></div>
-            <span class="toggle-label">Ville du restaurant (affichée en premier)</span>
-          </div>
-        </div>
         <div style="display:flex;gap:12px;margin-top:20px">
           <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
           <button type="button" class="btn btn-ghost" onclick="closeModal('modalCity')">Annuler</button>
@@ -460,7 +454,6 @@ $csrfToken = getCsrfToken();
       list.innerHTML = deliveryCities.map(city => {
         const fee = parseFloat(city.delivery_fee) || 0;
         const badges = [];
-        if (city.is_home_city == 1) badges.push('<span class="city-badge home"><i class="fas fa-home"></i> Ville du resto</span>');
         badges.push(`<span class="city-badge ${city.is_active == 1 ? 'active' : 'inactive'}">${city.is_active == 1 ? 'Active' : 'Inactive'}</span>`);
 
         return `
@@ -490,7 +483,6 @@ $csrfToken = getCsrfToken();
       $('#formCity').reset();
       $('#cityId').value = '';
       $('#toggleCityActive').classList.add('active');
-      $('#toggleCityHome').classList.remove('active');
       openModal('modalCity');
     });
 
@@ -505,7 +497,6 @@ $csrfToken = getCsrfToken();
       $('#cityTime').value = city.estimated_time_min || 30;
       $('#cityMinOrder').value = city.min_order_amount || '';
       city.is_active == 1 ? $('#toggleCityActive').classList.add('active') : $('#toggleCityActive').classList.remove('active');
-      city.is_home_city == 1 ? $('#toggleCityHome').classList.add('active') : $('#toggleCityHome').classList.remove('active');
       openModal('modalCity');
     }
 
@@ -528,8 +519,7 @@ $csrfToken = getCsrfToken();
         delivery_fee: parseFloat($('#cityFee').value) || 0,
         estimated_time_min: parseInt($('#cityTime').value) || 30,
         min_order_amount: $('#cityMinOrder').value ? parseFloat($('#cityMinOrder').value) : null,
-        is_active: $('#toggleCityActive').classList.contains('active') ? 1 : 0,
-        is_home_city: $('#toggleCityHome').classList.contains('active') ? 1 : 0
+        is_active: $('#toggleCityActive').classList.contains('active') ? 1 : 0
       };
       const res = id ? await api('update_delivery_city', { id: parseInt(id), ...data }) : await api('add_delivery_city', data);
       if (res.success) {
@@ -541,7 +531,6 @@ $csrfToken = getCsrfToken();
     });
 
     $('#toggleCityActive').onclick = function() { this.classList.toggle('active'); };
-    $('#toggleCityHome').onclick = function() { this.classList.toggle('active'); };
 
     loadSettings();
   </script>

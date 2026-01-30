@@ -2398,6 +2398,7 @@
                 this.selectedCityId = null;
                 this.selectedCityFee = 0;
                 this.selectedCityName = null;
+                this.selectedCityMinOrder = 0;
                 this.deliveryAvailable = false;
             },
 
@@ -2573,31 +2574,52 @@
                     this.selectedCityId = matchedCity.id;
                     this.selectedCityFee = parseFloat(matchedCity.delivery_fee) || 0;
                     this.selectedCityName = matchedCity.city_name;
+                    this.selectedCityMinOrder = parseFloat(matchedCity.min_order_amount) || 0;
 
-                    // Afficher le badge succès
+                    // Vérifier le montant minimum
+                    const subtotal = Cart.getSubtotal();
+                    const minNotMet = this.selectedCityMinOrder > 0 && subtotal < this.selectedCityMinOrder;
+
+                    // Afficher le badge succès/avertissement
                     if (badgeDiv && cityNameSpan && cityFeeSpan && badgeLabel) {
-                        badgeLabel.className = 'detected-city-label valid';
-                        badgeLabel.querySelector('i').className = 'fas fa-check-circle';
+                        if (minNotMet) {
+                            badgeLabel.className = 'detected-city-label warning';
+                            badgeLabel.querySelector('i').className = 'fas fa-exclamation-triangle';
+                        } else {
+                            badgeLabel.className = 'detected-city-label valid';
+                            badgeLabel.querySelector('i').className = 'fas fa-check-circle';
+                        }
                         cityNameSpan.textContent = matchedCity.city_name;
-                        cityFeeSpan.textContent = this.selectedCityFee === 0
-                            ? '• Livraison gratuite'
-                            : `• +${Config.formatPrice(this.selectedCityFee)}`;
+
+                        // Construire le texte des frais et minimum
+                        let feeText = this.selectedCityFee === 0 ? '• Livraison gratuite' : `• +${Config.formatPrice(this.selectedCityFee)}`;
+                        if (minNotMet) {
+                            feeText += ` • Min. ${Config.formatPrice(this.selectedCityMinOrder)}`;
+                        }
+                        cityFeeSpan.textContent = feeText;
                         badgeDiv.style.display = 'block';
                     }
 
-                    // Cacher le message d'erreur
+                    // Afficher avertissement montant minimum
                     if (validationDiv) {
-                        validationDiv.style.display = 'none';
-                        validationDiv.innerHTML = '';
+                        if (minNotMet) {
+                            validationDiv.style.display = 'block';
+                            validationDiv.className = 'delivery-validation warning';
+                            validationDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Montant minimum de ${Config.formatPrice(this.selectedCityMinOrder)} requis pour ${matchedCity.city_name} (actuel: ${Config.formatPrice(subtotal)})`;
+                        } else {
+                            validationDiv.style.display = 'none';
+                            validationDiv.innerHTML = '';
+                        }
                     }
 
-                    console.log('✅ Livraison disponible:', matchedCity.city_name, 'Frais:', this.selectedCityFee);
+                    console.log('✅ Livraison disponible:', matchedCity.city_name, 'Frais:', this.selectedCityFee, 'Min:', this.selectedCityMinOrder);
                 } else {
                     // ❌ Ville non trouvée - Livraison non disponible
                     this.deliveryAvailable = false;
                     this.selectedCityId = null;
                     this.selectedCityFee = 0;
                     this.selectedCityName = null;
+                    this.selectedCityMinOrder = 0;
 
                     // Afficher le badge erreur
                     if (badgeDiv && cityNameSpan && badgeLabel) {
@@ -2675,6 +2697,7 @@
                 this.selectedCityId = null;
                 this.selectedCityFee = 0;
                 this.selectedCityName = null;
+                this.selectedCityMinOrder = 0;
                 this.selectedAddress = null;
 
                 const badgeDiv = document.getElementById('detectedCityBadge');
@@ -4210,6 +4233,15 @@
                         this.showToast('Veuillez sélectionner une adresse dans une zone de livraison desservie', 'error');
                         document.getElementById('customerAddress')?.focus();
                         return;
+                    }
+
+                    // Vérifier le montant minimum pour cette ville
+                    if (this.selectedCityMinOrder > 0) {
+                        const subtotal = Cart.getSubtotal();
+                        if (subtotal < this.selectedCityMinOrder) {
+                            this.showToast(`Montant minimum de ${Config.formatPrice(this.selectedCityMinOrder)} requis pour la livraison à ${this.selectedCityName}`, 'error');
+                            return;
+                        }
                     }
 
                     // Vérifier le mode de paiement
