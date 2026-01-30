@@ -2528,6 +2528,7 @@ $csrfToken = getCsrfToken();
       const description = $("#formuleDesc").value.trim();
       const price = parseFloat($("#formulePrice").value) || 0;
       const originalPrice = $("#formuleOriginalPrice").value ? parseFloat($("#formuleOriginalPrice").value) : null;
+      const badge = $("#formuleBadge").value.trim() || null;
       const status = $("#formuleStatus").value;
       const imageFile = $("#formuleImage").files[0];
 
@@ -2561,6 +2562,7 @@ $csrfToken = getCsrfToken();
         formData.set("description", description);
         formData.set("price", price);
         if (originalPrice !== null) formData.set("originalPrice", originalPrice);
+        if (badge !== null) formData.set("badge", badge);
         formData.set("status", status);
         formData.set("includes", JSON.stringify(includes));
         if (imageFile) formData.set("image", imageFile);
