@@ -4005,6 +4005,10 @@ ul {
         font-size: 26px;
     }
 
+    .section-header h2 {
+        font-size: 26px;
+    }
+
     .featured-section,
     .services-section {
         margin-bottom: 48px;
