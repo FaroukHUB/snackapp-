@@ -203,6 +203,15 @@ $csrfToken = getCsrfToken();
       transition: none !important;
       animation: none !important;
     }
+    .sup-group{font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px;padding:8px 12px;background:#FCE4EC;border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase}
+    .sup-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04)}
+    .sup-item strong{font-size:13px}
+    .sup-item .price{color:var(--muted);margin-left:8px}
+    .sup-item .actions{display:flex;gap:6px}
+    .sup-btn{padding:6px 12px;font-size:12px;font-weight:600;border:none;border-radius:8px;cursor:pointer}
+    .sup-btn.available{background:#10b981;color:white}
+    .sup-btn.unavailable{background:#ef4444;color:white}
+    .sup-btn.delete{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.32);color:#ef4444;padding:6px 10px}
 
     /* ===== Modal moderne (optimisé: sans backdrop-filter pour éviter freeze) ===== */
     .modal-overlay{
@@ -1351,26 +1360,15 @@ $csrfToken = getCsrfToken();
         grouped[cat].push(sup);
       });
 
-      // Construire tout le HTML d'un coup (plus rapide que multiple appendChild)
+      // Construire HTML avec classes CSS (plus performant que styles inline)
       let html = '';
       Object.keys(grouped).sort().forEach(group => {
-        html += `<div style="font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;">${escapeHtml(capitalizeStr(group))}</div>`;
+        html += `<div class="sup-group">${escapeHtml(capitalizeStr(group))}</div>`;
         grouped[group].forEach(sup => {
-          const price = (parseFloat(sup.price) || 0).toFixed(2).replace('.', ',');
+          const price = (parseFloat(sup.price) || 0).toFixed(0);
           const status = sup.status || 'available';
           const supId = String(sup.id || '');
-          html += `
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);">
-              <div style="flex:1;">
-                <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
-                <span style="color:var(--muted);margin-left:8px;">${price} ${CURRENCY}</span>
-                <span class="status" data-status="${status}" style="margin-left:8px;padding:4px 8px;"><span class="dot"></span>${status === 'available' ? 'Dispo' : 'Indispo'}</span>
-              </div>
-              <div style="display:flex;gap:6px;">
-                <button class="btn" type="button" data-toggle-sup="${escapeHtml(supId)}" style="padding:6px 12px;font-size:12px;font-weight:600;${status === 'available' ? 'background:#10b981;color:white;' : 'background:#ef4444;color:white;'}border:none;">${status === 'available' ? '✓ Disponible' : '✕ Indisponible'}</button>
-                <button class="btn btn-danger" type="button" data-delete-sup="${escapeHtml(supId)}" style="padding:6px 10px;">🗑️</button>
-              </div>
-            </div>`;
+          html += `<div class="sup-item"><div><strong>${escapeHtml(sup.name || '')}</strong><span class="price">${price} ${CURRENCY}</span></div><div class="actions"><button class="sup-btn ${status}" data-toggle-sup="${supId}">${status === 'available' ? '✓ Dispo' : '✕ Indispo'}</button><button class="sup-btn delete" data-delete-sup="${supId}">🗑️</button></div></div>`;
         });
       });
 
