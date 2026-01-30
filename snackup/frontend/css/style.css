@@ -3627,15 +3627,6 @@ ul {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Fixed mode (via JavaScript) - plus robuste que CSS sticky */
-.category-icons-section.is-fixed {
-    position: fixed;
-    top: var(--header-height);
-    left: 0;
-    right: 0;
-    z-index: 90;
-}
-
 /* Hide on desktop (sidebar is visible) */
 @media (min-width: 1025px) {
     .category-icons-section {
