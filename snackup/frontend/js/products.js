@@ -907,18 +907,39 @@ const Products = {
             console.log('Platforms loaded:', platforms);
             // Check if platforms is an array with items
             if (Array.isArray(platforms) && platforms.length > 0) {
-                // Platform logos - try image first, fallback to text
-                const platformLogos = {
-                    'uber-eats': `<img src="../images/logouber.webp" alt="Uber Eats" class="platform-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span class="platform-text-logo" style="display:none">Uber Eats</span>`,
-                    'deliveroo': `<img src="../images/logodeliveroo.webp" alt="Deliveroo" class="platform-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span class="platform-text-logo" style="display:none">Deliveroo</span>`,
-                    'just-eat': `<img src="../images/logojusteat.webp" alt="Just Eat" class="platform-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><span class="platform-text-logo" style="display:none">Just Eat</span>`
+                // Platform logos - matching by name (case insensitive)
+                const platformLogoUrls = {
+                    'uber eats': 'https://d3i4yxtzktqr9n.cloudfront.net/web-eats-v2/ee037401cb5d31b23cf780808ee4ec1f.svg',
+                    'uber': 'https://d3i4yxtzktqr9n.cloudfront.net/web-eats-v2/ee037401cb5d31b23cf780808ee4ec1f.svg',
+                    'deliveroo': 'https://consumer-component-library.roocdn.com/30.2.0/static/images/logo-teal.svg',
+                    'just eat': 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Just_Eat_logo.svg',
+                    'justeat': 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Just_Eat_logo.svg',
+                    'glovo': 'https://res.cloudinary.com/glovoapp/image/fetch/f_svg/https://glovoapp.com/images/glovo-logo.svg',
+                    'doordash': 'https://cdn.doordash.com/static/img/doordash-logo.svg',
+                    'bolt food': 'https://bolt.eu/static/bolt-food-logo.svg',
+                    'bolt': 'https://bolt.eu/static/bolt-food-logo.svg',
+                    'wolt': 'https://wolt.com/static/wolt-logo.svg',
+                    'takeaway': 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Just_Eat_logo.svg',
                 };
 
+                function getPlatformLogoUrl(name) {
+                    const key = name.toLowerCase().trim();
+                    for (const [platform, url] of Object.entries(platformLogoUrls)) {
+                        if (key.includes(platform) || platform.includes(key)) {
+                            return url;
+                        }
+                    }
+                    return null;
+                }
+
                 let html = platforms.map(p => {
-                    const logo = platformLogos[p.id] || `<span class="platform-text-logo">${p.name}</span>`;
+                    const logoUrl = getPlatformLogoUrl(p.name);
+                    const logoHtml = logoUrl
+                        ? `<img src="${logoUrl}" alt="${p.name}" class="platform-logo-img" style="max-height: 40px; object-fit: contain;">`
+                        : `<span class="platform-text-logo">${p.name}</span>`;
                     const platformClass = p.id || '';
                     return `<a href="${p.url}" target="_blank" class="platform-card platform-card--large ${platformClass}">
-                        <div class="platform-logo-wrapper">${logo}</div>
+                        <div class="platform-logo-wrapper">${logoHtml}</div>
                         <span class="platform-cta">Commander <i class="fas fa-arrow-right"></i></span>
                     </a>`;
                 }).join('');
