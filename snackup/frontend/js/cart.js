@@ -112,6 +112,7 @@ const Cart = {
                 isFormule: !!item.includes,
                 categoryId: item.categoryId || null,
                 categoryName: item.categoryName || null,
+                categorySlug: item.categorySlug || null,
                 addedAt: Date.now()
             });
         }
@@ -327,13 +328,13 @@ const Cart = {
     },
 
     /**
-     * Get all unique categories in cart
+     * Get all unique category slugs in cart (pour upsells)
      */
     getCartCategories() {
         const categories = new Set();
         this.items.forEach(item => {
-            if (item.categoryId) {
-                categories.add(item.categoryId);
+            if (item.categorySlug) {
+                categories.add(item.categorySlug);
             }
         });
         return Array.from(categories);

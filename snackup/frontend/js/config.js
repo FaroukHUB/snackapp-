@@ -192,8 +192,8 @@ const Config = {
     /**
      * Get products from a specific category
      */
-    getProductsByCategory(categoryId) {
-        const category = this.menu?.categories?.find(c => c.id == categoryId);
+    getProductsByCategory(categoryIdOrSlug) {
+        const category = this.menu?.categories?.find(c => c.id == categoryIdOrSlug || c.slug === categoryIdOrSlug);
         return category?.items || [];
     },
 
@@ -237,7 +237,7 @@ const Config = {
             }
 
             if (product) {
-                return { ...product, categoryId: category.id, categoryName: category.name };
+                return { ...product, categoryId: category.id, categoryName: category.name, categorySlug: category.slug };
             }
         }
         return null;
