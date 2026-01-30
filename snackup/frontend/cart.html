@@ -2897,7 +2897,18 @@
                 const grid = document.getElementById('upsellGrid');
                 const message = document.getElementById('upsellMessage');
 
-                if (!grid) return;
+                // Vérifier que les éléments existent
+                if (!section || !grid) {
+                    console.warn('⚠️ Upsell: éléments DOM non trouvés', { section: !!section, grid: !!grid });
+                    return;
+                }
+
+                // Vérifier que Config est chargé
+                if (!Config.isLoaded || !Config.upsellRules) {
+                    console.warn('⚠️ Upsell: Config pas encore chargé, retry dans 500ms');
+                    setTimeout(() => this.renderUpsell(), 500);
+                    return;
+                }
 
                 const categories = Cart.getCartCategories();
                 console.log('🛒 Cart categories (slugs):', categories);
@@ -2906,12 +2917,15 @@
                 const suggestions = Config.getUpsellSuggestions(categories);
                 console.log('💡 Suggestions:', suggestions);
 
-                if (suggestions.length === 0) {
+                if (!suggestions || suggestions.length === 0) {
                     section.style.display = 'none';
+                    console.log('ℹ️ Upsell: aucune suggestion, section masquée');
                     return;
                 }
 
+                // Afficher la section
                 section.style.display = 'block';
+                console.log('✅ Upsell: section affichée avec', suggestions.length, 'suggestions');
 
                 // Get first upsell message
                 if (suggestions[0]?.upsellMessage) {
