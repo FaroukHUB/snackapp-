@@ -4,8 +4,8 @@
 
 /* CSS Variables for easy theming */
 :root {
-    /* Fonts - Option 1: Moderne & Énergique */
-    --font-heading: 'Fredoka One', sans-serif;
+    /* Fonts - Rubik + Nunito + Poppins */
+    --font-heading: 'Rubik', sans-serif;
     --font-body: 'Nunito', sans-serif;
     --font-price: 'Poppins', sans-serif;
     /* Brand Colors - Pizzeria Theme (Rouge, Noir, Vert) - VERSION TEST */
@@ -164,7 +164,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Headings - Russo One */
+/* Headings - Rubik */
 h1, h2, h3, h4, h5, h6,
 .section-title,
 .category-name,
@@ -172,11 +172,11 @@ h1, h2, h3, h4, h5, h6,
 .product-name-new,
 .formule-name {
     font-family: var(--font-heading);
-    font-weight: 400; /* Russo One n'a qu'un seul poids */
-    letter-spacing: 0.5px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
 }
 
-/* Prices - Montserrat Black */
+/* Prices - Poppins Bold */
 .product-price,
 .product-price-new,
 .formule-price,
