@@ -551,20 +551,20 @@ ul {
 
 /* Section Headers */
 .section-header {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .section-header h2 {
     font-size: 28px;
     font-weight: 800;
-    color: var(--gray-900);
+    color: var(--success);
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
 .section-header h2 i {
-    color: var(--primary);
+    color: var(--success);
 }
 
 .section-subtitle {
@@ -3594,17 +3594,18 @@ ul {
    FEATURED SECTION (Sélection pour vous)
    ============================================ */
 .featured-section {
-    margin-bottom: 60px;
-    padding-bottom: 40px;
-    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: 0;
+    padding: 32px 24px 40px;
+    border-bottom: none;
+    background-color: #fafafa;
+    scroll-margin-top: calc(var(--header-height) + var(--sticky-nav-height) + 24px);
 }
 
 .featured-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    max-width: 1000px;
-    margin: 0 auto;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
 }
 
 .featured-card {
