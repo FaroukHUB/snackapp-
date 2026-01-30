@@ -377,7 +377,7 @@ ul {
     background: var(--white);
     border-right: 1px solid var(--gray-200);
     overflow-y: auto;
-    z-index: 90;
+    z-index: 200;
     display: flex;
     flex-direction: column;
 }
