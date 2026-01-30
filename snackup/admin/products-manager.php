@@ -1353,7 +1353,6 @@ $csrfToken = getCsrfToken();
       // Rendu différé
       requestAnimationFrame(() => {
         setupSupplementsEvents();
-        populateCategorySelect(); // À chaque ouverture du modal
         renderSupplementsList();
       });
     });
@@ -1429,6 +1428,9 @@ $csrfToken = getCsrfToken();
     function setupSupplementsEvents() {
       if (supplementsEventsAttached) return;
       supplementsEventsAttached = true;
+
+      // Peupler le select des catégories à l'ouverture du modal
+      populateCategorySelect();
 
       const container = $("#supplementsList");
       container.addEventListener("click", async (e) => {
