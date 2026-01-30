@@ -29,13 +29,15 @@
     <style>
         :root {
             --primary: #e63946;
-            --primary-dark: #d62839;
-            --black: #111111;
-            --dark-bg: #1a1a1a;
-            --card-bg: #222222;
-            --text-light: #ffffff;
-            --text-muted: #9ca3af;
+            --primary-dark: #c1121f;
+            --black: #1a1a1a;
+            --bg-light: #f8f9fa;
+            --bg-cream: #fff9f0;
+            --card-bg: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-muted: #6b7280;
             --gold: #f59e0b;
+            --border: #e5e7eb;
         }
 
         * {
@@ -46,19 +48,19 @@
 
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--black);
-            color: var(--text-light);
+            background: var(--bg-cream);
+            color: var(--text-dark);
             min-height: 100vh;
         }
 
         /* Header */
         .loyalty-header {
-            background: linear-gradient(180deg, var(--dark-bg) 0%, var(--black) 100%);
-            padding: 20px 16px;
+            background: var(--primary);
+            padding: 16px;
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid #333;
+            box-shadow: 0 2px 10px rgba(230, 57, 70, 0.3);
         }
 
         .header-content {
@@ -70,7 +72,7 @@
         }
 
         .back-btn {
-            color: var(--text-light);
+            color: white;
             text-decoration: none;
             font-size: 20px;
             padding: 8px;
@@ -79,11 +81,12 @@
         .header-title {
             font-size: 18px;
             font-weight: 700;
+            color: white;
         }
 
         .cart-btn {
             position: relative;
-            color: var(--text-light);
+            color: white;
             text-decoration: none;
             font-size: 20px;
             padding: 8px;
@@ -93,7 +96,7 @@
             position: absolute;
             top: 0;
             right: 0;
-            background: var(--primary);
+            background: var(--black);
             color: white;
             font-size: 10px;
             font-weight: 700;
@@ -116,15 +119,19 @@
         .points-section {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
+            padding: 28px 24px;
+            margin-bottom: 20px;
             text-align: center;
+            color: white;
+            box-shadow: 0 8px 24px rgba(230, 57, 70, 0.25);
         }
 
         .points-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: 8px;
         }
 
@@ -144,14 +151,20 @@
             background: var(--card-bg);
             border-radius: 16px;
             padding: 20px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
         }
 
         .phone-section h3 {
             font-size: 14px;
             font-weight: 600;
             margin-bottom: 12px;
-            color: var(--text-muted);
+            color: var(--text-dark);
+        }
+
+        .phone-section h3 i {
+            color: var(--primary);
         }
 
         .phone-input-group {
@@ -162,25 +175,26 @@
         .phone-input {
             flex: 1;
             padding: 14px 16px;
-            background: var(--dark-bg);
-            border: 2px solid #333;
+            background: var(--bg-light);
+            border: 2px solid var(--border);
             border-radius: 12px;
-            color: var(--text-light);
+            color: var(--text-dark);
             font-size: 16px;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .phone-input:focus {
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
         }
 
         .phone-input::placeholder {
-            color: #666;
+            color: #9ca3af;
         }
 
         .phone-btn {
-            padding: 14px 20px;
+            padding: 14px 24px;
             background: var(--primary);
             border: none;
             border-radius: 12px;
@@ -199,22 +213,28 @@
         }
 
         .phone-error {
-            color: #ef4444;
+            color: #dc2626;
             font-size: 12px;
-            margin-top: 8px;
+            margin-top: 10px;
             display: none;
+            background: #fef2f2;
+            padding: 8px 12px;
+            border-radius: 8px;
         }
 
         .phone-success {
-            color: #22c55e;
+            color: #16a34a;
             font-size: 12px;
-            margin-top: 8px;
+            margin-top: 10px;
             display: none;
+            background: #f0fdf4;
+            padding: 8px 12px;
+            border-radius: 8px;
         }
 
         /* Rewards Section */
         .rewards-section {
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
 
         .section-header {
@@ -230,6 +250,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--text-dark);
         }
 
         .section-title i {
@@ -239,28 +260,30 @@
         /* Rewards Grid */
         .rewards-grid {
             display: grid;
-            gap: 16px;
+            gap: 14px;
         }
 
         .reward-card {
             background: var(--card-bg);
             border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             overflow: hidden;
             position: relative;
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .reward-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
 
         .reward-card.locked {
-            opacity: 0.6;
+            opacity: 0.7;
         }
 
         .reward-card.locked .reward-image {
-            filter: blur(4px) grayscale(50%);
+            filter: blur(3px) grayscale(40%);
         }
 
         .reward-image-container {
@@ -311,15 +334,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.7);
-            width: 60px;
-            height: 60px;
+            background: rgba(255,255,255,0.9);
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            color: var(--text-muted);
+            font-size: 22px;
+            color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .reward-content {
@@ -359,8 +383,8 @@
         }
 
         .reward-action.locked {
-            background: #333;
-            color: var(--text-muted);
+            background: #e5e7eb;
+            color: #9ca3af;
             cursor: not-allowed;
         }
 
@@ -394,7 +418,9 @@
             background: var(--card-bg);
             border-radius: 16px;
             padding: 24px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
         }
 
         .how-section h2 {
@@ -404,6 +430,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--text-dark);
         }
 
         .how-section h2 i {
@@ -423,15 +450,16 @@
         }
 
         .step-number {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             background: var(--primary);
+            color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 15px;
             flex-shrink: 0;
         }
 
@@ -439,6 +467,7 @@
             font-size: 15px;
             font-weight: 600;
             margin-bottom: 4px;
+            color: var(--text-dark);
         }
 
         .step-content p {
@@ -449,13 +478,14 @@
 
         /* Points Visual */
         .points-visual {
-            background: var(--dark-bg);
+            background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
+            border: 2px solid rgba(230, 57, 70, 0.15);
             border-radius: 12px;
             padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 24px;
             margin-top: 20px;
         }
 
@@ -472,16 +502,18 @@
         .points-visual-label {
             font-size: 12px;
             color: var(--text-muted);
+            margin-top: 2px;
         }
 
         .points-visual-equals {
             font-size: 24px;
-            color: var(--text-muted);
+            color: var(--primary);
+            font-weight: bold;
         }
 
         /* FAQ Section */
         .faq-section {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .faq-section h2 {
@@ -491,6 +523,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--text-dark);
         }
 
         .faq-section h2 i {
@@ -502,6 +535,7 @@
             border-radius: 12px;
             margin-bottom: 8px;
             overflow: hidden;
+            border: 1px solid var(--border);
         }
 
         .faq-item summary {
@@ -513,6 +547,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            color: var(--text-dark);
         }
 
         .faq-item summary::after {
@@ -539,16 +574,18 @@
             justify-content: center;
             gap: 8px;
             padding: 16px;
-            background: var(--card-bg);
+            background: var(--primary);
             border-radius: 12px;
-            color: var(--text-light);
+            color: white;
             text-decoration: none;
             font-weight: 600;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.25);
         }
 
         .back-to-menu:hover {
-            background: #333;
+            background: var(--primary-dark);
+            transform: translateY(-1px);
         }
 
         /* Loading Spinner */
@@ -571,12 +608,15 @@
             text-align: center;
             padding: 40px 20px;
             color: var(--text-muted);
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
         }
 
         .empty-rewards i {
             font-size: 48px;
             margin-bottom: 16px;
-            color: #444;
+            color: #d1d5db;
         }
 
         .empty-rewards p {
