@@ -80,13 +80,13 @@ try {
     // Règle générale pour toutes les catégories (sauf desserts et boissons)
     // On propose desserts, tex-mex et boissons
     $mainCategorySlugs = array_filter($categorySlugs, function($slug) {
-        return !in_array($slug, ['desserts', 'boissons', 'tex-mex', 'texmex']);
+        return !in_array($slug, ['desserts', 'boissons', 'texmex']);
     });
 
     if (!empty($mainCategorySlugs)) {
         $upsellRules[] = [
             'when' => array_values($mainCategorySlugs),
-            'suggest' => ['desserts', 'tex-mex', 'boissons'],
+            'suggest' => ['desserts', 'texmex', 'boissons'],
             'message' => 'Un petit kiff avec ceci ?',
             'priority' => 1
         ];
