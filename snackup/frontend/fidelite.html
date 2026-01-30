@@ -1022,7 +1022,7 @@
             rewardsContainer.innerHTML = html;
         }
 
-        // Claim reward - redirect to cart
+        // Claim reward - redirect to cart loyalty section
         function claimReward(rewardId, rewardName) {
             // Save selected reward to localStorage for cart page
             localStorage.setItem('selected_reward', JSON.stringify({
@@ -1030,8 +1030,8 @@
                 name: rewardName
             }));
 
-            // Redirect to cart
-            window.location.href = 'cart.html?reward=' + rewardId;
+            // Redirect to cart loyalty section
+            window.location.href = 'cart.html?reward=' + rewardId + '#loyaltyRewardsSection';
         }
     </script>
 </body>
