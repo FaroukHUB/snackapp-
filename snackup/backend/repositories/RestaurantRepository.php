@@ -165,16 +165,19 @@ class RestaurantRepository {
     public static function getPublicData(int $restaurantId): array {
         $restaurant = self::getById($restaurantId);
         $settings = self::getSettings($restaurantId);
-        $hours = self::getOpeningHours($restaurantId);
+        $hoursGrouped = self::getOpeningHoursGrouped($restaurantId);
         $faq = self::getFaq($restaurantId);
 
         $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
         $openingHours = [];
-        foreach ($hours as $h) {
+        foreach ($hoursGrouped as $h) {
+            $dayIndex = $h['day_of_week'];
+            $slots = $h['slots'] ?? [['opens' => '18:30', 'closes' => '23:30']];
             $openingHours[] = [
-                'day' => $days[$h['day_of_week']] ?? 'jour',
-                'opens' => substr($h['opens'], 0, 5),
-                'closes' => substr($h['closes'], 0, 5)
+                'day' => $days[$dayIndex] ?? 'jour',
+                'opens' => $slots[0]['opens'] ?? '18:30',
+                'closes' => $slots[0]['closes'] ?? '23:30',
+                'slots' => $slots
             ];
         }
 
