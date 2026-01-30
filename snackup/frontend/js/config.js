@@ -229,8 +229,8 @@ const Config = {
             let product;
 
             if (isNumericLookup) {
-                // Lookup par ID numérique (strict)
-                product = category.items?.find(p => p.id === numericId);
+                // Lookup par ID numérique - convertir pour éviter mismatch string/number
+                product = category.items?.find(p => Number(p.id) === numericId);
             } else {
                 // Lookup par ID string ou par slug (strict)
                 product = category.items?.find(p => p.id === productId || p.slug === productId);
