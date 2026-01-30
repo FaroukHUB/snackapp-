@@ -1910,7 +1910,11 @@
                 if (!grid) return;
 
                 const categories = Cart.getCartCategories();
+                console.log('🛒 Cart categories (slugs):', categories);
+                console.log('📋 Upsell rules:', Config.upsellRules);
+                console.log('🛍️ Cart items:', Cart.items.map(i => ({ name: i.name, categorySlug: i.categorySlug, categoryId: i.categoryId })));
                 const suggestions = Config.getUpsellSuggestions(categories);
+                console.log('💡 Suggestions:', suggestions);
 
                 if (suggestions.length === 0) {
                     section.style.display = 'none';
