@@ -957,6 +957,32 @@ if ($useMySQL) {
             }
             break;
 
+        case 'upload_supplement_image':
+            $supplementId = (int)($input['supplement_id'] ?? 0);
+
+            if (!$supplementId) {
+                jsonError('ID supplément manquant');
+            }
+
+            $supplement = SupplementRepository::getById($supplementId);
+            if (!$supplement) {
+                jsonError('Supplément introuvable');
+            }
+
+            $imagePath = handleImageUpload('sup-' . $supplementId);
+            if (!$imagePath) {
+                jsonError('Aucune image fournie');
+            }
+
+            try {
+                SupplementRepository::update($supplementId, ['image' => $imagePath]);
+                $updatedSupplement = SupplementRepository::getById($supplementId);
+                jsonSuccess(['supplement' => $updatedSupplement, 'image' => $imagePath]);
+            } catch (Exception $e) {
+                jsonError('Erreur upload image: ' . $e->getMessage());
+            }
+            break;
+
         // ===== FORMULES (DB-FIRST) =====
         case 'add_formule':
             // 🔒 VALIDATION: Rejeter tout formule_id envoyé (création = AUTO_INCREMENT uniquement)

@@ -57,7 +57,8 @@ class SupplementRepository {
             'status' => $data['status'] ?? 'available',
             'sort_order' => $data['sort_order'] ?? 0,
             'flavor' => $data['flavor'] ?? 'sale',
-            'group_name' => $data['group_name'] ?? 'autres'
+            'group_name' => $data['group_name'] ?? 'autres',
+            'image' => $data['image'] ?? null
         ];
 
         return Database::insert('supplements', $insertData);
@@ -69,7 +70,7 @@ class SupplementRepository {
     public static function update(int $id, array $data): bool {
         // Filtrer les champs modifiables
         $updateData = [];
-        $allowedFields = ['name', 'price', 'status', 'sort_order', 'flavor', 'group_name'];
+        $allowedFields = ['name', 'price', 'status', 'sort_order', 'flavor', 'group_name', 'image'];
 
         foreach ($allowedFields as $field) {
             if (array_key_exists($field, $data)) {

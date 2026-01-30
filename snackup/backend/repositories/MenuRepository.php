@@ -72,7 +72,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, name, flavor, COALESCE(group_name, 'autres') as group_name, price, status
+            SELECT id, name, flavor, COALESCE(group_name, 'autres') as group_name, price, status, image
             FROM supplements
             WHERE restaurant_id = ? AND flavor != 'sucre'
             ORDER BY group_name ASC, sort_order ASC
@@ -88,7 +88,8 @@ class MenuRepository {
                 'group_name' => $supp['group_name'],
                 'category' => $supp['group_name'], // Alias pour compatibilité admin
                 'price' => (float)$supp['price'],
-                'status' => $supp['status']
+                'status' => $supp['status'],
+                'image' => $supp['image']
             ];
         }
 
@@ -102,7 +103,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, name, flavor, COALESCE(group_name, 'autres') as group_name, price, status
+            SELECT id, name, flavor, COALESCE(group_name, 'autres') as group_name, price, status, image
             FROM supplements
             WHERE restaurant_id = ? AND status = 'available' AND flavor != 'sucre'
             ORDER BY group_name ASC, sort_order ASC
@@ -118,7 +119,8 @@ class MenuRepository {
             $grouped[$group][] = [
                 'id' => $supp['id'],
                 'name' => $supp['name'],
-                'price' => (float)$supp['price']
+                'price' => (float)$supp['price'],
+                'image' => $supp['image']
             ];
         }
 

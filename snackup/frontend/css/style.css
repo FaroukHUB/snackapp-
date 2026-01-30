@@ -1640,6 +1640,14 @@ ul {
     gap: 12px;
 }
 
+.supplement-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
 .supplement-checkbox {
     width: 20px;
     height: 20px;

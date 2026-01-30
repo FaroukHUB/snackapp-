@@ -1261,6 +1261,7 @@ const Products = {
                                         ${grouped[group].map(sup => `
                                             <div class="supplement-item" data-id="${sup.id}" onclick="Products.toggleSupplement('${sup.id}')">
                                                 <div class="supplement-info">
+                                                    ${sup.image ? `<img src="${sup.image}" class="supplement-img" alt="${sup.name}" onerror="this.style.display='none'">` : ''}
                                                     <div class="supplement-checkbox">
                                                         <i class="fas fa-check" style="font-size: 12px;"></i>
                                                     </div>

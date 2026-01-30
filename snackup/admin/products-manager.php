@@ -1483,7 +1483,47 @@ $csrfToken = getCsrfToken();
             toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
           }
         }
+
+        // Upload image supplément
+        const imgContainer = e.target.closest(".sup-img-container");
+        if (imgContainer) {
+          const id = imgContainer.dataset.supId;
+          if (!id) return;
+          uploadSupplementImage(id);
+        }
       });
+    }
+
+    // Upload image pour un supplément
+    function uploadSupplementImage(supplementId) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/png,image/jpeg,image/webp";
+      input.onchange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("action", "upload_supplement_image");
+        formData.append("supplement_id", supplementId);
+        formData.append("imageFile", file);
+
+        try {
+          const resp = await fetch("./api/products.php", { method: "POST", body: formData });
+          const result = await resp.json();
+          if (!result.success) throw new Error(result.error || "Erreur upload");
+
+          // Mettre à jour le state local
+          if (state.menu?.supplements?.catalog?.[supplementId]) {
+            state.menu.supplements.catalog[supplementId].image = result.image;
+          }
+          toast("success", "Image ajoutée", "L'image du supplément a été mise à jour.");
+          renderSupplementsList();
+        } catch (err) {
+          toast("error", "Erreur", err?.message ?? "Impossible d'uploader l'image.");
+        }
+      };
+      input.click();
     }
 
     // Helper pour créer un item de supplément
@@ -1494,13 +1534,20 @@ $csrfToken = getCsrfToken();
       const priceStr = price.toFixed(2).replace('.', ',');
       const status = sup.status || 'available';
       const supId = String(sup.id || '');
+      const hasImage = sup.image && sup.image.trim() !== '';
+      const imageUrl = hasImage ? `../../${sup.image}` : '';
       div.innerHTML = `
-        <div style="flex:1;">
-          <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
-          <span style="color:var(--muted);margin-left:8px;">${priceStr} ${CURRENCY}</span>
-          <span class="status" data-status="${status}" style="margin-left:8px;padding:4px 8px;">
-            <span class="dot"></span>${status === 'available' ? 'Dispo' : 'Indispo'}
-          </span>
+        <div style="display:flex;align-items:center;gap:10px;flex:1;">
+          <div class="sup-img-container" data-sup-id="${escapeHtml(supId)}" style="width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;border:1px dashed var(--stroke);flex-shrink:0;" title="Cliquer pour ${hasImage ? 'changer' : 'ajouter'} l'image">
+            ${hasImage ? `<img src="${escapeHtml(imageUrl)}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fas fa-camera" style="color:var(--muted);font-size:14px;"></i>'}
+          </div>
+          <div>
+            <strong style="font-size:13px;">${escapeHtml(sup.name || '')}</strong>
+            <span style="color:var(--muted);margin-left:8px;">${priceStr} ${CURRENCY}</span>
+            <span class="status" data-status="${status}" style="margin-left:8px;padding:4px 8px;">
+              <span class="dot"></span>${status === 'available' ? 'Dispo' : 'Indispo'}
+            </span>
+          </div>
         </div>
         <div style="display:flex;gap:6px;">
           <button class="btn" type="button" data-toggle-sup="${escapeHtml(supId)}"
