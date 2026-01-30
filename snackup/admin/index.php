@@ -32,18 +32,20 @@ if ($useMySQL) {
 
     // Charger les settings depuis la BD
     $settings = RestaurantRepository::getSettings(SNACK_RESTAURANT_ID);
-    $openingHours = RestaurantRepository::getOpeningHours(SNACK_RESTAURANT_ID);
+    $openingHoursGrouped = RestaurantRepository::getOpeningHoursGrouped(SNACK_RESTAURANT_ID);
     $faqItems = RestaurantRepository::getFaq(SNACK_RESTAURANT_ID);
 
     // Construire $restaurantSettings pour compatibilité avec les templates
     $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
     $formattedHours = [];
-    foreach ($openingHours as $h) {
-        $formattedHours[$h['day_of_week']] = [
-            'day' => $days[$h['day_of_week']] ?? 'jour',
-            'opens' => substr($h['opens'], 0, 5),
-            'closes' => substr($h['closes'], 0, 5),
-            'slots' => [['opens' => substr($h['opens'], 0, 5), 'closes' => substr($h['closes'], 0, 5)]]
+    foreach ($openingHoursGrouped as $h) {
+        $dayIndex = $h['day_of_week'];
+        $slots = $h['slots'] ?? [['opens' => '18:30', 'closes' => '23:30']];
+        $formattedHours[$dayIndex] = [
+            'day' => $days[$dayIndex] ?? 'jour',
+            'opens' => $slots[0]['opens'] ?? '18:30',
+            'closes' => $slots[0]['closes'] ?? '23:30',
+            'slots' => $slots
         ];
     }
 
@@ -482,14 +484,22 @@ $action = $_POST['action'];
                 foreach ($_POST['hours'] as $i => $h) {
                     // Support nouveau format avec slots multiples
                     if (isset($h['slots']) && is_array($h['slots'])) {
-                        $firstSlot = reset($h['slots']);
-                        $hours[] = [
-                            'opens' => $firstSlot['opens'] ?? '18:30',
-                            'closes' => $firstSlot['closes'] ?? '23:30'
+                        $slots = [];
+                        foreach ($h['slots'] as $slot) {
+                            if (!empty($slot['opens']) && !empty($slot['closes'])) {
+                                $slots[] = [
+                                    'opens' => $slot['opens'],
+                                    'closes' => $slot['closes']
+                                ];
+                            }
+                        }
+                        $hours[$i] = [
+                            'slots' => $slots,
+                            'is_closed' => $h['is_closed'] ?? 0
                         ];
                     } else {
                         // Ancien format direct
-                        $hours[] = [
+                        $hours[$i] = [
                             'opens' => $h['opens'] ?? '18:30',
                             'closes' => $h['closes'] ?? '23:30'
                         ];

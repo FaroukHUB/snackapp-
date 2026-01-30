@@ -62,21 +62,22 @@ CREATE TABLE IF NOT EXISTS `restaurant_settings` (
 COMMENT='Paramètres restaurant (config/restaurant.json)';
 
 -- ---------------------------------------------
--- Table: opening_hours
+-- Table: opening_hours (supporte plusieurs créneaux par jour)
 -- ---------------------------------------------
 CREATE TABLE IF NOT EXISTS `opening_hours` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `restaurant_id` INT UNSIGNED NOT NULL,
   `day_of_week` TINYINT NOT NULL COMMENT '0=Lundi, 6=Dimanche',
+  `slot_number` TINYINT DEFAULT 0 COMMENT '0=premier créneau, 1=deuxième, etc.',
   `opens` TIME DEFAULT '18:30:00',
   `closes` TIME DEFAULT '23:30:00',
   `is_closed` TINYINT(1) DEFAULT 0,
   `deleted_at` TIMESTAMP NULL DEFAULT NULL,
-  UNIQUE KEY `uk_restaurant_day` (`restaurant_id`, `day_of_week`),
+  UNIQUE KEY `uk_restaurant_day_slot` (`restaurant_id`, `day_of_week`, `slot_number`),
   INDEX `idx_deleted` (`deleted_at`),
   FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='Horaires ouverture par jour';
+COMMENT='Horaires ouverture par jour (multi-créneaux)';
 
 -- =============================================
 -- 2. MENU & PRODUITS

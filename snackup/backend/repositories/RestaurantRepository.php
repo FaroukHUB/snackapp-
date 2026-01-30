@@ -42,22 +42,81 @@ class RestaurantRepository {
 
     public static function getOpeningHours(int $restaurantId): array {
         return Database::fetchAll(
-            "SELECT * FROM opening_hours WHERE restaurant_id = ? ORDER BY day_of_week",
+            "SELECT * FROM opening_hours WHERE restaurant_id = ? ORDER BY day_of_week, slot_number",
             [$restaurantId]
         );
     }
 
+    /**
+     * Récupère les horaires groupés par jour avec tous les créneaux
+     */
+    public static function getOpeningHoursGrouped(int $restaurantId): array {
+        $rows = self::getOpeningHours($restaurantId);
+        $grouped = [];
+
+        foreach ($rows as $row) {
+            $day = (int) $row['day_of_week'];
+            if (!isset($grouped[$day])) {
+                $grouped[$day] = [
+                    'day_of_week' => $day,
+                    'is_closed' => (bool) $row['is_closed'],
+                    'slots' => []
+                ];
+            }
+            $grouped[$day]['slots'][] = [
+                'opens' => substr($row['opens'], 0, 5),
+                'closes' => substr($row['closes'], 0, 5)
+            ];
+        }
+
+        // S'assurer que tous les jours existent (0-6)
+        for ($i = 0; $i < 7; $i++) {
+            if (!isset($grouped[$i])) {
+                $grouped[$i] = [
+                    'day_of_week' => $i,
+                    'is_closed' => false,
+                    'slots' => [['opens' => '18:30', 'closes' => '23:30']]
+                ];
+            }
+        }
+
+        ksort($grouped);
+        return array_values($grouped);
+    }
+
+    /**
+     * Met à jour les horaires avec support de plusieurs créneaux par jour
+     */
     public static function updateOpeningHours(int $restaurantId, array $hours): bool {
         Database::delete('opening_hours', ['restaurant_id' => $restaurantId]);
 
-        foreach ($hours as $i => $hour) {
-            Database::insert('opening_hours', [
-                'restaurant_id' => $restaurantId,
-                'day_of_week' => $i,
-                'opens' => $hour['opens'] ?? '18:30',
-                'closes' => $hour['closes'] ?? '23:30',
-                'is_closed' => $hour['is_closed'] ?? 0
-            ]);
+        foreach ($hours as $dayIndex => $dayData) {
+            // Support ancien format (single slot) et nouveau format (multiple slots)
+            if (isset($dayData['slots']) && is_array($dayData['slots'])) {
+                // Nouveau format avec plusieurs créneaux
+                foreach ($dayData['slots'] as $slotIndex => $slot) {
+                    if (!empty($slot['opens']) && !empty($slot['closes'])) {
+                        Database::insert('opening_hours', [
+                            'restaurant_id' => $restaurantId,
+                            'day_of_week' => $dayIndex,
+                            'slot_number' => $slotIndex,
+                            'opens' => $slot['opens'],
+                            'closes' => $slot['closes'],
+                            'is_closed' => $dayData['is_closed'] ?? 0
+                        ]);
+                    }
+                }
+            } else {
+                // Ancien format avec un seul créneau
+                Database::insert('opening_hours', [
+                    'restaurant_id' => $restaurantId,
+                    'day_of_week' => $dayIndex,
+                    'slot_number' => 0,
+                    'opens' => $dayData['opens'] ?? '18:30',
+                    'closes' => $dayData['closes'] ?? '23:30',
+                    'is_closed' => $dayData['is_closed'] ?? 0
+                ]);
+            }
         }
 
         return true;

@@ -51,16 +51,17 @@ CREATE TABLE IF NOT EXISTS `restaurant_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------
--- Table: opening_hours
+-- Table: opening_hours (multi-créneaux par jour)
 -- ---------------------------------------------
 CREATE TABLE IF NOT EXISTS `opening_hours` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `restaurant_id` INT UNSIGNED NOT NULL,
   `day_of_week` TINYINT NOT NULL COMMENT '0=Lundi, 6=Dimanche',
+  `slot_number` TINYINT DEFAULT 0 COMMENT '0=premier créneau, 1=deuxième, etc.',
   `opens` TIME DEFAULT '18:30:00',
   `closes` TIME DEFAULT '23:30:00',
   `is_closed` TINYINT(1) DEFAULT 0,
-  UNIQUE KEY `uk_restaurant_day` (`restaurant_id`, `day_of_week`),
+  UNIQUE KEY `uk_restaurant_day_slot` (`restaurant_id`, `day_of_week`, `slot_number`),
   FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
