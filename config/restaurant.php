@@ -27,7 +27,7 @@ try {
     // Récupérer les données du restaurant depuis la base
     $restaurant = RestaurantRepository::getById($restaurantId);
     $settings = RestaurantRepository::getSettings($restaurantId);
-    $openingHours = RestaurantRepository::getOpeningHours($restaurantId);
+    $openingHours = RestaurantRepository::getOpeningHoursGrouped($restaurantId);
     $faqItems = RestaurantRepository::getFaq($restaurantId);
 
 } catch (Exception $e) {
@@ -107,13 +107,15 @@ $response = [
         'snapchat' => $settings['snapchat'] ?? ''
     ],
 
-    // Horaires d'ouverture depuis table opening_hours
+    // Horaires d'ouverture depuis table opening_hours (groupés par jour avec créneaux multiples)
     'openingHours' => array_map(function($h) {
         $days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+        $slots = $h['slots'] ?? [['opens' => '18:30', 'closes' => '23:30']];
         return [
             'day' => $days[$h['day_of_week']] ?? 'jour',
-            'opens' => substr($h['opens'], 0, 5),
-            'closes' => substr($h['closes'], 0, 5),
+            'opens' => $slots[0]['opens'] ?? '18:30',
+            'closes' => $slots[0]['closes'] ?? '23:30',
+            'slots' => $slots,
             'isClosed' => (bool)($h['is_closed'] ?? false)
         ];
     }, $openingHours),
