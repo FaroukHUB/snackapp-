@@ -2330,8 +2330,8 @@ $csrfToken = getCsrfToken();
             </div>
             <p style="margin:0 0 6px;color:var(--muted);font-size:12px;line-height:1.3;">${escapeHtml(f.description ?? '')}</p>
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:15px;font-weight:600;">${f.price?.toFixed(0) ?? '—'} ${CURRENCY}</span>
-              ${f.originalPrice ? `<span style="color:var(--muted);text-decoration:line-through;font-size:12px;">${f.originalPrice.toFixed(0)} ${CURRENCY}</span>` : ''}
+              <span style="font-size:15px;font-weight:600;">${money(f.price)}</span>
+              ${f.originalPrice ? `<span style="color:var(--muted);text-decoration:line-through;font-size:12px;">${money(f.originalPrice)}</span>` : ''}
               <span class="status" data-status="${f.status ?? 'available'}" style="margin-left:auto;padding:4px 8px;">
                 <span class="dot"></span>${(f.status ?? 'available') === 'available' ? 'Dispo' : 'Indispo'}
               </span>
@@ -2402,7 +2402,7 @@ $csrfToken = getCsrfToken();
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
-            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${Number(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${money(product.priceSolo || product.price || 0)}</div>
           </div>
           <button type="button" class="btn btn-danger" style="padding:6px 10px;font-size:11px;position:absolute;top:6px;right:6px;" data-remove="${index}">✕</button>
         `;
@@ -2449,7 +2449,7 @@ $csrfToken = getCsrfToken();
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
           </div>
-          <div style="font-size:13px;font-weight:600;color:var(--brand);">${Number(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--brand);">${money(product.priceSolo || product.price || 0)}</div>
           <button type="button" class="btn btn-good" style="padding:6px 12px;font-size:11px;">+ Ajouter</button>
         `;
 

@@ -61,12 +61,14 @@ try {
         }
     }
 
-    // Featured: structure par défaut (pas de données JSON)
+    // Featured: charger depuis la DB
+    $featuredSettings = MenuRepository::getFeaturedSettings();
+    $featuredProductIds = MenuRepository::getFeaturedProductIds();
     $featured = [
-        'enabled' => false,
-        'title' => '',
-        'subtitle' => '',
-        'items' => []
+        'enabled' => $featuredSettings['enabled'] ?? false,
+        'title' => $featuredSettings['title'] ?? 'Sélection pour vous',
+        'subtitle' => $featuredSettings['subtitle'] ?? 'Nos produits les plus appréciés',
+        'items' => $featuredProductIds
     ];
 
     // Upsell Rules - suggestions basées sur le panier
