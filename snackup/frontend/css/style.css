@@ -4049,10 +4049,39 @@ ul {
         font-size: 20px;
     }
 
-    .products-grid,
-    .featured-grid {
+    .products-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
+    }
+
+    /* Slider horizontal pour featured sur mobile */
+    .featured-grid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .featured-grid::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .featured-grid::-webkit-scrollbar-track {
+        background: var(--gray-200);
+        border-radius: 4px;
+    }
+
+    .featured-grid::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
+    }
+
+    .featured-grid > .product-card-new {
+        flex: 0 0 75%;
+        max-width: 75%;
+        scroll-snap-align: start;
     }
 
     .product-info,
