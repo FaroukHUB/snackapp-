@@ -388,7 +388,7 @@ $csrfToken = getCsrfToken();
       </div>
 
       <div class="actions">
-        <a class="btn btn-ghost" href="./index.php" style="margin-right:8px;">← Retour</a>
+        <a class="btn btn-ghost" href="./index.php#settings" style="margin-right:8px;">← Retour</a>
         <button class="btn btn-good" type="button" id="btnAddCategory">+ Catégorie</button>
         <button class="btn btn-primary" type="button" id="btnAddProduct">+ Produit</button>
         <button class="btn" type="button" id="btnAddFormule" style="background:rgba(168,85,247,.14);border-color:rgba(168,85,247,.35);">📦 + Formule</button>

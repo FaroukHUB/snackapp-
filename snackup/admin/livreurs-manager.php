@@ -191,7 +191,7 @@ $csrfToken = getCsrfToken();
         <p>Gérez vos livreurs WhatsApp pour les livraisons</p>
       </div>
       <div class="actions">
-        <a href="index.php" class="btn"><i class="fas fa-arrow-left"></i> Retour</a>
+        <a href="index.php#settings" class="btn"><i class="fas fa-arrow-left"></i> Retour</a>
         <button class="btn btn-primary" onclick="openAddModal()"><i class="fas fa-plus"></i> Ajouter un livreur</button>
       </div>
     </div>

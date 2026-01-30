@@ -975,6 +975,9 @@ if (isset($_GET['export'])) {
         .settings-grid > .card {
             margin-bottom: 0;
         }
+        .settings-grid > .card:only-child {
+            grid-column: 1 / -1;
+        }
         .settings-grid-full {
             grid-column: 1 / -1;
         }

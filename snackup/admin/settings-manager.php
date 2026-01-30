@@ -132,7 +132,7 @@ $csrfToken = getCsrfToken();
         <h1><i class="fas fa-cog"></i> Paramètres</h1>
         <p>Configuration générale, livraison et paiements</p>
       </div>
-      <a href="index.php" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> Retour</a>
+      <a href="index.php#settings" class="btn btn-ghost"><i class="fas fa-arrow-left"></i> Retour</a>
     </div>
 
     <div class="tabs">
