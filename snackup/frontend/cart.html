@@ -1955,7 +1955,7 @@
                     }
 
                     // Échapper les guillemets pour les attributs HTML
-                    const safeId = (product.id || '').replace(/'/g, "\\'");
+                    const safeId = String(product.id || '').replace(/'/g, "\\'");
                     const safeName = (product.name || '').replace(/"/g, '&quot;');
                     const safeImage = (product.image || '').replace(/"/g, '&quot;');
 
