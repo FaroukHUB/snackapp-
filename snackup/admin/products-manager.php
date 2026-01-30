@@ -1348,13 +1348,23 @@ $csrfToken = getCsrfToken();
 
     // ===== GESTION DES SUPPLÉMENTS =====
     $("#btnManageSupplements").addEventListener("click", () => {
+      console.log('[DIAG] 1. Clic bouton suppléments');
       // Ouvrir le modal d'abord (évite le freeze)
       openModal("#modalSupplements");
+      console.log('[DIAG] 2. Modal ouvert');
       // Rendu différé
       requestAnimationFrame(() => {
+        console.log('[DIAG] 3. RAF callback start');
+        console.time('[DIAG] setupSupplementsEvents');
         setupSupplementsEvents();
-        populateCategorySelect(); // À chaque ouverture du modal
+        console.timeEnd('[DIAG] setupSupplementsEvents');
+        console.time('[DIAG] populateCategorySelect');
+        populateCategorySelect();
+        console.timeEnd('[DIAG] populateCategorySelect');
+        console.time('[DIAG] renderSupplementsList');
         renderSupplementsList();
+        console.timeEnd('[DIAG] renderSupplementsList');
+        console.log('[DIAG] 4. RAF callback end');
       });
     });
 
@@ -1376,29 +1386,38 @@ $csrfToken = getCsrfToken();
     // Protection contre les rendus multiples
     let isRenderingSupplements = false;
     function renderSupplementsList(){
-      if (isRenderingSupplements) return;
+      console.log('[DIAG] renderSupplementsList() called, isRenderingSupplements:', isRenderingSupplements);
+      if (isRenderingSupplements) {
+        console.log('[DIAG] ⚠️ Already rendering, skipping');
+        return;
+      }
       isRenderingSupplements = true;
 
       try {
         const container = $("#supplementsList");
         if (!container) {
+          console.log('[DIAG] ❌ Container not found');
           isRenderingSupplements = false;
           return;
         }
+        console.log('[DIAG] Container found');
 
         const catalog = state.menu?.supplements?.catalog || {};
         const supplements = Object.values(catalog).filter(s => s != null);
+        console.log('[DIAG] Supplements count:', supplements.length, 'Catalog type:', typeof catalog, 'Keys:', Object.keys(catalog).length);
 
       // Note: populateCategorySelect() est appelé séparément (modal open + ajout)
       // pour éviter les recalculs inutiles lors de toggle/delete/edit
 
       if (supplements.length === 0) {
         container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
+        console.log('[DIAG] No supplements, showing empty message');
         isRenderingSupplements = false;
         return;
       }
 
       // Grouper par catégorie
+      console.log('[DIAG] Grouping supplements...');
       const grouped = {};
       supplements.forEach(sup => {
         if (!sup) return;
@@ -1406,8 +1425,10 @@ $csrfToken = getCsrfToken();
         if (!grouped[cat]) grouped[cat] = [];
         grouped[cat].push(sup);
       });
+      console.log('[DIAG] Groups:', Object.keys(grouped));
 
       // Construire tout le HTML d'un coup (plus rapide que multiple appendChild)
+      console.log('[DIAG] Building HTML...');
       let html = '';
       Object.keys(grouped).sort().forEach(group => {
         html += `<div style="font-size:13px;font-weight:600;color:#E91E63;margin:12px 0 8px 0;padding:8px 12px;background:linear-gradient(135deg,#FCE4EC 0%,#F8BBD0 100%);border-left:4px solid #E91E63;border-radius:6px;text-transform:uppercase;">${escapeHtml(capitalizeStr(group))}</div>`;
@@ -1415,20 +1436,29 @@ $csrfToken = getCsrfToken();
           html += createSupplementItemHTML(sup);
         });
       });
+      console.log('[DIAG] HTML built, length:', html.length);
 
+      console.log('[DIAG] Setting innerHTML...');
       container.innerHTML = html;
+      console.log('[DIAG] ✓ innerHTML set');
       } catch(e) {
         console.error('[Supplements] Erreur rendu:', e);
       } finally {
         isRenderingSupplements = false;
+        console.log('[DIAG] renderSupplementsList() finished');
       }
     }
 
     // Event delegation pour suppléments (attaché UNE SEULE FOIS)
     let supplementsEventsAttached = false;
     function setupSupplementsEvents() {
-      if (supplementsEventsAttached) return;
+      console.log('[DIAG] setupSupplementsEvents() called, attached:', supplementsEventsAttached);
+      if (supplementsEventsAttached) {
+        console.log('[DIAG] ⚠️ Events already attached, skipping');
+        return;
+      }
       supplementsEventsAttached = true;
+      console.log('[DIAG] Attaching event listener...');
 
       const container = $("#supplementsList");
       container.addEventListener("click", async (e) => {
