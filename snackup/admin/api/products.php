@@ -520,20 +520,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             // ✅ Charger formules depuis MySQL
             $formules = MenuRepository::getAllFormules();
 
-            // Charger featured et categoryIcons depuis menu.json (pas encore migrés)
-            $menuJsonPath = getMenuJsonPath();
+            // ✅ Charger featured depuis MySQL (migré)
+            $featuredSettings = MenuRepository::getFeaturedSettings();
+            $featuredProductIds = MenuRepository::getFeaturedProductIds();
             $featured = [
-                'enabled' => true,
-                'title' => 'Sélection pour vous',
-                'subtitle' => 'Nos produits les plus appréciés',
-                'items' => []
+                'enabled' => $featuredSettings['enabled'] ?? true,
+                'title' => $featuredSettings['title'] ?? 'Sélection pour vous',
+                'subtitle' => $featuredSettings['subtitle'] ?? 'Nos produits les plus appréciés',
+                'items' => $featuredProductIds
             ];
-            $categoryIcons = [];
 
+            // Charger categoryIcons depuis menu.json (pas encore migré)
+            $menuJsonPath = getMenuJsonPath();
+            $categoryIcons = [];
             if (file_exists($menuJsonPath)) {
                 $menuData = json_decode(file_get_contents($menuJsonPath), true);
                 if ($menuData) {
-                    $featured = $menuData['featured'] ?? $featured;
                     $categoryIcons = $menuData['categoryIcons'] ?? [];
                 }
             }
