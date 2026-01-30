@@ -1388,8 +1388,8 @@ $csrfToken = getCsrfToken();
         const catalog = state.menu?.supplements?.catalog || {};
         const supplements = Object.values(catalog).filter(s => s != null);
 
-      // Peupler le select
-      populateCategorySelect();
+      // Note: populateCategorySelect() est appelé séparément (modal open + ajout)
+      // pour éviter les recalculs inutiles lors de toggle/delete/edit
 
       if (supplements.length === 0) {
         container.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Aucun supplément configuré.</p>';
@@ -1429,6 +1429,9 @@ $csrfToken = getCsrfToken();
       if (supplementsEventsAttached) return;
       supplementsEventsAttached = true;
 
+      // Peupler le select des catégories à l'ouverture du modal
+      populateCategorySelect();
+
       const container = $("#supplementsList");
       container.addEventListener("click", async (e) => {
         const toggleBtn = e.target.closest("[data-toggle-sup]");
@@ -1450,6 +1453,7 @@ $csrfToken = getCsrfToken();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de modifier le statut.");
           }
+          return; // 1 clic = 1 action
         }
 
         if (deleteBtn) {
@@ -1468,6 +1472,7 @@ $csrfToken = getCsrfToken();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
           }
+          return; // 1 clic = 1 action
         }
 
         // Upload image supplément
@@ -1606,6 +1611,7 @@ $csrfToken = getCsrfToken();
         toast("success", "Supplément ajouté", `"${name}" a été créé.`);
         $("#formAddSupplement").reset();
         renderSupplementsList();
+        populateCategorySelect(); // Rafraîchir les catégories (nouvelle catégorie possible)
       } catch(err) {
         toast("error", "Erreur", err?.message ?? "Impossible d'ajouter.");
       }
