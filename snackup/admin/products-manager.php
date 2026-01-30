@@ -393,6 +393,7 @@ $csrfToken = getCsrfToken();
         <button class="btn btn-primary" type="button" id="btnAddProduct">+ Produit</button>
         <button class="btn" type="button" id="btnAddFormule" style="background:rgba(168,85,247,.14);border-color:rgba(168,85,247,.35);">📦 + Formule</button>
         <button class="btn" type="button" id="btnManageSupplements" style="background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.35);">🧀 Suppléments</button>
+        <button class="btn" type="button" id="btnManageUpsells" style="background:rgba(236,72,153,.14);border-color:rgba(236,72,153,.35);">🎯 Upsells</button>
       </div>
     </div>
 
@@ -966,6 +967,60 @@ $csrfToken = getCsrfToken();
         <button class="btn btn-good" type="button" id="btnSaveFeatured" style="margin-top:16px;">Enregistrer la sélection</button>
       </div>
     </section>
+
+    <!-- Section Upsells -->
+    <section class="panel" id="upsellsPanel" style="margin-top:20px;">
+      <div class="panel-h">
+        <div>
+          <h2>🎯 Upsells</h2>
+          <div class="meta" id="upsellsMeta">Suggestions de produits sur la page panier</div>
+        </div>
+        <button class="btn btn-primary" type="button" id="btnAddUpsell">+ Ajouter règle</button>
+      </div>
+      <div class="panel-b">
+        <div id="upsellsGrid" style="display:grid;gap:12px;"></div>
+        <div id="upsellsEmpty" class="muted" style="display:none;padding:20px;text-align:center;">Aucune règle d'upsell. Cliquez sur "+ Ajouter règle" pour en créer une.</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- MODAL: Ajouter/Modifier Upsell -->
+  <div id="modalUpsell" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalUpsellTitle" style="max-width:600px;">
+      <div class="modal-h">
+        <h3 id="modalUpsellTitle">Nouvelle règle d'upsell</h3>
+        <button class="btn btn-ghost" type="button" data-close aria-label="Fermer">✕</button>
+      </div>
+      <div class="modal-b" style="max-height:60vh;overflow-y:auto;">
+        <input type="hidden" id="upsellId" value="">
+
+        <div class="field">
+          <label>Message affiché</label>
+          <input id="upsellMessage" class="input" type="text" placeholder="Un petit kiff avec ceci ?" />
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label>Quand le panier contient (catégories)</label>
+          <p class="muted" style="margin:4px 0 8px;font-size:12px;">Sélectionnez les catégories qui déclenchent cet upsell</p>
+          <div id="upsellWhenCategories" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;"></div>
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label>Suggérer ces catégories</label>
+          <p class="muted" style="margin:4px 0 8px;font-size:12px;">Sélectionnez les catégories à proposer en upsell</p>
+          <div id="upsellSuggestCategories" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;"></div>
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label>Priorité</label>
+          <input id="upsellPriority" class="input" type="number" value="1" min="1" max="10" style="width:80px;" />
+        </div>
+      </div>
+      <div class="modal-f">
+        <button class="btn btn-ghost" type="button" data-close>Annuler</button>
+        <button class="btn btn-primary" type="button" id="btnSaveUpsell">Enregistrer</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL: Ajouter produit Featured -->
@@ -2495,9 +2550,178 @@ $csrfToken = getCsrfToken();
       }
     });
 
+    // ============================================
+    // UPSELLS MANAGEMENT
+    // ============================================
+
+    let upsellRules = [];
+
+    function renderUpsells() {
+      const grid = $("#upsellsGrid");
+      const empty = $("#upsellsEmpty");
+
+      grid.innerHTML = "";
+
+      if (upsellRules.length === 0) {
+        empty.style.display = "block";
+        return;
+      }
+
+      empty.style.display = "none";
+
+      upsellRules.forEach(rule => {
+        const card = document.createElement("div");
+        card.style.cssText = "background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:16px;";
+
+        const whenNames = rule.when.map(slug => {
+          const cat = getCategories().find(c => c.slug === slug);
+          return cat ? cat.name : slug;
+        }).join(", ");
+
+        const suggestNames = rule.suggest.map(slug => {
+          const cat = getCategories().find(c => c.slug === slug);
+          return cat ? cat.name : slug;
+        }).join(", ");
+
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+            <div style="flex:1;">
+              <div style="font-weight:600;margin-bottom:8px;color:var(--brand);">"${rule.message}"</div>
+              <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">
+                <strong>Quand:</strong> ${whenNames || "Aucune catégorie"}
+              </div>
+              <div style="font-size:13px;color:var(--muted);">
+                <strong>Suggère:</strong> ${suggestNames || "Aucune catégorie"}
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn-icon-sm" onclick="editUpsell(${rule.id})" title="Modifier"><i class="fas fa-pen"></i></button>
+              <button class="btn-icon-sm btn-danger" onclick="deleteUpsell(${rule.id})" title="Supprimer"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    function renderUpsellModal(rule = null) {
+      const categories = getCategories();
+      const whenContainer = $("#upsellWhenCategories");
+      const suggestContainer = $("#upsellSuggestCategories");
+
+      const selectedWhen = rule?.when || [];
+      const selectedSuggest = rule?.suggest || [];
+
+      whenContainer.innerHTML = categories.map(cat => `
+        <label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border-radius:8px;cursor:pointer;">
+          <input type="checkbox" name="upsellWhen" value="${cat.slug}" ${selectedWhen.includes(cat.slug) ? "checked" : ""}>
+          <span style="font-size:13px;">${cat.name}</span>
+        </label>
+      `).join("");
+
+      suggestContainer.innerHTML = categories.map(cat => `
+        <label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border-radius:8px;cursor:pointer;">
+          <input type="checkbox" name="upsellSuggest" value="${cat.slug}" ${selectedSuggest.includes(cat.slug) ? "checked" : ""}>
+          <span style="font-size:13px;">${cat.name}</span>
+        </label>
+      `).join("");
+
+      $("#upsellId").value = rule?.id || "";
+      $("#upsellMessage").value = rule?.message || "Un petit kiff avec ceci ?";
+      $("#upsellPriority").value = rule?.priority || 1;
+      $("#modalUpsellTitle").textContent = rule ? "Modifier la règle d'upsell" : "Nouvelle règle d'upsell";
+    }
+
+    window.editUpsell = function(id) {
+      const rule = upsellRules.find(r => r.id === id);
+      if (rule) {
+        renderUpsellModal(rule);
+        openModal("#modalUpsell");
+      }
+    };
+
+    window.deleteUpsell = async function(id) {
+      if (!confirm("Supprimer cette règle d'upsell ?")) return;
+
+      try {
+        await apiPostJson({ action: "delete_upsell", id });
+        upsellRules = upsellRules.filter(r => r.id !== id);
+        renderUpsells();
+        toast("success", "Supprimé", "Règle d'upsell supprimée.");
+      } catch (err) {
+        toast("error", "Erreur", err.message);
+      }
+    };
+
+    $("#btnAddUpsell").addEventListener("click", () => {
+      renderUpsellModal();
+      openModal("#modalUpsell");
+    });
+
+    $("#btnManageUpsells").addEventListener("click", () => {
+      document.getElementById("upsellsPanel").scrollIntoView({ behavior: "smooth" });
+    });
+
+    $("#btnSaveUpsell").addEventListener("click", async () => {
+      const id = $("#upsellId").value;
+      const message = $("#upsellMessage").value.trim() || "Un petit kiff avec ceci ?";
+      const priority = parseInt($("#upsellPriority").value) || 1;
+
+      const whenCategories = Array.from($$('input[name="upsellWhen"]:checked')).map(cb => cb.value);
+      const suggestCategories = Array.from($$('input[name="upsellSuggest"]:checked')).map(cb => cb.value);
+
+      if (whenCategories.length === 0) {
+        toast("error", "Erreur", "Sélectionnez au moins une catégorie déclencheuse.");
+        return;
+      }
+
+      if (suggestCategories.length === 0) {
+        toast("error", "Erreur", "Sélectionnez au moins une catégorie à suggérer.");
+        return;
+      }
+
+      try {
+        if (id) {
+          await apiPostJson({
+            action: "update_upsell",
+            id: parseInt(id),
+            when_categories: whenCategories,
+            suggest_categories: suggestCategories,
+            message,
+            priority,
+            is_active: true
+          });
+          toast("success", "Modifié", "Règle d'upsell mise à jour.");
+        } else {
+          await apiPostJson({
+            action: "add_upsell",
+            when_categories: whenCategories,
+            suggest_categories: suggestCategories,
+            message,
+            priority
+          });
+          toast("success", "Ajouté", "Nouvelle règle d'upsell créée.");
+        }
+
+        closeModal("#modalUpsell");
+        // Recharger les upsells
+        const data = await apiGet();
+        upsellRules = data.upsellRules || [];
+        renderUpsells();
+      } catch (err) {
+        toast("error", "Erreur", err.message);
+      }
+    });
+
+    // ============================================
+    // BOOT
+    // ============================================
+
     async function boot(){
       const data = await apiGet();
       state.menu = normalizeMenuData(data);
+      upsellRules = data.upsellRules || [];
       const cats = getCategories();
       if (!cats.find(c=>c.id===parseInt(state.selectedCategoryId, 10))) {
         state.selectedCategoryId = cats[0]?.id ?? null;
@@ -2505,6 +2729,7 @@ $csrfToken = getCsrfToken();
       render();
       renderFormules();
       renderFeatured();
+      renderUpsells();
     }
 
     boot().catch((err)=>{

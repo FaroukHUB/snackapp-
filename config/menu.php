@@ -71,26 +71,8 @@ try {
         'items' => $featuredProductIds
     ];
 
-    // Upsell Rules - suggestions basées sur le panier
-    // Récupère les slugs des catégories pour les règles
-    $categorySlugs = array_column($categories, 'slug');
-
-    $upsellRules = [];
-
-    // Règle générale pour toutes les catégories (sauf desserts et boissons)
-    // On propose desserts, tex-mex et boissons
-    $mainCategorySlugs = array_filter($categorySlugs, function($slug) {
-        return !in_array($slug, ['desserts', 'boissons', 'texmex']);
-    });
-
-    if (!empty($mainCategorySlugs)) {
-        $upsellRules[] = [
-            'when' => array_values($mainCategorySlugs),
-            'suggest' => ['desserts', 'texmex', 'boissons'],
-            'message' => 'Un petit kiff avec ceci ?',
-            'priority' => 1
-        ];
-    }
+    // Upsell Rules - chargé depuis la base de données
+    $upsellRules = MenuRepository::getUpsellRules();
 
     // Construire la réponse complète
     $response = [

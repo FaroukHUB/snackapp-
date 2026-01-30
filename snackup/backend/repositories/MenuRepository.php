@@ -935,4 +935,121 @@ class MenuRepository {
             throw $e;
         }
     }
+
+    /**
+     * Récupère toutes les règles upsell actives
+     */
+    public static function getUpsellRules() {
+        $pdo = Database::getInstance();
+
+        try {
+            $stmt = $pdo->prepare("
+                SELECT id, when_categories, suggest_categories, message, priority
+                FROM upsell_rules
+                WHERE restaurant_id = ? AND is_active = 1
+                ORDER BY priority ASC
+            ");
+            $stmt->execute([self::$restaurantId]);
+            $rules = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Parser le JSON
+            foreach ($rules as &$rule) {
+                $rule['when'] = json_decode($rule['when_categories'], true) ?: [];
+                $rule['suggest'] = json_decode($rule['suggest_categories'], true) ?: [];
+                unset($rule['when_categories'], $rule['suggest_categories']);
+            }
+
+            return $rules;
+        } catch (PDOException $e) {
+            // Table n'existe pas encore
+            return [];
+        }
+    }
+
+    /**
+     * Récupère toutes les règles upsell (incluant inactives) pour l'admin
+     */
+    public static function getAllUpsellRules() {
+        $pdo = Database::getInstance();
+
+        try {
+            $stmt = $pdo->prepare("
+                SELECT id, when_categories, suggest_categories, message, priority, is_active
+                FROM upsell_rules
+                WHERE restaurant_id = ?
+                ORDER BY priority ASC
+            ");
+            $stmt->execute([self::$restaurantId]);
+            $rules = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Parser le JSON
+            foreach ($rules as &$rule) {
+                $rule['when'] = json_decode($rule['when_categories'], true) ?: [];
+                $rule['suggest'] = json_decode($rule['suggest_categories'], true) ?: [];
+            }
+
+            return $rules;
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Ajoute une règle upsell
+     */
+    public static function addUpsellRule($whenCategories, $suggestCategories, $message, $priority = 1) {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            INSERT INTO upsell_rules (restaurant_id, when_categories, suggest_categories, message, priority)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+
+        $stmt->execute([
+            self::$restaurantId,
+            json_encode($whenCategories, JSON_UNESCAPED_UNICODE),
+            json_encode($suggestCategories, JSON_UNESCAPED_UNICODE),
+            $message,
+            $priority
+        ]);
+
+        return $pdo->lastInsertId();
+    }
+
+    /**
+     * Met à jour une règle upsell
+     */
+    public static function updateUpsellRule($id, $whenCategories, $suggestCategories, $message, $priority, $isActive) {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            UPDATE upsell_rules
+            SET when_categories = ?, suggest_categories = ?, message = ?, priority = ?, is_active = ?
+            WHERE id = ? AND restaurant_id = ?
+        ");
+
+        return $stmt->execute([
+            json_encode($whenCategories, JSON_UNESCAPED_UNICODE),
+            json_encode($suggestCategories, JSON_UNESCAPED_UNICODE),
+            $message,
+            $priority,
+            $isActive ? 1 : 0,
+            $id,
+            self::$restaurantId
+        ]);
+    }
+
+    /**
+     * Supprime une règle upsell
+     */
+    public static function deleteUpsellRule($id) {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare("
+            DELETE FROM upsell_rules
+            WHERE id = ? AND restaurant_id = ?
+        ");
+
+        return $stmt->execute([$id, self::$restaurantId]);
+    }
 }

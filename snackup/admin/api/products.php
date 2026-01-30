@@ -540,12 +540,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 }
             }
 
+            // ✅ Charger upsell rules depuis MySQL
+            $upsellRules = MenuRepository::getAllUpsellRules();
+
             jsonSuccess([
                 'menu' => $menu,
                 'supplements' => $supplementsFormatted,
                 'formules' => $formules,
                 'featured' => $featured,
-                'categoryIcons' => $categoryIcons
+                'categoryIcons' => $categoryIcons,
+                'upsellRules' => $upsellRules
             ]);
 
         } catch (Exception $e) {
@@ -1306,6 +1310,60 @@ if ($useMySQL) {
             } catch (Exception $e) {
                 error_log('[PRODUCTS API] ❌ Erreur featured: ' . $e->getMessage());
                 jsonError('Erreur sauvegarde featured: ' . $e->getMessage());
+            }
+            break;
+
+        // ===== UPSELL RULES =====
+        case 'add_upsell':
+            $whenCategories = $input['when_categories'] ?? [];
+            $suggestCategories = $input['suggest_categories'] ?? [];
+            $message = trim($input['message'] ?? 'Un petit kiff avec ceci ?');
+            $priority = (int)($input['priority'] ?? 1);
+
+            if (empty($whenCategories) || empty($suggestCategories)) {
+                jsonError('Catégories requises');
+            }
+
+            try {
+                $id = MenuRepository::addUpsellRule($whenCategories, $suggestCategories, $message, $priority);
+                jsonSuccess(['id' => $id, 'message' => 'Règle d\'upsell créée']);
+            } catch (Exception $e) {
+                jsonError($e->getMessage());
+            }
+            break;
+
+        case 'update_upsell':
+            $id = (int)($input['id'] ?? 0);
+            $whenCategories = $input['when_categories'] ?? [];
+            $suggestCategories = $input['suggest_categories'] ?? [];
+            $message = trim($input['message'] ?? 'Un petit kiff avec ceci ?');
+            $priority = (int)($input['priority'] ?? 1);
+            $isActive = $input['is_active'] ?? true;
+
+            if (!$id || empty($whenCategories) || empty($suggestCategories)) {
+                jsonError('Paramètres invalides');
+            }
+
+            try {
+                MenuRepository::updateUpsellRule($id, $whenCategories, $suggestCategories, $message, $priority, $isActive);
+                jsonSuccess(['message' => 'Règle d\'upsell mise à jour']);
+            } catch (Exception $e) {
+                jsonError($e->getMessage());
+            }
+            break;
+
+        case 'delete_upsell':
+            $id = (int)($input['id'] ?? 0);
+
+            if (!$id) {
+                jsonError('ID manquant');
+            }
+
+            try {
+                MenuRepository::deleteUpsellRule($id);
+                jsonSuccess(['message' => 'Règle d\'upsell supprimée']);
+            } catch (Exception $e) {
+                jsonError($e->getMessage());
             }
             break;
 
