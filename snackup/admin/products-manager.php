@@ -2560,6 +2560,8 @@ $csrfToken = getCsrfToken();
       const grid = $("#upsellsGrid");
       const empty = $("#upsellsEmpty");
 
+      if (!grid || !empty) return;
+
       grid.innerHTML = "";
 
       if (upsellRules.length === 0) {
@@ -2573,12 +2575,15 @@ $csrfToken = getCsrfToken();
         const card = document.createElement("div");
         card.style.cssText = "background:var(--card);border:1px solid var(--stroke);border-radius:12px;padding:16px;";
 
-        const whenNames = rule.when.map(slug => {
+        const whenArr = Array.isArray(rule.when) ? rule.when : [];
+        const suggestArr = Array.isArray(rule.suggest) ? rule.suggest : [];
+
+        const whenNames = whenArr.map(slug => {
           const cat = getCategories().find(c => c.slug === slug);
           return cat ? cat.name : slug;
         }).join(", ");
 
-        const suggestNames = rule.suggest.map(slug => {
+        const suggestNames = suggestArr.map(slug => {
           const cat = getCategories().find(c => c.slug === slug);
           return cat ? cat.name : slug;
         }).join(", ");
@@ -2606,12 +2611,14 @@ $csrfToken = getCsrfToken();
     }
 
     function renderUpsellModal(rule = null) {
-      const categories = getCategories();
+      const categories = getCategories() || [];
       const whenContainer = $("#upsellWhenCategories");
       const suggestContainer = $("#upsellSuggestCategories");
 
-      const selectedWhen = rule?.when || [];
-      const selectedSuggest = rule?.suggest || [];
+      if (!whenContainer || !suggestContainer) return;
+
+      const selectedWhen = Array.isArray(rule?.when) ? rule.when : [];
+      const selectedSuggest = Array.isArray(rule?.suggest) ? rule.suggest : [];
 
       whenContainer.innerHTML = categories.map(cat => `
         <label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border-radius:8px;cursor:pointer;">
