@@ -4,6 +4,10 @@
 
 /* CSS Variables for easy theming */
 :root {
+    /* Fonts - Option 4: Clean & Pro */
+    --font-heading: 'Russo One', sans-serif;
+    --font-body: 'Quicksand', sans-serif;
+    --font-price: 'Montserrat', sans-serif;
     /* Brand Colors - Pizzeria Theme (Rouge, Noir, Vert) - VERSION TEST */
     --primary: #ff0000;        /* ROUGE VIF TEST */
     --primary-dark: #cc0000;   /* Rouge très foncé */
@@ -152,12 +156,35 @@ html {
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-body);
     font-size: 15px;
     line-height: 1.6;
     color: var(--gray-800);
     background-color: var(--gray-50);
     -webkit-font-smoothing: antialiased;
+}
+
+/* Headings - Russo One */
+h1, h2, h3, h4, h5, h6,
+.section-title,
+.category-name,
+.formule-title,
+.product-name-new,
+.formule-name {
+    font-family: var(--font-heading);
+    font-weight: 400; /* Russo One n'a qu'un seul poids */
+    letter-spacing: 0.5px;
+}
+
+/* Prices - Montserrat Black */
+.product-price,
+.product-price-new,
+.formule-price,
+.cart-total,
+.price,
+.bundle-price {
+    font-family: var(--font-price);
+    font-weight: 800;
 }
 
 a {
