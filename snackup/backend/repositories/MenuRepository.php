@@ -669,7 +669,7 @@ class MenuRepository {
     /**
      * Modifie une formule
      */
-    public static function editFormule($formuleId, $name, $description, $price, $originalPrice, $status, $image = null, $includes = null) {
+    public static function editFormule($formuleId, $name, $description, $price, $originalPrice, $status, $image = null, $includes = null, $badge = null) {
         $pdo = Database::getInstance();
 
         // Si includes est fourni, le convertir en JSON
@@ -684,7 +684,7 @@ class MenuRepository {
                 $stmt = $pdo->prepare("
                     UPDATE formules
                     SET name = ?, description = ?, price = ?, original_price = ?,
-                        status = ?, image = ?, includes = ?
+                        status = ?, image = ?, includes = ?, badge = ?
                     WHERE id = ? AND restaurant_id = ?
                 ");
 
@@ -696,6 +696,7 @@ class MenuRepository {
                     $status,
                     $image,
                     $includesJson,
+                    $badge,
                     $formuleId,
                     self::$restaurantId
                 ]);
@@ -703,7 +704,7 @@ class MenuRepository {
                 $stmt = $pdo->prepare("
                     UPDATE formules
                     SET name = ?, description = ?, price = ?, original_price = ?,
-                        status = ?, image = ?
+                        status = ?, image = ?, badge = ?
                     WHERE id = ? AND restaurant_id = ?
                 ");
 
@@ -714,6 +715,7 @@ class MenuRepository {
                     $originalPrice,
                     $status,
                     $image,
+                    $badge,
                     $formuleId,
                     self::$restaurantId
                 ]);
@@ -724,7 +726,7 @@ class MenuRepository {
                 $stmt = $pdo->prepare("
                     UPDATE formules
                     SET name = ?, description = ?, price = ?, original_price = ?,
-                        status = ?, includes = ?
+                        status = ?, includes = ?, badge = ?
                     WHERE id = ? AND restaurant_id = ?
                 ");
 
@@ -735,6 +737,7 @@ class MenuRepository {
                     $originalPrice,
                     $status,
                     $includesJson,
+                    $badge,
                     $formuleId,
                     self::$restaurantId
                 ]);
@@ -742,7 +745,7 @@ class MenuRepository {
                 $stmt = $pdo->prepare("
                     UPDATE formules
                     SET name = ?, description = ?, price = ?, original_price = ?,
-                        status = ?
+                        status = ?, badge = ?
                     WHERE id = ? AND restaurant_id = ?
                 ");
 
@@ -752,6 +755,7 @@ class MenuRepository {
                     $price,
                     $originalPrice,
                     $status,
+                    $badge,
                     $formuleId,
                     self::$restaurantId
                 ]);

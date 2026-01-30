@@ -1009,6 +1009,7 @@ if ($useMySQL) {
             $price = (float)($input['price'] ?? 0);
             $originalPrice = isset($input['originalPrice']) && $input['originalPrice'] !== '' ? (float)$input['originalPrice'] : null;
             $status = $input['status'] ?? 'available';
+            $badge = isset($input['badge']) && $input['badge'] !== '' ? trim((string)$input['badge']) : null;
 
             if ($name === '' || $price <= 0) {
                 jsonError('Nom et prix requis');
@@ -1027,7 +1028,7 @@ if ($useMySQL) {
             }
 
             try {
-                MenuRepository::editFormule($formuleId, $name, $description, $price, $originalPrice, $status, $imagePath, $includes);
+                MenuRepository::editFormule($formuleId, $name, $description, $price, $originalPrice, $status, $imagePath, $includes, $badge);
                 jsonSuccess(['formule' => ['id' => $formuleId, 'name' => $name]]);
             } catch (Exception $e) {
                 jsonError('Erreur modification formule: ' . $e->getMessage());
