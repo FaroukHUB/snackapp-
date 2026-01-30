@@ -40,14 +40,16 @@ require_once __DIR__ . '/../backend/repositories/CustomerRepository.php';
 require_once __DIR__ . '/../backend/repositories/PromoCodeRepository.php';
 require_once __DIR__ . '/../backend/repositories/LoyaltyRepository.php';
 require_once __DIR__ . '/../backend/repositories/SupplementRepository.php';
+require_once __DIR__ . '/../backend/repositories/PizzaBaseRepository.php';
 
 // Constantes pour le mode MySQL
 define('SNACK_USE_JSON', false);
 define('SNACK_RESTAURANT_ID', RESTAURANT_ID);
 
-// Définir le restaurant ID pour MenuRepository (CRITIQUE pour multi-instance)
+// Définir le restaurant ID pour les repositories (CRITIQUE pour multi-instance)
 if (!SNACK_USE_JSON && defined('SNACK_RESTAURANT_ID')) {
     MenuRepository::$restaurantId = SNACK_RESTAURANT_ID;
+    PizzaBaseRepository::$restaurantId = SNACK_RESTAURANT_ID;
 }
 
 /**

@@ -993,6 +993,92 @@ if ($useMySQL) {
             }
             break;
 
+        // ===== BASES PIZZA =====
+        case 'get_pizza_bases':
+            try {
+                $bases = PizzaBaseRepository::getAll();
+                jsonSuccess(['bases' => $bases]);
+            } catch (Exception $e) {
+                jsonError('Erreur chargement bases: ' . $e->getMessage());
+            }
+            break;
+
+        case 'add_pizza_base':
+            $name = trim((string)($input['name'] ?? ''));
+            if ($name === '') {
+                jsonError('Nom de la base requis');
+            }
+
+            try {
+                $baseId = PizzaBaseRepository::create([
+                    'name' => $name,
+                    'sort_order' => (int)($input['sort_order'] ?? 0)
+                ]);
+                $base = PizzaBaseRepository::getById($baseId);
+                jsonSuccess(['base' => $base]);
+            } catch (Exception $e) {
+                jsonError('Erreur création base: ' . $e->getMessage());
+            }
+            break;
+
+        case 'update_pizza_base':
+            $baseId = (int)($input['base_id'] ?? 0);
+            if (!$baseId) {
+                jsonError('ID base manquant');
+            }
+
+            $updateData = [];
+            if (isset($input['name'])) $updateData['name'] = trim((string)$input['name']);
+            if (isset($input['sort_order'])) $updateData['sort_order'] = (int)$input['sort_order'];
+
+            try {
+                PizzaBaseRepository::update($baseId, $updateData);
+                $base = PizzaBaseRepository::getById($baseId);
+                jsonSuccess(['base' => $base]);
+            } catch (Exception $e) {
+                jsonError('Erreur mise à jour base: ' . $e->getMessage());
+            }
+            break;
+
+        case 'delete_pizza_base':
+            $baseId = (int)($input['base_id'] ?? 0);
+            if (!$baseId) {
+                jsonError('ID base manquant');
+            }
+
+            try {
+                PizzaBaseRepository::delete($baseId);
+                jsonSuccess(['message' => 'Base supprimée']);
+            } catch (Exception $e) {
+                jsonError('Erreur suppression base: ' . $e->getMessage());
+            }
+            break;
+
+        case 'upload_pizza_base_image':
+            $baseId = (int)($input['base_id'] ?? 0);
+            if (!$baseId) {
+                jsonError('ID base manquant');
+            }
+
+            $base = PizzaBaseRepository::getById($baseId);
+            if (!$base) {
+                jsonError('Base introuvable');
+            }
+
+            $imagePath = handleImageUpload('base-' . $baseId);
+            if (!$imagePath) {
+                jsonError('Aucune image fournie');
+            }
+
+            try {
+                PizzaBaseRepository::update($baseId, ['image' => $imagePath]);
+                $updatedBase = PizzaBaseRepository::getById($baseId);
+                jsonSuccess(['base' => $updatedBase, 'image' => $imagePath]);
+            } catch (Exception $e) {
+                jsonError('Erreur upload image: ' . $e->getMessage());
+            }
+            break;
+
         // ===== FORMULES (DB-FIRST) =====
         case 'add_formule':
             // 🔒 VALIDATION: Rejeter tout formule_id envoyé (création = AUTO_INCREMENT uniquement)
