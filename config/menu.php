@@ -77,44 +77,18 @@ try {
 
     $upsellRules = [];
 
-    // Règles pour pizzeria
-    if (in_array('pizzas', $categorySlugs) || in_array('pizza', $categorySlugs)) {
-        // Si pizza dans le panier, suggérer boissons et desserts
-        $upsellRules[] = [
-            'when' => ['pizzas', 'pizza', 'pizzas-classiques', 'pizzas-speciales', 'pizzas-signature'],
-            'suggest' => ['boissons', 'desserts', 'sodas', 'tiramisu', 'cookies'],
-            'message' => 'Une boisson ou un dessert pour accompagner ?',
-            'priority' => 1
-        ];
-    }
+    // Règle générale pour toutes les catégories (sauf desserts et boissons)
+    // On propose desserts, tex-mex et boissons
+    $mainCategorySlugs = array_filter($categorySlugs, function($slug) {
+        return !in_array($slug, ['desserts', 'boissons', 'tex-mex', 'texmex']);
+    });
 
-    // Si burgers
-    if (in_array('burgers', $categorySlugs) || in_array('burger', $categorySlugs)) {
+    if (!empty($mainCategorySlugs)) {
         $upsellRules[] = [
-            'when' => ['burgers', 'burger'],
-            'suggest' => ['boissons', 'desserts', 'frites', 'sodas'],
-            'message' => 'Des frites ou une boisson avec votre burger ?',
+            'when' => array_values($mainCategorySlugs),
+            'suggest' => ['desserts', 'tex-mex', 'boissons'],
+            'message' => 'Un petit kiff avec ceci ?',
             'priority' => 1
-        ];
-    }
-
-    // Si tacos
-    if (in_array('tacos', $categorySlugs) || in_array('taco', $categorySlugs)) {
-        $upsellRules[] = [
-            'when' => ['tacos', 'taco'],
-            'suggest' => ['boissons', 'desserts', 'sodas'],
-            'message' => 'Une boisson fraîche pour accompagner ?',
-            'priority' => 1
-        ];
-    }
-
-    // Règle générale : si dessert, suggérer boisson chaude
-    if (in_array('desserts', $categorySlugs)) {
-        $upsellRules[] = [
-            'when' => ['desserts', 'dessert', 'patisseries'],
-            'suggest' => ['boissons-chaudes', 'cafe', 'the', 'chocolat-chaud'],
-            'message' => 'Un café ou une boisson chaude avec votre dessert ?',
-            'priority' => 2
         ];
     }
 
