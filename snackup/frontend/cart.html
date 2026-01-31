@@ -4324,14 +4324,16 @@
 
                     // Validation option de monnaie (seulement si paiement espèces)
                     if (this.paymentMethod === 'cash' && this.changeOption === 'change') {
-                        const changeForAmount = parseFloat(document.getElementById('changeForAmount')?.value || 0);
+                        const changeForAmount = this.changeForAmount || 0;
                         if (!changeForAmount || changeForAmount <= 0) {
                             this.showToast('Veuillez indiquer le montant pour la monnaie', 'error');
+                            this.openCashModal(); // Réouvrir le modal pour saisir le montant
                             return;
                         }
                         const total = Cart.getSubtotal() - this.discount + this.deliveryFee;
                         if (changeForAmount < total) {
                             this.showToast('Le montant pour la monnaie doit être supérieur au total', 'error');
+                            this.openCashModal();
                             return;
                         }
                     }
@@ -4435,12 +4437,9 @@
 
                     // Info monnaie (seulement pour espèces)
                     if (this.paymentMethod === 'cash') {
-                        if (this.changeOption === 'change') {
-                            const changeForAmount = parseFloat(document.getElementById('changeForAmount')?.value || 0);
-                            if (changeForAmount > 0) {
-                                paymentInfo.change_for = changeForAmount;
-                                deliveryInstructions = `Monnaie pour ${Config.formatPrice(changeForAmount)}`;
-                            }
+                        if (this.changeOption === 'change' && this.changeForAmount > 0) {
+                            paymentInfo.change_for = this.changeForAmount;
+                            deliveryInstructions = `Prévoir monnaie sur ${Config.formatPrice(this.changeForAmount)}`;
                         } else {
                             paymentInfo.has_exact_change = true;
                             deliveryInstructions = 'Client a la monnaie exacte';
