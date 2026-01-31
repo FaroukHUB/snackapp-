@@ -2877,15 +2877,21 @@
                     // Encoder la key complètement pour éviter toute troncature
                     const encodedKey = encodeURIComponent(item.key || '');
 
-                    // Construire le nom avec Solo/Duo si applicable
+                    // Construire le nom avec Solo/Duo si applicable (UNIQUEMENT pour les pizzas)
                     let displayName = item.name;
-                    if (menuType === 'solo' || menuType === 'duo') {
-                        const sizeLabel = menuType === 'solo' ? 'Solo' : 'Duo';
-                        // Insérer après "Pizza" si c'est une pizza
+                    const isPizza = (item.categoryName || '').toLowerCase().includes('pizza')
+                                 || (item.categorySlug || '').toLowerCase().includes('pizza')
+                                 || item.name.toLowerCase().startsWith('pizza');
+
+                    // menuType: 'solo' = Solo, 'menu' ou 'duo' = Duo
+                    if (isPizza && menuType) {
+                        const isDuo = menuType === 'menu' || menuType === 'duo';
+                        const sizeLabel = isDuo ? 'Duo' : 'Solo';
+                        // Insérer après "Pizza"
                         if (item.name.toLowerCase().startsWith('pizza')) {
                             displayName = item.name.replace(/^(pizza)\s*/i, `$1 ${sizeLabel} `);
                         } else {
-                            displayName = `${item.name} (${sizeLabel})`;
+                            displayName = `${sizeLabel} ${item.name}`;
                         }
                     }
 
