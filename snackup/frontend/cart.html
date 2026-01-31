@@ -1832,8 +1832,8 @@
                             <i class="fas fa-coins"></i>
                         </div>
                         <div class="cash-option-text">
-                            <strong>Non, je paie avec</strong>
-                            <span>Indiquez le montant du billet</span>
+                            <strong>Non, prévoir la monnaie</strong>
+                            <span>Indiquez le montant prévu</span>
                         </div>
                         <div class="cash-option-check">
                             <i class="fas fa-check"></i>
@@ -1843,7 +1843,7 @@
 
                 <!-- Champ montant (visible seulement si "change") -->
                 <div id="cashAmountField" class="cash-amount-field" style="display: none;">
-                    <label>Je paie avec un billet de :</label>
+                    <label>Prévoir de la monnaie sur :</label>
                     <div class="cash-amount-input">
                         <input type="number" id="cashAmountInput" placeholder="50" min="0" step="1">
                         <span class="cash-currency" id="cashModalCurrency">€</span>
@@ -3756,10 +3756,21 @@
                 // Reset les options
                 this.cashModalOption = 'exact';
                 this.cashModalAmount = null;
+
+                // Reset les radio buttons ET les classes visuelles
+                const radioExact = modal.querySelector('input[name="cashOption"][value="exact"]');
+                const radioChange = modal.querySelector('input[name="cashOption"][value="change"]');
+                if (radioExact) radioExact.checked = true;
+                if (radioChange) radioChange.checked = false;
+
                 document.querySelectorAll('.cash-option-card').forEach(card => {
                     card.classList.toggle('selected', card.dataset.option === 'exact');
                 });
+
+                // Reset et masquer le champ montant
                 document.getElementById('cashAmountField').style.display = 'none';
+                const amountInput = document.getElementById('cashAmountInput');
+                if (amountInput) amountInput.value = '';
 
                 // Mettre à jour la devise
                 const currency = this.settings.currency_symbol || '€';
