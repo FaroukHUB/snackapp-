@@ -1666,11 +1666,17 @@ if (isset($_GET['export'])) {
                 `;
 
                 (order.items || []).forEach((item, i) => {
+                    // Déterminer si c'est une pizza pour afficher Solo/Duo
+                    const isPizza = (item.name || '').toLowerCase().includes('pizza');
+                    const variant = item.variant || 'solo';
+                    const sizeLabel = (variant === 'menu' || variant === 'duo') ? 'Duo' : 'Solo';
+
                     html += `
                         <div style="padding: ${i > 0 ? '12px' : '8px'} 0; ${i > 0 ? 'border-top: 1px solid #374151; margin-top: 8px;' : ''}">
                             <div style="color: #e5e7eb; font-size: 15px; font-weight: 600; margin-bottom: 4px;">
                                 <strong style="color: ${primaryColor}; font-size: 16px;">${item.quantity || 1}x</strong>
                                 <strong>${item.name}</strong>
+                                ${isPizza ? `<span style="color: #a78bfa; font-size: 13px; margin-left: 8px; font-weight: 500;">(${sizeLabel})</span>` : ''}
                             </div>
                     `;
 
