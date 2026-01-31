@@ -1315,9 +1315,27 @@ const Products = {
                 pizzaBaseContainer.classList.remove('hidden');
                 pizzaBaseContainer.style.display = '';
 
-                // Trouver la base par défaut du produit
-                const defaultBaseId = product.default_base_id;
-                this.selectedBase = defaultBaseId ? Config.pizzaBases.find(b => String(b.id) === String(defaultBaseId)) : Config.pizzaBases[0];
+                // Trouver la base par défaut selon la catégorie
+                // Détecter si c'est une pizza base tomate ou crème à partir du nom de catégorie
+                let defaultBase = null;
+
+                if (categoryName.includes('tomate')) {
+                    // Chercher une base qui contient "tomate" dans son nom
+                    defaultBase = Config.pizzaBases.find(b => b.name.toLowerCase().includes('tomate'));
+                } else if (categoryName.includes('crème') || categoryName.includes('creme')) {
+                    // Chercher une base qui contient "crème" ou "creme" dans son nom
+                    defaultBase = Config.pizzaBases.find(b =>
+                        b.name.toLowerCase().includes('crème') || b.name.toLowerCase().includes('creme')
+                    );
+                }
+
+                // Fallback: utiliser default_base_id du produit ou la première base
+                if (!defaultBase) {
+                    const defaultBaseId = product.default_base_id;
+                    defaultBase = defaultBaseId ? Config.pizzaBases.find(b => String(b.id) === String(defaultBaseId)) : Config.pizzaBases[0];
+                }
+
+                this.selectedBase = defaultBase || Config.pizzaBases[0];
 
                 let baseHtml = '';
                 Config.pizzaBases.forEach(base => {
