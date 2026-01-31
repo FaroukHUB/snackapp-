@@ -1179,12 +1179,26 @@ if (isset($_GET['export'])) {
                                 }
                             }
                         ?>
+                            <?php
+                            // Récupérer la base si présente
+                            $baseLabel = '';
+                            if (!empty($item['selected_options'])) {
+                                $opts = is_string($item['selected_options']) ? json_decode($item['selected_options'], true) : $item['selected_options'];
+                                if (!empty($opts['selectedBase'])) {
+                                    $baseName = is_array($opts['selectedBase']) ? ($opts['selectedBase']['name'] ?? '') : $opts['selectedBase'];
+                                    if ($baseName) $baseLabel = $baseName;
+                                }
+                            }
+                            ?>
                             <div style="font-size: 12px; color: #e5e7eb; padding: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <strong style="color: <?php echo $primaryColor; ?>;"><?php echo $item['quantity'] ?? 1; ?>x</strong>
                                 <?php if ($variantLabel): ?>
                                     <span style="color: #f59e0b; font-weight: 600;"><?php echo $variantLabel; ?></span>
                                 <?php endif; ?>
                                 <?php echo htmlspecialchars($item['name']); ?>
+                                <?php if ($baseLabel): ?>
+                                    <span style="color: #f97316; font-size: 11px;"> (<?php echo htmlspecialchars($baseLabel); ?>)</span>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                         <?php if ($itemCount > 3): ?>
@@ -1721,6 +1735,11 @@ if (isset($_GET['export'])) {
                             if (opts.crepe) html += `<div style="color: #f59e0b; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-utensils" style="font-size: 11px;"></i> Crêpe: ${opts.crepe}</div>`;
                             if (opts.sauce) html += `<div style="color: #ef4444; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-droplet" style="font-size: 11px;"></i> Sauce: ${opts.sauce}</div>`;
                             if (opts.accompagnement) html += `<div style="color: #fbbf24; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-bowl-food" style="font-size: 11px;"></i> ${opts.accompagnement}</div>`;
+                            // Base pizza (tomate/crème)
+                            if (opts.selectedBase) {
+                                const baseName = typeof opts.selectedBase === 'object' ? opts.selectedBase.name : opts.selectedBase;
+                                html += `<div style="color: #f97316; font-size: 13px; font-weight: 600; margin-left: 28px; margin-top: 4px;"><i class="fas fa-circle" style="font-size: 11px;"></i> Base: ${baseName}</div>`;
+                            }
                         }
                     }
 
