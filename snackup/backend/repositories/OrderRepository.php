@@ -340,19 +340,37 @@ class OrderRepository {
      * Statistiques du jour
      */
     public static function getTodayStats(int $restaurantId): array {
-        $stats = Database::fetchOne(
+        // Stats d'aujourd'hui (revenue, orders_count)
+        $todayStats = Database::fetchOne(
             "SELECT
                 COUNT(*) as orders_count,
                 COALESCE(SUM(total), 0) as revenue,
-                COALESCE(AVG(total), 0) as avg_order,
-                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+                COALESCE(AVG(total), 0) as avg_order
              FROM orders
              WHERE restaurant_id = ?
                AND DATE(created_at) = CURDATE()
                AND is_archived = 0",
             [$restaurantId]
         );
+
+        // Stats globales des commandes actives (pending/completed de TOUTES les commandes visibles)
+        $globalStats = Database::fetchOne(
+            "SELECT
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+             FROM orders
+             WHERE restaurant_id = ?
+               AND is_archived = 0",
+            [$restaurantId]
+        );
+
+        $stats = [
+            'orders_count' => $todayStats['orders_count'] ?? 0,
+            'revenue' => $todayStats['revenue'] ?? 0,
+            'avg_order' => $todayStats['avg_order'] ?? 0,
+            'pending' => $globalStats['pending'] ?? 0,
+            'completed' => $globalStats['completed'] ?? 0
+        ];
 
         // Produit le plus vendu
         $topProduct = Database::fetchOne(
