@@ -144,14 +144,16 @@ if ($useMySQL) {
     $archivedOrders = loadData('orders-archive.json') ?? [];
     $customers = loadData('customers.json') ?? [];
 
-    // Auto-archive JSON
+    // Auto-archive JSON - archive les commandes terminées depuis plus de 24h
     $now = time();
     $archiveThreshold = 24 * 60 * 60;
     $ordersToKeep = [];
 
     foreach ($orders as $order) {
-        $orderTime = strtotime($order['created_at'] ?? '');
-        if ($orderTime && ($now - $orderTime) > $archiveThreshold && ($order['status'] ?? '') === 'completed') {
+        $completedTime = strtotime($order['completed_at'] ?? '');
+        $isCompleted = ($order['status'] ?? '') === 'completed';
+        // Archiver seulement si terminée ET completed_at existe ET > 24h
+        if ($isCompleted && $completedTime && ($now - $completedTime) > $archiveThreshold) {
             $archivedOrders[] = $order;
         } else {
             $ordersToKeep[] = $order;
