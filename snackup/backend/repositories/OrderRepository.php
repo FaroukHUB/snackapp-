@@ -240,7 +240,7 @@ class OrderRepository {
     }
 
     /**
-     * Archive automatiquement les commandes de plus de 24h
+     * Archive automatiquement les commandes terminées depuis plus de 24h
      */
     public static function autoArchive(int $restaurantId): int {
         return Database::query(
@@ -248,7 +248,8 @@ class OrderRepository {
              WHERE restaurant_id = ?
                AND status = 'completed'
                AND is_archived = 0
-               AND created_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)",
+               AND completed_at IS NOT NULL
+               AND completed_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)",
             [$restaurantId]
         )->rowCount();
     }
