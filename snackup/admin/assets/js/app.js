@@ -461,10 +461,18 @@ function updateStats(orders) {
     const today = new Date().toDateString();
     const todayOrders = orders.filter(o => new Date(o.created_at).toDateString() === today);
 
-    document.getElementById('stat-pending').textContent = orders.filter(o => o.status === 'received').length;
-    document.getElementById('stat-preparing').textContent = orders.filter(o => o.status === 'preparing').length;
-    document.getElementById('stat-ready').textContent = orders.filter(o => o.status === 'ready').length;
-    document.getElementById('stat-today').textContent = todayOrders.length;
+    // Compter les commandes en attente (tout sauf completed et cancelled)
+    const pendingCount = orders.filter(o => o.status !== 'completed' && o.status !== 'cancelled').length;
+    // Compter les commandes terminées
+    const completedCount = orders.filter(o => o.status === 'completed').length;
+
+    const statPending = document.getElementById('stat-pending');
+    const statCompleted = document.getElementById('stat-completed');
+    const statToday = document.getElementById('stat-today');
+
+    if (statPending) statPending.textContent = pendingCount;
+    if (statCompleted) statCompleted.textContent = completedCount;
+    if (statToday) statToday.textContent = todayOrders.length;
 }
 
 // Auto-refresh toutes les 60 secondes (réduit pour éviter surcharge)

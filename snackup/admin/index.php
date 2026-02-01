@@ -1085,17 +1085,17 @@ if (isset($_GET['export'])) {
             <div class="stats" style="margin-bottom: 20px;">
                 <div class="stat-card" style="border-left: 4px solid #f59e0b;">
                     <div style="color: #f59e0b;"><i class="fas fa-clock"></i></div>
-                    <div class="stat-number" style="color: #f59e0b;"><?php echo $stats['pending']; ?></div>
+                    <div id="stat-pending" class="stat-number" style="color: #f59e0b;"><?php echo $stats['pending']; ?></div>
                     <div style="color: #9ca3af; font-size: 11px;">En attente</div>
                 </div>
                 <div class="stat-card" style="border-left: 4px solid #10b981;">
                     <div style="color: #10b981;"><i class="fas fa-check-circle"></i></div>
-                    <div class="stat-number" style="color: #10b981;"><?php echo $stats['completed']; ?></div>
+                    <div id="stat-completed" class="stat-number" style="color: #10b981;"><?php echo $stats['completed']; ?></div>
                     <div style="color: #9ca3af; font-size: 11px;">Terminées</div>
                 </div>
                 <div class="stat-card" style="border-left: 4px solid <?php echo $primaryColor; ?>;">
                     <div style="color: <?php echo $primaryColor; ?>;"><i class="fas fa-calendar-day"></i></div>
-                    <div class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo $stats['today']; ?></div>
+                    <div id="stat-today" class="stat-number" style="color: <?php echo $primaryColor; ?>;"><?php echo $stats['today']; ?></div>
                     <div style="color: #9ca3af; font-size: 11px;">Aujourd'hui</div>
                 </div>
             </div>
