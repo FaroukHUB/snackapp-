@@ -358,10 +358,21 @@ const Config = {
     },
 
     /**
-     * Format price for display (DA = Dinar Algérien)
+     * Format price for display
+     * Currency symbol: € (euro) by default, or from config
      */
     formatPrice(price) {
-        return Math.round(price) + ' DA';
+        // Récupérer la devise depuis les données du restaurant ou du menu
+        const currencyCode = this.restaurant?._jsConfig?.currency ||
+                        this.menu?._meta?.currency ||
+                        window.SNACK_CONFIG?.currency ||
+                        'EUR';
+        // Convertir code devise en symbole
+        const currencySymbols = { 'EUR': '€', 'USD': '$', 'GBP': '£', 'DA': 'DA', 'DZD': 'DA' };
+        const symbol = currencySymbols[currencyCode] || currencyCode;
+        // Afficher les décimales si nécessaire (ex: 1.50€), sinon entier (ex: 2€)
+        const formatted = Number(price).toFixed(2).replace(/\.00$/, '').replace('.', ',');
+        return formatted + ' ' + symbol;
     },
 
     /**
