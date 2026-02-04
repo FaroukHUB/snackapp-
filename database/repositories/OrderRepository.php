@@ -518,6 +518,55 @@ class OrderRepository {
     }
 
     /**
+     * Statistiques par méthode de paiement
+     * @param string $period 'today' ou 'month'
+     */
+    public static function getPaymentMethodStats(int $restaurantId, string $period = 'today'): array {
+        $dateCondition = match($period) {
+            'today' => "DATE(created_at) = CURDATE()",
+            'month' => "created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)",
+            default => "DATE(created_at) = CURDATE()"
+        };
+
+        $stats = Database::fetchAll(
+            "SELECT
+                COALESCE(payment_method, 'cash') as method,
+                COUNT(*) as orders_count,
+                COALESCE(SUM(total), 0) as revenue
+             FROM orders
+             WHERE restaurant_id = ?
+               AND status IN ('completed', 'ready', 'preparing', 'pending')
+               AND $dateCondition
+             GROUP BY COALESCE(payment_method, 'cash')
+             ORDER BY revenue DESC",
+            [$restaurantId]
+        );
+
+        // Initialiser avec toutes les méthodes à 0
+        $result = [
+            'cash' => ['orders' => 0, 'revenue' => 0],
+            'card_terminal' => ['orders' => 0, 'revenue' => 0],
+            'card_online' => ['orders' => 0, 'revenue' => 0],
+            'ticket_resto' => ['orders' => 0, 'revenue' => 0],
+            'total' => ['orders' => 0, 'revenue' => 0]
+        ];
+
+        foreach ($stats as $row) {
+            $method = $row['method'] ?? 'cash';
+            if (isset($result[$method])) {
+                $result[$method] = [
+                    'orders' => (int) $row['orders_count'],
+                    'revenue' => (float) $row['revenue']
+                ];
+            }
+            $result['total']['orders'] += (int) $row['orders_count'];
+            $result['total']['revenue'] += (float) $row['revenue'];
+        }
+
+        return $result;
+    }
+
+    /**
      * Export des stats en CSV
      */
     public static function exportStatsCSV(int $restaurantId, string $period = 'month'): string {

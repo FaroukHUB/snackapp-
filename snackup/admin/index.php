@@ -123,7 +123,11 @@ if ($useMySQL) {
     $topProducts = OrderRepository::getTopProducts(SNACK_RESTAURANT_ID, 30, 5);
     $peakHours = OrderRepository::getPeakHours(SNACK_RESTAURANT_ID, 30);
     $dailyRevenue = OrderRepository::getDailyRevenue(SNACK_RESTAURANT_ID, 7);
-    
+
+    // Stats par méthode de paiement
+    $paymentStatsToday = OrderRepository::getPaymentMethodStats(SNACK_RESTAURANT_ID, 'today');
+    $paymentStatsMonth = OrderRepository::getPaymentMethodStats(SNACK_RESTAURANT_ID, 'month');
+
     // Données fidélité
      $loyaltyConfig = LoyaltyRepository::getConfig(SNACK_RESTAURANT_ID);
      $loyaltyRewards = LoyaltyRepository::getAllRewards(SNACK_RESTAURANT_ID);
@@ -3071,6 +3075,127 @@ if (isset($_GET['export'])) {
                 </div>
             </div>
 
+            <!-- Récap par Méthode de Paiement -->
+            <div class="card" style="margin-bottom: 20px; border-left: 4px solid #ec4899;">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-cash-register" style="color: #ec4899;"></i> Récap par Méthode de Paiement</h3>
+
+                <!-- Toggle Jour/Mois -->
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button id="btnPaymentToday" onclick="showPaymentStats('today')" class="btn btn-sm" style="background: #ec4899;"><i class="fas fa-calendar-day"></i> Aujourd'hui</button>
+                    <button id="btnPaymentMonth" onclick="showPaymentStats('month')" class="btn btn-sm btn-gray"><i class="fas fa-calendar-alt"></i> 30 jours</button>
+                </div>
+
+                <!-- Stats Aujourd'hui -->
+                <div id="paymentStatsToday" style="display: block;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                        <!-- Espèces -->
+                        <div style="background: #1e293b; padding: 15px; border-radius: 10px; border-left: 4px solid #22c55e;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <i class="fas fa-money-bill-wave" style="color: #22c55e; font-size: 18px;"></i>
+                                <span style="color: #9ca3af; font-size: 12px;">Espèces</span>
+                            </div>
+                            <div style="font-size: 20px; font-weight: bold; color: #22c55e;"><?php echo number_format($paymentStatsToday['cash']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;"><?php echo $paymentStatsToday['cash']['orders']; ?> commandes</div>
+                        </div>
+                        <!-- CB Terminal -->
+                        <div style="background: #1e293b; padding: 15px; border-radius: 10px; border-left: 4px solid #3b82f6;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <i class="fas fa-credit-card" style="color: #3b82f6; font-size: 18px;"></i>
+                                <span style="color: #9ca3af; font-size: 12px;">CB (TPE)</span>
+                            </div>
+                            <div style="font-size: 20px; font-weight: bold; color: #3b82f6;"><?php echo number_format($paymentStatsToday['card_terminal']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;"><?php echo $paymentStatsToday['card_terminal']['orders']; ?> commandes</div>
+                        </div>
+                        <!-- CB en ligne -->
+                        <div style="background: #1e293b; padding: 15px; border-radius: 10px; border-left: 4px solid #8b5cf6;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <i class="fas fa-globe" style="color: #8b5cf6; font-size: 18px;"></i>
+                                <span style="color: #9ca3af; font-size: 12px;">CB en ligne</span>
+                            </div>
+                            <div style="font-size: 20px; font-weight: bold; color: #8b5cf6;"><?php echo number_format($paymentStatsToday['card_online']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;"><?php echo $paymentStatsToday['card_online']['orders']; ?> commandes</div>
+                        </div>
+                        <!-- Ticket Restaurant -->
+                        <div style="background: #1e293b; padding: 15px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <i class="fas fa-ticket-alt" style="color: #f59e0b; font-size: 18px;"></i>
+                                <span style="color: #9ca3af; font-size: 12px;">Ticket Resto</span>
+                            </div>
+                            <div style="font-size: 20px; font-weight: bold; color: #f59e0b;"><?php echo number_format($paymentStatsToday['ticket_resto']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;"><?php echo $paymentStatsToday['ticket_resto']['orders']; ?> commandes</div>
+                        </div>
+                    </div>
+                    <!-- Total -->
+                    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 15px; border-radius: 10px; margin-top: 12px; border: 1px solid #374151;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-calculator" style="color: #ec4899; font-size: 20px;"></i>
+                                <span style="color: #d1d5db; font-weight: 500;">Total Aujourd'hui</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: bold; color: #ec4899;"><?php echo number_format($paymentStatsToday['total']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                                <div style="color: #6b7280; font-size: 12px;"><?php echo $paymentStatsToday['total']['orders']; ?> commandes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Mois (masqué par défaut) -->
+                <div id="paymentStatsMonth" style="display: none;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                        <!-- Espèces -->
+                        <div style="background: #1e293b; padding: 15px; border-radius: 10px; border-left: 4px solid #22c55e;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <i class="fas fa-money-bill-wave" style="color: #22c55e; font-size: 18px;"></i>
+                                <span style="color: #9ca3af; font-size: 12px;">Espèces</span>
+                            </div>
+                            <div style="font-size: 20px; font-weight: bold; color: #22c55e;"><?php echo number_format($paymentStatsMonth['cash']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;"><?php echo $paymentStatsMonth['cash']['orders']; ?> commandes</div>
+                        </div>
+                        <!-- CB Terminal -->
+                        <div style="background: #1e293b; padding: 15px; border-radius: 10px; border-left: 4px solid #3b82f6;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <i class="fas fa-credit-card" style="color: #3b82f6; font-size: 18px;"></i>
+                                <span style="color: #9ca3af; font-size: 12px;">CB (TPE)</span>
+                            </div>
+                            <div style="font-size: 20px; font-weight: bold; color: #3b82f6;"><?php echo number_format($paymentStatsMonth['card_terminal']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;"><?php echo $paymentStatsMonth['card_terminal']['orders']; ?> commandes</div>
+                        </div>
+                        <!-- CB en ligne -->
+                        <div style="background: #1e293b; padding: 15px; border-radius: 10px; border-left: 4px solid #8b5cf6;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <i class="fas fa-globe" style="color: #8b5cf6; font-size: 18px;"></i>
+                                <span style="color: #9ca3af; font-size: 12px;">CB en ligne</span>
+                            </div>
+                            <div style="font-size: 20px; font-weight: bold; color: #8b5cf6;"><?php echo number_format($paymentStatsMonth['card_online']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;"><?php echo $paymentStatsMonth['card_online']['orders']; ?> commandes</div>
+                        </div>
+                        <!-- Ticket Restaurant -->
+                        <div style="background: #1e293b; padding: 15px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <i class="fas fa-ticket-alt" style="color: #f59e0b; font-size: 18px;"></i>
+                                <span style="color: #9ca3af; font-size: 12px;">Ticket Resto</span>
+                            </div>
+                            <div style="font-size: 20px; font-weight: bold; color: #f59e0b;"><?php echo number_format($paymentStatsMonth['ticket_resto']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                            <div style="color: #6b7280; font-size: 11px; margin-top: 4px;"><?php echo $paymentStatsMonth['ticket_resto']['orders']; ?> commandes</div>
+                        </div>
+                    </div>
+                    <!-- Total -->
+                    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 15px; border-radius: 10px; margin-top: 12px; border: 1px solid #374151;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-calculator" style="color: #ec4899; font-size: 20px;"></i>
+                                <span style="color: #d1d5db; font-weight: 500;">Total 30 jours</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: bold; color: #ec4899;"><?php echo number_format($paymentStatsMonth['total']['revenue'], 0); ?> <?= CURRENCY ?></div>
+                                <div style="color: #6b7280; font-size: 12px;"><?php echo $paymentStatsMonth['total']['orders']; ?> commandes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Top Produits -->
             <div class="card" style="border-left: 4px solid #f59e0b;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-trophy" style="color: #f59e0b;"></i> Top 5 Produits (30j)</h3>
@@ -3711,6 +3836,30 @@ if (isset($_GET['export'])) {
 
         // Notifications (polling toutes les 10 secondes pour être réactif)
         if (window.orderNotificationSystem) orderNotificationSystem.start(10);
+
+// === STATS PAIEMENT ===
+function showPaymentStats(period) {
+    const todayDiv = document.getElementById('paymentStatsToday');
+    const monthDiv = document.getElementById('paymentStatsMonth');
+    const btnToday = document.getElementById('btnPaymentToday');
+    const btnMonth = document.getElementById('btnPaymentMonth');
+
+    if (period === 'today') {
+        todayDiv.style.display = 'block';
+        monthDiv.style.display = 'none';
+        btnToday.style.background = '#ec4899';
+        btnToday.classList.remove('btn-gray');
+        btnMonth.style.background = '';
+        btnMonth.classList.add('btn-gray');
+    } else {
+        todayDiv.style.display = 'none';
+        monthDiv.style.display = 'block';
+        btnMonth.style.background = '#ec4899';
+        btnMonth.classList.remove('btn-gray');
+        btnToday.style.background = '';
+        btnToday.classList.add('btn-gray');
+    }
+}
 
 // === GESTION CLIENTS ===
 function openAddCustomerModal() {
