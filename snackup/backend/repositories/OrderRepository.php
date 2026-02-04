@@ -551,12 +551,13 @@ class OrderRepository {
      * Export des stats en CSV
      */
     public static function exportStatsCSV(int $restaurantId, string $period = 'month'): string {
-        $days = match($period) {
-            'week' => 7,
-            'month' => 30,
-            'year' => 365,
-            default => 30
-        };
+        // Compatible PHP 7.x (pas de match())
+        switch ($period) {
+            case 'week': $days = 7; break;
+            case 'year': $days = 365; break;
+            case 'month':
+            default: $days = 30;
+        }
 
         $orders = Database::fetchAll(
             "SELECT o.order_number, o.created_at, o.customer_name, o.customer_phone, o.total, o.status

@@ -56,12 +56,13 @@ class CustomerRepository {
      * Récupère les clients par catégorie (VIP, Regular, New)
      */
     public static function getByCategory(int $restaurantId, string $category): array {
-        $where = match($category) {
-            'vip' => 'orders_count >= 10',
-            'regular' => 'orders_count >= 3 AND orders_count < 10',
-            'new' => 'orders_count < 3',
-            default => '1=1'
-        };
+        // Compatible PHP 7.x (pas de match())
+        switch ($category) {
+            case 'vip': $where = 'orders_count >= 10'; break;
+            case 'regular': $where = 'orders_count >= 3 AND orders_count < 10'; break;
+            case 'new': $where = 'orders_count < 3'; break;
+            default: $where = '1=1';
+        }
 
         return Database::fetchAll(
             "SELECT * FROM customers WHERE restaurant_id = ? AND {$where} ORDER BY orders_count DESC",
