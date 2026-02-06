@@ -18,6 +18,25 @@ const Config = {
     // Cache for computed values
     _cache: {},
 
+    // Indicatifs téléphoniques les plus populaires
+    phoneIndicators: [
+        { code: '+213', flag: '🇩🇿', country: 'Algérie' },
+        { code: '+33',  flag: '🇫🇷', country: 'France' },
+        { code: '+212', flag: '🇲🇦', country: 'Maroc' },
+        { code: '+216', flag: '🇹🇳', country: 'Tunisie' },
+        { code: '+966', flag: '🇸🇦', country: 'Arabie S.' },
+        { code: '+971', flag: '🇦🇪', country: 'Émirats' },
+        { code: '+20',  flag: '🇪🇬', country: 'Égypte' },
+        { code: '+44',  flag: '🇬🇧', country: 'Royaume-Uni' },
+        { code: '+1',   flag: '🇨🇦', country: 'Canada/USA' },
+        { code: '+32',  flag: '🇧🇪', country: 'Belgique' },
+        { code: '+41',  flag: '🇨🇭', country: 'Suisse' },
+        { code: '+221', flag: '🇸🇳', country: 'Sénégal' },
+        { code: '+223', flag: '🇲🇱', country: 'Mali' },
+        { code: '+225', flag: '🇨🇮', country: 'Côte d\'Ivoire' },
+        { code: '+86',  flag: '🇨🇳', country: 'Chine' },
+    ],
+
     // Paths - adjust based on your setup
     basePath: '../config/',
 
@@ -392,6 +411,34 @@ const Config = {
             // Fallback si le code devise n'est pas reconnu
             const formatted = Number(price).toFixed(2).replace(/\.00$/, '').replace('.', ',');
             return formatted + ' ' + currencyCode;
+        }
+    },
+
+    /**
+     * Génère les options HTML pour un select d'indicatifs téléphoniques
+     * @param {string|null} selected - Indicatif présélectionné
+     * @returns {string} HTML des options
+     */
+    getPhoneIndicatorOptions(selected = null) {
+        let html = '<option value="">Pays *</option>';
+        for (const ind of this.phoneIndicators) {
+            const isSelected = (selected === ind.code) ? ' selected' : '';
+            html += `<option value="${ind.code}"${isSelected}>${ind.flag} ${ind.country} (${ind.code})</option>`;
+        }
+        return html;
+    },
+
+    /**
+     * Remplit un élément select avec les indicatifs téléphoniques
+     * @param {string|HTMLElement} selectElement - ID ou élément select
+     * @param {string|null} selected - Indicatif présélectionné
+     */
+    populatePhoneIndicators(selectElement, selected = null) {
+        const el = typeof selectElement === 'string'
+            ? document.getElementById(selectElement)
+            : selectElement;
+        if (el) {
+            el.innerHTML = this.getPhoneIndicatorOptions(selected);
         }
     },
 

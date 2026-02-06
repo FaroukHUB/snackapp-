@@ -830,20 +830,9 @@
                         <div class="form-row">
                             <label for="customerPhone"><i class="fab fa-whatsapp" style="color: #25D366;"></i> WhatsApp *</label>
                             <div style="display: flex; gap: 8px; align-items: center;">
+                                <!-- Options générées dynamiquement depuis Config.phoneIndicators -->
                                 <select id="countryCode" required style="flex: 0 0 auto; width: 160px; padding: 12px; border: 2px solid var(--gray-200); border-radius: 12px; font-size: 14px; background: white; cursor: pointer;">
                                     <option value="">Pays *</option>
-                                    <option value="+213">🇩🇿 Algérie (+213)</option>
-                                    <option value="+33">🇫🇷 France (+33)</option>
-                                    <option value="+966">🇸🇦 Arabie S. (+966)</option>
-                                    <option value="+20">🇪🇬 Égypte (+20)</option>
-                                    <option value="+44">🇬🇧 Angleterre (+44)</option>
-                                    <option value="+971">🇦🇪 Émirats (+971)</option>
-                                    <option value="+1">🇨🇦 Canada (+1)</option>
-                                    <option value="+216">🇹🇳 Tunisie (+216)</option>
-                                    <option value="+212">🇲🇦 Maroc (+212)</option>
-                                    <option value="+221">🇸🇳 Sénégal (+221)</option>
-                                    <option value="+223">🇲🇱 Mali (+223)</option>
-                                    <option value="+86">🇨🇳 Chine (+86)</option>
                                 </select>
                                 <input type="tel" id="customerPhone" placeholder="6 12 34 56 78" required style="flex: 1; padding: 12px; border: 2px solid var(--gray-200); border-radius: 12px; font-size: 14px;">
                             </div>
@@ -1654,6 +1643,9 @@
             async init() {
                 // Load config
                 await Config.init();
+
+                // Remplir le select des indicatifs téléphoniques depuis Config
+                Config.populatePhoneIndicators('countryCode');
 
                 // Check delivery setting and hide option if disabled
                 const deliveryEnabled = Config.restaurant?.delivery?.enabled ?? true;

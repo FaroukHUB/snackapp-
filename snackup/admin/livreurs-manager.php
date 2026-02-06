@@ -254,11 +254,7 @@ $csrfToken = getCsrfToken();
         <div class="form-group">
           <label>Indicatif téléphone *</label>
           <select id="indicatif" required>
-            <option value="+213">🇩🇿 Algérie (+213)</option>
-            <option value="+33">🇫🇷 France (+33)</option>
-            <option value="+966">🇸🇦 Arabie Saoudite (+966)</option>
-            <option value="+212">🇲🇦 Maroc (+212)</option>
-            <option value="+216">🇹🇳 Tunisie (+216)</option>
+            <?= getPhoneIndicatorsOptions(DEFAULT_PHONE_INDICATOR) ?>
           </select>
         </div>
 

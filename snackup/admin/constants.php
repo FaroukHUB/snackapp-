@@ -34,6 +34,49 @@ define('MAX_PHONE_LENGTH', 15);
  */
 define('MIN_PHONE_TOTAL_LENGTH', 6);
 
+/**
+ * Liste des indicatifs téléphoniques les plus populaires
+ * Format: code => [emoji drapeau, nom du pays]
+ */
+define('PHONE_INDICATORS', [
+    '+213' => ['🇩🇿', 'Algérie'],
+    '+33'  => ['🇫🇷', 'France'],
+    '+212' => ['🇲🇦', 'Maroc'],
+    '+216' => ['🇹🇳', 'Tunisie'],
+    '+966' => ['🇸🇦', 'Arabie Saoudite'],
+    '+971' => ['🇦🇪', 'Émirats'],
+    '+20'  => ['🇪🇬', 'Égypte'],
+    '+44'  => ['🇬🇧', 'Royaume-Uni'],
+    '+1'   => ['🇨🇦', 'Canada/USA'],
+    '+32'  => ['🇧🇪', 'Belgique'],
+    '+41'  => ['🇨🇭', 'Suisse'],
+    '+221' => ['🇸🇳', 'Sénégal'],
+    '+223' => ['🇲🇱', 'Mali'],
+    '+225' => ['🇨🇮', 'Côte d\'Ivoire'],
+    '+86'  => ['🇨🇳', 'Chine'],
+]);
+
+/**
+ * Génère les options HTML pour un select d'indicatifs téléphoniques
+ * @param string|null $selected Indicatif présélectionné
+ * @return string HTML des options
+ */
+function getPhoneIndicatorsOptions(?string $selected = null): string {
+    $options = '<option value="">Pays *</option>';
+    foreach (PHONE_INDICATORS as $code => $info) {
+        $isSelected = ($selected === $code) ? ' selected' : '';
+        $options .= sprintf(
+            '<option value="%s"%s>%s %s (%s)</option>',
+            htmlspecialchars($code),
+            $isSelected,
+            $info[0],
+            htmlspecialchars($info[1]),
+            $code
+        );
+    }
+    return $options;
+}
+
 // ============================================================================
 // DEVISE
 // ============================================================================
