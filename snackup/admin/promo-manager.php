@@ -251,7 +251,7 @@ $csrfToken = getCsrfToken();
           <label>Type de réduction <span style="color:var(--bad)">*</span></label>
           <select id="promoType" name="discount_type" required>
             <option value="percent">Pourcentage (%)</option>
-            <option value="fixed">Montant fixe (DA)</option>
+            <option value="fixed">Montant fixe (<?= CURRENCY ?>)</option>
           </select>
         </div>
         <div class="form-group">
@@ -263,7 +263,7 @@ $csrfToken = getCsrfToken();
 
       <div class="form-row">
         <div class="form-group">
-          <label>Commande minimum (DA)</label>
+          <label>Commande minimum (<?= CURRENCY ?>)</label>
           <input type="number" id="promoMinOrder" name="min_order_amount" min="0" step="0.01" placeholder="Ex: 1000">
           <small>Laisser vide si pas de minimum</small>
         </div>
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (this.value === 'percent') {
       hint.textContent = 'En pourcentage (ex: 10 pour -10%)';
     } else {
-      hint.textContent = 'Montant en DA (ex: 500 pour -500 DA)';
+      hint.textContent = 'Montant en <?= CURRENCY ?> (ex: 500 pour -500 <?= CURRENCY ?>)';
     }
   });
 });
@@ -370,7 +370,7 @@ function renderPromoCodes(promoCodes) {
   promoCodes.forEach(promo => {
     const discount = promo.discount_type === 'percent'
       ? `-${promo.discount_value}%`
-      : `-${promo.discount_value} DA`;
+      : `-${promo.discount_value} <?= CURRENCY ?>`;
 
     const uses = promo.max_uses
       ? `${promo.current_uses}/${promo.max_uses}`

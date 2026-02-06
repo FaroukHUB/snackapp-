@@ -67,8 +67,8 @@ switch ($action) {
     case 'create_intent':
         $amount = (float)($input['amount'] ?? 0);
 
-        if ($amount < 0.50) {
-            jsonError('Montant minimum: 0.50€');
+        if ($amount < MIN_ONLINE_PAYMENT_AMOUNT) {
+            jsonError('Montant minimum: ' . MIN_ONLINE_PAYMENT_AMOUNT . ' ' . CURRENCY);
         }
 
         // Vérifier que le paiement en ligne est activé

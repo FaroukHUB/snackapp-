@@ -123,8 +123,8 @@ function renderProducts(products) {
                             <div class="flex-1">
                                 <h4 class="text-white font-semibold">${product.name}</h4>
                                 <div class="text-gray-400 text-sm mt-1">
-                                    ${product.priceSolo ? `Solo: ${product.priceSolo} DA` : ''}
-                                    ${product.priceMenu ? ` | Menu: ${product.priceMenu} DA` : ''}
+                                    ${product.priceSolo ? `Solo: ${product.priceSolo} ${window.CURRENCY}` : ''}
+                                    ${product.priceMenu ? ` | Menu: ${product.priceMenu} ${window.CURRENCY}` : ''}
                                 </div>
                             </div>
 
@@ -238,8 +238,8 @@ function renderTgtgOffers() {
                     <p class="text-gray-400 text-sm mt-1">${offer.description}</p>
                     <div class="flex items-center gap-4 mt-2 text-sm">
                         <div class="text-gray-400">
-                            <span class="line-through">${offer.original_price} DA</span>
-                            <span class="text-green-400 font-bold ml-2">${offer.discount_price} DA</span>
+                            <span class="line-through">${offer.original_price} ${window.CURRENCY}</span>
+                            <span class="text-green-400 font-bold ml-2">${offer.discount_price} ${window.CURRENCY}</span>
                         </div>
                         <div class="text-gray-400">
                             <i class="fas fa-box mr-1"></i>${offer.quantity_available}/${offer.quantity_total} restants

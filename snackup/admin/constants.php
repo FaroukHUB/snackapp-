@@ -124,6 +124,12 @@ define('CUSTOMER_ORDER_HISTORY_LIMIT', 20);
 define('LOYALTY_LEADERBOARD_LIMIT', 10);
 
 /**
+ * Points de fidélité par unité de devise (par défaut: 1 point par unité)
+ * Cette valeur peut être surchargée par la config du restaurant
+ */
+define('DEFAULT_LOYALTY_POINTS_PER_CURRENCY', 1);
+
+/**
  * Limite par défaut pour les notifications
  */
 define('NOTIFICATION_LIMIT', 1);

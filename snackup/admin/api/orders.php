@@ -402,10 +402,12 @@ function addOrder(bool $useMySQL) {
                 }
             }
 
-            // Ajouter les points gagnés (100 DA = 1 point)
+            // Ajouter les points gagnés (selon config fidélité)
             $amountPaid = (float)$requestData['total'];
             if ($amountPaid > 0) {
-                $pointsEarned = floor($amountPaid / 100); // 100 DA = 1 point
+                $loyaltyConfig = LoyaltyRepository::getConfig(SNACK_RESTAURANT_ID);
+                $pointsPerCurrency = (int)($loyaltyConfig['points_per_euro'] ?? DEFAULT_LOYALTY_POINTS_PER_CURRENCY);
+                $pointsEarned = (int)floor($amountPaid * $pointsPerCurrency);
                 CustomerRepository::addPoints($customer['id'], SNACK_RESTAURANT_ID, $pointsEarned, $orderId);
             }
 
@@ -480,9 +482,10 @@ function addOrder(bool $useMySQL) {
                 $c['last_order'] = date('Y-m-d H:i:s');
                 $c['name'] = $requestData['customer_name'] ?? $c['name'];
 
-                // ✅ Ajouter points gagnés (100 DA = 1 point)
+                // ✅ Ajouter points gagnés (selon config)
                 if ($requestData['total'] > 0) {
-                    $pointsEarned = floor($requestData['total'] / 100);
+                    $pointsPerCurrency = DEFAULT_LOYALTY_POINTS_PER_CURRENCY;
+                    $pointsEarned = (int)floor($requestData['total'] * $pointsPerCurrency);
                     $c['loyalty_points'] = ($c['loyalty_points'] ?? 0) + $pointsEarned;
                 }
 

@@ -138,8 +138,9 @@ function saveCustomerFromOrder($order) {
             $customer['total_spent'] = ($customer['total_spent'] ?? 0) + $order['total'];
             $customer['last_order'] = date('Y-m-d H:i:s');
 
-            // Ajouter des points de fidélité (1€ = 1 point)
-            $customer['loyalty_points'] = ($customer['loyalty_points'] ?? 0) + floor($order['total']);
+            // Ajouter des points de fidélité (selon config)
+            $pointsEarned = (int)floor($order['total'] * DEFAULT_LOYALTY_POINTS_PER_CURRENCY);
+            $customer['loyalty_points'] = ($customer['loyalty_points'] ?? 0) + $pointsEarned;
 
             $customerExists = true;
             break;
@@ -156,7 +157,7 @@ function saveCustomerFromOrder($order) {
             'registered_at' => date('Y-m-d H:i:s'),
             'orders_count' => 1,
             'total_spent' => $order['total'],
-            'loyalty_points' => floor($order['total']),
+            'loyalty_points' => (int)floor($order['total'] * DEFAULT_LOYALTY_POINTS_PER_CURRENCY),
             'last_order' => date('Y-m-d H:i:s'),
             'notes' => ''
         ];
