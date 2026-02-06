@@ -367,12 +367,32 @@ const Config = {
                         this.menu?._meta?.currency ||
                         window.SNACK_CONFIG?.currency ||
                         'EUR';
-        // Convertir code devise en symbole
-        const currencySymbols = { 'EUR': '€', 'USD': '$', 'GBP': '£', 'DA': 'DA', 'DZD': 'DA' };
-        const symbol = currencySymbols[currencyCode] || currencyCode;
-        // Afficher les décimales si nécessaire (ex: 1.50€), sinon entier (ex: 2€)
-        const formatted = Number(price).toFixed(2).replace(/\.00$/, '').replace('.', ',');
-        return formatted + ' ' + symbol;
+
+        // Utiliser Intl.NumberFormat pour obtenir automatiquement le bon symbole de devise
+        // Supporte toutes les devises ISO 4217 sans hardcoding (EUR, USD, GBP, MAD, TND, DZD, etc.)
+        try {
+            // Gérer le cas spécial 'DA' qui n'est pas un code ISO (utiliser DZD pour Dinar Algérien)
+            const isoCode = currencyCode === 'DA' ? 'DZD' : currencyCode;
+
+            const formatter = new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: isoCode,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+
+            // Pour DA/DZD, on veut afficher "DA" au lieu du symbole officiel
+            if (currencyCode === 'DA' || currencyCode === 'DZD') {
+                const formatted = Number(price).toFixed(2).replace(/\.00$/, '').replace('.', ',');
+                return formatted + ' DA';
+            }
+
+            return formatter.format(price);
+        } catch (e) {
+            // Fallback si le code devise n'est pas reconnu
+            const formatted = Number(price).toFixed(2).replace(/\.00$/, '').replace('.', ',');
+            return formatted + ' ' + currencyCode;
+        }
     },
 
     /**
