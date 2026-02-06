@@ -4,6 +4,9 @@
  * Charge la configuration depuis l'instance et se connecte à MySQL
  */
 
+// Charger les constantes globales en premier
+require_once __DIR__ . '/constants.php';
+
 session_start();
 
 // Charger le gestionnaire d'instances (architecture scalable)

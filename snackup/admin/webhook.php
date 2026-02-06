@@ -7,50 +7,12 @@
  */
 
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/cors.php';
 
 header('Content-Type: application/json');
 
-// 🔒 SÉCURITÉ: Autoriser uniquement les domaines de confiance
-// Charger dynamiquement tous les domaines de toutes les instances
-require_once __DIR__ . '/../backend/InstanceManager.php';
-InstanceManager::init();
-$allInstances = InstanceManager::getAllInstances();
-
-$allowed_origins = [
-    'http://localhost:3000', // Développement local
-    'http://localhost:8000',
-    'http://localhost'
-];
-
-// Ajouter tous les domaines de toutes les instances
-foreach ($allInstances as $instanceData) {
-    if (isset($instanceData['domains']) && is_array($instanceData['domains'])) {
-        foreach ($instanceData['domains'] as $domain) {
-            $allowed_origins[] = 'https://' . $domain;
-            $allowed_origins[] = 'https://www.' . $domain;
-            $allowed_origins[] = 'http://' . $domain;
-        }
-    }
-}
-
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowed_origins, true)) {
-    header("Access-Control-Allow-Origin: $origin");
-} else {
-    // Bloquer les requêtes d'origines non autorisées
-    http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Origine non autorisée']);
-    exit;
-}
-
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-// Gérer les requêtes OPTIONS (preflight CORS)
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+// CORS centralisé - restreint aux domaines autorisés, bloque si non autorisé
+handlePrivateCors();
 
 // Vérifier que c'est une requête POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

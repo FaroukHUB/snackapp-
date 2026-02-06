@@ -10,20 +10,14 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../cors.php';
 require_once __DIR__ . '/../../backend/PaymentService.php';
 require_once __DIR__ . '/../../backend/repositories/SettingsRepository.php';
 
 header('Content-Type: application/json');
 
-// CORS pour le frontend
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+// CORS centralisé - API publique
+handlePublicCors();
 
 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 $action = $input['action'] ?? $_GET['action'] ?? '';

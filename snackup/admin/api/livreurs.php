@@ -39,7 +39,7 @@ switch ($action) {
         requireCsrf();
 
         $prenom = trim($_POST['prenom'] ?? '');
-        $indicatif = trim($_POST['indicatif'] ?? '+213');
+        $indicatif = trim($_POST['indicatif'] ?? DEFAULT_PHONE_INDICATOR);
         $numero = trim($_POST['numero'] ?? '');
 
         if (empty($prenom) || empty($numero)) {
@@ -49,8 +49,8 @@ switch ($action) {
         // Nettoyer le numéro (garder que les chiffres)
         $numero = preg_replace('/[^0-9]/', '', $numero);
 
-        if (strlen($numero) < 8) {
-            jsonError('Numéro invalide');
+        if (strlen($numero) < MIN_PHONE_LENGTH) {
+            jsonError('Numéro invalide (minimum ' . MIN_PHONE_LENGTH . ' chiffres)');
         }
 
         $livreurs = loadLivreurs();
@@ -75,7 +75,7 @@ switch ($action) {
 
         $id = $_POST['id'] ?? '';
         $prenom = trim($_POST['prenom'] ?? '');
-        $indicatif = trim($_POST['indicatif'] ?? '+213');
+        $indicatif = trim($_POST['indicatif'] ?? DEFAULT_PHONE_INDICATOR);
         $numero = trim($_POST['numero'] ?? '');
         $actif = isset($_POST['actif']) && $_POST['actif'] === 'true';
 
@@ -84,6 +84,10 @@ switch ($action) {
         }
 
         $numero = preg_replace('/[^0-9]/', '', $numero);
+
+        if (strlen($numero) < MIN_PHONE_LENGTH) {
+            jsonError('Numéro invalide (minimum ' . MIN_PHONE_LENGTH . ' chiffres)');
+        }
 
         $livreurs = loadLivreurs();
 
