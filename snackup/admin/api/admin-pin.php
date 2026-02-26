@@ -21,10 +21,22 @@ $pinFile = __DIR__ . '/../data/admin-pin.json';
 function loadPin(): array {
     global $pinFile;
     if (!file_exists($pinFile)) {
-        // ⚠️ SÉCURITÉ: PIN par défaut aléatoire (doit être changé au premier usage)
-        $defaultPin = str_pad((string)random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
-        error_log('[SÉCURITÉ] ⚠️ PIN par défaut généré: ' . $defaultPin . ' - CHANGEZ-LE immédiatement!');
-        return ['pin' => $defaultPin, 'is_default' => true];
+        // ⚠️ SÉCURITÉ: PIN par défaut 1234 (doit être changé au premier usage)
+        $defaultPin = '1234';
+        error_log('[SÉCURITÉ] ⚠️ PIN par défaut utilisé: ' . $defaultPin . ' - CHANGEZ-LE immédiatement!');
+        // Sauvegarder le PIN par défaut pour qu'il persiste
+        $dir = dirname($pinFile);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $data = [
+            'pin' => $defaultPin,
+            'updated_at' => date('c'),
+            'is_default' => true,
+            'note' => 'PIN initial généré automatiquement - CHANGEZ-LE immédiatement.'
+        ];
+        file_put_contents($pinFile, json_encode($data, JSON_PRETTY_PRINT));
+        return $data;
     }
     $data = json_decode(file_get_contents($pinFile), true);
     return is_array($data) ? $data : ['pin' => '1234', 'is_default' => true];
