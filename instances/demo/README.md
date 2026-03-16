@@ -1,6 +1,6 @@
-# 🆕 Instance Demo - Template
+# 🧪 Instance Demo - demo.mon-agenceweb.fr
 
-Ceci est un template d'instance vide. Utilisez ce dossier comme base pour créer une nouvelle instance de restaurant.
+Instance de démonstration pour tester la nouvelle plateforme Snackup avant migration complète.
 
 ## 📋 Comment créer une nouvelle instance
 
