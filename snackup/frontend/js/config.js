@@ -19,7 +19,7 @@ const Config = {
     _cache: {},
 
     // Paths - adjust based on your setup
-    basePath: '../config/',
+    basePath: '../../config/',
 
     /**
      * Initialize configuration
