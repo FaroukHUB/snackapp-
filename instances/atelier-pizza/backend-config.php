@@ -7,9 +7,9 @@
 return [
     'database' => [
         'host' => '127.0.0.1',
-        'name' => 'zajr1824_atelierpizza',
+        'dbname' => 'zajr1824_atelierpizza',  // Utilise 'dbname' pour cohérence
         'user' => 'zajr1824_atelierpizza',
-        'password' => 'Mariagor6!',
+        'password' => 'CHANGE_ME',  // ⚠️ À configurer sur le serveur
         'charset' => 'utf8mb4'
     ],
 

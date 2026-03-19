@@ -8,10 +8,10 @@
 
 return [
     'database' => [
-        'host' => '127.0.0.1',
-        'name' => 'zajr1824_demo',
+        'host' => 'localhost',
+        'dbname' => 'zajr1824_demo',  // Utilise 'dbname' pour cohérence avec Database.php
         'user' => 'zajr1824_demo',
-        'password' => 'CHANGE_ME',
+        'password' => 'CHANGE_ME',  // ⚠️ À configurer sur le serveur
         'charset' => 'utf8mb4'
     ],
 

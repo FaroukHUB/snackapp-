@@ -20,8 +20,8 @@ try {
 // Définir les constantes depuis la config
 define('INSTANCE_NAME', $instanceName);
 define('DB_HOST', $instanceConfig['database']['host']);
-define('DB_NAME', $instanceConfig['database']['name']);
-define('DB_USER', $instanceConfig['database']['user']);
+define('DB_NAME', $instanceConfig['database']['dbname'] ?? $instanceConfig['database']['name']);  // Support 'dbname' et 'name'
+define('DB_USER', $instanceConfig['database']['user'] ?? $instanceConfig['database']['username']);  // Support 'user' et 'username'
 define('DB_PASS', $instanceConfig['database']['password']);
 define('DB_CHARSET', $instanceConfig['database']['charset']);
 
