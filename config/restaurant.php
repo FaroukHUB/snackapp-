@@ -18,15 +18,38 @@ try {
     $instanceName = InstanceManager::getCurrentInstance();
     $restaurantId = InstanceManager::getRestaurantId();
 
-    // Charger la base de données
-    require_once __DIR__ . '/../snackup/backend/Database.php';
-    Database::init(InstanceManager::getDatabaseConfig());
+    // Pour l'instance demo, utiliser des données statiques (pas de DB)
+    if ($instanceName === 'demo') {
+        $restaurant = [
+            'name' => $instanceConfig['app']['name'] ?? 'Restaurant Demo',
+            'legal_name' => $instanceConfig['app']['name'] ?? 'Restaurant Demo',
+            'slug' => 'demo',
+            'phone' => $instanceConfig['contact']['phone'] ?? '',
+            'email' => $instanceConfig['contact']['email'] ?? '',
+            'address' => $instanceConfig['location']['address'] ?? '',
+            'city' => $instanceConfig['location']['city'] ?? '',
+            'postal_code' => $instanceConfig['location']['postalCode'] ?? '',
+            'latitude' => $instanceConfig['location']['coordinates']['lat'] ?? 0,
+            'longitude' => $instanceConfig['location']['coordinates']['lng'] ?? 0,
+            'logo_url' => ''
+        ];
+        $settings = [
+            'brand_tagline' => 'Commandez en ligne',
+            'is_halal' => true,
+            'whatsapp_orders_number' => $instanceConfig['contact']['whatsappOrdersNumber'] ?? '',
+            'social_links' => '{}'
+        ];
+    } else {
+        // Pour les autres instances, charger depuis la base de données
+        require_once __DIR__ . '/../snackup/backend/Database.php';
+        Database::init(InstanceManager::getDatabaseConfig());
 
-    require_once __DIR__ . '/../snackup/backend/repositories/RestaurantRepository.php';
+        require_once __DIR__ . '/../snackup/backend/repositories/RestaurantRepository.php';
 
-    // Récupérer les données du restaurant depuis la base
-    $restaurant = RestaurantRepository::getById($restaurantId);
-    $settings = RestaurantRepository::getSettings($restaurantId);
+        // Récupérer les données du restaurant depuis la base
+        $restaurant = RestaurantRepository::getById($restaurantId);
+        $settings = RestaurantRepository::getSettings($restaurantId);
+    }
 
 } catch (Exception $e) {
     http_response_code(500);

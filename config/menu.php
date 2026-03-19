@@ -18,14 +18,25 @@ try {
     $instanceName = InstanceManager::getCurrentInstance();
     $restaurantId = InstanceManager::getRestaurantId();
 
-    // Charger la base de données
-    require_once __DIR__ . '/../snackup/backend/Database.php';
-    Database::init(InstanceManager::getDatabaseConfig());
+    // Pour l'instance demo, retourner un menu vide (pas de DB)
+    if ($instanceName === 'demo') {
+        $categories = [];
+        $supplements = [];
+        $categorySupplements = [];
+        $formules = [];
+    } else {
+        // Pour les autres instances, charger depuis la base de données
+        require_once __DIR__ . '/../snackup/backend/Database.php';
+        Database::init(InstanceManager::getDatabaseConfig());
 
-    require_once __DIR__ . '/../snackup/backend/repositories/MenuRepository.php';
+        require_once __DIR__ . '/../snackup/backend/repositories/MenuRepository.php';
 
-    // Définir le restaurant ID
-    MenuRepository::$restaurantId = $restaurantId;
+        // Récupérer les données du menu depuis MySQL
+        $categories = MenuRepository::getAllCategories();
+        $supplements = MenuRepository::getAllSupplements();
+        $categorySupplements = MenuRepository::getCategorySupplements();
+        $formules = MenuRepository::getAllFormules();
+    }
 
 } catch (Exception $e) {
     http_response_code(500);
@@ -38,11 +49,6 @@ try {
 }
 
 try {
-    // Récupérer les données du menu depuis MySQL
-    $categories = MenuRepository::getAllCategories();
-    $supplements = MenuRepository::getAllSupplements();
-    $categorySupplements = MenuRepository::getCategorySupplements();
-    $formules = MenuRepository::getAllFormules();
 
     // Formater le menu pour le frontend
     $menu = ['categories' => $categories];
