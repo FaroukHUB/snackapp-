@@ -4,7 +4,7 @@
  * Charge la configuration depuis l'instance et se connecte à MySQL
  */
 
-session_start();
+// Note: session_start() est géré par bootstrap.php pour éviter les doublons
 
 // Charger le gestionnaire d'instances (architecture scalable)
 require_once __DIR__ . '/../backend/InstanceManager.php';
@@ -25,10 +25,10 @@ define('DB_USER', $instanceConfig['database']['user']);
 define('DB_PASS', $instanceConfig['database']['password']);
 define('DB_CHARSET', $instanceConfig['database']['charset']);
 
-define('RESTAURANT_ID', $instanceConfig['app']['restaurant_id']);
-define('APP_NAME', $instanceConfig['app']['name']);
-define('APP_SLUG', $instanceConfig['app']['instance_id']);
-define('TIMEZONE', $instanceConfig['app']['timezone']);
+define('RESTAURANT_ID', $instanceConfig['app']['restaurant_id'] ?? 1);
+define('APP_NAME', $instanceConfig['app']['name'] ?? 'Snackup');
+define('APP_SLUG', $instanceConfig['app']['instance_id'] ?? 'default');
+define('TIMEZONE', $instanceConfig['app']['timezone'] ?? 'Europe/Paris');
 define('CURRENCY', $instanceConfig['app']['currency'] ?? 'DA');
 
 // Chemins
