@@ -9,7 +9,14 @@ require_once __DIR__ . '/../Database.php';
 require_once __DIR__ . '/../InstanceManager.php';
 
 class MenuRepository {
-    public static $restaurantId = 3; // Par défaut Le Marvelous, peut être changé
+
+    /**
+     * Récupère le restaurant_id de l'instance courante
+     */
+    private static function getRestaurantId() {
+        $config = InstanceManager::loadConfig();
+        return $config['app']['restaurant_id'] ?? null;
+    }
 
     /**
      * Récupère toutes les catégories actives avec leurs produits
@@ -24,7 +31,7 @@ class MenuRepository {
             WHERE restaurant_id = ? AND is_active = 1
             ORDER BY sort_order ASC, id ASC
         ");
-        $stmt->execute([self::$restaurantId]);
+        $stmt->execute([self::getRestaurantId()]);
         $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Pour chaque catégorie, récupérer ses produits
@@ -49,7 +56,7 @@ class MenuRepository {
             WHERE category_id = ? AND restaurant_id = ?
             ORDER BY sort_order ASC, id ASC
         ");
-        $stmt->execute([$categoryId, self::$restaurantId]);
+        $stmt->execute([$categoryId, self::getRestaurantId()]);
 
         $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -77,7 +84,7 @@ class MenuRepository {
             WHERE restaurant_id = ?
             ORDER BY sort_order ASC
         ");
-        $stmt->execute([self::$restaurantId]);
+        $stmt->execute([self::getRestaurantId()]);
 
         $supplements = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $supp) {
@@ -108,7 +115,7 @@ class MenuRepository {
                     WHERE c.id = cs.category_id AND c.restaurant_id = ?
                 )
             ");
-            $stmt->execute([self::$restaurantId]);
+            $stmt->execute([self::getRestaurantId()]);
 
             $associations = [];
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -144,7 +151,7 @@ class MenuRepository {
                 FROM categories
                 WHERE restaurant_id = ?
             ");
-            $stmt->execute([self::$restaurantId]);
+            $stmt->execute([self::getRestaurantId()]);
             $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
 
             // Insérer la catégorie
@@ -154,7 +161,7 @@ class MenuRepository {
                 VALUES (?, ?, ?, ?, ?, ?, 1)
             ");
             $stmt->execute([
-                self::$restaurantId,
+                self::getRestaurantId(),
                 $name,
                 $description,
                 $icon,
@@ -219,7 +226,7 @@ class MenuRepository {
             SELECT id FROM supplements
             WHERE restaurant_id = ? AND (flavor = ? OR flavor = 'both')
         ");
-        $stmt->execute([self::$restaurantId, $flavor]);
+        $stmt->execute([self::getRestaurantId(), $flavor]);
         $supplements = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         // Créer les associations
@@ -251,7 +258,7 @@ class MenuRepository {
             $icon,
             $flavor ?: null,
             $categoryId,
-            self::$restaurantId
+            self::getRestaurantId()
         ]);
     }
 
@@ -267,7 +274,7 @@ class MenuRepository {
             WHERE id = ? AND restaurant_id = ?
         ");
 
-        return $stmt->execute([$categoryId, self::$restaurantId]);
+        return $stmt->execute([$categoryId, self::getRestaurantId()]);
     }
 
     /**
@@ -295,7 +302,7 @@ class MenuRepository {
         ");
 
         $stmt->execute([
-            self::$restaurantId,
+            self::getRestaurantId(),
             $categoryId,
             $name,
             $description,
@@ -342,7 +349,7 @@ class MenuRepository {
                 $status,
                 $baseIngredientsJson,
                 $productId,
-                self::$restaurantId
+                self::getRestaurantId()
             ]);
         } else {
             // Comportement par défaut sans modifier base_ingredients
@@ -361,7 +368,7 @@ class MenuRepository {
                 $priceMenu,
                 $status,
                 $productId,
-                self::$restaurantId
+                self::getRestaurantId()
             ]);
         }
     }
@@ -378,7 +385,7 @@ class MenuRepository {
             WHERE id = ? AND restaurant_id = ?
         ");
 
-        return $stmt->execute([$productId, self::$restaurantId]);
+        return $stmt->execute([$productId, self::getRestaurantId()]);
     }
 
     /**
@@ -395,7 +402,7 @@ class MenuRepository {
             WHERE restaurant_id = ? AND status = 'available'
             ORDER BY sort_order ASC, id ASC
         ");
-        $stmt->execute([self::$restaurantId]);
+        $stmt->execute([self::getRestaurantId()]);
 
         $formules = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -463,7 +470,7 @@ class MenuRepository {
             FROM formules
             WHERE restaurant_id = ?
         ");
-        $stmt->execute([self::$restaurantId]);
+        $stmt->execute([self::getRestaurantId()]);
         $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
 
         // Convertir includes en JSON
@@ -483,7 +490,7 @@ class MenuRepository {
 
             $stmt->execute([
                 $generatedId,
-                self::$restaurantId,
+                self::getRestaurantId(),
                 $name,
                 $description,
                 $image,
@@ -504,7 +511,7 @@ class MenuRepository {
             ");
 
             $stmt->execute([
-                self::$restaurantId,
+                self::getRestaurantId(),
                 $name,
                 $description,
                 $image,
@@ -564,7 +571,7 @@ class MenuRepository {
                     $image,
                     $includesJson,
                     $formuleId,
-                    self::$restaurantId
+                    self::getRestaurantId()
                 ]);
             } else {
                 $stmt = $pdo->prepare("
@@ -582,7 +589,7 @@ class MenuRepository {
                     $status,
                     $image,
                     $formuleId,
-                    self::$restaurantId
+                    self::getRestaurantId()
                 ]);
             }
         } else {
@@ -603,7 +610,7 @@ class MenuRepository {
                     $status,
                     $includesJson,
                     $formuleId,
-                    self::$restaurantId
+                    self::getRestaurantId()
                 ]);
             } else {
                 $stmt = $pdo->prepare("
@@ -620,7 +627,7 @@ class MenuRepository {
                     $originalPrice,
                     $status,
                     $formuleId,
-                    self::$restaurantId
+                    self::getRestaurantId()
                 ]);
             }
         }
@@ -638,7 +645,7 @@ class MenuRepository {
             WHERE id = ? AND restaurant_id = ?
         ");
 
-        return $stmt->execute([$formuleId, self::$restaurantId]);
+        return $stmt->execute([$formuleId, self::getRestaurantId()]);
     }
 
     /**

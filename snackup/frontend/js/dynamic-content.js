@@ -109,7 +109,7 @@
             console.log('✅ Hero subtitle mis à jour:', restaurant.brandTagline);
         }
 
-        // IMPORTANT: Masquer les avis Google si contiennent Ouled Moussa ou Marvelous
+        // Vérifier et masquer les avis non pertinents
         hideWrongReviews();
 
         // Alt de l'image hero
@@ -121,6 +121,7 @@
 
     /**
      * Masquer les avis qui ne correspondent pas à ce restaurant
+     * Vérifie si les avis mentionnent une ville/adresse différente
      */
     function hideWrongReviews() {
         console.log('🔍 [Dynamic Content] Vérification des avis...');
@@ -131,36 +132,39 @@
             return;
         }
 
-        // Si on n'est PAS Le Marvelous, cacher toute la section Google Reviews
-        // Car tous ces avis sont pour Le Marvelous à Ouled Moussa
-        if (!restaurant.name.includes('Marvelous')) {
-            reviewsSection.style.display = 'none';
-            console.log('❌ Section Google Reviews cachée (avis pour un autre restaurant)');
+        const reviewCards = document.querySelectorAll('.review-card');
+        if (reviewCards.length === 0) {
+            console.log('ℹ️ Aucun avis trouvé');
             return;
         }
 
-        // Si on EST Le Marvelous, vérifier quand même chaque avis
-        const reviewCards = document.querySelectorAll('.review-card');
         let hiddenCount = 0;
+        const currentCity = restaurant.location.city;
 
         reviewCards.forEach(card => {
             const text = card.textContent || '';
 
-            // Si l'avis mentionne Ouled Moussa mais qu'on n'est PAS à Ouled Moussa
-            if (text.includes('Ouled Moussa') && restaurant.location.city !== 'Ouled Moussa') {
-                card.style.display = 'none';
-                hiddenCount++;
-                console.log('❌ Avis caché (Ouled Moussa)');
+            // Vérifier si l'avis mentionne une ville différente
+            // (Liste des villes communes à vérifier)
+            const cityMentions = ['Ouled Moussa', 'Lille', 'Paris', 'Lyon', 'Marseille'];
+
+            for (const city of cityMentions) {
+                if (text.includes(city) && currentCity !== city) {
+                    card.style.display = 'none';
+                    hiddenCount++;
+                    console.log(`❌ Avis caché (mentionne ${city} mais restaurant à ${currentCity})`);
+                    break;
+                }
             }
         });
 
         // Si tous les avis sont cachés, masquer toute la section
         if (hiddenCount > 0 && hiddenCount === reviewCards.length) {
             reviewsSection.style.display = 'none';
-            console.log('❌ Section avis entièrement cachée (tous les avis cachés)');
+            console.log('❌ Section avis entièrement cachée (aucun avis pertinent)');
         }
 
-        console.log(`✅ ${hiddenCount} avis cachés`);
+        console.log(`✅ ${hiddenCount} avis cachés sur ${reviewCards.length}`);
     }
 
     /**

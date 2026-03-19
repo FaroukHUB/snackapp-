@@ -84,7 +84,7 @@ class InstanceManager {
 
         // Fallback pour environnement local/dev
         if (empty($host) || $host === 'localhost' || strpos($host, '127.0.0.1') !== false) {
-            self::$currentInstance = self::$instancesConfig['default'] ?? 'atelier-pizza';
+            self::$currentInstance = self::$instancesConfig['default'] ?? 'demo';
             return self::$currentInstance;
         }
 
@@ -188,6 +188,16 @@ class InstanceManager {
     public static function getAllInstances() {
         self::init();
         return self::$instancesConfig['instances'];
+    }
+
+    /**
+     * Retourne la configuration complète des instances (instances.json)
+     *
+     * @return array Configuration complète
+     */
+    public static function getInstancesConfig() {
+        self::init();
+        return self::$instancesConfig;
     }
 
     /**
