@@ -11,9 +11,21 @@ require_once __DIR__ . '/../InstanceManager.php';
 class MenuRepository {
 
     /**
+     * ID du restaurant pour multi-instance (peut être défini par bootstrap.php)
+     * @var int|null
+     */
+    public static $restaurantId = null;
+
+    /**
      * Récupère le restaurant_id de l'instance courante
      */
     private static function getRestaurantId() {
+        // Si le restaurant ID a été défini statiquement (par bootstrap.php), l'utiliser
+        if (self::$restaurantId !== null) {
+            return self::$restaurantId;
+        }
+
+        // Sinon, charger depuis la config de l'instance
         $config = InstanceManager::loadConfig();
         return $config['app']['restaurant_id'] ?? null;
     }
