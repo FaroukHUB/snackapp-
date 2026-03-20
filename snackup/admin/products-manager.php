@@ -1116,6 +1116,10 @@ $csrfToken = getCsrfToken();
       if (firstInput) firstInput.focus({preventScroll:true});
     }
     function closeModal(overlay){
+      // Retirer le focus avant de cacher pour l'accessibilité
+      if (overlay.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       overlay.setAttribute("aria-hidden","true");
       document.body.style.overflow = "";
     }
