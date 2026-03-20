@@ -288,7 +288,7 @@ $restaurantId = SNACK_RESTAURANT_ID;
         <p>Configurez les types de cuisine disponibles pour votre restaurant</p>
       </div>
       <div class="actions">
-        <a href="dashboard.php" class="btn btn-ghost">
+        <a href="index.php" class="btn btn-ghost">
           <i class="fas fa-arrow-left"></i> Retour
         </a>
       </div>
