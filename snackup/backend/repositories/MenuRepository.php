@@ -166,15 +166,19 @@ class MenuRepository {
             $stmt->execute([self::getRestaurantId()]);
             $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
 
+            // Générer le slug
+            $slug = self::generateSlug($name, 'categories');
+
             // Insérer la catégorie
             $stmt = $pdo->prepare("
                 INSERT INTO categories
-                (restaurant_id, name, description, icon, flavor, sort_order, is_active)
-                VALUES (?, ?, ?, ?, ?, ?, 1)
+                (restaurant_id, name, slug, description, icon, flavor, sort_order, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1)
             ");
             $stmt->execute([
                 self::getRestaurantId(),
                 $name,
+                $slug,
                 $description,
                 $icon,
                 $flavor ?: null,
@@ -258,14 +262,18 @@ class MenuRepository {
     public static function editCategory($categoryId, $name, $description, $icon, $flavor) {
         $pdo = Database::getInstance();
 
+        // Générer un nouveau slug basé sur le nouveau nom
+        $slug = self::generateSlug($name, 'categories', $categoryId);
+
         $stmt = $pdo->prepare("
             UPDATE categories
-            SET name = ?, description = ?, icon = ?, flavor = ?
+            SET name = ?, slug = ?, description = ?, icon = ?, flavor = ?
             WHERE id = ? AND restaurant_id = ?
         ");
 
         return $stmt->execute([
             $name,
+            $slug,
             $description,
             $icon,
             $flavor ?: null,
@@ -307,16 +315,20 @@ class MenuRepository {
         // Convertir baseIngredients en JSON
         $baseIngredientsJson = !empty($baseIngredients) ? json_encode($baseIngredients, JSON_UNESCAPED_UNICODE) : null;
 
+        // Générer le slug
+        $slug = self::generateSlug($name, 'products');
+
         $stmt = $pdo->prepare("
             INSERT INTO products
-            (restaurant_id, category_id, name, description, image, price_solo, price_menu, base_ingredients, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            (restaurant_id, category_id, name, slug, description, image, price_solo, price_menu, base_ingredients, status, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
         ");
 
         $stmt->execute([
             self::getRestaurantId(),
             $categoryId,
             $name,
+            $slug,
             $description,
             $image,
             $priceSolo,
@@ -337,6 +349,9 @@ class MenuRepository {
     public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status, $baseIngredients = null) {
         $pdo = Database::getInstance();
 
+        // Générer un nouveau slug basé sur le nouveau nom
+        $slug = self::generateSlug($name, 'products', $productId);
+
         // Convertir baseIngredients en JSON si fourni
         $baseIngredientsJson = null;
         if ($baseIngredients !== null) {
@@ -347,13 +362,14 @@ class MenuRepository {
         if ($baseIngredients !== null) {
             $stmt = $pdo->prepare("
                 UPDATE products
-                SET name = ?, description = ?, image = ?,
+                SET name = ?, slug = ?, description = ?, image = ?,
                     price_solo = ?, price_menu = ?, status = ?, base_ingredients = ?
                 WHERE id = ? AND restaurant_id = ?
             ");
 
             return $stmt->execute([
                 $name,
+                $slug,
                 $description,
                 $image,
                 $priceSolo,
@@ -367,13 +383,14 @@ class MenuRepository {
             // Comportement par défaut sans modifier base_ingredients
             $stmt = $pdo->prepare("
                 UPDATE products
-                SET name = ?, description = ?, image = ?,
+                SET name = ?, slug = ?, description = ?, image = ?,
                     price_solo = ?, price_menu = ?, status = ?
                 WHERE id = ? AND restaurant_id = ?
             ");
 
             return $stmt->execute([
                 $name,
+                $slug,
                 $description,
                 $image,
                 $priceSolo,
@@ -662,16 +679,40 @@ class MenuRepository {
 
     /**
      * Génère un slug unique depuis un nom
-     * NOTE: Fonction désactivée - la colonne 'slug' n'existe pas dans la DB actuelle
      */
-    // private static function generateSlug($name) {
-    //     $slug = strtolower(trim($name));
-    //     $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
-    //     $slug = trim($slug, '-');
-    //
-    //     // Ajouter un suffix unique si nécessaire
-    //     $slug .= '-' . substr(md5(uniqid()), 0, 8);
-    //
-    //     return $slug;
-    // }
+    private static function generateSlug($name, $table = 'categories', $existingId = null) {
+        // Normaliser le nom en slug
+        $slug = strtolower(trim($name));
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+        $slug = trim($slug, '-');
+
+        // Vérifier l'unicité dans la table
+        $pdo = Database::getInstance();
+        $baseSlug = $slug;
+        $counter = 1;
+
+        while (true) {
+            $checkSql = "SELECT COUNT(*) FROM $table WHERE slug = ? AND restaurant_id = ?";
+            $params = [$slug, self::getRestaurantId()];
+
+            // Si on modifie une entrée existante, exclure son propre ID
+            if ($existingId) {
+                $checkSql .= " AND id != ?";
+                $params[] = $existingId;
+            }
+
+            $stmt = $pdo->prepare($checkSql);
+            $stmt->execute($params);
+
+            if ($stmt->fetchColumn() == 0) {
+                break; // Slug disponible
+            }
+
+            // Slug existe déjà, essayer avec un suffixe
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
 }
