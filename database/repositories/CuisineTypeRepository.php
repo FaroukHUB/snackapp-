@@ -2,9 +2,9 @@
 /**
  * SnackApp v2 - Cuisine Type Repository
  * Gestion du système de types de cuisine universel (tacos, burger, kebab, etc.)
+ *
+ * Note: La classe Database est chargée par bootstrap.php
  */
-
-require_once __DIR__ . '/../Database.php';
 
 class CuisineTypeRepository {
 
