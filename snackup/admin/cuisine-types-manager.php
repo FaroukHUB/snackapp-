@@ -7,7 +7,7 @@ $csrfToken = getCsrfToken();
 // Charger le repository
 require_once __DIR__ . '/../../database/repositories/CuisineTypeRepository.php';
 
-$restaurantId = getRestaurantId();
+$restaurantId = SNACK_RESTAURANT_ID;
 ?><!doctype html>
 <html lang="fr">
 <head>

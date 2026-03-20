@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../../database/repositories/CuisineTypeRepository.ph
 header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'];
-$restaurantId = getRestaurantId();
+$restaurantId = SNACK_RESTAURANT_ID;
 
 try {
     // GET - Récupérer les types
