@@ -408,13 +408,59 @@ function regenerateMenuJson(): void {
     }
 }
 
+/**
+ * Applique les filtres du runtime (deletedCategories, deletedProducts) au menu
+ *
+ * @param array $menuData Les données complètes du menu
+ * @param array $runtime Les modifications runtime (deletedCategories, deletedProducts)
+ * @return array Menu filtré sans les éléments supprimés
+ */
+function applyRuntimeToConfig(array $menuData, array $runtime): array {
+    $deletedCategoryIds = $runtime['deletedCategories'] ?? [];
+    $deletedProductIds = $runtime['deletedProducts'] ?? [];
+
+    // Filtrer les catégories supprimées et leurs produits
+    if (!empty($menuData['menu']['categories'])) {
+        $filteredCategories = [];
+
+        foreach ($menuData['menu']['categories'] as $category) {
+            // Exclure la catégorie si elle est dans deletedCategories
+            if (in_array($category['id'] ?? null, $deletedCategoryIds)) {
+                continue;
+            }
+
+            // Filtrer les produits supprimés dans cette catégorie
+            if (!empty($category['products'])) {
+                $category['products'] = array_values(array_filter(
+                    $category['products'],
+                    fn($product) => !in_array($product['id'] ?? null, $deletedProductIds)
+                ));
+            }
+
+            // Filtrer les items supprimés dans cette catégorie (alternative à products)
+            if (!empty($category['items'])) {
+                $category['items'] = array_values(array_filter(
+                    $category['items'],
+                    fn($item) => !in_array($item['id'] ?? null, $deletedProductIds)
+                ));
+            }
+
+            $filteredCategories[] = $category;
+        }
+
+        $menuData['menu']['categories'] = $filteredCategories;
+    }
+
+    return $menuData;
+}
+
 /* =========================
    MODE MySQL ou JSON
    ========================= */
 
 // ⚠️ MODE MYSQL DÉSACTIVÉ - Retour au mode JSON
 // MySQL contient données incomplètes, on utilise menu.json
-$useMySQL = true;
+$useMySQL = false;
 
 /* =========================
    GET: Retourner le menu complet
