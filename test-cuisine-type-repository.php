@@ -26,9 +26,9 @@ try {
     }
     echo "\n";
 
-    // 2. Choisir un restaurant de test (ID 2 = restaurant demo)
-    $restaurantId = 2;
-    echo "2. Restaurant de test: ID = $restaurantId\n\n";
+    // 2. Choisir un restaurant de test (ID 1 = restaurant demo)
+    $restaurantId = 1;
+    echo "2. Restaurant de test: ID = $restaurantId (Restaurant Demo)\n\n";
 
     // 3. Vérifier les types déjà activés
     echo "3. Types déjà activés pour ce restaurant:\n";
