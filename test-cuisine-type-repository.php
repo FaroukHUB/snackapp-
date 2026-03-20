@@ -4,6 +4,14 @@
  * Teste l'activation d'un type de cuisine avec copie automatique
  */
 
+// Charger la configuration de la base de données
+$config = require __DIR__ . '/database/config.php';
+
+// Initialiser la connexion Database
+require_once __DIR__ . '/database/Database.php';
+Database::init($config['database']);
+
+// Charger le repository
 require_once __DIR__ . '/database/repositories/CuisineTypeRepository.php';
 
 echo "=== TEST CUISINE TYPE REPOSITORY ===\n\n";
