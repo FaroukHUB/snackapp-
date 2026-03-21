@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Onboarding</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        #log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Onboarding System</h1>
+
+    <div class="test-section">
+        <h2>1. Test JavaScript Chargé</h2>
+        <div id="jsStatus" class="status">Checking...</div>
+        <button onclick="testJS()">Re-test JS</button>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test Bouton Click</h2>
+        <button id="testBtn" onclick="testClick()">Cliquer ici</button>
+        <div id="clickStatus"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test LocalStorage</h2>
+        <button onclick="testLocalStorage()">Test Storage</button>
+        <button onclick="clearStorage()">Clear Storage</button>
+        <div id="storageStatus"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Aller à l'onboarding</h2>
+        <button onclick="window.location.href='onboarding.html'">Ouvrir Onboarding</button>
+        <button onclick="window.location.href='onboarding.html?debug=1'">Ouvrir avec Debug</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Log</h2>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        // Override console.log to show in page
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const logDiv = document.getElementById('log');
+            const message = args.map(arg =>
+                typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            ).join(' ');
+            logDiv.innerHTML += '<div>' + new Date().toLocaleTimeString() + ' - ' + message + '</div>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+
+        // Test 1: JS loaded
+        function testJS() {
+            const status = document.getElementById('jsStatus');
+            status.className = 'status success';
+            status.textContent = '✅ JavaScript is working!';
+            console.log('✅ JS Test passed');
+        }
+
+        // Test 2: Click
+        function testClick() {
+            const status = document.getElementById('clickStatus');
+            status.innerHTML = '✅ Click event works! Time: ' + new Date().toLocaleTimeString();
+            console.log('✅ Click test passed');
+        }
+
+        // Test 3: LocalStorage
+        function testLocalStorage() {
+            try {
+                localStorage.setItem('test', 'value');
+                const val = localStorage.getItem('test');
+                const status = document.getElementById('storageStatus');
+                if (val === 'value') {
+                    status.className = 'status success';
+                    status.textContent = '✅ LocalStorage works!';
+                    console.log('✅ LocalStorage test passed');
+                } else {
+                    throw new Error('Value mismatch');
+                }
+            } catch (e) {
+                const status = document.getElementById('storageStatus');
+                status.className = 'status error';
+                status.textContent = '❌ LocalStorage error: ' + e.message;
+                console.error('❌ LocalStorage test failed:', e);
+            }
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            console.log('🗑️ LocalStorage cleared');
+            alert('LocalStorage cleared!');
+        }
+
+        // Run tests on load
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Test page loaded');
+            testJS();
+        });
+    </script>
+</body>
+</html>

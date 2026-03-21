@@ -78,8 +78,11 @@ const cuisineTypes = [
 
 // Initialize onboarding
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Onboarding initialized');
+    console.log('Current step:', onboardingState.currentStep);
     setupEventListeners();
     updateUI();
+    console.log('✅ Setup complete');
 });
 
 // Render cuisine cards
@@ -121,8 +124,20 @@ function setupEventListeners() {
     const btnNext = document.getElementById('btnNext');
     const btnPrev = document.getElementById('btnPrev');
 
-    btnNext.addEventListener('click', nextStep);
-    btnPrev.addEventListener('click', prevStep);
+    console.log('🔗 Setting up event listeners');
+    console.log('btnNext found:', btnNext !== null);
+    console.log('btnPrev found:', btnPrev !== null);
+
+    if (btnNext) {
+        btnNext.addEventListener('click', nextStep);
+        console.log('✅ Click listener added to btnNext');
+    } else {
+        console.error('❌ btnNext not found!');
+    }
+
+    if (btnPrev) {
+        btnPrev.addEventListener('click', prevStep);
+    }
 
     // Config options
     document.querySelectorAll('.config-option').forEach(option => {
@@ -146,12 +161,16 @@ function setupEventListeners() {
 
 // Next step
 function nextStep() {
+    console.log('📍 nextStep called, current step:', onboardingState.currentStep);
+
     if (onboardingState.currentStep === 3) {
+        console.log('✅ Finishing onboarding');
         finishOnboarding();
         return;
     }
 
     onboardingState.currentStep++;
+    console.log('➡️ Moving to step:', onboardingState.currentStep);
     updateUI();
 }
 
