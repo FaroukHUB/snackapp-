@@ -2,8 +2,7 @@
 // Configuration state
 const onboardingState = {
     currentStep: 1,
-    totalSteps: 4,
-    selectedCuisine: null,
+    totalSteps: 3,
     config: {
         deliveryMode: 'delivery',
         hours: 'hours-standard'
@@ -79,7 +78,6 @@ const cuisineTypes = [
 
 // Initialize onboarding
 document.addEventListener('DOMContentLoaded', () => {
-    renderCuisineCards();
     setupEventListeners();
     updateUI();
 });
@@ -148,13 +146,7 @@ function setupEventListeners() {
 
 // Next step
 function nextStep() {
-    // Validation
-    if (onboardingState.currentStep === 2 && !onboardingState.selectedCuisine) {
-        alert('Veuillez choisir un type de cuisine 🍴');
-        return;
-    }
-
-    if (onboardingState.currentStep === 4) {
+    if (onboardingState.currentStep === 3) {
         finishOnboarding();
         return;
     }
@@ -204,7 +196,7 @@ function updateUI() {
     updateButtons();
 
     // Update summary if on last step
-    if (currentStep === 4) {
+    if (currentStep === 3) {
         updateSummary();
     }
 }
@@ -213,9 +205,8 @@ function updateUI() {
 function updateHeader() {
     const headers = {
         1: { title: '🎉 Bienvenue !', subtitle: 'Configuration rapide en 3 étapes' },
-        2: { title: '🍴 Votre spécialité', subtitle: 'Choisissez votre type de cuisine' },
-        3: { title: '⚙️ Configuration', subtitle: 'Personnalisez vos préférences' },
-        4: { title: '✅ C\'est terminé !', subtitle: 'Vérifiez votre configuration' }
+        2: { title: '⚙️ Configuration', subtitle: 'Personnalisez vos préférences' },
+        3: { title: '✅ C\'est terminé !', subtitle: 'Vérifiez votre configuration' }
     };
 
     const header = headers[onboardingState.currentStep];
@@ -248,29 +239,11 @@ function updateButtons() {
 // Update next button state
 function updateNextButton() {
     const btnNext = document.getElementById('btnNext');
-    const { currentStep, selectedCuisine } = onboardingState;
-
-    if (currentStep === 2) {
-        btnNext.disabled = !selectedCuisine;
-    } else {
-        btnNext.disabled = false;
-    }
+    btnNext.disabled = false;
 }
 
 // Update summary
 function updateSummary() {
-    // Selected cuisine
-    const selectedCuisine = cuisineTypes.find(c => c.id === onboardingState.selectedCuisine);
-    document.getElementById('summarySelectedCuisine').innerHTML = `
-        <div class="summary-item">
-            <div class="summary-item-icon">${selectedCuisine.emoji}</div>
-            <div class="summary-item-text">
-                <div class="summary-item-label">Type de cuisine</div>
-                <div class="summary-item-value">${selectedCuisine.name}</div>
-            </div>
-        </div>
-    `;
-
     // Delivery mode
     const deliveryModes = {
         'delivery': 'Livraison à domicile',
@@ -297,7 +270,6 @@ function finishOnboarding() {
 
     // Save configuration
     const config = {
-        cuisineType: onboardingState.selectedCuisine,
         deliveryMode: onboardingState.config.deliveryMode,
         hours: onboardingState.config.hours,
         completedAt: new Date().toISOString()
@@ -313,20 +285,20 @@ function finishOnboarding() {
         document.querySelector('.content').innerHTML = `
             <div class="welcome-content">
                 <div class="welcome-icon">🎉</div>
-                <h2>Félicitations !</h2>
-                <p style="font-size: 18px; margin-bottom: 30px;">Votre espace est prêt. Vous allez être redirigé...</p>
+                <h2>Configuration initiale terminée !</h2>
+                <p style="font-size: 18px; margin-bottom: 30px;">Passons maintenant au choix de votre type de cuisine...</p>
                 <div class="features">
                     <div class="feature-card">
                         <div class="icon">✅</div>
                         <h3>Configuré</h3>
                     </div>
                     <div class="feature-card">
-                        <div class="icon">🚀</div>
-                        <h3>Activé</h3>
+                        <div class="icon">🍴</div>
+                        <h3>Suivant</h3>
                     </div>
                     <div class="feature-card">
                         <div class="icon">🎯</div>
-                        <h3>Prêt</h3>
+                        <h3>Cuisine</h3>
                     </div>
                 </div>
             </div>
@@ -334,10 +306,9 @@ function finishOnboarding() {
 
         document.querySelector('.button-group').style.display = 'none';
 
-        // Redirect after 2 seconds
+        // Redirect after 2 seconds to cuisine selection page
         setTimeout(() => {
-            // Redirect to admin dashboard or main app
-            window.location.href = '../admin/index.php';
+            window.location.href = 'cuisine-selection.html';
         }, 2000);
     }, 1500);
 }

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍴 Choisissez votre type de cuisine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1100px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 50px 40px 30px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Content */
+        .content {
+            padding: 40px;
+        }
+
+        .cuisine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+
+        .cuisine-card {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 3px solid transparent;
+            background: #fff;
+        }
+
+        .cuisine-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
+        }
+
+        .cuisine-card.selected {
+            border-color: #667eea;
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 16px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .cuisine-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .cuisine-card:hover .cuisine-image {
+            transform: scale(1.1);
+        }
+
+        .cuisine-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.2));
+            padding: 24px 18px;
+            color: white;
+        }
+
+        .cuisine-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cuisine-description {
+            font-size: 13px;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .cuisine-emoji {
+            font-size: 40px;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .cuisine-card:hover .cuisine-emoji {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .selected-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 700;
+            display: none;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+            animation: bounceIn 0.4s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .cuisine-card.selected .selected-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Selection Counter */
+        .selection-info {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 15px;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .selection-count {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 20px;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 16px 40px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            max-width: 350px;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Assistant Chatbot */
+        .assistant-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .assistant-bubble {
+            position: relative;
+            background: white;
+            border-radius: 20px 20px 4px 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            max-width: 320px;
+            margin-bottom: 15px;
+            animation: slideInRight 0.5s ease;
+            display: none;
+        }
+
+        .assistant-bubble.active {
+            display: block;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .assistant-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            right: 20px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 8px 8px 0 8px;
+            border-color: white transparent transparent transparent;
+        }
+
+        .assistant-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .assistant-icon-container {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            float: right;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                box-shadow: 0 6px 32px rgba(102, 126, 234, 0.6);
+            }
+        }
+
+        .assistant-icon-container:hover {
+            transform: scale(1.1);
+        }
+
+        .close-bubble {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .close-bubble:hover {
+            color: #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cuisine-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .header .subtitle {
+                font-size: 16px;
+            }
+
+            .assistant-bubble {
+                max-width: 260px;
+            }
+
+            .assistant-container {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><span>🍴</span> Quel type de cuisine proposez-vous ?</h1>
+            <p class="subtitle">Sélectionnez tous les types de cuisine que vous proposez. Cela nous aidera à personnaliser votre menu.</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Selection Info -->
+            <div class="selection-info">
+                <span>📋</span>
+                <span>Vous avez sélectionné <span class="selection-count" id="selectionCount">0</span> type(s) de cuisine</span>
+            </div>
+
+            <!-- Cuisine Grid -->
+            <div class="cuisine-grid" id="cuisineGrid">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="window.history.back()">
+                ← Retour
+            </button>
+            <button class="btn btn-primary" id="btnContinue" disabled>
+                Continuer vers mon admin 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- Assistant Chatbot -->
+    <div class="assistant-container">
+        <div class="assistant-bubble active" id="assistantBubble">
+            <button class="close-bubble" onclick="closeBubble()">✕</button>
+            <div class="assistant-text" id="assistantText">
+                👋 Bonjour ! Je suis votre assistant virtuel. Sélectionnez un ou plusieurs types de cuisine qui correspondent à votre restaurant. Vous pourrez toujours les modifier plus tard dans l'administration.
+            </div>
+        </div>
+        <div class="assistant-icon-container" onclick="toggleBubble()">
+            🤖
+        </div>
+    </div>
+
+    <script src="js/cuisine-selection.js"></script>
+</body>
+</html>
