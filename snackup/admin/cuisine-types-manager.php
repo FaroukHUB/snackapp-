@@ -278,6 +278,146 @@ $restaurantId = SNACK_RESTAURANT_ID;
     .toast.success{background:#22c55e;color:#fff}
     .toast.error{background:#ef4444;color:#fff}
     .toast.info{background:#60a5fa;color:#fff}
+
+    /* Guide d'utilisation */
+    .help-guide{
+      background: linear-gradient(135deg, rgba(96,165,250,.12) 0%, rgba(96,165,250,.05) 100%);
+      border:2px solid rgba(96,165,250,.3);
+      border-radius:var(--radius);
+      padding:24px;
+      margin-bottom:32px;
+      position:relative;
+      overflow:hidden;
+    }
+    .help-guide::before{
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;
+      height:4px;
+      background:linear-gradient(90deg, #60a5fa, #3b82f6);
+    }
+    .help-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:20px;
+    }
+    .help-title{
+      font-size:20px;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      color:#60a5fa;
+    }
+    .help-toggle{
+      background:rgba(96,165,250,.15);
+      border:1px solid rgba(96,165,250,.3);
+      color:#60a5fa;
+      padding:8px 16px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:600;
+      transition:all .2s ease;
+    }
+    .help-toggle:hover{
+      background:rgba(96,165,250,.25);
+    }
+    .help-steps{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+      gap:16px;
+      margin-top:20px;
+    }
+    .help-step{
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px;
+      padding:20px;
+      position:relative;
+    }
+    .help-step-number{
+      position:absolute;
+      top:-12px;
+      left:20px;
+      width:32px;
+      height:32px;
+      background:linear-gradient(135deg, #60a5fa, #3b82f6);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      font-size:16px;
+      box-shadow:0 4px 12px rgba(96,165,250,.4);
+    }
+    .help-step h4{
+      margin:12px 0 8px;
+      font-size:16px;
+      color:#fff;
+    }
+    .help-step p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+    .help-step ul{
+      margin:8px 0 0;
+      padding-left:20px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.8;
+    }
+    .help-step ul li{
+      margin-bottom:4px;
+    }
+    .help-example{
+      background:rgba(34,197,94,.1);
+      border-left:3px solid #22c55e;
+      padding:12px 16px;
+      margin-top:12px;
+      border-radius:6px;
+      font-size:12px;
+      color:#4ade80;
+    }
+
+    /* Tooltip */
+    .tooltip-trigger{
+      position:relative;
+      cursor:help;
+      border-bottom:1px dotted currentColor;
+    }
+    .tooltip{
+      position:absolute;
+      bottom:calc(100% + 8px);
+      left:50%;
+      transform:translateX(-50%);
+      background:#1f2937;
+      color:#fff;
+      padding:8px 12px;
+      border-radius:8px;
+      font-size:12px;
+      white-space:nowrap;
+      pointer-events:none;
+      opacity:0;
+      transition:opacity .2s ease;
+      z-index:1000;
+      box-shadow:0 4px 12px rgba(0,0,0,.3);
+    }
+    .tooltip::after{
+      content:'';
+      position:absolute;
+      top:100%;
+      left:50%;
+      transform:translateX(-50%);
+      border:6px solid transparent;
+      border-top-color:#1f2937;
+    }
+    .tooltip-trigger:hover .tooltip{
+      opacity:1;
+    }
   </style>
 </head>
 <body>
@@ -291,6 +431,64 @@ $restaurantId = SNACK_RESTAURANT_ID;
         <a href="index.php" class="btn btn-ghost">
           <i class="fas fa-arrow-left"></i> Retour
         </a>
+      </div>
+    </div>
+
+    <!-- Guide d'utilisation -->
+    <div class="help-guide" id="helpGuide">
+      <div class="help-header">
+        <div class="help-title">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Comment ça marche ?</span>
+        </div>
+        <button class="help-toggle" onclick="toggleHelp()">
+          <i class="fas fa-times"></i> Masquer
+        </button>
+      </div>
+
+      <div class="help-steps" id="helpContent">
+        <div class="help-step">
+          <div class="help-step-number">1</div>
+          <h4>📋 Activer des types de cuisine</h4>
+          <p>Choisissez les types de cuisine que propose votre restaurant :</p>
+          <ul>
+            <li>Parcourez la section "Types disponibles"</li>
+            <li>Cliquez sur "Activer ce type" sur ceux que vous proposez</li>
+            <li>Les étapes et options par défaut sont copiées automatiquement</li>
+          </ul>
+          <div class="help-example">
+            <strong>💡 Exemple :</strong> Vous faites des burgers ET des tacos ? Activez les deux types !
+          </div>
+        </div>
+
+        <div class="help-step">
+          <div class="help-step-number">2</div>
+          <h4>⚙️ Configurer chaque type</h4>
+          <p>Personnalisez les étapes de commande pour chaque type :</p>
+          <ul>
+            <li>Cliquez sur "Configurer" sur un type activé</li>
+            <li>Définissez les étapes de personnalisation (ex: sauce, garniture, cuisson)</li>
+            <li>Ajoutez les options pour chaque étape</li>
+            <li>Configurez les prix et les limites</li>
+          </ul>
+          <div class="help-example">
+            <strong>💡 Exemple :</strong> Pour un burger : Étape 1 = Pain, Étape 2 = Viande, Étape 3 = Garnitures, Étape 4 = Sauce
+          </div>
+        </div>
+
+        <div class="help-step">
+          <div class="help-step-number">3</div>
+          <h4>✅ Vérifier et tester</h4>
+          <p>Assurez-vous que tout fonctionne correctement :</p>
+          <ul>
+            <li>Vérifiez que vos types sont bien activés (section verte en haut)</li>
+            <li>Consultez les statistiques pour voir le nombre d'étapes configurées</li>
+            <li>Testez sur le site client pour valider le parcours</li>
+          </ul>
+          <div class="help-example">
+            <strong>💡 Astuce :</strong> Vous pouvez désactiver temporairement un type sans perdre sa configuration !
+          </div>
+        </div>
       </div>
     </div>
 
@@ -417,8 +615,9 @@ $restaurantId = SNACK_RESTAURANT_ID;
         container.innerHTML = `
           <div class="empty-state">
             <i class="fas fa-utensils"></i>
-            <h3>Aucun type activé</h3>
-            <p>Activez des types de cuisine ci-dessous pour commencer</p>
+            <h3>🚀 Commencez par activer vos types de cuisine</h3>
+            <p>👇 Descendez dans la section "Types disponibles" ci-dessous</p>
+            <p style="margin-top:12px;color:#60a5fa">Cliquez sur "Activer ce type" sur ceux que vous proposez (Burger, Tacos, etc.)</p>
           </div>
         `;
         return;
@@ -447,10 +646,10 @@ $restaurantId = SNACK_RESTAURANT_ID;
                 </div>
               </div>
               <div class="type-actions">
-                <button class="btn btn-sm btn-primary" onclick="configureType(${type.id})">
+                <button class="btn btn-sm btn-primary" onclick="configureType(${type.id})" title="Personnaliser les étapes et options de ce type">
                   <i class="fas fa-cog"></i> Configurer
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deactivateType(${type.id})">
+                <button class="btn btn-sm btn-danger" onclick="deactivateType(${type.id})" title="Désactiver temporairement (la configuration sera conservée)">
                   <i class="fas fa-times"></i> Désactiver
                 </button>
               </div>
@@ -488,7 +687,7 @@ $restaurantId = SNACK_RESTAURANT_ID;
           <h3 class="type-name">${type.name}</h3>
           <p class="type-desc">${type.description || ''}</p>
           <div class="type-actions">
-            <button class="btn btn-sm btn-success" onclick="activateType(${type.id}, '${type.name}')">
+            <button class="btn btn-sm btn-success" onclick="activateType(${type.id}, '${type.name}')" title="Activer ce type pour votre restaurant (copie les étapes par défaut)">
               <i class="fas fa-plus"></i> Activer ce type
             </button>
           </div>
@@ -498,7 +697,7 @@ $restaurantId = SNACK_RESTAURANT_ID;
 
     // Activer un type
     async function activateType(cuisineTypeId, name) {
-      if (!confirm(`Activer le type "${name}" ?\n\nLes étapes et options par défaut seront copiées automatiquement.`)) {
+      if (!confirm(`✅ Activer le type "${name}" ?\n\n📋 Ce qui va se passer :\n• Les étapes par défaut seront copiées automatiquement\n• Les options standard seront ajoutées\n• Vous pourrez ensuite personnaliser dans "Configurer"\n\nContinuer ?`)) {
         return;
       }
 
@@ -516,7 +715,7 @@ $restaurantId = SNACK_RESTAURANT_ID;
 
         const data = await response.json();
         if (data.success) {
-          toast('success', `Type "${name}" activé avec succès !`);
+          toast('success', `✅ Type "${name}" activé ! Cliquez sur "Configurer" pour personnaliser`);
           await loadActiveTypes();
         } else {
           toast('error', data.error || 'Erreur lors de l\'activation');
@@ -529,7 +728,7 @@ $restaurantId = SNACK_RESTAURANT_ID;
 
     // Désactiver un type
     async function deactivateType(restaurantCuisineTypeId) {
-      if (!confirm('Désactiver ce type ?\n\nLa configuration sera conservée et pourra être réactivée plus tard.')) {
+      if (!confirm('⚠️ Désactiver ce type ?\n\n💾 Rassurez-vous :\n• Votre configuration (étapes, options) sera conservée\n• Vous pouvez le réactiver à tout moment\n• Il ne sera juste plus visible sur le site client\n\nContinuer ?')) {
         return;
       }
 
@@ -565,6 +764,31 @@ $restaurantId = SNACK_RESTAURANT_ID;
     // Chargement initial
     loadAllTypes();
     loadActiveTypes();
+
+    // Toggle du guide d'aide
+    function toggleHelp() {
+      const guide = $('#helpGuide');
+      const content = $('#helpContent');
+      const btn = guide.querySelector('.help-toggle');
+
+      if (content.style.display === 'none') {
+        content.style.display = 'grid';
+        btn.innerHTML = '<i class="fas fa-times"></i> Masquer';
+        localStorage.setItem('helpGuideVisible', 'true');
+      } else {
+        content.style.display = 'none';
+        btn.innerHTML = '<i class="fas fa-question-circle"></i> Afficher l\'aide';
+        localStorage.setItem('helpGuideVisible', 'false');
+      }
+    }
+
+    // Restaurer l'état du guide
+    window.addEventListener('DOMContentLoaded', () => {
+      const isVisible = localStorage.getItem('helpGuideVisible');
+      if (isVisible === 'false') {
+        toggleHelp();
+      }
+    });
   </script>
 </body>
 </html>
