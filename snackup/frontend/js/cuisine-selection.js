@@ -20,93 +20,30 @@ const selectionState = {
     sessionId: SESSION_ID
 };
 
-// Cuisine types with local images
-const cuisineTypes = [
-    {
-        id: 'burger',
-        name: 'Burgers',
-        emoji: '🍔',
-        image: 'images/cuisine-types/burger.svg',
-        description: 'Burgers juteux et frites croustillantes'
-    },
-    {
-        id: 'pizza',
-        name: 'Pizza',
-        emoji: '🍕',
-        image: 'images/cuisine-types/pizza.svg',
-        description: 'Pizzas artisanales et italiennes'
-    },
-    {
-        id: 'sushi',
-        name: 'Sushi',
-        emoji: '🍣',
-        image: 'images/cuisine-types/sushi.svg',
-        description: 'Sushi frais et cuisine japonaise'
-    },
-    {
-        id: 'tacos',
-        name: 'Tacos',
-        emoji: '🌮',
-        image: 'images/cuisine-types/tacos.svg',
-        description: 'Tacos mexicains et tex-mex'
-    },
-    {
-        id: 'asian',
-        name: 'Asiatique',
-        emoji: '🍜',
-        image: 'images/cuisine-types/asian.svg',
-        description: 'Wok, noodles et cuisine asiatique'
-    },
-    {
-        id: 'kebab',
-        name: 'Kebab',
-        emoji: '🥙',
-        image: 'images/cuisine-types/kebab.svg',
-        description: 'Kebabs, sandwichs et grillades'
-    },
-    {
-        id: 'poke',
-        name: 'Poké Bowl',
-        emoji: '🥗',
-        image: 'images/cuisine-types/poke.svg',
-        description: 'Poké bowls frais et healthy'
-    },
-    {
-        id: 'desserts',
-        name: 'Desserts',
-        emoji: '🍰',
-        image: 'images/cuisine-types/desserts.svg',
-        description: 'Pâtisseries et douceurs'
-    },
-    {
-        id: 'vegan',
-        name: 'Végétarien',
-        emoji: '🥬',
-        image: 'images/cuisine-types/vegan.svg',
-        description: 'Cuisine végétarienne et vegan'
-    },
-    {
-        id: 'french',
-        name: 'Française',
-        emoji: '🥖',
-        image: 'images/cuisine-types/french.svg',
-        description: 'Cuisine française traditionnelle'
-    },
-    {
-        id: 'seafood',
-        name: 'Fruits de mer',
-        emoji: '🦞',
-        image: 'images/cuisine-types/seafood.svg',
-        description: 'Poissons et fruits de mer frais'
-    },
-    {
-        id: 'bbq',
-        name: 'BBQ & Grillades',
-        emoji: '🍖',
-        image: 'images/cuisine-types/bbq.svg',
-        description: 'Viandes grillées et BBQ'
-    }
-];
+// Cuisine types - CHARGÉS DEPUIS L'API (pas hardcodés)
+let cuisineTypes = [];
+
+// Emoji par défaut selon le slug (fallback si pas d'icône)
+const defaultEmojis = {
+    'burger': '🍔',
+    'pizza': '🍕',
+    'sushi': '🍣',
+    'tacos': '🌮',
+    'asian': '🍜',
+    'kebab': '🥙',
+    'poke': '🥗',
+    'bowl': '🥗',
+    'desserts': '🍰',
+    'vegan': '🥬',
+    'vegetarien': '🥬',
+    'french': '🥖',
+    'francaise': '🥖',
+    'seafood': '🦞',
+    'bbq': '🍖',
+    'sandwich': '🥪',
+    'pates': '🍝',
+    'riz-crousty': '🍚'
+};
 
 // Assistant messages
 const assistantMessages = [
@@ -128,16 +65,58 @@ const assistantMessages = [
     }
 ];
 
+// Load cuisine types from API
+async function loadCuisineTypesFromAPI() {
+    try {
+        console.log('📡 Chargement des types de cuisine depuis l\'API...');
+        const response = await fetch('api/onboarding.php?action=get_cuisine_types');
+        const data = await response.json();
+
+        if (data.success && data.types) {
+            cuisineTypes = data.types.map(type => {
+                // Déterminer l'emoji à utiliser
+                const emoji = defaultEmojis[type.slug] || defaultEmojis[type.slug?.toLowerCase()] || '🍽️';
+
+                return {
+                    id: type.id,
+                    name: type.name,
+                    emoji: emoji,
+                    image: `images/cuisine-types/${type.slug}.svg`,
+                    description: type.description || `Type de cuisine ${type.name}`,
+                    slug: type.slug,
+                    steps_count: type.steps_count || 0,
+                    options_count: type.options_count || 0
+                };
+            });
+            console.log(`✅ ${cuisineTypes.length} types de cuisine chargés depuis la DB`);
+        } else {
+            console.error('❌ Erreur lors du chargement:', data.error);
+            showError('Impossible de charger les types de cuisine');
+        }
+    } catch (error) {
+        console.error('❌ Erreur réseau:', error);
+        showError('Erreur de connexion au serveur');
+    }
+}
+
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Initialisation de la sélection de cuisine');
+    await loadCuisineTypesFromAPI();
     renderCuisineCards();
     setupEventListeners();
-    loadPreviousSelections();
+    await loadPreviousSelections();
 });
 
 // Render cuisine cards
 function renderCuisineCards() {
     const grid = document.getElementById('cuisineGrid');
+
+    if (cuisineTypes.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">Chargement...</p>';
+        return;
+    }
+
     grid.innerHTML = cuisineTypes.map(cuisine => `
         <div class="cuisine-card" data-cuisine="${cuisine.id}">
             <div class="selected-badge">✓ Sélectionné</div>
@@ -156,8 +135,22 @@ function renderCuisineCards() {
     });
 }
 
+// Show error message
+function showError(message) {
+    const grid = document.getElementById('cuisineGrid');
+    grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:40px;background:rgba(239,68,68,0.1);border-radius:12px;color:#ef4444;">
+            <p style="font-size:18px;margin:0;"><strong>⚠️ ${message}</strong></p>
+            <p style="margin:10px 0 0;font-size:14px;">Veuillez réessayer ou contacter le support.</p>
+        </div>
+    `;
+}
+
 // Toggle cuisine selection
 function toggleCuisine(cuisineId) {
+    // Convertir en nombre
+    cuisineId = parseInt(cuisineId);
+
     const index = selectionState.selectedCuisines.indexOf(cuisineId);
     const card = document.querySelector(`[data-cuisine="${cuisineId}"]`);
 
@@ -216,8 +209,33 @@ function saveSelections() {
     localStorage.setItem('cuisineSelection', JSON.stringify(data));
 }
 
-// Load previous selections
-function loadPreviousSelections() {
+// Load previous selections (from localStorage AND from DB)
+async function loadPreviousSelections() {
+    // 1. Charger depuis la DB les types déjà activés
+    try {
+        const response = await fetch('api/onboarding.php?action=get_selected_types');
+        const data = await response.json();
+
+        if (data.success && data.selected && data.selected.length > 0) {
+            console.log('📋 Types déjà activés en DB:', data.selected);
+            selectionState.selectedCuisines = data.selected.map(id => parseInt(id));
+
+            // Update UI
+            selectionState.selectedCuisines.forEach(cuisineId => {
+                const card = document.querySelector(`[data-cuisine="${cuisineId}"]`);
+                if (card) {
+                    card.classList.add('selected');
+                }
+            });
+
+            updateUI();
+            return; // Priorité aux données DB
+        }
+    } catch (e) {
+        console.error('Erreur chargement depuis DB:', e);
+    }
+
+    // 2. Sinon, charger depuis localStorage (session en cours)
     const saved = localStorage.getItem('cuisineSelection');
     if (saved) {
         try {
@@ -243,36 +261,67 @@ function loadPreviousSelections() {
 }
 
 // Finish selection and redirect
-function finishSelection() {
+async function finishSelection() {
     if (selectionState.selectedCuisines.length === 0) {
         alert('Veuillez sélectionner au moins un type de cuisine 🍴');
         return;
     }
 
     const btnContinue = document.getElementById('btnContinue');
-    btnContinue.textContent = '⏳ Chargement...';
+    btnContinue.textContent = '⏳ Enregistrement...';
     btnContinue.disabled = true;
 
-    // Save final selection with session ID
-    const finalData = {
-        sessionId: SESSION_ID,
-        cuisines: selectionState.selectedCuisines,
-        completedAt: new Date().toISOString(),
-        onboardingConfig: JSON.parse(localStorage.getItem('onboardingConfig') || '{}')
-    };
+    try {
+        // Récupérer la config de l'onboarding
+        const onboardingConfig = JSON.parse(localStorage.getItem('onboardingConfig') || '{}');
 
-    localStorage.setItem('cuisineSelectionComplete', 'true');
-    localStorage.setItem('finalDemoConfig', JSON.stringify(finalData));
+        // Enregistrer dans la DB via l'API
+        console.log('💾 Enregistrement des sélections dans la DB...');
+        const response = await fetch('api/onboarding.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'save_selections',
+                cuisine_ids: selectionState.selectedCuisines,
+                onboarding_config: onboardingConfig
+            })
+        });
 
-    // Show success and redirect
-    setTimeout(() => {
-        showAssistantMessage('readyToContinue');
+        const data = await response.json();
 
-        setTimeout(() => {
-            // Redirect to admin with session parameter
-            window.location.href = `../admin/index.php?session=${SESSION_ID}&demo=1`;
-        }, 1500);
-    }, 800);
+        if (data.success) {
+            console.log('✅ Enregistrement réussi:', data);
+
+            // Marquer l'onboarding comme terminé
+            localStorage.setItem('cuisineSelectionComplete', 'true');
+            localStorage.setItem('onboardingComplete', 'true');
+
+            // Afficher le message de succès
+            btnContinue.textContent = `✅ ${data.total_activated} type(s) activé(s) !`;
+
+            // Attendre un peu puis rediriger vers la page de gestion des types
+            setTimeout(() => {
+                showAssistantMessage('readyToContinue');
+
+                setTimeout(() => {
+                    // Rediriger vers la page de gestion des types de cuisine dans l'admin
+                    window.location.href = `../admin/cuisine-types-manager.php?onboarding_complete=1`;
+                }, 1500);
+            }, 800);
+        } else {
+            console.error('❌ Erreur:', data.error);
+            alert(`Erreur lors de l'enregistrement: ${data.error}`);
+            btnContinue.textContent = 'Continuer vers mon admin 🚀';
+            btnContinue.disabled = false;
+        }
+    } catch (error) {
+        console.error('❌ Erreur réseau:', error);
+        alert('Erreur de connexion au serveur. Veuillez réessayer.');
+        btnContinue.textContent = 'Continuer vers mon admin 🚀';
+        btnContinue.disabled = false;
+    }
 }
 
 // Assistant bubble functions

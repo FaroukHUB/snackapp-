@@ -392,6 +392,38 @@ class CuisineTypeRepository {
     }
 
     // ========================================================================
+    // TEMPLATES (pour onboarding / preview)
+    // ========================================================================
+
+    /**
+     * Récupère les étapes template d'un type de cuisine
+     * Utilisé pour l'onboarding / preview
+     */
+    public static function getTemplateSteps(int $cuisineTypeId): array {
+        return Database::fetchAll(
+            "SELECT * FROM cuisine_type_steps
+             WHERE cuisine_type_id = ?
+             ORDER BY sort_order ASC",
+            [$cuisineTypeId]
+        );
+    }
+
+    /**
+     * Récupère les options template d'une étape
+     * Utilisé pour l'onboarding / preview
+     */
+    public static function getTemplateOptions(int $cuisineTypeStepId): array {
+        return Database::fetchAll(
+            "SELECT * FROM cuisine_type_step_options
+             WHERE cuisine_type_step_id = ?
+             AND is_active = 1
+             AND deleted_at IS NULL
+             ORDER BY sort_order ASC",
+            [$cuisineTypeStepId]
+        );
+    }
+
+    // ========================================================================
     // STATISTIQUES
     // ========================================================================
 
