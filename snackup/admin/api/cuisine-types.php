@@ -17,6 +17,17 @@ $restaurantId = SNACK_RESTAURANT_ID;
 try {
     // GET - Récupérer les types
     if ($method === 'GET') {
+        // Config complète d'un type (pour page de configuration)
+        if (isset($_GET['type_id'])) {
+            $typeId = (int) $_GET['type_id'];
+            $steps = CuisineTypeRepository::getRestaurantSteps($typeId, true);
+            foreach ($steps as &$step) {
+                $step['options'] = CuisineTypeRepository::getStepOptions($step['id'], true);
+            }
+            echo json_encode(['success' => true, 'steps' => $steps]);
+            exit;
+        }
+
         $activeOnly = isset($_GET['active_only']) && $_GET['active_only'] == '1';
 
         if ($activeOnly) {
@@ -58,8 +69,11 @@ try {
         $input = json_decode(file_get_contents('php://input'), true);
 
         // Vérifier CSRF
-        $csrfToken = $input['csrf_token'] ?? '';
-        if (!verifyCsrfToken($csrfToken)) {
+        $csrfToken = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+        if (!$csrfToken) {
+            $csrfToken = $input['csrf_token'] ?? null;
+        }
+        if (!$csrfToken || !validateCsrfToken($csrfToken)) {
             http_response_code(403);
             echo json_encode(['success' => false, 'error' => 'Token CSRF invalide']);
             exit;
@@ -123,6 +137,97 @@ try {
                 'success' => true,
                 'message' => 'Type désactivé avec succès'
             ]);
+            exit;
+        }
+
+        // Mettre à jour une étape
+        if ($action === 'update_step') {
+            $stepId = (int) ($input['step_id'] ?? 0);
+            if (!$stepId) {
+                echo json_encode(['success' => false, 'error' => 'ID étape manquant']);
+                exit;
+            }
+            $data = [];
+            foreach (['custom_name', 'is_active', 'is_required', 'min_choices', 'max_choices', 'allow_removal', 'has_price_modifier'] as $field) {
+                if (array_key_exists($field, $input)) {
+                    $data[$field] = $input[$field];
+                }
+            }
+            CuisineTypeRepository::updateRestaurantStep($stepId, $data);
+            echo json_encode(['success' => true, 'message' => 'Étape mise à jour']);
+            exit;
+        }
+
+        // Créer une option
+        if ($action === 'create_option') {
+            $stepId = (int) ($input['step_id'] ?? 0);
+            $name = trim($input['name'] ?? '');
+            if (!$stepId || !$name) {
+                echo json_encode(['success' => false, 'error' => 'Données manquantes']);
+                exit;
+            }
+            $optionId = CuisineTypeRepository::createStepOption($stepId, [
+                'name' => $name,
+                'price_modifier' => (float) ($input['price_modifier'] ?? 0),
+                'sort_order' => (int) ($input['sort_order'] ?? 99)
+            ]);
+            echo json_encode(['success' => true, 'option_id' => $optionId, 'message' => 'Option créée']);
+            exit;
+        }
+
+        // Mettre à jour une option
+        if ($action === 'update_option') {
+            $optionId = (int) ($input['option_id'] ?? 0);
+            if (!$optionId) {
+                echo json_encode(['success' => false, 'error' => 'ID option manquant']);
+                exit;
+            }
+            $data = [];
+            foreach (['name', 'price_modifier', 'sort_order', 'is_active'] as $field) {
+                if (array_key_exists($field, $input)) {
+                    $data[$field] = $input[$field];
+                }
+            }
+            CuisineTypeRepository::updateStepOption($optionId, $data);
+            echo json_encode(['success' => true, 'message' => 'Option mise à jour']);
+            exit;
+        }
+
+        // Supprimer une option
+        if ($action === 'delete_option') {
+            $optionId = (int) ($input['option_id'] ?? 0);
+            if (!$optionId) {
+                echo json_encode(['success' => false, 'error' => 'ID option manquant']);
+                exit;
+            }
+            CuisineTypeRepository::deleteStepOption($optionId);
+            echo json_encode(['success' => true, 'message' => 'Option supprimée']);
+            exit;
+        }
+
+        // Réorganiser les étapes
+        if ($action === 'reorder_steps') {
+            $typeId = (int) ($input['type_id'] ?? 0);
+            $stepIds = $input['step_ids'] ?? [];
+            if (!$typeId || empty($stepIds)) {
+                echo json_encode(['success' => false, 'error' => 'Données manquantes']);
+                exit;
+            }
+            CuisineTypeRepository::reorderSteps($typeId, $stepIds);
+            echo json_encode(['success' => true, 'message' => 'Ordre mis à jour']);
+            exit;
+        }
+
+        // Réorganiser les options
+        if ($action === 'reorder_options') {
+            $stepId = (int) ($input['step_id'] ?? 0);
+            $optionIds = $input['option_ids'] ?? [];
+            if (!$stepId || empty($optionIds)) {
+                echo json_encode(['success' => false, 'error' => 'Données manquantes']);
+                exit;
+            }
+            CuisineTypeRepository::reorderOptions($stepId, $optionIds);
+            echo json_encode(['success' => true, 'message' => 'Ordre mis à jour']);
             exit;
         }
 

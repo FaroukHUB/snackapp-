@@ -96,8 +96,8 @@ Créer la page `snackup/admin/cuisine-type-config.php` pour :
 - [x] CuisineTypeRepository avec copie automatique
 - [x] Interface Admin principale (cuisine-types-manager.php)
 - [x] API REST basique (cuisine-types.php)
-- [ ] Fix CSRF vérification ⚠️
-- [ ] Page de configuration détaillée
+- [x] Fix CSRF vérification ✅
+- [x] Page de configuration détaillée ✅
 - [ ] Tests complets activation/désactivation
 - [ ] Documentation utilisateur
 
@@ -108,9 +108,9 @@ Créer la page `snackup/admin/cuisine-type-config.php` pour :
 ```
 snackup/admin/
 ├── cuisine-types-manager.php ✅ (interface principale)
-├── cuisine-type-config.php ❌ (à créer)
+├── cuisine-type-config.php ✅ (créée)
 └── api/
-    └── cuisine-types.php ⚠️ (à corriger - CSRF)
+    └── cuisine-types.php ✅ (CSRF corrigé + API config ajoutée)
 
 database/
 └── repositories/
