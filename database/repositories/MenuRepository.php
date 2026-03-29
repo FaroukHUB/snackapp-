@@ -15,11 +15,11 @@ class MenuRepository {
     public static function getAllCategories() {
         $pdo = Database::getInstance();
 
-        // Récupérer catégories actives (non supprimées)
+        // Récupérer catégories actives
         $stmt = $pdo->prepare("
             SELECT id, slug, name, description, icon, flavor, sort_order
             FROM categories
-            WHERE restaurant_id = ? AND deleted_at IS NULL
+            WHERE restaurant_id = ?
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([self::$restaurantId]);
@@ -42,14 +42,27 @@ class MenuRepository {
         $stmt = $pdo->prepare("
             SELECT id, slug, name, description, image,
                    price_solo as priceSolo, price_menu as priceMenu,
-                   status, sort_order
+                   status, sort_order, base_ingredients
             FROM products
-            WHERE category_id = ? AND deleted_at IS NULL
+            WHERE category_id = ?
             ORDER BY sort_order ASC, id ASC
         ");
         $stmt->execute([$categoryId]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Décoder les colonnes JSON
+        foreach ($products as &$product) {
+            // Décoder base_ingredients (array simple)
+            if (!empty($product['base_ingredients'])) {
+                $product['baseIngredients'] = json_decode($product['base_ingredients'], true) ?? [];
+            } else {
+                $product['baseIngredients'] = [];
+            }
+            unset($product['base_ingredients']); // Supprimer l'ancienne clé snake_case
+        }
+
+        return $products;
     }
 
     /**
@@ -59,7 +72,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT id, slug, name, price, type, status
+            SELECT id, name, price, flavor, status
             FROM supplements
             WHERE restaurant_id = ?
             ORDER BY sort_order ASC
@@ -68,12 +81,12 @@ class MenuRepository {
 
         $supplements = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $supp) {
-            $supplements[$supp['slug']] = [
-                'id' => $supp['slug'],
+            $supplements[$supp['id']] = [
+                'id' => $supp['id'],
                 'name' => $supp['name'],
                 'price' => (int)$supp['price'],
                 'status' => $supp['status'],
-                'type' => $supp['type']
+                'flavor' => $supp['flavor']
             ];
         }
 
@@ -87,7 +100,7 @@ class MenuRepository {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
-            SELECT c.slug as category_slug, s.slug as supplement_slug
+            SELECT c.slug as category_slug, s.id as supplement_id
             FROM category_supplements cs
             JOIN categories c ON cs.category_id = c.id
             JOIN supplements s ON cs.supplement_id = s.id
@@ -100,7 +113,7 @@ class MenuRepository {
             if (!isset($associations[$row['category_slug']])) {
                 $associations[$row['category_slug']] = [];
             }
-            $associations[$row['category_slug']][] = $row['supplement_slug'];
+            $associations[$row['category_slug']][] = $row['supplement_id'];
         }
 
         return $associations;
@@ -176,7 +189,7 @@ class MenuRepository {
         // Récupérer les suppléments du type correspondant
         $stmt = $pdo->prepare("
             SELECT id FROM supplements
-            WHERE restaurant_id = ? AND (type = ? OR type = 'both')
+            WHERE restaurant_id = ? AND (flavor = ? OR flavor = 'both')
         ");
         $stmt->execute([self::$restaurantId, $flavor]);
         $supplements = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -215,14 +228,14 @@ class MenuRepository {
     }
 
     /**
-     * Supprime une catégorie (soft delete)
+     * Supprime une catégorie (désactivation)
      */
     public static function deleteCategory($categoryId) {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
             UPDATE categories
-            SET deleted_at = NOW(), is_active = 0
+            SET is_active = 0
             WHERE id = ? AND restaurant_id = ?
         ");
 
@@ -232,7 +245,7 @@ class MenuRepository {
     /**
      * Ajoute un produit
      */
-    public static function addProduct($categoryId, $name, $description, $image, $priceSolo, $priceMenu = null) {
+    public static function addProduct($categoryId, $name, $description, $image, $priceSolo, $priceMenu = null, $baseIngredients = null) {
         $pdo = Database::getInstance();
 
         $slug = self::generateSlug($name);
@@ -246,10 +259,13 @@ class MenuRepository {
         $stmt->execute([$categoryId]);
         $sortOrder = ($stmt->fetchColumn() ?: 0) + 1;
 
+        // Encoder les données JSON si présentes
+        $baseIngredientsJson = $baseIngredients !== null ? json_encode($baseIngredients, JSON_UNESCAPED_UNICODE) : null;
+
         $stmt = $pdo->prepare("
             INSERT INTO products
-            (restaurant_id, category_id, slug, name, description, image, price_solo, price_menu, status, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?)
+            (restaurant_id, category_id, slug, name, description, image, price_solo, price_menu, status, sort_order, base_ingredients)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available', ?, ?)
         ");
 
         $stmt->execute([
@@ -261,7 +277,8 @@ class MenuRepository {
             $image,
             $priceSolo,
             $priceMenu,
-            $sortOrder
+            $sortOrder,
+            $baseIngredientsJson
         ]);
 
         return [
@@ -274,13 +291,17 @@ class MenuRepository {
     /**
      * Modifie un produit
      */
-    public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status) {
+    public static function editProduct($productId, $name, $description, $image, $priceSolo, $priceMenu, $status, $baseIngredients = null) {
         $pdo = Database::getInstance();
+
+        // Encoder les données JSON si présentes
+        $baseIngredientsJson = $baseIngredients !== null ? json_encode($baseIngredients, JSON_UNESCAPED_UNICODE) : null;
 
         $stmt = $pdo->prepare("
             UPDATE products
             SET name = ?, description = ?, image = ?,
-                price_solo = ?, price_menu = ?, status = ?
+                price_solo = ?, price_menu = ?, status = ?,
+                base_ingredients = ?
             WHERE id = ? AND restaurant_id = ?
         ");
 
@@ -291,20 +312,21 @@ class MenuRepository {
             $priceSolo,
             $priceMenu,
             $status,
+            $baseIngredientsJson,
             $productId,
             self::$restaurantId
         ]);
     }
 
     /**
-     * Supprime un produit (soft delete)
+     * Supprime un produit (désactivation)
      */
     public static function deleteProduct($productId) {
         $pdo = Database::getInstance();
 
         $stmt = $pdo->prepare("
             UPDATE products
-            SET deleted_at = NOW()
+            SET status = 'unavailable'
             WHERE id = ? AND restaurant_id = ?
         ");
 

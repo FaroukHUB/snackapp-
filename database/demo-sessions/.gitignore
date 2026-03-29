@@ -1,0 +1,5 @@
+# Ignore all demo session files
+demo_*.json
+
+# But keep this directory
+!.gitignore

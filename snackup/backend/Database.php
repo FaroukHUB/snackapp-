@@ -29,7 +29,7 @@ class Database {
      * Connexion à la base de données
      */
     private static function connect(): void {
-        $host = self::$config['host'] ?? 'localhost';
+        $host = self::$config['host'] ?? '127.0.0.1';
         $dbname = self::$config['name'] ?? self::$config['dbname'] ?? 'snackapp';  // Support 'name' et 'dbname'
         $username = self::$config['user'] ?? self::$config['username'] ?? 'root';  // Support 'user' et 'username'
         $password = self::$config['password'] ?? '';

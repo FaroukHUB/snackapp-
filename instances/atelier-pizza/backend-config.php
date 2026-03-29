@@ -6,10 +6,10 @@
 
 return [
     'database' => [
-        'host' => 'localhost',
-        'name' => 'zajr1824_atelierpizza',
+        'host' => '127.0.0.1',
+        'dbname' => 'zajr1824_atelierpizza',  // Utilise 'dbname' pour cohérence
         'user' => 'zajr1824_atelierpizza',
-        'password' => 'Mariagor6!',
+        'password' => 'CHANGE_ME',  // ⚠️ À configurer sur le serveur
         'charset' => 'utf8mb4'
     ],
 
@@ -27,6 +27,12 @@ return [
         'timezone' => 'Europe/Paris',
         'locale' => 'fr_FR',
         'currency' => 'EUR'
+    ],
+
+    'features' => [
+        // Désactiver l'auto-assignment des suppléments par flavor/type
+        // Feature Marvelous (crêperie salé/sucré) non applicable aux pizzerias
+        'auto_category_supplements' => false
     ],
 
     'email' => [

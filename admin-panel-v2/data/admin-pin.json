@@ -1,5 +1,0 @@
-{
-    "pin": "1234",
-    "created_at": "2024-01-01T00:00:00Z",
-    "note": "PIN par défaut. Changez-le via l'interface admin (nécessite l'ancien PIN)."
-}

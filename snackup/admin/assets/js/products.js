@@ -113,7 +113,7 @@ function renderProducts(products) {
                     ${byCategory[category].map(product => `
                         <div class="glass-strong rounded-xl p-4 flex items-center gap-4">
                             ${product.image ? `
-                                <img src="${product.image}" alt="${product.name}" class="w-16 h-16 rounded-lg object-cover">
+                                <img src="../../${product.image}" alt="${product.name}" class="w-16 h-16 rounded-lg object-cover">
                             ` : `
                                 <div class="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center">
                                     <i class="fas fa-image text-gray-600"></i>

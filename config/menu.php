@@ -18,14 +18,25 @@ try {
     $instanceName = InstanceManager::getCurrentInstance();
     $restaurantId = InstanceManager::getRestaurantId();
 
-    // Charger la base de données
-    require_once __DIR__ . '/../snackup/backend/Database.php';
-    Database::init(InstanceManager::getDatabaseConfig());
+    // Pour l'instance demo, retourner un menu vide (pas de DB)
+    if ($instanceName === 'demo') {
+        $categories = [];
+        $supplements = [];
+        $categorySupplements = [];
+        $formules = [];
+    } else {
+        // Pour les autres instances, charger depuis la base de données
+        require_once __DIR__ . '/../snackup/backend/Database.php';
+        Database::init(InstanceManager::getDatabaseConfig());
 
-    require_once __DIR__ . '/../snackup/backend/repositories/MenuRepository.php';
+        require_once __DIR__ . '/../snackup/backend/repositories/MenuRepository.php';
 
-    // Définir le restaurant ID
-    MenuRepository::$restaurantId = $restaurantId;
+        // Récupérer les données du menu depuis MySQL
+        $categories = MenuRepository::getAllCategories();
+        $supplements = MenuRepository::getAllSupplements();
+        $categorySupplements = MenuRepository::getCategorySupplements();
+        $formules = MenuRepository::getAllFormules();
+    }
 
 } catch (Exception $e) {
     http_response_code(500);
@@ -38,10 +49,6 @@ try {
 }
 
 try {
-    // Récupérer les données du menu depuis MySQL
-    $categories = MenuRepository::getAllCategories();
-    $supplements = MenuRepository::getAllSupplements();
-    $categorySupplements = MenuRepository::getCategorySupplements();
 
     // Formater le menu pour le frontend
     $menu = ['categories' => $categories];
@@ -52,25 +59,21 @@ try {
         'defaultForCategories' => $categorySupplements
     ];
 
-    // Charger formules depuis menu.json si existant (fallback temporaire)
-    $menuJsonPath = __DIR__ . '/menu.json';
-    $formules = [];
-    $featured = [
-        'enabled' => true,
-        'title' => 'Sélection pour vous',
-        'subtitle' => 'Nos produits les plus appréciés',
-        'items' => []
-    ];
+    // Construire categoryIcons depuis la base de données (mapping slug → icon)
     $categoryIcons = [];
-
-    if (file_exists($menuJsonPath)) {
-        $menuData = json_decode(file_get_contents($menuJsonPath), true);
-        if ($menuData) {
-            $formules = $menuData['formules'] ?? [];
-            $featured = $menuData['featured'] ?? $featured;
-            $categoryIcons = $menuData['categoryIcons'] ?? [];
+    foreach ($categories as $cat) {
+        if (!empty($cat['slug']) && !empty($cat['icon'])) {
+            $categoryIcons[$cat['slug']] = $cat['icon'];
         }
     }
+
+    // Featured: structure par défaut (pas de données JSON)
+    $featured = [
+        'enabled' => false,
+        'title' => '',
+        'subtitle' => '',
+        'items' => []
+    ];
 
     // Construire la réponse complète
     $response = [

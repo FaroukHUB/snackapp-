@@ -1,5 +1,14 @@
 {
   "instances": {
+    "demo": {
+      "name": "Restaurant Demo",
+      "domains": [
+        "demo.mon-agenceweb.fr",
+        "www.demo.mon-agenceweb.fr"
+      ],
+      "config_path": "instances/demo/backend-config.php",
+      "enabled": true
+    },
     "marvelous": {
       "name": "Le Marvelous",
       "domains": [
@@ -22,7 +31,7 @@
       "enabled": true
     }
   },
-  "default": "atelier-pizza",
+  "default": "demo",
   "settings": {
     "cache_enabled": false,
     "strict_domain_matching": false

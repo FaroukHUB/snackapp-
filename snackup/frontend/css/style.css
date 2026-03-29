@@ -499,142 +499,114 @@ ul {
 /* ============================================
    FORMULES SECTION
    ============================================ */
+/* ALIGNEMENT AVEC PRODUCT-SECTION : mêmes margins, paddings, border */
 .formules-section {
-    margin-bottom: 48px;
+    /* Mêmes valeurs que .product-section */
+    margin-bottom: 64px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--gray-200);
+    scroll-margin-top: calc(var(--header-height) + 24px);
+}
+
+.formules-section:last-child {
+    border-bottom: none;
+    margin-bottom: 32px;
+}
+
+/* TITRE : mêmes styles que .product-section h2 */
+.formules-section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--success);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.formules-section h2 i {
+    color: var(--success);
+    font-size: 20px;
 }
 
 .formules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
+    width: 100%;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 768px) {
     .formules-grid {
-        grid-template-columns: 1fr;
+        gap: 16px;
     }
 }
 
+/* CARTE FORMULE : Design vertical, plus haute que large, fond légèrement vert */
 .formule-card {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border-radius: var(--border-radius-lg);
+    background: #ffffff;
+    border-radius: 16px;
     overflow: hidden;
-    color: var(--white);
     position: relative;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    min-height: 440px;
+    /* Fond légèrement vert */
+    background: linear-gradient(180deg, #f0fff4 0%, #ffffff 100%);
 }
 
 .formule-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
 }
 
 .formule-card-content {
-    padding: 24px;
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    padding: 20px;
+    flex: 1;
+    text-align: center;
 }
 
-.formule-image-wrapper {
-    width: 100px;
-    height: 100px;
-    border-radius: var(--border-radius);
-    flex-shrink: 0;
-    overflow: hidden;
-    background: rgba(255,255,255,0.1);
+/* IMAGE CENTRÉE (pas collée en haut/gauche) */
+.formule-image-centered {
+    width: 100%;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-height: 200px;
 }
 
 .formule-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+.formule-card:hover .formule-image {
+    transform: scale(1.05);
 }
 
 .formule-image-placeholder {
-    width: 100%;
-    height: 100%;
+    width: 180px;
+    height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.6);
-    font-size: 32px;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: var(--success);
+    font-size: 64px;
+    border-radius: 12px;
 }
 
-.formule-info {
-    flex: 1;
-    min-width: 0;
-    overflow: visible;
-}
-
-.formule-name {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.formule-description {
-    font-size: 13px;
-    opacity: 0.9;
-    margin-bottom: 12px;
-    line-height: 1.4;
-}
-
-.formule-price {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-}
-
-.formule-price .current {
-    font-size: 24px;
-    font-weight: 800;
-}
-
-.formule-price .original {
-    font-size: 14px;
-    text-decoration: line-through;
-    opacity: 0.7;
-}
-
-.formule-footer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-top: 12px;
-    position: relative;
-    z-index: 5;
-}
-
-.formule-add-btn {
-    background: rgba(255,255,255,0.95);
-    color: var(--primary);
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    transition: var(--transition);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 10;
-    pointer-events: auto;
-}
-
-.formule-add-btn:hover {
-    background: white;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
+/* BADGE : vient de la DB, pas hardcodé */
 .formule-savings {
     position: absolute;
     top: 12px;
@@ -643,8 +615,103 @@ ul {
     color: var(--gray-900);
     font-size: 11px;
     font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 50px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    z-index: 10;
+}
+
+/* NOM CENTRÉ */
+.formule-name {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 10px 0;
+    line-height: 1.3;
+    text-align: center;
+}
+
+/* DESCRIPTION : vient de la DB */
+.formule-description {
+    font-size: 14px;
+    color: var(--gray-600);
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    text-align: center;
+}
+
+/* PRIX MIS EN VALEUR (rouge OK) */
+.formule-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.formule-price .current {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.formule-price .original {
+    font-size: 15px;
+    text-decoration: line-through;
+    color: var(--gray-400);
+}
+
+/* BOUTON CTA EN BAS */
+.formule-cta-btn {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 13px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.formule-cta-btn:hover {
+    background: var(--primary-dark);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.formule-cta-btn i {
+    font-size: 16px;
+}
+
+.formule-add-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.formule-add-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 /* ============================================
@@ -1536,6 +1603,147 @@ ul {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+/* Formule Includes Section */
+.modal-formule-includes {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-radius: 12px;
+    border: 2px solid #86efac;
+}
+
+.modal-formule-includes h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #15803d;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-formule-includes h4 i {
+    color: #22c55e;
+}
+
+.formule-includes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.formule-include-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.formule-include-item i {
+    color: #22c55e;
+    font-size: 14px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.formule-include-content {
+    flex: 1;
+}
+
+.formule-include-title {
+    font-weight: 600;
+    color: var(--gray-900);
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.formule-include-type {
+    font-size: 12px;
+    color: var(--gray-500);
+    text-transform: capitalize;
+}
+
+.formule-include-rules {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.formule-include-rule {
+    font-size: 12px;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.formule-include-rule i {
+    color: var(--primary);
+    font-size: 11px;
+}
+
+/* Formule Selector */
+.formule-selector {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-900);
+    background-color: white;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+.formule-selector:hover {
+    border-color: var(--primary);
+}
+
+.formule-selector:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.formule-selector option {
+    padding: 10px;
+}
+
+.formule-include-note {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.formule-include-title {
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* Add to cart button disabled state for formules */
+#addToCartBtn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--gray-400);
+}
+
+#addToCartBtn.disabled:hover {
+    background-color: var(--gray-400);
+    transform: none;
 }
 
 /* Drinks Selection (Menu) */

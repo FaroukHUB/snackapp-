@@ -19,7 +19,7 @@ const Config = {
     _cache: {},
 
     // Paths - adjust based on your setup
-    basePath: '../config/',
+    basePath: '../../config/',
 
     /**
      * Initialize configuration
@@ -183,7 +183,7 @@ const Config = {
      * Get products from a specific category
      */
     getProductsByCategory(categoryId) {
-        const category = this.menu?.categories?.find(c => c.id === categoryId);
+        const category = this.menu?.categories?.find(c => c.id == categoryId);
         return category?.items || [];
     },
 
@@ -204,6 +204,7 @@ const Config = {
      * Find product by ID or SLUG
      * Supports:
      * - Numeric ID lookup: getProduct(123) or getProduct("123")
+     * - String ID lookup: getProduct("fromagere")
      * - Slug lookup: getProduct("margherita-26cm")
      */
     getProduct(productId) {
@@ -221,8 +222,8 @@ const Config = {
                 // Lookup par ID numérique (strict)
                 product = category.items?.find(p => p.id === numericId);
             } else {
-                // Lookup par slug (strict)
-                product = category.items?.find(p => p.slug === productId);
+                // Lookup par ID string ou par slug (strict)
+                product = category.items?.find(p => p.id === productId || p.slug === productId);
             }
 
             if (product) {
@@ -399,9 +400,23 @@ const Config = {
 
     /**
      * Get formule by ID
+     * Supports both numeric and string IDs (flexible like getProduct)
      */
     getFormule(formuleId) {
-        return this.formules.find(f => f.id === formuleId);
+        // Handle both number and string IDs
+        const isNumericLookup = typeof formuleId === 'number' ||
+                                (typeof formuleId === 'string' && /^\d+$/.test(formuleId));
+
+        // Convert to number if it's a numeric string
+        const numericId = isNumericLookup ? Number(formuleId) : null;
+
+        if (isNumericLookup) {
+            // Lookup by numeric ID (strict)
+            return this.formules.find(f => f.id === numericId);
+        } else {
+            // Lookup by string ID (for formule-midi, etc.)
+            return this.formules.find(f => f.id === formuleId);
+        }
     },
 
     /**

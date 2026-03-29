@@ -10,7 +10,7 @@ $csrfToken = getCsrfToken();
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="csrf-token" content="<?= e($csrfToken) ?>">
   <title>Admin • Produits</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
   <style>
     :root{
@@ -553,6 +553,70 @@ $csrfToken = getCsrfToken();
                 <input type="radio" name="icon" value="fa-utensils">
                 <span><i class="fas fa-utensils"></i></span>
               </label>
+              <label class="icon-option" data-icon="fa-hamburger" title="Hamburger">
+                <input type="radio" name="icon" value="fa-hamburger">
+                <span><i class="fas fa-hamburger"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-fish" title="Poisson">
+                <input type="radio" name="icon" value="fa-fish">
+                <span><i class="fas fa-fish"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-cookie" title="Cookie">
+                <input type="radio" name="icon" value="fa-cookie">
+                <span><i class="fas fa-cookie"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-stroopwafel" title="Stroopwafel">
+                <input type="radio" name="icon" value="fa-stroopwafel">
+                <span><i class="fas fa-stroopwafel"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-apple-alt" title="Pomme">
+                <input type="radio" name="icon" value="fa-apple-alt">
+                <span><i class="fas fa-apple-alt"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-lemon" title="Citron">
+                <input type="radio" name="icon" value="fa-lemon">
+                <span><i class="fas fa-lemon"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-seedling" title="Végétal">
+                <input type="radio" name="icon" value="fa-seedling">
+                <span><i class="fas fa-seedling"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-coffee" title="Café">
+                <input type="radio" name="icon" value="fa-coffee">
+                <span><i class="fas fa-coffee"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-glass-martini-alt" title="Cocktail">
+                <input type="radio" name="icon" value="fa-glass-martini-alt">
+                <span><i class="fas fa-glass-martini-alt"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-wine-glass-alt" title="Vin">
+                <input type="radio" name="icon" value="fa-wine-glass-alt">
+                <span><i class="fas fa-wine-glass-alt"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-beer" title="Bière">
+                <input type="radio" name="icon" value="fa-beer">
+                <span><i class="fas fa-beer"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-blender" title="Blender">
+                <input type="radio" name="icon" value="fa-blender">
+                <span><i class="fas fa-blender"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-concierge-bell" title="Service">
+                <input type="radio" name="icon" value="fa-concierge-bell">
+                <span><i class="fas fa-concierge-bell"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-shopping-basket" title="Panier">
+                <input type="radio" name="icon" value="fa-shopping-basket">
+                <span><i class="fas fa-shopping-basket"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-shopping-bag" title="Sac">
+                <input type="radio" name="icon" value="fa-shopping-bag">
+                <span><i class="fas fa-shopping-bag"></i></span>
+              </label>
+              <label class="icon-option" data-icon="fa-store" title="Boutique">
+                <input type="radio" name="icon" value="fa-store">
+                <span><i class="fas fa-store"></i></span>
+              </label>
             </div>
           </div>
           <p class="muted" style="margin:0">L'identifiant technique est généré automatiquement.</p>
@@ -703,7 +767,7 @@ $csrfToken = getCsrfToken();
           </div>
           <div class="two">
             <div class="field">
-              <label for="editPriceSolo">Prix Solo 26cm <span class="muted">(optionnel pour produits avec options)</span></label>
+              <label for="editPriceSolo">Prix Solo 26cm</label>
               <input id="editPriceSolo" name="priceSolo" class="input" type="number" step="0.01" min="0" />
             </div>
             <div class="field">
@@ -897,7 +961,7 @@ $csrfToken = getCsrfToken();
           <div class="field">
             <label>Photo de la formule</label>
             <div class="upload">
-              <img id="formuleImgPreview" class="preview" alt="Aperçu" style="display:none;" />
+              <img id="formuleImgPreview" class="preview" alt="Aperçu" style="display:none;" onerror="this.style.display='none'" />
               <div style="display:flex;flex-direction:column;gap:8px">
                 <input id="formuleImage" name="image" type="file" accept="image/png,image/jpeg,image/webp" />
                 <span class="muted">Formats: jpg / png / webp • conseillé: 800×600</span>
@@ -1002,12 +1066,14 @@ $csrfToken = getCsrfToken();
     const $ = (sel, root=document) => root.querySelector(sel);
     const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-    const state = {
+    // Rendre state global pour debug en console
+    window.state = {
       menu: null,
       selectedCategoryId: null,
       catQuery: "",
       prodQuery: "",
     };
+    const state = window.state;
 
     function toast(type, title, message){
       const host = $("#toast");
@@ -1050,6 +1116,10 @@ $csrfToken = getCsrfToken();
       if (firstInput) firstInput.focus({preventScroll:true});
     }
     function closeModal(overlay){
+      // Retirer le focus avant de cacher pour l'accessibilité
+      if (overlay.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       overlay.setAttribute("aria-hidden","true");
       document.body.style.overflow = "";
     }
@@ -1115,9 +1185,9 @@ $csrfToken = getCsrfToken();
     });
 
     function openEditCategoryModal(categoryId){
-      currentEditCategoryId = categoryId;
+      currentEditCategoryId = parseInt(categoryId, 10);
       const cats = getCategories();
-      const cat = cats.find(c => c.id === categoryId);
+      const cat = cats.find(c => c.id === currentEditCategoryId);
       if (!cat) {
         toast("error", "Erreur", "Catégorie introuvable.");
         return;
@@ -1143,8 +1213,9 @@ $csrfToken = getCsrfToken();
     }
 
     async function deleteCategory(categoryId){
+      const id = parseInt(categoryId, 10);
       const cats = getCategories();
-      const cat = cats.find(c => c.id === categoryId);
+      const cat = cats.find(c => c.id === id);
       if (!cat) return;
 
       const itemsCount = Array.isArray(cat.items) ? cat.items.length : 0;
@@ -1156,7 +1227,7 @@ $csrfToken = getCsrfToken();
       if (!confirm(confirmMsg)) return;
 
       try {
-        await apiPostJson({ action: "delete_category", category_id: categoryId });
+        await apiPostJson({ action: "delete_category", category_id: id });
         toast("success", "Catégorie supprimée", `"${cat.name}" a été supprimée.`);
         await boot();
       } catch(err) {
@@ -1415,7 +1486,7 @@ $csrfToken = getCsrfToken();
 
     function renderPatisserieOptionsList() {
       const container = $("#patisserieOptionsList");
-      const patisserieProduct = state.menu?.menu?.categories?.flatMap(c => c.items || []).find(p => p.id === 'patisserie');
+      const patisserieProduct = state.menu?.categories?.flatMap(c => c.items || []).find(p => p.id === 'patisserie');
       const options = patisserieProduct?.pâtisserieOptions || [];
 
       container.innerHTML = "";
@@ -1433,8 +1504,8 @@ $csrfToken = getCsrfToken();
         let imgHtml = '';
         if (opt.image) {
           let imgSrc = opt.image;
-          if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../')) {
-            imgSrc = '../' + imgSrc;
+          if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../../')) {
+            imgSrc = '../../' + imgSrc;
           }
           imgHtml = `<img src="${escapeHtml(imgSrc)}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;opacity:${isAvailable ? '1' : '0.4'}">`;
         } else {
@@ -1464,7 +1535,7 @@ $csrfToken = getCsrfToken();
           try {
             await apiPostJson({ action: "update_patisserie_option_status", index: idx, status: newStatus });
             toast("success", "Statut modifié", `${opt.name} est maintenant ${newStatus === 'available' ? 'disponible' : 'indisponible'}.`);
-            state.menu = await apiGet();
+            state.menu = normalizeMenuData(await apiGet());
             renderPatisserieOptionsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de modifier le statut.");
@@ -1480,7 +1551,7 @@ $csrfToken = getCsrfToken();
           try {
             await apiPostJson({ action: "delete_patisserie_option", index: idx });
             toast("success", "Supprimé", `${opt.name} supprimé.`);
-            state.menu = await apiGet();
+            state.menu = normalizeMenuData(await apiGet());
             renderPatisserieOptionsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
@@ -1511,7 +1582,7 @@ $csrfToken = getCsrfToken();
         await apiPostMultipart(formData, 'add_patisserie_option');
         toast("success", "Ajouté", `${name} ajouté avec succès.`);
         $("#formAddPatisserieOption").reset();
-        state.menu = await apiGet();
+        state.menu = normalizeMenuData(await apiGet());
         renderPatisserieOptionsList();
       } catch(err) {
         toast("error", "Erreur", err?.message ?? "Impossible d'ajouter.");
@@ -1538,7 +1609,7 @@ $csrfToken = getCsrfToken();
 
     function renderBeverageOptionsList() {
       const container = $("#beverageOptionsList");
-      const beverageProduct = state.menu?.menu?.categories?.flatMap(c => c.items || []).find(p => p.id === currentBeverageProductId);
+      const beverageProduct = state.menu?.categories?.flatMap(c => c.items || []).find(p => p.id === currentBeverageProductId);
       const options = beverageProduct?.beverageOptions || [];
 
       container.innerHTML = "";
@@ -1556,8 +1627,8 @@ $csrfToken = getCsrfToken();
         let imgHtml = '';
         if (opt.image) {
           let imgSrc = opt.image;
-          if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../')) {
-            imgSrc = '../' + imgSrc;
+          if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../../')) {
+            imgSrc = '../../' + imgSrc;
           }
           imgHtml = `<img src="${escapeHtml(imgSrc)}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;opacity:${isAvailable ? '1' : '0.4'}">`;
         } else {
@@ -1587,7 +1658,7 @@ $csrfToken = getCsrfToken();
           try {
             await apiPostJson({ action: "update_beverage_option_status", beverage_type: currentBeverageProductId, index: idx, status: newStatus });
             toast("success", "Statut modifié", `${opt.name} est maintenant ${newStatus === 'available' ? 'disponible' : 'indisponible'}.`);
-            state.menu = await apiGet();
+            state.menu = normalizeMenuData(await apiGet());
             renderBeverageOptionsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de modifier le statut.");
@@ -1603,7 +1674,7 @@ $csrfToken = getCsrfToken();
           try {
             await apiPostJson({ action: "delete_beverage_option", beverage_type: currentBeverageProductId, index: idx });
             toast("success", "Supprimé", `${opt.name} supprimé.`);
-            state.menu = await apiGet();
+            state.menu = normalizeMenuData(await apiGet());
             renderBeverageOptionsList();
           } catch(err) {
             toast("error", "Erreur", err?.message ?? "Impossible de supprimer.");
@@ -1635,7 +1706,7 @@ $csrfToken = getCsrfToken();
         await apiPostMultipart(formData, 'add_beverage_option');
         toast("success", "Ajouté", `${name} ajouté avec succès.`);
         $("#formAddBeverageOption").reset();
-        state.menu = await apiGet();
+        state.menu = normalizeMenuData(await apiGet());
         renderBeverageOptionsList();
       } catch(err) {
         toast("error", "Erreur", err?.message ?? "Impossible d'ajouter.");
@@ -1660,7 +1731,7 @@ $csrfToken = getCsrfToken();
       // Afficher l'image actuelle
       const previewDiv = $("#editProductImagePreview");
       if (product.image) {
-        previewDiv.innerHTML = `<img src="../${product.image}" style="max-width:150px;max-height:100px;border-radius:8px;object-fit:cover;">`;
+        previewDiv.innerHTML = `<img src="../../${product.image}" style="max-width:150px;max-height:100px;border-radius:8px;object-fit:cover;">`;
       } else {
         previewDiv.innerHTML = `<span style="color:#6b7280;">Aucune image</span>`;
       }
@@ -1964,6 +2035,11 @@ $csrfToken = getCsrfToken();
       return data;
     }
 
+    // Helper pour transformer les données API en format state.menu
+    function normalizeMenuData(data){
+      return { ...data.menu, supplements: data.supplements, formules: data.formules, featured: data.featured, categoryIcons: data.categoryIcons };
+    }
+
     async function apiPostJson(payload){
       payload.csrf_token = CSRF_TOKEN;
       const res = await fetch(API, {
@@ -1992,7 +2068,7 @@ $csrfToken = getCsrfToken();
     }
 
     function getCategories(){
-      return state.menu?.menu?.categories ?? [];
+      return state.menu?.categories ?? [];
     }
 
     function selectCategory(id){
@@ -2075,8 +2151,8 @@ $csrfToken = getCsrfToken();
         tr.style.cursor = "pointer";
         let img = it.image ? String(it.image) : "";
         // Préfixer avec ../ pour remonter à la racine du site
-        if (img && !img.startsWith('http') && !img.startsWith('../')) {
-          img = '../' + img;
+        if (img && !img.startsWith('http') && !img.startsWith('../../')) {
+          img = '../../' + img;
         }
 
         tr.innerHTML = `
@@ -2228,7 +2304,7 @@ $csrfToken = getCsrfToken();
 
         // Afficher l'image existante
         if (formule.image) {
-          $("#formuleImgPreview").src = "../" + formule.image;
+          $("#formuleImgPreview").src = "../../" + formule.image;
           $("#formuleImgPreview").style.display = "block";
         }
 
@@ -2251,6 +2327,9 @@ $csrfToken = getCsrfToken();
       const cats = getCategories();
       const idx = formuleIncludesCount++;
 
+      console.log('[addFormuleInclude] data:', data);
+      console.log('[addFormuleInclude] cats:', cats);
+
       const div = document.createElement("div");
       div.className = "formule-include-row";
       div.style.cssText = "display:flex;gap:8px;align-items:center;padding:10px;border:1px solid var(--stroke);border-radius:10px;background:rgba(0,0,0,.18);";
@@ -2261,6 +2340,42 @@ $csrfToken = getCsrfToken();
       const catIdVal = data?.categoryId ?? "";
       const prodIdVal = data?.productId ?? "";
 
+      console.log('[addFormuleInclude] catIdVal:', catIdVal, '| prodIdVal:', prodIdVal);
+
+      // Collecter tous les produits disponibles
+      const allProducts = [];
+      cats.forEach(cat => {
+        if (cat.items && Array.isArray(cat.items)) {
+          cat.items.forEach(item => {
+            allProducts.push({
+              id: item.id,
+              name: item.name,
+              categoryName: cat.name
+            });
+          });
+        }
+      });
+
+      // Log pour debug
+      console.log('[addFormuleInclude] Checking category selection...');
+      console.log('[addFormuleInclude] Number of categories:', cats.length);
+      console.log('[addFormuleInclude] Looking for category with ID:', catIdVal);
+      cats.forEach(c => {
+        const match = String(c.id) == String(catIdVal);
+        console.log(`  - Category "${c.name}" (id: ${typeof c.id} "${c.id}") vs (${typeof catIdVal} "${catIdVal}") = ${match}`);
+      });
+
+      // Générer les options avec comparaison robuste
+      const categoryOptions = cats.map(c => {
+        const isSelected = String(c.id) == String(catIdVal);
+        return `<option value="${escapeHtml(c.id)}" ${isSelected ? 'selected' : ''}>${escapeHtml(c.name)}</option>`;
+      }).join('');
+
+      const productOptions = allProducts.map(p => {
+        const isSelected = String(p.id) == String(prodIdVal);
+        return `<option value="${escapeHtml(p.id)}" ${isSelected ? 'selected' : ''}>${escapeHtml(p.name)} (${escapeHtml(p.categoryName)})</option>`;
+      }).join('');
+
       div.innerHTML = `
         <select name="include_type_${idx}" class="select" style="width:110px;" onchange="toggleIncludeType(this, ${idx})">
           <option value="category" ${typeVal === 'category' ? 'selected' : ''}>Catégorie</option>
@@ -2268,9 +2383,12 @@ $csrfToken = getCsrfToken();
         </select>
         <select name="include_cat_${idx}" class="select include-cat" style="width:140px;${typeVal === 'product' ? 'display:none;' : ''}">
           <option value="">-- Catégorie --</option>
-          ${cats.map(c => `<option value="${escapeHtml(c.id)}" ${c.id === catIdVal ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+          ${categoryOptions}
         </select>
-        <input name="include_prod_${idx}" class="input include-prod" type="text" placeholder="ID produit" value="${escapeHtml(prodIdVal)}" style="width:140px;${typeVal === 'category' ? 'display:none;' : ''}" />
+        <select name="include_prod_${idx}" class="select include-prod" style="width:180px;${typeVal === 'category' ? 'display:none;' : ''}">
+          <option value="">-- Produit --</option>
+          ${productOptions}
+        </select>
         <input name="include_label_${idx}" class="input" type="text" placeholder="Label affiché" value="${escapeHtml(labelVal)}" style="flex:1;min-width:100px;" />
         <input name="include_qty_${idx}" class="input" type="number" min="1" value="${qtyVal}" style="width:60px;" />
         <button type="button" class="btn btn-danger" style="padding:6px 10px;" onclick="this.closest('.formule-include-row').remove()">✕</button>
@@ -2307,12 +2425,11 @@ $csrfToken = getCsrfToken();
     $("#formFormule").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const formuleId = $("#formuleId").value || null;
+      const formuleId = $("#formuleId").value.trim() || null;
       const name = $("#formuleName").value.trim();
       const description = $("#formuleDesc").value.trim();
       const price = parseFloat($("#formulePrice").value) || 0;
       const originalPrice = $("#formuleOriginalPrice").value ? parseFloat($("#formuleOriginalPrice").value) : null;
-      const badge = $("#formuleBadge").value.trim() || null;
       const status = $("#formuleStatus").value;
       const imageFile = $("#formuleImage").files[0];
 
@@ -2336,12 +2453,12 @@ $csrfToken = getCsrfToken();
 
       try {
         const formData = new FormData();
+        // ⚠️ CRITIQUE: Ne JAMAIS envoyer formule_id lors d'un add (AUTO_INCREMENT géré par DB)
         if (formuleId) formData.set("formule_id", formuleId);
         formData.set("name", name);
         formData.set("description", description);
         formData.set("price", price);
         if (originalPrice !== null) formData.set("originalPrice", originalPrice);
-        if (badge) formData.set("badge", badge);
         formData.set("status", status);
         formData.set("includes", JSON.stringify(includes));
         if (imageFile) formData.set("image", imageFile);
@@ -2358,6 +2475,13 @@ $csrfToken = getCsrfToken();
 
     $("#btnDeleteFormule").addEventListener("click", async () => {
       if (!currentEditFormule) return;
+
+      // 🔒 VALIDATION: Vérifier que l'ID existe avant suppression
+      if (!currentEditFormule.id) {
+        toast("error", "Erreur", "ID formule manquant - impossible de supprimer");
+        return;
+      }
+
       if (!confirm(`Supprimer la formule "${currentEditFormule.name}" ?`)) return;
 
       try {
@@ -2391,11 +2515,11 @@ $csrfToken = getCsrfToken();
         card.onmouseenter = () => card.style.background = "rgba(255,255,255,.08)";
         card.onmouseleave = () => card.style.background = "rgba(255,255,255,.04)";
 
-        let imgSrc = f.image ? "../" + f.image : "";
+        let imgSrc = f.image ? "../../" + f.image : "";
 
         card.innerHTML = `
           <div style="width:80px;height:80px;flex-shrink:0;border-radius:12px;overflow:hidden;border:1px solid var(--stroke);background:rgba(0,0,0,.18);">
-            ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" style="width:100%;height:100%;object-fit:cover;" alt="${escapeHtml(f.name)}">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);">📦</div>'}
+            ${imgSrc ? `<img src="${escapeHtml(imgSrc)}" style="width:100%;height:100%;object-fit:cover;" alt="${escapeHtml(f.name)}" onerror="this.style.display='none'">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);">📦</div>'}
           </div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
@@ -2467,7 +2591,7 @@ $csrfToken = getCsrfToken();
         const card = document.createElement("div");
         card.style.cssText = "display:flex;gap:10px;padding:10px;border:1px solid var(--stroke);border-radius:12px;background:rgba(255,255,255,.04);position:relative;";
 
-        let imgSrc = product.image ? "../" + product.image : "";
+        let imgSrc = product.image ? "../../" + product.image : "";
 
         card.innerHTML = `
           <div style="width:50px;height:50px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.18);">
@@ -2476,7 +2600,7 @@ $csrfToken = getCsrfToken();
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
-            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--brand);margin-top:2px;">${Number(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
           </div>
           <button type="button" class="btn btn-danger" style="padding:6px 10px;font-size:11px;position:absolute;top:6px;right:6px;" data-remove="${index}">✕</button>
         `;
@@ -2513,7 +2637,7 @@ $csrfToken = getCsrfToken();
         item.onmouseenter = () => item.style.background = "rgba(255,255,255,.06)";
         item.onmouseleave = () => item.style.background = "";
 
-        let imgSrc = product.image ? "../" + product.image : "";
+        let imgSrc = product.image ? "../../" + product.image : "";
 
         item.innerHTML = `
           <div style="width:40px;height:40px;flex-shrink:0;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.18);">
@@ -2523,7 +2647,7 @@ $csrfToken = getCsrfToken();
             <div style="font-size:13px;font-weight:600;">${escapeHtml(product.name)}</div>
             <div style="font-size:11px;color:var(--muted);">${escapeHtml(product.categoryName || '')}</div>
           </div>
-          <div style="font-size:13px;font-weight:600;color:var(--brand);">${(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--brand);">${Number(product.priceSolo || product.price || 0).toFixed(0)} ${CURRENCY}</div>
           <button type="button" class="btn btn-good" style="padding:6px 12px;font-size:11px;">+ Ajouter</button>
         `;
 
@@ -2571,9 +2695,9 @@ $csrfToken = getCsrfToken();
 
     async function boot(){
       const data = await apiGet();
-      state.menu = data;
+      state.menu = normalizeMenuData(data);
       const cats = getCategories();
-      if (!cats.find(c=>c.id===state.selectedCategoryId)) {
+      if (!cats.find(c=>c.id===parseInt(state.selectedCategoryId, 10))) {
         state.selectedCategoryId = cats[0]?.id ?? null;
       }
       render();

@@ -1,0 +1,66 @@
+# Migration: Ajout colonne snackup_context à products
+
+## Objectif
+Ajouter une colonne JSON `snackup_context` dans la table `products` pour stocker :
+- Ingrédients de base custom
+- Prix personnalisés
+- Autres configurations spécifiques au contexte Snackup
+
+## Statut: ✅ CODE PRÊT - MIGRATION À EXÉCUTER EN PRODUCTION
+
+## Étapes
+
+### ✅ Étape 0: Préparation
+- [x] Plan créé
+- [x] Fichier de suivi créé
+
+### ✅ Étape 1: Migration Base de données
+- [x] Créer fichier migration SQL (2026-01-26-add-snackup-context.sql)
+- [x] Commit migration
+
+### ✅ Étape 2: Mise à jour Code PHP
+- [x] Mettre à jour MenuRepository.php (getProductsByCategory, editProduct, addProduct)
+- [x] Mettre à jour API products.php (add_product, edit_product, update_product)
+- [x] Commit code
+
+### ✅ Étape 3: Préparation Production
+- [x] Script d'exécution de migration créé (run-migration.php)
+- [x] Documentation complète créée (MIGRATION_INSTRUCTIONS.md)
+- [x] Code testé et validé
+
+### ✅ Étape 4: Exécution en Production
+- [x] Exécuter run-migration.php sur le serveur de production
+- [x] Vérifier que la colonne snackup_context a été ajoutée (Type: longtext, Null: YES)
+- [ ] Tester l'admin panel en production
+- [ ] Valider le fonctionnement complet
+
+**Résultat migration:**
+```
+✅ Connexion réussie à zajr1824_atelierpizza
+✅ Colonne snackup_context ajoutée avec succès
+Type: longtext (JSON stocké en longtext par MySQL)
+Nullable: YES (compatible produits existants)
+```
+
+## Structure snackup_context
+```json
+{
+  "base_ingredients_custom": [
+    {
+      "ingredient_id": "uuid",
+      "ingredient_name": "nom",
+      "default_quantity": 1,
+      "unit": "g/ml/pièce",
+      "is_custom": true
+    }
+  ],
+  "custom_price": 5.50,
+  "custom_settings": {}
+}
+```
+
+## Notes importantes
+- Migration ADDITIVE uniquement (pas de suppression)
+- Colonne nullable (NULL par défaut)
+- Compatible avec anciens produits
+- Commits fréquents pour sécuriser

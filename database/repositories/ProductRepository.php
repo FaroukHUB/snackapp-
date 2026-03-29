@@ -12,11 +12,9 @@ class ProductRepository {
      * Récupère tous les produits d'un restaurant
      */
     public static function getAll(int $restaurantId, bool $includeDeleted = false): array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         $products = Database::fetchAll(
             "SELECT * FROM products
-             WHERE restaurant_id = ? {$deletedFilter}
+             WHERE restaurant_id = ?
              ORDER BY category_id ASC, sort_order ASC, id ASC",
             [$restaurantId]
         );
@@ -29,11 +27,9 @@ class ProductRepository {
      * Récupère tous les produits d'une catégorie
      */
     public static function getByCategory(int $categoryId, bool $includeDeleted = false): array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         $products = Database::fetchAll(
             "SELECT * FROM products
-             WHERE category_id = ? {$deletedFilter}
+             WHERE category_id = ?
              ORDER BY sort_order ASC, id ASC",
             [$categoryId]
         );
@@ -45,10 +41,8 @@ class ProductRepository {
      * Récupère un produit par ID
      */
     public static function getById(int $id, bool $includeDeleted = false): ?array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         $product = Database::fetchOne(
-            "SELECT * FROM products WHERE id = ? {$deletedFilter}",
+            "SELECT * FROM products WHERE id = ?",
             [$id]
         );
 
@@ -59,11 +53,9 @@ class ProductRepository {
      * Récupère un produit par slug
      */
     public static function getBySlug(int $restaurantId, string $slug, bool $includeDeleted = false): ?array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
-
         $product = Database::fetchOne(
             "SELECT * FROM products
-             WHERE restaurant_id = ? AND slug = ? {$deletedFilter}",
+             WHERE restaurant_id = ? AND slug = ?",
             [$restaurantId, $slug]
         );
 
@@ -152,24 +144,24 @@ class ProductRepository {
     }
 
     /**
-     * Soft delete d'un produit
+     * Désactive un produit
      */
     public static function softDelete(int $id): bool {
         $rowsAffected = Database::update(
             'products',
-            ['deleted_at' => date('Y-m-d H:i:s')],
+            ['status' => 'unavailable'],
             ['id' => $id]
         );
         return $rowsAffected > 0;
     }
 
     /**
-     * Restaure un produit supprimé
+     * Restaure un produit (réactive)
      */
     public static function restore(int $id): bool {
         $rowsAffected = Database::update(
             'products',
-            ['deleted_at' => null],
+            ['status' => 'available'],
             ['id' => $id]
         );
         return $rowsAffected > 0;
@@ -220,12 +212,11 @@ class ProductRepository {
      * Recherche de produits par nom
      */
     public static function search(int $restaurantId, string $query, bool $includeDeleted = false): array {
-        $deletedFilter = $includeDeleted ? '' : 'AND deleted_at IS NULL';
         $searchTerm = '%' . $query . '%';
 
         $products = Database::fetchAll(
             "SELECT * FROM products
-             WHERE restaurant_id = ? AND name LIKE ? {$deletedFilter}
+             WHERE restaurant_id = ? AND name LIKE ?
              ORDER BY name ASC",
             [$restaurantId, $searchTerm]
         );
@@ -239,7 +230,7 @@ class ProductRepository {
     public static function getAvailable(int $restaurantId): array {
         $products = Database::fetchAll(
             "SELECT * FROM products
-             WHERE restaurant_id = ? AND status = 'available' AND deleted_at IS NULL
+             WHERE restaurant_id = ? AND status = 'available'
              ORDER BY category_id ASC, sort_order ASC",
             [$restaurantId]
         );
@@ -256,7 +247,7 @@ class ProductRepository {
                 COUNT(*) as total_products,
                 SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available_products,
                 SUM(CASE WHEN status = 'unavailable' THEN 1 ELSE 0 END) as unavailable_products,
-                SUM(CASE WHEN deleted_at IS NOT NULL THEN 1 ELSE 0 END) as deleted_products,
+                0 as deleted_products,
                 SUM(CASE WHEN options_config IS NOT NULL THEN 1 ELSE 0 END) as products_with_options
              FROM products
              WHERE restaurant_id = ?",
@@ -305,7 +296,7 @@ class ProductRepository {
         return Database::fetchAll(
             "SELECT s.* FROM supplements s
              JOIN product_supplements ps ON s.id = ps.supplement_id
-             WHERE ps.product_id = ? AND s.deleted_at IS NULL AND ps.deleted_at IS NULL
+             WHERE ps.product_id = ?
              ORDER BY s.sort_order ASC",
             [$productId]
         );
@@ -316,11 +307,8 @@ class ProductRepository {
      */
     public static function attachSupplements(int $productId, array $supplementIds): bool {
         return Database::transaction(function() use ($productId, $supplementIds) {
-            // Supprimer anciennes associations (soft delete)
-            Database::query(
-                "UPDATE product_supplements SET deleted_at = NOW() WHERE product_id = ?",
-                [$productId]
-            );
+            // Supprimer anciennes associations
+            Database::delete('product_supplements', ['product_id' => $productId]);
 
             // Créer nouvelles associations
             foreach ($supplementIds as $supplementId) {

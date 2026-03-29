@@ -1,1 +1,13 @@
 *.zip
+admin-panel-v2/
+images/uploads/
+snackup/admin/api/test-debug.php
+snackup/test-error-log.php
+
+# ⚠️ SÉCURITÉ: Fichiers de configuration locaux avec mots de passe
+# Note: Les fichiers backend-config.php sont déjà trackés dans Git
+# TODO: Migrer vers backend-config.local.php (non tracké) + backend-config.example.php (tracké)
+instances/*/backend-config.local.php
+*.local.php
+.env
+.env.local

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API BaseIngredients</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background: #007bff;
+            color: white;
+        }
+        table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .has-ingredients {
+            background: #d4edda !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test API - BaseIngredients</h1>
+
+        <p>Ce script teste si les baseIngredients sont bien retournés par l'API.</p>
+
+        <button onclick="testGetMenu()">📥 GET - Charger le menu</button>
+        <button onclick="clearResult()">🗑️ Effacer</button>
+
+        <div id="result" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        const resultDiv = document.getElementById('result');
+
+        function clearResult() {
+            resultDiv.style.display = 'none';
+            resultDiv.innerHTML = '';
+            resultDiv.className = 'result';
+        }
+
+        async function testGetMenu() {
+            clearResult();
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Chargement du menu...';
+
+            try {
+                const response = await fetch('./api/products.php', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                resultDiv.className = 'result success';
+
+                let html = '<h3>✅ Réponse API reçue</h3>';
+                html += '<p><strong>Status:</strong> ' + response.status + ' ' + response.statusText + '</p>';
+
+                if (data.success) {
+                    html += '<p><strong>Success:</strong> true</p>';
+
+                    const categories = data.menu?.categories || [];
+                    html += '<p><strong>Nombre de catégories:</strong> ' + categories.length + '</p>';
+
+                    let totalProducts = 0;
+                    let productsWithBaseIngredients = 0;
+
+                    html += '<table>';
+                    html += '<thead><tr><th>Catégorie</th><th>Produit</th><th>ID</th><th>baseIngredients</th></tr></thead>';
+                    html += '<tbody>';
+
+                    categories.forEach(cat => {
+                        const items = cat.items || [];
+                        items.forEach(product => {
+                            totalProducts++;
+                            const hasBaseIng = product.baseIngredients && product.baseIngredients.length > 0;
+                            if (hasBaseIng) productsWithBaseIngredients++;
+
+                            const rowClass = hasBaseIng ? 'has-ingredients' : '';
+                            html += '<tr class="' + rowClass + '">';
+                            html += '<td>' + (cat.name || 'N/A') + '</td>';
+                            html += '<td>' + (product.name || 'N/A') + '</td>';
+                            html += '<td>' + (product.id || 'N/A') + '</td>';
+                            html += '<td>';
+
+                            if (hasBaseIng) {
+                                html += '<strong style="color:green">[' + product.baseIngredients.join(', ') + ']</strong>';
+                            } else {
+                                html += '<em style="color:gray">Aucun</em>';
+                            }
+
+                            html += '</td>';
+                            html += '</tr>';
+                        });
+                    });
+
+                    html += '</tbody>';
+                    html += '</table>';
+
+                    html += '<hr>';
+                    html += '<p><strong>Total produits:</strong> ' + totalProducts + '</p>';
+                    html += '<p><strong>Produits avec baseIngredients:</strong> ' + productsWithBaseIngredients + '</p>';
+
+                    if (productsWithBaseIngredients === 0) {
+                        html += '<p style="color:orange;font-weight:bold">⚠️ Aucun produit n\'a de baseIngredients définis !</p>';
+                        html += '<p>Cela signifie que les baseIngredients ne sont pas sauvegardés OU qu\'ils sont vides en base.</p>';
+                    } else {
+                        html += '<p style="color:green;font-weight:bold">✅ Certains produits ont des baseIngredients !</p>';
+                    }
+
+                    html += '<hr>';
+                    html += '<details>';
+                    html += '<summary>📋 JSON complet (cliquez pour voir)</summary>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    html += '</details>';
+                } else {
+                    html += '<p style="color:red">❌ L\'API a retourné success=false</p>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+
+                resultDiv.innerHTML = html;
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '<h3>❌ Erreur</h3><p>' + error.message + '</p>';
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

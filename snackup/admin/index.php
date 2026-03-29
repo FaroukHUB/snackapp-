@@ -12,7 +12,30 @@ ini_set('log_errors', 1);
 
 // Bootstrap charge déjà tous les repositories
 require_once __DIR__ . '/bootstrap.php';
-requireAdmin();
+
+// Demo Session Manager
+require_once __DIR__ . '/../backend/session-manager.php';
+
+// Check if this is a demo session
+$isDemo = isDemoSession();
+$demoSessionId = getCurrentDemoSessionId();
+
+if ($isDemo && $demoSessionId) {
+    $sessionManager = getDemoSessionManager();
+    $demoSession = $sessionManager->getSession($demoSessionId);
+
+    if (!$demoSession) {
+        // Create new demo session
+        $sessionManager->createSession($demoSessionId);
+        $demoSession = $sessionManager->getSession($demoSessionId);
+    }
+
+    // Skip authentication for demo sessions
+    // Demo mode has limited functionality and isolated data
+} else {
+    // Normal admin authentication
+    requireAdmin();
+}
 
 // 🔒 SÉCURITÉ: Générer token CSRF pour la page
 $csrfToken = getCsrfToken();
@@ -596,7 +619,7 @@ if (isset($_GET['export'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - <?php echo htmlspecialchars($restaurantName); ?></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -4734,6 +4757,9 @@ if (printerHelpIcon && printerHelpContent && printerHelpOverlay) {
 }
 
     </script>
+
+    <!-- Admin Assistant for Demo Mode -->
+    <script src="../frontend/js/admin-assistant.js"></script>
 
 </body>
 </html>
